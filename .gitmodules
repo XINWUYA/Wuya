@@ -1,0 +1,3 @@
+[submodule "Wuya/third_party/spdlog"]
+	path = Wuya/third_party/spdlog
+	url = https://github.com/gabime/spdlog
