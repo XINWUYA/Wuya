@@ -1,19 +1,6 @@
 #include "TerminatorApp.h"
-#include <Wuya.h>
-
-class TerminatorApp : public Wuya::Application
-{
-public:
-	TerminatorApp() {}
-	~TerminatorApp() {}
-
-	virtual void Run() override;
-};
-
-Wuya::Application* Wuya::CreateApplication()
-{
-	return new TerminatorApp();
-}
+/* 程序主入口点，需要保证放在Wuya.h之后 */
+#include <Wuya/Application/EntryPoint.h>
 
 void TerminatorApp::Run()
 {
