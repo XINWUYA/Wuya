@@ -6,8 +6,11 @@
 # User-specific files
 *.rsuser
 *.suo
+*.vcproj
+*.vcxproj
 *.user
 *.userosscache
+*.sln
 *.sln.docstates
 
 # User-specific files (MonoDevelop/Xamarin Studio)
