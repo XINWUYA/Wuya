@@ -29,12 +29,13 @@ project "Kernel"
 	{
 		"%{prj.name}/src",
 		"%{prj.name}/third_party/spdlog/include",
+		"%{prj.name}/third_party/debugbreak",
 	}
 
 	filter "system:windows"
 		cppdialect "C++17"
 		staticruntime "On"
-		-- systemversion "10.0.19041.0"
+		systemversion "latest"
 
 		defines
 		{
@@ -79,6 +80,7 @@ project "Terminator"
 		"%{prj.name}/src",
 		"Kernel/src",
 		"Kernel/third_party/spdlog/include",
+		"Kernel/third_party/debugbreak",
 	}
 
 	links
@@ -89,7 +91,7 @@ project "Terminator"
 	filter "system:windows"
 		cppdialect "C++17"
 		staticruntime "On"
-		-- systemversion "10.0.19041.0"
+		systemversion "latest"
 
 		defines
 		{
