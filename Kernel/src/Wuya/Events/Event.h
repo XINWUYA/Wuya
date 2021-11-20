@@ -1,6 +1,7 @@
 #pragma once
 #include "Wuya/Common/Common.h"
 #include <sstream>
+#include <functional>
 
 namespace Wuya
 {

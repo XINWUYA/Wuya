@@ -4,7 +4,7 @@
 class TerminatorApp : public Wuya::Application
 {
 public:
-	TerminatorApp() {}
+	TerminatorApp();
 	~TerminatorApp() {}
 
 	virtual void Run() override;

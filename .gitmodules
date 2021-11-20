@@ -4,3 +4,6 @@
 [submodule "Kernel/third_party/debugbreak"]
 	path = Kernel/third_party/debugbreak
 	url = https://github.com/scottt/debugbreak
+[submodule "Kernel/third_party/glfw"]
+	path = Kernel/third_party/glfw
+	url = https://github.com/glfw/glfw

@@ -1,15 +1,19 @@
 #pragma once
 #include "Wuya/Common/Utils.h"
+#include "Wuya/Core/Window.h"
 
 namespace Wuya
 {
 	class WUYA_API Application 
 	{
 	public:
-		Application() = default;
-		virtual ~Application() {};
+		Application(const std::string& window_title);
+		virtual ~Application();
 
-		virtual void Run() = 0;
+		virtual void Run();
+
+	private:
+		UniquePtr<IWindow> m_Window{ nullptr };
 	};
 
 	// Implement in clients

@@ -3,8 +3,14 @@
 #include <Wuya/Application/EntryPoint.h>
 #include <Wuya/Events/ApplicationEvent.h>
 
+TerminatorApp::TerminatorApp() : Application("Terminator")
+{
+}
+
 void TerminatorApp::Run()
 {
+	__super::Run();
+
 	CLIENT_LOG_WARN("Hello! {0}", 5);
 
 	Wuya::WindowResizeEvent e(1280, 720);

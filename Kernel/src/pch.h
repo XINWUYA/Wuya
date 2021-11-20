@@ -5,3 +5,5 @@
 #include <sstream>
 
 #include "Wuya/Common/Common.h"
+#include "Wuya/Common/Assert.h"
+#include "Wuya/Core/Logger.h"
