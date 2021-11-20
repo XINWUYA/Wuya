@@ -19,6 +19,9 @@ project "Kernel"
 	targetdir ("bin/" .. outputdir .. "/%{prj.name}")
 	objdir ("intermediates/" .. outputdir .. "/%{prj.name}")
 
+	pchheader "pch.h"
+	pchsource "Kernel/src/pch.cpp"
+
 	files
 	{
 		"%{prj.name}/src/**.h",
