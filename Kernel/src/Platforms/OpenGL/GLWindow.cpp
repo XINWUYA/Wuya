@@ -1,8 +1,8 @@
 #include "pch.h"
 #include "GLWindow.h"
-#include "Wuya/Events/ApplicationEvent.h"
-#include "Wuya/Events/KeyEvent.h"
-#include "Wuya/Events/MouseEvent.h"
+#include <Wuya/Events/ApplicationEvent.h>
+#include <Wuya/Events/KeyEvent.h>
+#include <Wuya/Events/MouseEvent.h>
 
 namespace Wuya
 {

@@ -1,5 +1,5 @@
 #pragma once
-#include "Wuya/Events/Event.h"
+#include <Wuya/Events/Event.h>
 
 namespace Wuya
 {

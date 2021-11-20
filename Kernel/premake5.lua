@@ -1,5 +1,4 @@
 project "Kernel"
-	location "Kernel"
 	kind "SharedLib"
 	language "C++"
 

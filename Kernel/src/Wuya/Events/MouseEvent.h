@@ -1,6 +1,6 @@
 #pragma once
 #include "Event.h"
-#include "Wuya/Core/MouseCodes.h"
+#include <Wuya/Core/MouseCodes.h>
 
 namespace Wuya
 {

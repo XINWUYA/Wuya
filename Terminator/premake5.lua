@@ -1,5 +1,4 @@
 project "Terminator"
-	location "Terminator"
 	kind "ConsoleApp"
 	language "C++"
 

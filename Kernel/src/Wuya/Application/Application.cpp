@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "Application.h"
-#include "Wuya/Events/ApplicationEvent.h"
+#include <Wuya/Events/ApplicationEvent.h>
+#include <GLFW/glfw3.h>
 
 namespace Wuya 
 {
@@ -18,9 +19,25 @@ namespace Wuya
 	{
 		while (m_IsRuning)
 		{
-			m_pWindow->OnUpdate();
+			float time = (float)glfwGetTime();
+			float timestep = time - m_LastFrameTime;
+			m_LastFrameTime = time;
 
+			for (auto* layer : m_LayerStack)
+				layer->OnUpdate(timestep);
+
+			m_pWindow->OnUpdate();
 		}
+	}
+
+	void Application::PushLayer(ILayer* layer)
+	{
+		m_LayerStack.PushLayer(layer);
+	}
+
+	void Application::PushOverlay(ILayer* layer)
+	{
+		m_LayerStack.PushOverlay(layer);
 	}
 
 	void Application::OnHandleEvent(IEvent* event)
@@ -29,6 +46,15 @@ namespace Wuya
 
 		EventDispatcher dispatcher(event);
 		dispatcher.Dispatch<WindowCloseEvent>(BIND_EVENT_FUNC(Application::OnHandleWindowCloseEvent));
+
+		// 从最上层Layer向最下层Layer传递
+		for (auto it = m_LayerStack.rbegin(); it != m_LayerStack.rend(); ++it)
+		{
+			if (event->Handled)
+				break;
+			
+			(*it)->OnEvent(event);
+		}
 
 	}
 
