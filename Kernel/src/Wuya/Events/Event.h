@@ -56,8 +56,8 @@ namespace Wuya
 	class EventDispatcher
 	{
 	public:
-		EventDispatcher(IEvent& event)
-			: m_Event(event)
+		EventDispatcher(IEvent* event)
+			: m_pEvent(event)
 		{
 		}
 
@@ -65,15 +65,15 @@ namespace Wuya
 		template<typename T, typename F>
 		bool Dispatch(const F& func)
 		{
-			if (m_Event.GetEventType() == T::GetStaticType())
+			if (m_pEvent->GetEventType() == T::GetStaticType())
 			{
-				m_Event.Handled |= func(static_cast<T&>(m_Event));
+				m_pEvent->Handled |= func(static_cast<T*>(m_pEvent));
 				return true;
 			}
 			return false;
 		}
 	private:
-		IEvent& m_Event;
+		IEvent* m_pEvent;
 	};
 
 	inline std::ostream& operator<<(std::ostream& os, const IEvent& e)

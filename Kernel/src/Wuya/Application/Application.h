@@ -12,8 +12,12 @@ namespace Wuya
 
 		virtual void Run();
 
+		virtual void OnHandleEvent(IEvent* event);
+		virtual bool OnHandleWindowCloseEvent(IEvent* event);
+
 	private:
-		UniquePtr<IWindow> m_Window{ nullptr };
+		UniquePtr<IWindow> m_pWindow{ nullptr };
+		bool m_IsRuning{ true };
 	};
 
 	// Implement in clients

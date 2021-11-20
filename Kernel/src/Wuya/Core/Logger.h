@@ -1,5 +1,6 @@
 #pragma once
 #include "Wuya/Common/Utils.h"
+#include "Wuya/Common/Common.h"
 #include <spdlog/spdlog.h>
 #include <spdlog/fmt/ostr.h>
 
@@ -8,16 +9,14 @@ namespace Wuya
 	class WUYA_API Logger
 	{
 	public:
-		using SharedPtr = std::shared_ptr<spdlog::logger>;
-
 		static void Init();
 
-		inline static SharedPtr& GetCoreLogger() { return s_pCoreLogger; }
-		inline static SharedPtr& GetClientLogger() { return s_pClientLogger; }
+		inline static SharedPtr<spdlog::logger>& GetCoreLogger() { return s_pCoreLogger; }
+		inline static SharedPtr<spdlog::logger>& GetClientLogger() { return s_pClientLogger; }
 
 	private:
-		static SharedPtr s_pCoreLogger;
-		static SharedPtr s_pClientLogger;
+		static SharedPtr<spdlog::logger> s_pCoreLogger;
+		static SharedPtr<spdlog::logger> s_pClientLogger;
 	};
 
 }

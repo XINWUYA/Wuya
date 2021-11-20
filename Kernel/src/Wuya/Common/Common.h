@@ -4,6 +4,7 @@
 #define BIT(x) (1 << (x))
 #define EXPAND_MACRO(x) x
 #define STRINGIFY(x) #x
+#define BIND_EVENT_FUNC(func) [this](auto&& ...args)->decltype(auto) { return this->func(std::forward<decltype(args)>(args)...); }
 
 namespace Wuya
 {

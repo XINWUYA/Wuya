@@ -18,7 +18,7 @@ namespace Wuya
 	class IWindow
 	{
 	public:
-		using EventCallbackFunc = std::function<void(IEvent&)>;
+		using EventCallbackFunc = std::function<void(IEvent*)>;
 
 		virtual ~IWindow() = default;
 

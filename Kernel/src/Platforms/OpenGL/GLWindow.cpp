@@ -81,7 +81,7 @@ namespace Wuya
 				info.Height = height;
 
 				WindowResizeEvent event(width, height);
-				info.CallBackFunc(event);
+				info.CallBackFunc(&event);
 			});
 
 		// 设置窗口Close回调
@@ -90,7 +90,7 @@ namespace Wuya
 				WindowInfo& info = *(WindowInfo*)glfwGetWindowUserPointer(window);
 
 				WindowCloseEvent event;
-				info.CallBackFunc(event);
+				info.CallBackFunc(&event);
 			});
 
 		// 设置键盘回调
@@ -103,19 +103,19 @@ namespace Wuya
 					case GLFW_PRESS:
 					{
 						KeyPressedEvent event(key, 0);
-						info.CallBackFunc(event);
+						info.CallBackFunc(&event);
 						break;
 					}
 					case GLFW_RELEASE:
 					{
 						KeyReleasedEvent event(key);
-						info.CallBackFunc(event);
+						info.CallBackFunc(&event);
 						break;
 					}
 					case GLFW_REPEAT:
 					{
 						KeyPressedEvent event(key, 1);
-						info.CallBackFunc(event);
+						info.CallBackFunc(&event);
 						break;
 					}
 				}
@@ -127,7 +127,7 @@ namespace Wuya
 				WindowInfo& info = *(WindowInfo*)glfwGetWindowUserPointer(window);
 
 				KeyTypedEvent event(key);
-				info.CallBackFunc(event);
+				info.CallBackFunc(&event);
 			});
 
 		// 设置鼠标按键回调
@@ -140,13 +140,13 @@ namespace Wuya
 					case GLFW_PRESS:
 					{
 						MouseButtonPressedEvent event(button);
-						info.CallBackFunc(event);
+						info.CallBackFunc(&event);
 						break;
 					}
 					case GLFW_RELEASE:
 					{
 						MouseButtonReleasedEvent event(button);
-						info.CallBackFunc(event);
+						info.CallBackFunc(&event);
 						break;
 					}
 				}
@@ -158,7 +158,7 @@ namespace Wuya
 				WindowInfo& info = *(WindowInfo*)glfwGetWindowUserPointer(window);
 
 				MouseScrolledEvent event((float)xoffset, (float)yoffset);
-				info.CallBackFunc(event);
+				info.CallBackFunc(&event);
 			});
 
 		// 设置鼠标光标回调
@@ -167,7 +167,7 @@ namespace Wuya
 				WindowInfo& info = *(WindowInfo*)glfwGetWindowUserPointer(window);
 
 				MouseMovedEvent event((float)xpos, (float)ypos);
-				info.CallBackFunc(event);
+				info.CallBackFunc(&event);
 			});
 	}
 
