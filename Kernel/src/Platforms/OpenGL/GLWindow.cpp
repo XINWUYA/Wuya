@@ -3,6 +3,8 @@
 #include <Wuya/Events/ApplicationEvent.h>
 #include <Wuya/Events/KeyEvent.h>
 #include <Wuya/Events/MouseEvent.h>
+#include <glad/glad.h>
+#include <GLFW/glfw3.h>
 
 namespace Wuya
 {
@@ -66,7 +68,12 @@ namespace Wuya
 
 		// 创建GLFW窗口
 		m_pGLFWWindow = glfwCreateWindow(config.Width, config.Height, config.Title.c_str(), nullptr, nullptr);
+
 		glfwMakeContextCurrent(m_pGLFWWindow);
+
+		int status = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
+		CORE_ASSERT(status, "Failed to init Glad!");
+
 		++s_GLFWWindowCnt;
 
 		// 指定窗口信息

@@ -20,6 +20,7 @@ project "Kernel"
 		"third_party/spdlog/include",
 		"third_party/debugbreak",
 		"%{IncludeDirs.GLFW}",
+		"%{IncludeDirs.Glad}",
 	}
 	
 	defines
@@ -32,6 +33,7 @@ project "Kernel"
 	links
 	{
 		"GLFW",
+		"Glad",
 		"opengl32.lib",
 	}
 

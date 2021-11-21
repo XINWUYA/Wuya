@@ -1,6 +1,7 @@
 -- Include dirs for projects
 IncludeDirs = {}
 IncludeDirs["GLFW"] = "%{wks.location}/Kernel/third_party/glfw/include"
+IncludeDirs["Glad"] = "%{wks.location}/Kernel/third_party/glad/include"
 
 -- Solution configuration
 workspace "Wuya"

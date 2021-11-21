@@ -2,6 +2,7 @@
 #include "Application.h"
 #include <Wuya/Events/ApplicationEvent.h>
 #include <GLFW/glfw3.h>
+#include <glad/glad.h>
 
 namespace Wuya 
 {
@@ -22,6 +23,9 @@ namespace Wuya
 			float time = (float)glfwGetTime();
 			float timestep = time - m_LastFrameTime;
 			m_LastFrameTime = time;
+
+			glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+			glClear(GL_COLOR_BUFFER_BIT);
 
 			for (auto* layer : m_LayerStack)
 				layer->OnUpdate(timestep);
