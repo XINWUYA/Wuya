@@ -68,7 +68,7 @@ namespace Wuya
 	};
 
 	/*
-	* 按键类型事件类
+	* 输入文本事件类
 	*/
 	class KeyTypedEvent : public KeyEvent
 	{
