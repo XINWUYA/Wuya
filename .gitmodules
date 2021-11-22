@@ -7,3 +7,6 @@
 [submodule "Kernel/third_party/glfw"]
 	path = Kernel/third_party/glfw
 	url = https://github.com/glfw/glfw
+[submodule "Kernel/third_party/imgui"]
+	path = Kernel/third_party/imgui
+	url = https://github.com/ocornut/imgui

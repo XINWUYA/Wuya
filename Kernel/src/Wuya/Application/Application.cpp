@@ -6,14 +6,24 @@
 
 namespace Wuya 
 {
+	Application* Application::s_Instance = nullptr;
+
 	Application::Application(const std::string& window_title)
 	{
+		CORE_ASSERT(!s_Instance, "Application already exist!");
+		s_Instance = this;
+
 		m_pWindow = IWindow::Create(WindowConfig(window_title));
 		m_pWindow->SetEventCallback(BIND_EVENT_FUNC(Application::OnHandleEvent));
 	}
 
 	Application::~Application()
 	{
+	}
+
+	Application* Application::Instance()
+	{
+		return s_Instance;
 	}
 
 	void Application::Run()
@@ -37,11 +47,13 @@ namespace Wuya
 	void Application::PushLayer(ILayer* layer)
 	{
 		m_LayerStack.PushLayer(layer);
+		layer->OnAttached();
 	}
 
 	void Application::PushOverlay(ILayer* layer)
 	{
 		m_LayerStack.PushOverlay(layer);
+		layer->OnAttached();
 	}
 
 	void Application::OnHandleEvent(IEvent* event)

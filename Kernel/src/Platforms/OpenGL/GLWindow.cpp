@@ -22,6 +22,7 @@ namespace Wuya
 
 	void GLWindow::OnUpdate()
 	{
+		glfwSwapBuffers(m_pGLFWWindow);
 		glfwPollEvents();
 	}
 
@@ -71,6 +72,7 @@ namespace Wuya
 
 		glfwMakeContextCurrent(m_pGLFWWindow);
 
+		// ≥ı ºªØGlad
 		int status = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
 		CORE_ASSERT(status, "Failed to init Glad!");
 

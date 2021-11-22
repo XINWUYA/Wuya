@@ -8,8 +8,11 @@ namespace Wuya
 	class WUYA_API Application 
 	{
 	public:
-		Application(const std::string& window_title);
+		Application(const std::string& window_title = "Unnamed App");
 		virtual ~Application();
+
+		static Application* Instance();
+		IWindow& GetWindow() { return *m_pWindow; }
 
 		virtual void Run();
 
@@ -20,6 +23,7 @@ namespace Wuya
 		virtual bool OnHandleWindowCloseEvent(IEvent* event);
 
 	private:
+		static Application* s_Instance;
 		UniquePtr<IWindow> m_pWindow{ nullptr };
 		LayerStack m_LayerStack{};
 		bool m_IsRuning{ true };

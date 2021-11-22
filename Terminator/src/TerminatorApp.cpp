@@ -5,6 +5,7 @@
 
 TerminatorApp::TerminatorApp() : Application("Terminator")
 {
+	PushLayer(new Wuya::ImguiLayer());
 }
 
 void TerminatorApp::Run()
