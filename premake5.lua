@@ -3,6 +3,7 @@ IncludeDirs = {}
 IncludeDirs["GLFW"] = "%{wks.location}/Kernel/third_party/glfw/include"
 IncludeDirs["Glad"] = "%{wks.location}/Kernel/third_party/glad/include"
 IncludeDirs["Imgui"] = "%{wks.location}/Kernel/third_party/imgui"
+IncludeDirs["glm"] = "%{wks.location}/Kernel/third_party/glm"
 
 -- Solution configuration
 workspace "Wuya"

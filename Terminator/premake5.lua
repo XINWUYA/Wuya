@@ -17,6 +17,10 @@ project "Terminator"
 		"%{wks.location}/Kernel/src",
 		"%{wks.location}/Kernel/third_party/spdlog/include",
 		"%{wks.location}/Kernel/third_party/debugbreak",
+		"%{IncludeDirs.GLFW}",
+		"%{IncludeDirs.Glad}",
+		"%{IncludeDirs.Imgui}",
+		"%{IncludeDirs.glm}",
 	}
 
 	links
@@ -26,7 +30,7 @@ project "Terminator"
 
 	filter "system:windows"
 		cppdialect "C++17"
-		staticruntime "On"
+		staticruntime "off"
 		systemversion "latest"
 
 		defines

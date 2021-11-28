@@ -22,6 +22,7 @@ project "Kernel"
 		"%{IncludeDirs.GLFW}",
 		"%{IncludeDirs.Glad}",
 		"%{IncludeDirs.Imgui}",
+		"%{IncludeDirs.glm}",
 	}
 	
 	defines
@@ -41,7 +42,7 @@ project "Kernel"
 
 	filter "system:windows"
 		cppdialect "C++17"
-		staticruntime "On"
+		staticruntime "off"
 		systemversion "latest"
 
 	filter "configurations:Debug"
@@ -51,7 +52,7 @@ project "Kernel"
 			
 		postbuildcommands
 		{
-			("{COPY} %{cfg.buildtarget.relpath} %{wks.location}/bin/" .. outputdir .. "/Terminator")
+			("{COPY} %{cfg.buildtarget.relpath} \"%{wks.location}bin/" .. outputdir .. "/Terminator/\"")
 		}
 	
 	filter "configurations:Release"
