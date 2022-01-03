@@ -4,6 +4,7 @@
 #include <backends/imgui_impl_glfw.h>
 #include <backends/imgui_impl_opengl3.h>
 #include <Wuya/Application/Application.h>
+#include <GLFW/glfw3.h>
 
 namespace Wuya
 {
@@ -44,20 +45,6 @@ namespace Wuya
 		ImGui::DestroyContext();
 	}
 
-	void ImguiLayer::OnUpdate(float delta_time)
-	{
-		Begin();
-
-		ImGuiIO& io = ImGui::GetIO();
-		io.DeltaTime = delta_time;
-		io.DisplaySize = ImVec2((float)Application::Instance()->GetWindow().GetWidth(), (float)Application::Instance()->GetWindow().GetHeight()); 
-
-		bool show = true;
-		ImGui::ShowDemoWindow(&show);
-
-		End();
-	}
-
 	void ImguiLayer::OnEvent(IEvent* event)
 	{
 		if (m_IsBlockEvents)
@@ -66,6 +53,13 @@ namespace Wuya
 			event->Handled |= event->IsInCategory(EventCategoryMouse) & io.WantCaptureMouse;
 			event->Handled |= event->IsInCategory(EventCategoryKeyboard) & io.WantCaptureKeyboard;
 		}
+	}
+
+	void ImguiLayer::OnImGuiRender()
+	{
+		// Show Demo
+		bool show = true;
+		ImGui::ShowDemoWindow(&show);
 	}
 
 	void ImguiLayer::Begin()
@@ -77,11 +71,11 @@ namespace Wuya
 
 	void ImguiLayer::End()
 	{
-		/*ImGuiIO& io = ImGui::GetIO();
-		io.DisplaySize = ImVec2((float)Application::Instance()->GetWindow().GetWidth(), (float)Application::Instance()->GetWindow().GetHeight());*/
-
 		ImGui::Render();
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+		/*GLFWwindow* backup_current_context = glfwGetCurrentContext();
+		glfwMakeContextCurrent(backup_current_context);*/
 	}
 
 	void ImguiLayer::SetDarkThemeColors()

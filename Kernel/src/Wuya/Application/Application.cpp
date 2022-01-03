@@ -3,6 +3,7 @@
 #include <Wuya/Events/ApplicationEvent.h>
 #include <GLFW/glfw3.h>
 #include <glad/glad.h>
+#include <Wuya/Imgui/ImguiLayer.h>
 
 namespace Wuya 
 {
@@ -15,6 +16,9 @@ namespace Wuya
 
 		m_pWindow = IWindow::Create(WindowConfig(window_title));
 		m_pWindow->SetEventCallback(BIND_EVENT_FUNC(Application::OnHandleEvent));
+
+		m_pImguiLayer = CreateUniquePtr<ImguiLayer>();
+		PushOverlay(m_pImguiLayer.get());
 	}
 
 	Application::~Application()
@@ -30,16 +34,24 @@ namespace Wuya
 	{
 		while (m_IsRuning)
 		{
-			float time = (float)glfwGetTime();
-			float timestep = time - m_LastFrameTime;
+			const float time = (float)glfwGetTime();
+			const float timestep = time - m_LastFrameTime;
 			m_LastFrameTime = time;
 
 			glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 			glClear(GL_COLOR_BUFFER_BIT);
 
+			// Update layers
 			for (auto* layer : m_LayerStack)
 				layer->OnUpdate(timestep);
 
+			// Update layers' gui 
+			m_pImguiLayer->Begin();
+			for (auto* layer : m_LayerStack)
+				layer->OnImGuiRender();
+			m_pImguiLayer->End();
+
+			// Update window
 			m_pWindow->OnUpdate();
 		}
 	}

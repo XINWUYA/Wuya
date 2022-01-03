@@ -5,6 +5,8 @@
 
 namespace Wuya
 {
+	class ImguiLayer;
+
 	class WUYA_API Application 
 	{
 	public:
@@ -16,8 +18,8 @@ namespace Wuya
 
 		virtual void Run();
 
-		virtual void PushLayer(ILayer* layer);
-		virtual void PushOverlay(ILayer* layer);
+		void PushLayer(ILayer* layer);
+		void PushOverlay(ILayer* layer);
 
 		virtual void OnHandleEvent(IEvent* event);
 		virtual bool OnHandleWindowCloseEvent(IEvent* event);
@@ -25,6 +27,7 @@ namespace Wuya
 	private:
 		static Application* s_Instance;
 		UniquePtr<IWindow> m_pWindow{ nullptr };
+		UniquePtr<ImguiLayer> m_pImguiLayer{ nullptr };
 		LayerStack m_LayerStack{};
 		bool m_IsRuning{ true };
 		float m_LastFrameTime{ 0.0f };

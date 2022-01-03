@@ -12,7 +12,7 @@ namespace Wuya
 
 		virtual void OnAttached() override;
 		virtual void OnDetached() override;
-		virtual void OnUpdate(float delta_time) override;
+		virtual void OnImGuiRender() override;
 		virtual void OnEvent(IEvent* event) override;
 
 		void Begin();

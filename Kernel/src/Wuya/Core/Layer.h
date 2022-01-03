@@ -14,6 +14,7 @@ namespace Wuya
 		virtual void OnAttached() {}
 		virtual void OnDetached() {}
 		virtual void OnUpdate(float delta_time) {}
+		virtual void OnImGuiRender() {}
 		virtual void OnEvent(IEvent* event) {}
 
 	protected:
