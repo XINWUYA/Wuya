@@ -23,7 +23,7 @@ project "Kernel"
 		"third_party/debugbreak",
 		"%{IncludeDirs.GLFW}",
 		"%{IncludeDirs.Glad}",
-		"%{IncludeDirs.Imgui}",
+		"%{IncludeDirs.ImGui}",
 		"%{IncludeDirs.glm}",
 	}
 	
@@ -38,7 +38,7 @@ project "Kernel"
 	{
 		"GLFW",
 		"Glad",
-		"Imgui",
+		"ImGui",
 		"opengl32.lib",
 	}
 

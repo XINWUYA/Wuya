@@ -1,5 +1,5 @@
 #include "pch.h"
-#include "ImguiLayer.h"
+#include "ImGuiLayer.h"
 #include <imgui.h>
 #include <backends/imgui_impl_glfw.h>
 #include <backends/imgui_impl_opengl3.h>
@@ -8,12 +8,12 @@
 
 namespace Wuya
 {
-	ImguiLayer::ImguiLayer()
-		: ILayer("ImguiLayer")
+	ImGuiLayer::ImGuiLayer()
+		: ILayer("ImGuiLayer")
 	{
 	}
 
-	void ImguiLayer::OnAttached()
+	void ImGuiLayer::OnAttached()
 	{
 		IMGUI_CHECKVERSION();
 
@@ -40,14 +40,14 @@ namespace Wuya
 		ImGui_ImplOpenGL3_Init("#version 430");
 	}
 
-	void ImguiLayer::OnDetached()
+	void ImGuiLayer::OnDetached()
 	{
 		ImGui_ImplOpenGL3_Shutdown();
 		ImGui_ImplGlfw_Shutdown();
 		ImGui::DestroyContext();
 	}
 
-	void ImguiLayer::OnEvent(IEvent* event)
+	void ImGuiLayer::OnEvent(IEvent* event)
 	{
 		if (m_IsBlockEvents)
 		{
@@ -57,21 +57,21 @@ namespace Wuya
 		}
 	}
 
-	void ImguiLayer::OnImGuiRender()
+	void ImGuiLayer::OnImGuiRender()
 	{
 		// Show Demo
 		bool show = true;
 		ImGui::ShowDemoWindow(&show);
 	}
 
-	void ImguiLayer::Begin()
+	void ImGuiLayer::Begin()
 	{
 		ImGui_ImplOpenGL3_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
 	}
 
-	void ImguiLayer::End()
+	void ImGuiLayer::End()
 	{
 		ImGui::Render();
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
@@ -88,7 +88,7 @@ namespace Wuya
 		}
 	}
 
-	void ImguiLayer::SetDarkThemeColors()
+	void ImGuiLayer::SetDarkThemeColors()
 	{
 	}
 }

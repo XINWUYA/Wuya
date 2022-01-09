@@ -21,7 +21,7 @@ project "Terminator"
 		"%{wks.location}/Kernel/third_party/debugbreak",
 		"%{IncludeDirs.GLFW}",
 		"%{IncludeDirs.Glad}",
-		"%{IncludeDirs.Imgui}",
+		"%{IncludeDirs.ImGui}",
 		"%{IncludeDirs.glm}",
 	}
 

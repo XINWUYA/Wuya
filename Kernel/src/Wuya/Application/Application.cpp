@@ -3,7 +3,7 @@
 #include <Wuya/Events/ApplicationEvent.h>
 #include <GLFW/glfw3.h>
 #include <glad/glad.h>
-#include <Wuya/Imgui/ImguiLayer.h>
+#include <Wuya/Imgui/ImGuiLayer.h>
 
 namespace Wuya 
 {
@@ -17,7 +17,7 @@ namespace Wuya
 		m_pWindow = IWindow::Create(WindowConfig(window_title));
 		m_pWindow->SetEventCallback(BIND_EVENT_FUNC(Application::OnHandleEvent));
 
-		m_pImguiLayer = CreateUniquePtr<ImguiLayer>();
+		m_pImguiLayer = CreateUniquePtr<ImGuiLayer>();
 		PushOverlay(m_pImguiLayer.get());
 	}
 

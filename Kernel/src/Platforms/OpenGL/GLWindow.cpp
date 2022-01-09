@@ -3,6 +3,7 @@
 #include <Wuya/Events/ApplicationEvent.h>
 #include <Wuya/Events/KeyEvent.h>
 #include <Wuya/Events/MouseEvent.h>
+#include <Wuya/Renderer/RenderContext.h>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
@@ -22,8 +23,8 @@ namespace Wuya
 
 	void GLWindow::OnUpdate()
 	{
-		glfwSwapBuffers(m_pGLFWWindow);
 		glfwPollEvents();
+		m_pRenderContext->SwapBuffers();
 	}
 
 	bool GLWindow::IsVSync() const
@@ -69,14 +70,10 @@ namespace Wuya
 
 		// 创建GLFW窗口
 		m_pGLFWWindow = glfwCreateWindow(config.Width, config.Height, config.Title.c_str(), nullptr, nullptr);
-
-		glfwMakeContextCurrent(m_pGLFWWindow);
-
-		// 初始化Glad
-		int status = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
-		CORE_ASSERT(status, "Failed to init Glad!");
-
 		++s_GLFWWindowCnt;
+
+		m_pRenderContext = IRenderContext::Create(m_pGLFWWindow);
+		m_pRenderContext->Init();
 
 		// 指定窗口信息
 		glfwSetWindowUserPointer(m_pGLFWWindow, &m_WindowInfo);

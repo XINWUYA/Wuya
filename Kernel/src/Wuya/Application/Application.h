@@ -4,7 +4,7 @@
 
 namespace Wuya
 {
-	class ImguiLayer;
+	class ImGuiLayer;
 
 	class Application 
 	{
@@ -26,7 +26,7 @@ namespace Wuya
 	private:
 		static Application* s_Instance;
 		UniquePtr<IWindow> m_pWindow{ nullptr };
-		UniquePtr<ImguiLayer> m_pImguiLayer{ nullptr };
+		UniquePtr<ImGuiLayer> m_pImguiLayer{ nullptr };
 		LayerStack m_LayerStack{};
 		bool m_IsRuning{ true };
 		float m_LastFrameTime{ 0.0f };

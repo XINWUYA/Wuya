@@ -3,11 +3,11 @@
 
 namespace Wuya
 {
-	class ImguiLayer : public ILayer
+	class ImGuiLayer : public ILayer
 	{
 	public:
-		ImguiLayer();
-		~ImguiLayer() = default;
+		ImGuiLayer();
+		~ImGuiLayer() = default;
 
 		virtual void OnAttached() override;
 		virtual void OnDetached() override;

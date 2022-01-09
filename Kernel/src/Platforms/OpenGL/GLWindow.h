@@ -5,6 +5,7 @@ struct GLFWwindow;
 
 namespace Wuya
 {
+	class IRenderContext;
 
 	class GLWindow : public IWindow
 	{
@@ -35,7 +36,7 @@ namespace Wuya
 		};
 		GLFWwindow* m_pGLFWWindow{ nullptr };
 		WindowInfo m_WindowInfo{};
-		//UniquePtr<>
+		UniquePtr<IRenderContext> m_pRenderContext{ nullptr };
 	};
 
 }

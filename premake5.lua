@@ -2,7 +2,7 @@
 IncludeDirs = {}
 IncludeDirs["GLFW"] = "%{wks.location}/Kernel/third_party/glfw/include"
 IncludeDirs["Glad"] = "%{wks.location}/Kernel/third_party/glad/include"
-IncludeDirs["Imgui"] = "%{wks.location}/Kernel/third_party/imgui"
+IncludeDirs["ImGui"] = "%{wks.location}/Kernel/third_party/imgui"
 IncludeDirs["glm"] = "%{wks.location}/Kernel/third_party/glm"
 
 -- Solution configuration
@@ -25,9 +25,15 @@ workspace "Wuya"
 outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 
 -- Projects
-include "Kernel"
-include "Terminator"
+group "Kernel"
+	include "Kernel"
+group ""
 
-group "Libraries"
+group "Kernel/Libraries"
 	include "Kernel/third_party"
 group ""
+
+group "App"
+	include "Terminator"
+group ""
+

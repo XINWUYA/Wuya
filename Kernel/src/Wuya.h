@@ -6,4 +6,4 @@
 #include "Wuya/Core/MouseCodes.h"
 #include "Wuya/Application/Application.h"
 
-#include "Wuya/Imgui/ImguiLayer.h"
+#include "Wuya/ImGui/ImGuiLayer.h"
