@@ -1,6 +1,8 @@
 project "Kernel"
-	kind "SharedLib"
+	kind "StaticLib"
+	staticruntime "on"
 	language "C++"
+	cppdialect "C++17"
 
 	targetdir ("%{wks.location}/bin/" .. outputdir .. "/%{prj.name}")
 	objdir ("%{wks.location}/intermediates/" .. outputdir .. "/%{prj.name}")
@@ -27,7 +29,7 @@ project "Kernel"
 	
 	defines
 	{
-		"WUYA_EXPORT",
+		"PLATFORM_WINDOWS",
 		"GLFW_INCLUDE_NONE",
 		"_CRT_SECURE_NO_WARNINGS",
 	}
@@ -41,26 +43,19 @@ project "Kernel"
 	}
 
 	filter "system:windows"
-		cppdialect "C++17"
-		staticruntime "off"
 		systemversion "latest"
 
 	filter "configurations:Debug"
 		defines "WUYA_DEBUG"
 		runtime "Debug"
-		symbols "On"
-			
-		postbuildcommands
-		{
-			("{COPY} %{cfg.buildtarget.relpath} \"%{wks.location}bin/" .. outputdir .. "/Terminator/\"")
-		}
+		symbols "on"
 	
 	filter "configurations:Release"
 		defines "WUYA_RELEASE"
 		runtime "Release"
-		optimize "On"
+		optimize "on"
 
 	filter "configurations:Distribute"
 		defines "WUYA_DISTRIBUTE"
 		runtime "Release"
-		optimize "On"
+		optimize "on"

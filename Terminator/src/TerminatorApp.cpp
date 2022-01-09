@@ -3,8 +3,11 @@
 #include <Wuya/Application/EntryPoint.h>
 #include <Wuya/Events/ApplicationEvent.h>
 
+#include "EditorLayer.h"
+
 TerminatorApp::TerminatorApp() : Application("Terminator")
 {
+	PushLayer(new EditorLayer());
 }
 
 void TerminatorApp::Run()

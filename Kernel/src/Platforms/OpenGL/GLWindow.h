@@ -1,7 +1,7 @@
 #pragma once
 #include <Wuya/Core/Window.h>
 
-class GLFWwindow;
+struct GLFWwindow;
 
 namespace Wuya
 {

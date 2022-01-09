@@ -1,6 +1,8 @@
 project "Terminator"
 	kind "ConsoleApp"
+	staticruntime "on"
 	language "C++"
+	cppdialect "C++17"
 
 	targetdir ("%{wks.location}/bin/" .. outputdir .. "/%{prj.name}")
 	objdir ("%{wks.location}/intermediates/" .. outputdir .. "/%{prj.name}")
@@ -29,26 +31,24 @@ project "Terminator"
 	}
 
 	filter "system:windows"
-		cppdialect "C++17"
-		staticruntime "off"
 		systemversion "latest"
 
 		defines
 		{
-			-- "_WINDLL",
+			"PLATFORM_WINDOWS",
 		}
 
 	filter "configurations:Debug"
 		defines "WUYA_DEBUG"
 		runtime "Debug"
-		symbols "On"
+		symbols "on"
 	
 	filter "configurations:Release"
 		defines "WUYA_RELEASE"
 		runtime "Release"
-		optimize "On"
+		optimize "on"
 
 	filter "configurations:Distribute"
 		defines "WUYA_DISTRIBUTE"
 		runtime "Release"
-		symbols "On"
+		symbols "on"

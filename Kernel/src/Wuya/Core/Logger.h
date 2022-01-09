@@ -1,12 +1,11 @@
 #pragma once
-#include <Wuya/Common/Utils.h>
 #include <Wuya/Common/Common.h>
 #include <spdlog/spdlog.h>
 #include <spdlog/fmt/ostr.h>
 
 namespace Wuya 
 {
-	class WUYA_API Logger
+	class Logger
 	{
 	public:
 		static void Init();

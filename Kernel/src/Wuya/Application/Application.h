@@ -1,5 +1,4 @@
 #pragma once
-#include <Wuya/Common/Utils.h>
 #include <Wuya/Core/Window.h>
 #include <Wuya/Core/LayerStack.h>
 
@@ -7,7 +6,7 @@ namespace Wuya
 {
 	class ImguiLayer;
 
-	class WUYA_API Application 
+	class Application 
 	{
 	public:
 		Application(const std::string& window_title = "Unnamed App");

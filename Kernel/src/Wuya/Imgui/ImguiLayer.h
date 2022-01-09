@@ -1,10 +1,9 @@
 #pragma once
 #include <Wuya/Core/Layer.h>
-#include <Wuya/Common/Utils.h>
 
 namespace Wuya
 {
-	class WUYA_API ImguiLayer : public ILayer
+	class ImguiLayer : public ILayer
 	{
 	public:
 		ImguiLayer();

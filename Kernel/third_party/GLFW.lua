@@ -1,7 +1,7 @@
 project "GLFW"
 	kind "StaticLib"
+	staticruntime "on"
 	language "C"
-	staticruntime "On"
 
 	targetdir ("%{wks.location}/bin/" .. outputdir .. "/%{prj.name}")
 	objdir ("%{wks.location}/intermediates/" .. outputdir .. "/%{prj.name}")
