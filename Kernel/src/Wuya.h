@@ -7,3 +7,6 @@
 #include "Wuya/Application/Application.h"
 
 #include "Wuya/ImGui/ImGuiLayer.h"
+
+#include "Wuya/Renderer/Shader.h"
+#include "Wuya/Renderer/Renderer.h"

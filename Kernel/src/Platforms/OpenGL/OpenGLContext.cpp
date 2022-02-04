@@ -1,17 +1,17 @@
 #include "pch.h"
-#include "GLContext.h"
+#include "OpenGLContext.h"
 #include <GLFW/glfw3.h>
 #include <glad/glad.h>
 
 namespace Wuya
 {
-	GLContext::GLContext(GLFWwindow* window)
+	OpenGLContext::OpenGLContext(GLFWwindow* window)
 		: m_pGLFWWindow(window)
 	{
 		CORE_ASSERT(window, "GLFWwindow is nullptr!");
 	}
 
-	void GLContext::Init()
+	void OpenGLContext::Init()
 	{
 		glfwMakeContextCurrent(m_pGLFWWindow);
 
@@ -28,7 +28,7 @@ namespace Wuya
 			"OpenGL Version is too old(need >= 4.5).");
 	}
 
-	void GLContext::SwapBuffers()
+	void OpenGLContext::SwapBuffers()
 	{
 		glfwSwapBuffers(m_pGLFWWindow);
 	}

@@ -23,7 +23,7 @@ namespace Wuya
 		virtual void OnHandleEvent(IEvent* event);
 		virtual bool OnHandleWindowCloseEvent(IEvent* event);
 
-	private:
+	protected:
 		static Application* s_Instance;
 		UniquePtr<IWindow> m_pWindow{ nullptr };
 		UniquePtr<ImGuiLayer> m_pImguiLayer{ nullptr };
