@@ -10,3 +10,4 @@
 
 #include "Wuya/Renderer/Shader.h"
 #include "Wuya/Renderer/Renderer.h"
+#include "Wuya/Renderer/Buffer.h"

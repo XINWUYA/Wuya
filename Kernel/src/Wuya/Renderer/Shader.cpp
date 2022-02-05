@@ -1,11 +1,11 @@
 #include "pch.h"
 #include "Shader.h"
 #include "Renderer.h"
-#include "Platforms/OpenGL/OpenGLShader.h"
+#include "GraphicsAPI/OpenGL/OpenGLShader.h"
 
 namespace Wuya
 {
-	SharedPtr<IShader> IShader::Create(const std::string& filepath)
+	SharedPtr<Shader> Shader::Create(const std::string& filepath)
 	{
 		switch(Renderer::GetAPI())
 		{
@@ -20,7 +20,7 @@ namespace Wuya
 		}
 	}
 
-	SharedPtr<IShader> IShader::Create(const std::string& name, const std::string& vertex_src, const std::string& pixel_src)
+	SharedPtr<Shader> Shader::Create(const std::string& name, const std::string& vertex_src, const std::string& pixel_src)
 	{
 		switch (Renderer::GetAPI())
 		{
@@ -35,21 +35,21 @@ namespace Wuya
 		}
 	}
 
-	SharedPtr<IShader> ShaderLibrary::Load(const std::string& filepath)
+	SharedPtr<Shader> ShaderLibrary::Load(const std::string& filepath)
 	{
-		auto shader = IShader::Create(filepath);
+		auto shader = Shader::Create(filepath);
 		AddShader(shader);
 		return shader;
 	}
 
-	SharedPtr<IShader> ShaderLibrary::Load(const std::string& name, const std::string& filepath)
+	SharedPtr<Shader> ShaderLibrary::Load(const std::string& name, const std::string& filepath)
 	{
-		auto shader = IShader::Create(filepath);
+		auto shader = Shader::Create(filepath);
 		AddShader(name, shader);
 		return shader;
 	}
 
-	SharedPtr<IShader> ShaderLibrary::GetShaderByName(const std::string& name)
+	SharedPtr<Shader> ShaderLibrary::GetShaderByName(const std::string& name)
 	{
 		CORE_ASSERT(IsExists(name), "Shader not found!");
 		return m_Shaders[name];
@@ -60,13 +60,13 @@ namespace Wuya
 		return m_Shaders.find(name) != m_Shaders.end();
 	}
 
-	void ShaderLibrary::AddShader(const SharedPtr<IShader>& shader)
+	void ShaderLibrary::AddShader(const SharedPtr<Shader>& shader)
 	{
 		auto& name = shader->GetName();
 		AddShader(name, shader);
 	}
 
-	void ShaderLibrary::AddShader(const std::string& name, const SharedPtr<IShader>& shader)
+	void ShaderLibrary::AddShader(const std::string& name, const SharedPtr<Shader>& shader)
 	{
 		CORE_ASSERT(!IsExists(name), "Shader already exists!");
 		m_Shaders[name] = shader;

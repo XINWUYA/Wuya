@@ -4,11 +4,11 @@
 
 namespace Wuya
 {
-	class IShader
+	class Shader
 	{
 	public:
-		IShader() = default;
-		~IShader() = default;
+		Shader() = default;
+		virtual ~Shader() = default;
 
 		virtual void Bind() = 0;
 		virtual void Unbind() = 0;
@@ -23,24 +23,24 @@ namespace Wuya
 
 		virtual const std::string& GetName() const = 0;
 
-		static SharedPtr<IShader> Create(const std::string& filepath);
-		static SharedPtr<IShader> Create(const std::string& name, const std::string& vertex_src, const std::string& pixel_src);
+		static SharedPtr<Shader> Create(const std::string& filepath);
+		static SharedPtr<Shader> Create(const std::string& name, const std::string& vertex_src, const std::string& pixel_src);
 	};
 
 	class ShaderLibrary
 	{
 	public:
-		SharedPtr<IShader> Load(const std::string& filepath);
-		SharedPtr<IShader> Load(const std::string& name, const std::string& filepath);
+		SharedPtr<Shader> Load(const std::string& filepath);
+		SharedPtr<Shader> Load(const std::string& name, const std::string& filepath);
 
-		SharedPtr<IShader> GetShaderByName(const std::string& name);
+		SharedPtr<Shader> GetShaderByName(const std::string& name);
 		bool IsExists(const std::string& name) const;
 
 	private:
-		void AddShader(const SharedPtr<IShader>& shader);
-		void AddShader(const std::string& name, const SharedPtr<IShader>& shader);
+		void AddShader(const SharedPtr<Shader>& shader);
+		void AddShader(const std::string& name, const SharedPtr<Shader>& shader);
 
-		std::unordered_map<std::string, SharedPtr<IShader>> m_Shaders;
+		std::unordered_map<std::string, SharedPtr<Shader>> m_Shaders;
 	};
 }
 

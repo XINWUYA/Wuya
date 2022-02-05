@@ -4,8 +4,6 @@
 #include <Wuya/Events/ApplicationEvent.h>
 
 #include "EditorLayer.h"
-#include <glad/glad.h>
-
 #include "GLFW/glfw3.h"
 
 TerminatorApp::TerminatorApp() : Application("Terminator")
@@ -18,31 +16,30 @@ TerminatorApp::TerminatorApp() : Application("Terminator")
 	shader->Bind();
 	shader->SetFloat3("color", glm::vec3(1, 1, 0));
 
+	Wuya::Renderer::Init();
+
+	m_pVertexArray = Wuya::VertexArray::Create();
+	m_pVertexArray->Bind();
+
 	// triangle vertices
 	const float vertices[3 * 3] = {
 		-0.5f, -0.5f, 0.0f,
 		 0.5f, -0.5f, 0.0f,
-		 0.0f,  0.5f, 0.0f 
+		 0.0f,  0.5f, 0.0f
 	};
-
-	glGenVertexArrays(1, &m_VAO);
-	glBindVertexArray(m_VAO);
-
-	glGenBuffers(1, &m_VBO);
-	glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), nullptr);
+	Wuya::SharedPtr<Wuya::VertexBuffer> vertex_buffer = Wuya::VertexBuffer::Create(vertices, sizeof(vertices));
+	Wuya::VertexBufferLayout vertex_buffer_layout = {
+		{ "a_Position", Wuya::BufferDataType::Float3 }
+	};
+	vertex_buffer->SetLayout(vertex_buffer_layout);
+	m_pVertexArray->AddVertexBuffer(vertex_buffer);
 
 	// indices
-	const unsigned int indices[3] = {
+	const uint32_t indices[3] = {
 		0, 1, 2
 	};
-
-	glGenBuffers(1, &m_Index);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_Index);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+	Wuya::SharedPtr<Wuya::IndexBuffer> index_buffer = Wuya::IndexBuffer::Create(indices, sizeof(indices) / sizeof(uint32_t));
+	m_pVertexArray->SetIndexBuffer(index_buffer);
 }
 
 void TerminatorApp::Run()
@@ -53,11 +50,10 @@ void TerminatorApp::Run()
 		const float timestep = time - m_LastFrameTime;
 		m_LastFrameTime = time;
 
-		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT);
+		Wuya::Renderer::SetClearColor(glm::vec4(0.2f, 0.3f, 0.3f, 1.0f));
+		Wuya::Renderer::Clear();
 
-		glBindVertexArray(m_VAO);
-		glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, nullptr);
+		Wuya::Renderer::Submit(m_pShaderLibrary->GetShaderByName("triangle"), m_pVertexArray);
 
 		// Update layers
 		for (auto* layer : m_LayerStack)

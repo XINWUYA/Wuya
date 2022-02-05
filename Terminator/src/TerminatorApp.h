@@ -10,7 +10,7 @@ public:
 	virtual void Run() override;
 
 private:
-	unsigned int m_VAO, m_VBO, m_Index;
+	Wuya::SharedPtr<Wuya::VertexArray> m_pVertexArray;
 	Wuya::UniquePtr<Wuya::ShaderLibrary> m_pShaderLibrary;
 };
 

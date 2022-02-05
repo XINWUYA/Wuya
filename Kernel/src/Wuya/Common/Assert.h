@@ -11,7 +11,7 @@
 #endif
 
 #define ASSERT_IMPL(expr, msg, ...) { if(!(expr)) { CORE_LOG_ERROR(msg, __VA_ARGS__); Break(); } } 
-#define ASSERT_WITH_MSG(expr, ...) ASSERT_IMPL(expr, "Assertion failed:{}", __VA_ARGS__)
+#define ASSERT_WITH_MSG(expr, ...) ASSERT_IMPL(expr, "Assertion failed: {}", __VA_ARGS__)
 #define ASSERT_NO_MSG(expr) ASSERT_IMPL(expr, "Assertion({0}) failed at: {1}:{2}", STRINGIFY(expr), std::filesystem::path(__FILE__).filename().string(), __LINE__)
 
 // 如果只有一个参数，则name将被替换为ASSERT_NO_MSG； 如果有两个参数，name将被替换为ASSERT_WITH_MSG。

@@ -5,11 +5,12 @@
 
 namespace Wuya
 {
-	class OpenGLShader : public IShader
+	class OpenGLShader : public Shader
 	{
 	public:
 		OpenGLShader(const std::string& filepath);
 		OpenGLShader(const std::string& name, const std::string& vertex_src, const std::string& pixel_src);
+		virtual ~OpenGLShader();
 
 		void Bind() override;
 		void Unbind() override;

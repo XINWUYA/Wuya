@@ -46,6 +46,11 @@ namespace Wuya
 		CreateShaderProgram();
 	}
 
+	OpenGLShader::~OpenGLShader()
+	{
+		glDeleteProgram(m_ProgramID);
+	}
+
 	void OpenGLShader::Bind()
 	{
 		glUseProgram(m_ProgramID);

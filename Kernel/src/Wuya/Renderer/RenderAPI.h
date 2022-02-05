@@ -1,6 +1,8 @@
 #pragma once
 #include <glm/glm.hpp>
 
+#include "VertexArray.h"
+
 namespace Wuya
 {
 	class RenderAPI
@@ -19,10 +21,10 @@ namespace Wuya
 		virtual void SetClearColor(const glm::vec4& color) = 0;
 		virtual void Clear() = 0;
 
-		//virtual void DrawIndexed(const Ref<VertexArray>& vertexArray, uint32_t indexCount = 0) = 0;
+		virtual void DrawIndexed(const SharedPtr<VertexArray>& vertex_array, uint32_t index_count = 0) = 0;
 
 		static int GetAPI() { return m_API; }
-		static UniquePtr<RenderAPI> Create(int type);
+		static UniquePtr<RenderAPI> Create();
 
 	private:
 		static int m_API;

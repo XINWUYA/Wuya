@@ -1,11 +1,12 @@
 #include "pch.h"
-#include "RenderContext.h"
+#include "VertexArray.h"
+
 #include "Renderer.h"
-#include "GraphicsAPI/OpenGL/OpenGLContext.h"
+#include "GraphicsAPI/OpenGL/OpenGLVertexArray.h"
 
 namespace Wuya
 {
-	UniquePtr<IRenderContext> IRenderContext::Create(void* window)
+	SharedPtr<VertexArray> VertexArray::Create()
 	{
 		switch (Renderer::GetAPI())
 		{
@@ -13,7 +14,7 @@ namespace Wuya
 			CORE_LOG_ERROR("RenderAPI can't be None!");
 			return nullptr;
 		case RenderAPI::OpenGL:
-			return CreateUniquePtr<OpenGLContext>(static_cast<GLFWwindow*>(window));
+			return CreateSharedPtr<OpenGLVertexArray>();
 		default:
 			CORE_LOG_ERROR("Unknown RenderAPI is unsupported!");
 			return nullptr;

@@ -1,15 +1,13 @@
 #include "pch.h"
 #include "RenderAPI.h"
-#include "Platforms/OpenGL/OpenGLRenderAPI.h"
+#include "GraphicsAPI/OpenGL/OpenGLRenderAPI.h"
 
 namespace Wuya
 {
 	int RenderAPI::m_API = RenderAPI::OpenGL;
 
-	UniquePtr<RenderAPI> RenderAPI::Create(int type)
+	UniquePtr<RenderAPI> RenderAPI::Create()
 	{
-		m_API = type;
-
 		switch (m_API)
 		{
 		case None:
