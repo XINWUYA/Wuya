@@ -4,7 +4,6 @@
 #include <Wuya/Events/KeyEvent.h>
 #include <Wuya/Events/MouseEvent.h>
 #include <Wuya/Renderer/RenderContext.h>
-#include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
 namespace Wuya

@@ -15,7 +15,7 @@ namespace Wuya
 		log_sinks.emplace_back(CreateSharedPtr<spdlog::sinks::basic_file_sink_mt>("Wuya.log", true));
 		// 指定Log样式
 		log_sinks[0]->set_pattern("%^[%T] [thread %t] %n: %v%$");
-		log_sinks[0]->set_pattern("[%T] [thread %t] [%l] %n: %v");
+		log_sinks[1]->set_pattern("[%T] [thread %t] [%l] %n: %v");
 
 		s_pCoreLogger = CreateSharedPtr<spdlog::logger>("Wuya Kernel", std::begin(log_sinks), std::end(log_sinks));
 		spdlog::register_logger(s_pCoreLogger);
