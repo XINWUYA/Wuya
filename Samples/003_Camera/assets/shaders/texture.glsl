@@ -4,7 +4,12 @@
 layout(location = 0) in vec3 a_Position;
 layout(location = 1) in vec2 a_TexCoord;
 
-uniform mat4 u_ViewProjectionMat;
+layout(std140, binding = 0) uniform CameraCBuffer
+{
+	mat4 u_ViewProjectionMat;
+};
+
+//uniform mat4 u_ViewProjectionMat;
 
 out vec3 v2f_Position;
 out vec2 v2f_TexCoord;

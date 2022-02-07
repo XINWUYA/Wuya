@@ -11,10 +11,17 @@ public:
 	void OnImGuiRender() override;
 
 private:
+	struct CameraParams
+	{
+		glm::mat4 ViewProjection;
+	};
+
 	Wuya::SharedPtr<Wuya::VertexArray> m_pVertexArray;
 	Wuya::UniquePtr<Wuya::ShaderLibrary> m_pShaderLibrary;
 	Wuya::SharedPtr<Wuya::Texture2D> m_pTexture2D;
 	Wuya::UniquePtr<Wuya::EditorCamera> m_pEditorCamera;
+	Wuya::SharedPtr<Wuya::UniformBuffer> m_pCameraCBuffer;
+	CameraParams m_CameraParams{};
 };
 
 class TestApp : public Wuya::Application

@@ -12,4 +12,5 @@
 #include "Wuya/Renderer/Shader.h"
 #include "Wuya/Renderer/Renderer.h"
 #include "Wuya/Renderer/Buffer.h"
+#include "Wuya/Renderer/UniformBuffer.h"
 #include "Wuya/Renderer/Texture.h"
