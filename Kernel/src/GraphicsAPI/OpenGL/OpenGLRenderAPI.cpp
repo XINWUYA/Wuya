@@ -19,9 +19,9 @@ namespace Wuya
 		case GL_DEBUG_SEVERITY_MEDIUM:       CORE_LOG_ERROR(message); return;
 		case GL_DEBUG_SEVERITY_LOW:          CORE_LOG_WARN(message); return;
 		case GL_DEBUG_SEVERITY_NOTIFICATION: CORE_LOG_INFO(message); return;
+		default:
+			CORE_LOG_ERROR("Unknown severity level!");
 		}
-
-		CORE_LOG_ERROR("Unknown severity level!");
 	}
 
 	void OpenGLRenderAPI::Init()
@@ -58,7 +58,13 @@ namespace Wuya
 
 	void OpenGLRenderAPI::DrawIndexed(const SharedPtr<VertexArray>& vertex_array, uint32_t index_count)
 	{
-		const uint32_t count = index_count ? index_count : vertex_array->GetIndexBuffer()->GetCount();
+		const uint32_t count = index_count ? index_count : vertex_array->GetVertexCount();
 		glDrawElements(GL_TRIANGLES, (GLsizei)count, GL_UNSIGNED_INT, nullptr);
+	}
+
+	void OpenGLRenderAPI::DrawArrays(const SharedPtr<VertexArray>& vertex_array)
+	{
+		const auto count = vertex_array->GetVertexCount();
+		glDrawArrays(GL_TRIANGLES, 0, count);
 	}
 }

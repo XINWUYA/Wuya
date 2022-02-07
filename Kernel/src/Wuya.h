@@ -5,9 +5,11 @@
 #include "Wuya/Core/KeyCodes.h"
 #include "Wuya/Core/MouseCodes.h"
 #include "Wuya/Application/Application.h"
+#include "Wuya/Application/EditorCamera.h"
 
 #include "Wuya/ImGui/ImGuiLayer.h"
 
 #include "Wuya/Renderer/Shader.h"
 #include "Wuya/Renderer/Renderer.h"
 #include "Wuya/Renderer/Buffer.h"
+#include "Wuya/Renderer/Texture.h"

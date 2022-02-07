@@ -5,13 +5,7 @@ class TerminatorApp : public Wuya::Application
 {
 public:
 	TerminatorApp();
-	~TerminatorApp() {}
-
-	virtual void Run() override;
-
-private:
-	Wuya::SharedPtr<Wuya::VertexArray> m_pVertexArray;
-	Wuya::UniquePtr<Wuya::ShaderLibrary> m_pShaderLibrary;
+	~TerminatorApp() override {}
 };
 
 Wuya::Application* Wuya::CreateApplication()

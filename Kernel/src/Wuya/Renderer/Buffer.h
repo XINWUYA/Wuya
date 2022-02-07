@@ -69,6 +69,8 @@ namespace Wuya
 		virtual const VertexBufferLayout& GetLayout() const = 0;
 		virtual void SetLayout(const VertexBufferLayout& layout) = 0;
 
+		virtual uint32_t GetCount() const = 0;
+
 		static SharedPtr<VertexBuffer> Create(uint32_t size);
 		static SharedPtr<VertexBuffer> Create(const float* vertices, uint32_t size);
 	};

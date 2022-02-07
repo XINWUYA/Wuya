@@ -22,6 +22,7 @@ namespace Wuya
 		virtual void Clear() = 0;
 
 		virtual void DrawIndexed(const SharedPtr<VertexArray>& vertex_array, uint32_t index_count = 0) = 0;
+		virtual void DrawArrays(const SharedPtr<VertexArray>& vertex_array) = 0;
 
 		static int GetAPI() { return m_API; }
 		static UniquePtr<RenderAPI> Create();

@@ -18,7 +18,10 @@ namespace Wuya
 		const VertexBufferLayout& GetLayout() const override { return m_Layout; }
 		void SetLayout(const VertexBufferLayout& layout) override { m_Layout = layout; }
 
+		uint32_t GetCount() const override;
+
 	private:
+		uint32_t m_DataSize{ 0 };
 		uint32_t m_VertexBufferId{ 0 };
 		VertexBufferLayout m_Layout{};
 	};

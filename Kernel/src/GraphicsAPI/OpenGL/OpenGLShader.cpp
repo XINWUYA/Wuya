@@ -120,11 +120,13 @@ namespace Wuya
 			else
 			{
 				CORE_LOG_ERROR("Could not read from file '{0}'", filepath);
+				CORE_ASSERT(false);
 			}
 		}
 		else
 		{
 			CORE_LOG_ERROR("Could not open file '{0}'", filepath);
+			CORE_ASSERT(false);
 		}
 
 		return result;
@@ -220,6 +222,7 @@ namespace Wuya
 				std::vector<GLchar> info_log(max_length);
 				glGetShaderInfoLog(shader, max_length, &max_length, &info_log[0]);
 				CORE_LOG_ERROR("Shader compiled failed ({0}):\n{1}", m_FilePath, info_log.data());
+				CORE_ASSERT(false);
 
 				// Delete current shader
 				glDeleteShader(shader);
@@ -255,6 +258,7 @@ namespace Wuya
 			std::vector<GLchar> info_log(maxLength);
 			glGetProgramInfoLog(program, maxLength, &maxLength, info_log.data());
 			CORE_LOG_ERROR("Shader linking failed ({0}):\n{1}", m_FilePath, info_log.data());
+			CORE_ASSERT(false);
 
 			// Delete program
 			glDeleteProgram(program);

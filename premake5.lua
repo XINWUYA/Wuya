@@ -37,3 +37,9 @@ group "App"
 	include "Terminator"
 group ""
 
+group "Samples"
+	include "Samples/001_Triangle"
+	include "Samples/002_Texture"
+	include "Samples/003_Camera"
+group ""
+

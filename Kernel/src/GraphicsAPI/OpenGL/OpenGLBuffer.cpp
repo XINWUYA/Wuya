@@ -5,6 +5,7 @@
 namespace Wuya
 {
 	OpenGLVertexBuffer::OpenGLVertexBuffer(uint32_t size)
+		: m_DataSize(size)
 	{
 		glCreateBuffers(1, &m_VertexBufferId);
 		glBindBuffer(GL_ARRAY_BUFFER, m_VertexBufferId);
@@ -12,6 +13,7 @@ namespace Wuya
 	}
 
 	OpenGLVertexBuffer::OpenGLVertexBuffer(const float* vertices, uint32_t size)
+		: m_DataSize(size)
 	{
 		glCreateBuffers(1, &m_VertexBufferId);
 		glBindBuffer(GL_ARRAY_BUFFER, m_VertexBufferId);
@@ -37,6 +39,14 @@ namespace Wuya
 	{
 		glBindBuffer(GL_ARRAY_BUFFER, m_VertexBufferId);
 		glBufferSubData(GL_ARRAY_BUFFER, 0, size, data);
+
+		m_DataSize = size;
+	}
+
+	uint32_t OpenGLVertexBuffer::GetCount() const
+	{
+		CORE_ASSERT(!(m_DataSize % m_Layout.GetStride()), "VertexBuffer data is not complete!");
+		return m_DataSize / m_Layout.GetStride();
 	}
 
 	OpenGLIndexBuffer::OpenGLIndexBuffer(const uint32_t* indices, uint32_t count)

@@ -33,6 +33,10 @@ namespace Wuya
 	{
 		shader->Bind();
 		vertex_array->Bind();
-		m_pRenderAPI->DrawIndexed(vertex_array);
+
+		if (vertex_array->GetIndexBuffer())
+			m_pRenderAPI->DrawIndexed(vertex_array);
+		else
+			m_pRenderAPI->DrawArrays(vertex_array);
 	}
 }

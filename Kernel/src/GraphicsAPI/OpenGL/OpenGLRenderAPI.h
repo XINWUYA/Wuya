@@ -15,5 +15,6 @@ namespace Wuya
 		void Clear() override;
 
 		void DrawIndexed(const SharedPtr<VertexArray>& vertex_array, uint32_t index_count = 0) override;
+		void DrawArrays(const SharedPtr<VertexArray>& vertex_array) override;
 	};
 }

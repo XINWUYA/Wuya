@@ -18,6 +18,7 @@ namespace Wuya
 
 		virtual const std::vector<SharedPtr<VertexBuffer>>& GetVertexBuffers() const = 0;
 		virtual const SharedPtr<IndexBuffer>& GetIndexBuffer() const = 0;
+		virtual const uint32_t GetVertexCount() const = 0;
 
 		static SharedPtr<VertexArray> Create();
 	};

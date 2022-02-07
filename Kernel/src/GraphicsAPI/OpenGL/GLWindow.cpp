@@ -59,6 +59,7 @@ namespace Wuya
 			glfwSetErrorCallback([](int error_code, const char* msg)
 				{
 					CORE_LOG_ERROR("GLFW Error: {0}: {1}", error_code, msg);
+					CORE_ASSERT(false);
 				});
 		}
 

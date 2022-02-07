@@ -117,6 +117,7 @@ namespace Wuya
 			}
 		}
 
+		m_VertexCount += vertex_buffer->GetCount();
 		m_VertexBuffers.push_back(vertex_buffer);
 	}
 
@@ -126,5 +127,10 @@ namespace Wuya
 		index_buffer->Bind();
 
 		m_IndexBuffer = index_buffer;
+	}
+
+	const uint32_t OpenGLVertexArray::GetVertexCount() const
+	{
+		return m_IndexBuffer ? m_IndexBuffer->GetCount() : m_VertexCount;
 	}
 }

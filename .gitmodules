@@ -13,3 +13,6 @@
 [submodule "Kernel/third_party/glm"]
 	path = Kernel/third_party/glm
 	url = https://github.com/g-truc/glm
+[submodule "Kernel/third_party/stb"]
+	path = Kernel/third_party/stb
+	url = https://github.com/nothings/stb

@@ -1,14 +1,11 @@
-project "Kernel"
-	kind "StaticLib"
+project "002_Texture"
+	kind "ConsoleApp"
 	staticruntime "on"
 	language "C++"
 	cppdialect "C++17"
 
 	targetdir ("%{wks.location}/bin/" .. outputdir .. "/%{prj.name}")
 	objdir ("%{wks.location}/intermediates/" .. outputdir .. "/%{prj.name}")
-
-	pchheader "pch.h"
-	pchsource "src/pch.cpp"
 
 	files
 	{
@@ -19,32 +16,27 @@ project "Kernel"
 	includedirs
 	{
 		"src",
-		"third_party/spdlog/include",
-		"third_party/debugbreak",
-		"third_party/stb",
+		"%{wks.location}/Kernel/src",
+		"%{wks.location}/Kernel/third_party/spdlog/include",
+		"%{wks.location}/Kernel/third_party/debugbreak",
 		"%{IncludeDirs.GLFW}",
 		"%{IncludeDirs.Glad}",
 		"%{IncludeDirs.ImGui}",
 		"%{IncludeDirs.glm}",
 	}
-	
-	defines
-	{
-		"PLATFORM_WINDOWS",
-		"GLFW_INCLUDE_NONE",
-		"_CRT_SECURE_NO_WARNINGS",
-	}
 
 	links
 	{
-		"GLFW",
-		"Glad",
-		"ImGui",
-		"opengl32.lib",
+		"Kernel",
 	}
 
 	filter "system:windows"
 		systemversion "latest"
+
+		defines
+		{
+			"PLATFORM_WINDOWS",
+		}
 
 	filter "configurations:Debug"
 		defines "WUYA_DEBUG"
@@ -59,4 +51,4 @@ project "Kernel"
 	filter "configurations:Distribute"
 		defines "WUYA_DISTRIBUTE"
 		runtime "Release"
-		optimize "on"
+		symbols "on"
