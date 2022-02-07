@@ -19,5 +19,6 @@ private:
 	Wuya::SharedPtr<Wuya::Texture2D> m_pTexture2D;
 	Wuya::UniquePtr<Wuya::ShaderLibrary> m_pShaderLibrary;
 	Wuya::UniquePtr<Wuya::EditorCamera> m_pEditorCamera;
+	Wuya::SharedPtr<Wuya::FrameBuffer> m_pFrameBuffer;
 };
 

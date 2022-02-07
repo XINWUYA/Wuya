@@ -41,5 +41,6 @@ group "Samples"
 	include "Samples/001_Triangle"
 	include "Samples/002_Texture"
 	include "Samples/003_Camera"
+	include "Samples/004_FrameBuffer"
 group ""
 

@@ -47,6 +47,13 @@ void EditorLayer::OnAttached()
 	m_pEditorCamera = Wuya::CreateUniquePtr<Wuya::EditorCamera>(30.0f);
 	//m_pEditorCamera->SetViewportSize(1280, 720);
 	//m_pEditorCamera->SetDistance(1);
+
+	// Frame buffer
+	Wuya::FrameBufferDescription desc;
+	desc.Width = 1280;
+	desc.Height = 720;
+	desc.Attachments = { Wuya::FrameBufferTargetFormat::RGBA8, Wuya::FrameBufferTargetFormat::RedInteger, Wuya::FrameBufferTargetFormat::Depth24Stencil8 };
+	m_pFrameBuffer = Wuya::FrameBuffer::Create(desc);
 }
 
 void EditorLayer::OnDetached()
@@ -57,6 +64,12 @@ void EditorLayer::OnDetached()
 void EditorLayer::OnImGuiRender()
 {
 	ImGui::Begin("Stats");
+	ImVec2 viewport_panel_size = ImGui::GetContentRegionAvail();
+	auto viewport_size = { viewport_panel_size.x, viewport_panel_size.y };
+
+	uint64_t texture_id = m_pFrameBuffer->GetColorAttachmentByIndex(0);
+	ImGui::Image(reinterpret_cast<void*>(texture_id), viewport_panel_size, ImVec2{ 0, 1 }, ImVec2{ 1, 0 });
+
 	ImGui::End();
 }
 
@@ -69,8 +82,11 @@ void EditorLayer::OnUpdate(float delta_time)
 {
 	m_pEditorCamera->OnUpdate();
 
+	m_pFrameBuffer->Bind();
+
 	Wuya::Renderer::SetClearColor(glm::vec4(0.2f, 0.3f, 0.3f, 1.0f));
 	Wuya::Renderer::Clear();
+	m_pFrameBuffer->ClearColorAttachment(1, -1);
 
 	m_pTexture2D->Bind();
 
@@ -83,4 +99,8 @@ void EditorLayer::OnUpdate(float delta_time)
 	shader->SetMat4("u_ViewProjectionMat", scale);*/
 	shader->SetMat4("u_ViewProjectionMat", m_pEditorCamera->GetViewProjection());
 	Wuya::Renderer::Submit(shader, m_pVertexArray);
+
+	m_pFrameBuffer->Unbind();
+	/*Wuya::Renderer::SetClearColor(glm::vec4(0.2f, 0.3f, 0.3f, 1.0f));
+	Wuya::Renderer::Clear();*/
 }
