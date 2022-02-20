@@ -67,6 +67,7 @@ namespace Wuya
 	void EditorCamera::UpdateProjectionMatrix()
 	{
 		m_ProjectionMatrix = glm::perspective(glm::radians(m_Fov), m_AspectRatio, m_NearClip, m_FarClip);
+		m_ViewProjectionMatrix = m_ProjectionMatrix * m_ViewMatrix;
 	}
 
 	void EditorCamera::UpdateViewMatrix()
@@ -77,6 +78,7 @@ namespace Wuya
 		{
 			m_ViewMatrix = glm::translate(glm::mat4(1.0f), m_Position) * glm::toMat4(GetOrientation());
 			m_ViewMatrix = glm::inverse(m_ViewMatrix);
+			m_ViewProjectionMatrix = m_ProjectionMatrix * m_ViewMatrix;
 			break;
 		}
 		case EditorCameraMode::Focus:
@@ -84,6 +86,7 @@ namespace Wuya
 			m_Position = m_FocalPoint - GetForwardDir() * m_Distance; // 相机始终围绕聚焦点
 			m_ViewMatrix = glm::translate(glm::mat4(1.0f), m_Position) * glm::toMat4(GetOrientation());
 			m_ViewMatrix = glm::inverse(m_ViewMatrix);
+			m_ViewProjectionMatrix = m_ProjectionMatrix * m_ViewMatrix;
 			break;
 		}
 		default:

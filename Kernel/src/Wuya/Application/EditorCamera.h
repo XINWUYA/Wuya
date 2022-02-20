@@ -1,17 +1,17 @@
 #pragma once
-#include "Wuya/Events/Event.h"
 #include "Wuya/Renderer/Camera.h"
-
-#include <glm/glm.hpp>
 
 namespace Wuya
 {
+	class IEvent;
+
 	enum class EditorCameraMode
 	{
 		Free = 0, // 自由模式
 		Focus, // 聚焦模式
 	};
 
+	// 投影相机
 	class EditorCamera : public Camera
 	{
 	public:
@@ -33,13 +33,10 @@ namespace Wuya
 		float GetPitch() const { return m_Pitch; }
 		float GetYaw() const { return m_Yaw; }
 
-		const glm::vec3& GetPosition() const { return m_Position; }
 		const glm::vec3& GetUpDir() const { return m_UpDirection; }
 		const glm::vec3& GetRightDir() const { return m_RightDirection; }
 		const glm::vec3& GetForwardDir() const { return m_ForwardDirection; }
 
-		const glm::mat4& GetViewMatrix() const { return m_ViewMatrix; }
-		glm::mat4 GetViewProjection() const { return m_ProjectionMatrix * m_ViewMatrix; }
 		glm::quat GetOrientation() const;
 
 	private:
@@ -56,7 +53,6 @@ namespace Wuya
 		float RotateSpeed() const;
 		float ZoomSpeed() const;
 
-
 		float m_Fov{ 45.0f };
 		float m_AspectRatio{ 1.778f };
 		float m_NearClip{ 0.1f };
@@ -68,15 +64,11 @@ namespace Wuya
 
 		float m_MoveSpeed{ 1.0f };
 
-		glm::vec3 m_Position{ 0.0f, 0.0f, 0.0f };
-
 		glm::vec3 m_UpDirection{ 0.0f, 1.0f, 0.0f };
 		glm::vec3 m_RightDirection{ 1.0f, 0.0f, 0.0f };
 		glm::vec3 m_ForwardDirection{ 0.0f, 0.0f, -1.0f };
 
 		glm::vec3 m_FocalPoint{ 0.0f, 0.0f, 0.0f };
-		glm::mat4 m_ViewMatrix{};
-
 		glm::vec2 m_LastMousePosition{ 0.0f, 0.0f };
 
 		EditorCameraMode m_Mode{ EditorCameraMode::Focus };

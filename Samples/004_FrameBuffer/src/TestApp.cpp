@@ -109,7 +109,7 @@ void TestLayer::OnUpdate(float delta_time)
 
 	m_pTexture2D->Bind(m_pTexture2D->GetTextureID());
 
-	m_CameraParams.ViewProjection = m_pEditorCamera->GetViewProjection();
+	m_CameraParams.ViewProjection = m_pEditorCamera->GetViewProjectionMatrix();
 	m_pCameraCBuffer->SetData(&m_CameraParams, sizeof(CameraParams));
 
 	Wuya::Renderer::Submit(m_pShaderLibrary->GetShaderByName("texture"), m_pVertexArray);

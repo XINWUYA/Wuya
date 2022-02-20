@@ -29,13 +29,13 @@ namespace Wuya
 		m_pRenderAPI->Clear();
 	}
 
-	void Renderer::Submit(const SharedPtr<Shader>& shader, const SharedPtr<VertexArray>& vertex_array)
+	void Renderer::Submit(const SharedPtr<Shader>& shader, const SharedPtr<VertexArray>& vertex_array, uint32_t index_count)
 	{
 		shader->Bind();
 		vertex_array->Bind();
 
 		if (vertex_array->GetIndexBuffer())
-			m_pRenderAPI->DrawIndexed(vertex_array);
+			m_pRenderAPI->DrawIndexed(vertex_array, index_count);
 		else
 			m_pRenderAPI->DrawArrays(vertex_array);
 	}

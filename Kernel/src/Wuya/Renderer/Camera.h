@@ -10,17 +10,17 @@ namespace Wuya
 		Camera() = default;
 		virtual ~Camera() = default;
 
+		const glm::vec3& GetPosition() const { return m_Position; }
+
+		const glm::mat4& GetViewMatrix() const { return m_ViewMatrix; }
 		const glm::mat4& GetProjectionMatrix() const { return m_ProjectionMatrix; }
+		const glm::mat4& GetViewProjectionMatrix() const { return m_ViewProjectionMatrix; }
 
 	protected:
-		glm::mat4 m_ProjectionMatrix{ glm::mat4(1.0f) };
-	};
+		glm::vec3 m_Position{ 0.0f, 0.0f, 0.0f };
 
-	// 正交相机
-	class OrthographicCamera
-	{
-	public:
-		OrthographicCamera(float left, float right, float top, float bottom);
-		~OrthographicCamera() = default;
+		glm::mat4 m_ViewMatrix{ glm::mat4(1.0f) };
+		glm::mat4 m_ProjectionMatrix{ glm::mat4(1.0f) };
+		glm::mat4 m_ViewProjectionMatrix{ glm::mat4(1.0f) };
 	};
 }

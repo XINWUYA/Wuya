@@ -1,4 +1,4 @@
-project "Terminator"
+project "Editor2D"
 	kind "ConsoleApp"
 	staticruntime "on"
 	language "C++"
@@ -17,8 +17,8 @@ project "Terminator"
 	{
 		"src",
 		"%{wks.location}/Kernel/src",
-		"%{wks.location}/Kernel/third_party/spdlog/include",
-		"%{wks.location}/Kernel/third_party/debugbreak",
+		"%{IncludeDirs.spdlog}",
+		"%{IncludeDirs.debugbreak}",
 		"%{IncludeDirs.GLFW}",
 		"%{IncludeDirs.Glad}",
 		"%{IncludeDirs.ImGui}",

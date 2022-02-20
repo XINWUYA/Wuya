@@ -1,14 +1,17 @@
 -- Include dirs for projects
 IncludeDirs = {}
+IncludeDirs["spdlog"] = "%{wks.location}/Kernel/third_party/spdlog/include"
+IncludeDirs["debugbreak"] = "%{wks.location}/Kernel/third_party/debugbreak"
 IncludeDirs["GLFW"] = "%{wks.location}/Kernel/third_party/glfw/include"
 IncludeDirs["Glad"] = "%{wks.location}/Kernel/third_party/glad/include"
 IncludeDirs["ImGui"] = "%{wks.location}/Kernel/third_party/imgui"
 IncludeDirs["glm"] = "%{wks.location}/Kernel/third_party/glm"
+IncludeDirs["stb"] = "%{wks.location}/Kernel/third_party/stb"
 
 -- Solution configuration
 workspace "Wuya"
 	architecture "x64"
-	startproject "Terminator"
+	startproject "Editor"
 
 	configurations
 	{
@@ -34,7 +37,8 @@ group "Kernel/Libraries"
 group ""
 
 group "App"
-	include "Terminator"
+	include "Editor"
+	include "Editor2D"
 group ""
 
 group "Samples"

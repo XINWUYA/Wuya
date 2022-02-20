@@ -14,7 +14,7 @@ namespace Wuya
 		static void SetClearColor(const glm::vec4& color);
 		static void Clear();
 
-		static void Submit(const SharedPtr<Shader>& shader, const SharedPtr<VertexArray>& vertex_array);
+		static void Submit(const SharedPtr<Shader>& shader, const SharedPtr<VertexArray>& vertex_array, uint32_t index_count = 0);
 
 		static int GetAPI() { return RenderAPI::GetAPI(); }
 

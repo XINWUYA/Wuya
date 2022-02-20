@@ -1,10 +1,10 @@
-#include "TerminatorApp.h"
+#include "EditorApp.h"
 #include "EditorLayer.h"
 
 /* 程序主入口点，需要保证放在Wuya.h之后 */
 #include <Wuya/Application/EntryPoint.h>
 
-TerminatorApp::TerminatorApp() : Application("Terminator")
+EditorApp::EditorApp() : Application("Editor2D")
 {
 	PushLayer(new EditorLayer());
 }

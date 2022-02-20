@@ -6,11 +6,14 @@
 #include "Wuya/Core/MouseCodes.h"
 #include "Wuya/Application/Application.h"
 #include "Wuya/Application/EditorCamera.h"
+#include "Wuya/Application/OrthographicCamera.h"
+#include "Wuya/Application/OrthographicCameraController.h"
 
 #include "Wuya/ImGui/ImGuiLayer.h"
 
 #include "Wuya/Renderer/Shader.h"
 #include "Wuya/Renderer/Renderer.h"
+#include "Wuya/Renderer/Renderer2D.h"
 #include "Wuya/Renderer/Buffer.h"
 #include "Wuya/Renderer/UniformBuffer.h"
 #include "Wuya/Renderer/FrameBuffer.h"
