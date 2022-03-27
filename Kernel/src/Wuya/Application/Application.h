@@ -20,15 +20,17 @@ namespace Wuya
 		void PushLayer(ILayer* layer);
 		void PushOverlay(ILayer* layer);
 
-		virtual void OnHandleEvent(IEvent* event);
+		virtual void OnEvent(IEvent* event);
 		virtual bool OnHandleWindowCloseEvent(IEvent* event);
+		virtual bool OnHandleWindowResizeEvent(IEvent* event);
 
 	protected:
 		static Application* s_Instance;
 		UniquePtr<IWindow> m_pWindow{ nullptr };
 		UniquePtr<ImGuiLayer> m_pImguiLayer{ nullptr };
 		LayerStack m_LayerStack{};
-		bool m_IsRuning{ true };
+		bool m_IsRunning{ true };
+		bool m_IsMinimized{ false };
 		float m_LastFrameTime{ 0.0f };
 	};
 

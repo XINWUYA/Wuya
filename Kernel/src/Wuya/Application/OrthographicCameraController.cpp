@@ -77,12 +77,12 @@ namespace Wuya
 		m_ZoomLevel -= event->GetYOffset() * 0.25f;
 		m_ZoomLevel = std::max(m_ZoomLevel, 0.25f);
 		m_pCamera->SetProjection(-m_AspectRatio * m_ZoomLevel, m_AspectRatio * m_ZoomLevel, -m_ZoomLevel, m_ZoomLevel);
-		return true;
+		return false;
 	}
 
 	bool OrthographicCameraController::OnWindowResized(WindowResizeEvent* event)
 	{
 		OnResize(static_cast<float>(event->GetWidth()), static_cast<float>(event->GetHeight()));
-		return true;
+		return false;
 	}
 }

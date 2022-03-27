@@ -97,7 +97,7 @@ void EditorLayer::OnUpdate(float delta_time)
 		0, 0, 2, 0,
 		0, 0, 0, 1);
 	shader->SetMat4("u_ViewProjectionMat", scale);*/
-	shader->SetMat4("u_ViewProjectionMat", m_pEditorCamera->GetViewProjection());
+	shader->SetMat4("u_ViewProjectionMat", m_pEditorCamera->GetViewProjectionMatrix());
 	Wuya::Renderer::Submit(shader, m_pVertexArray);
 
 	m_pFrameBuffer->Unbind();

@@ -37,7 +37,7 @@ namespace Wuya
 	public:
 		virtual ~IEvent() = default;
 
-		bool Handled = false;
+		bool Handled = false; // 标记事件是否应该停止，对于多层Layer，更上层的事件优先触发，若事件到达某一层后不再向下传递，才应返回true
 
 		virtual EventType GetEventType() const = 0;
 		virtual const char* GetName() const = 0;
