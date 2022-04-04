@@ -4,8 +4,8 @@ project "001_Triangle"
 	language "C++"
 	cppdialect "C++17"
 
-	targetdir ("%{wks.location}/bin/" .. outputdir .. "/%{prj.name}")
-	objdir ("%{wks.location}/intermediates/" .. outputdir .. "/%{prj.name}")
+	targetdir ("%{wks.location}/build/bin/" .. outputdir .. "/%{prj.name}")
+	objdir ("%{wks.location}/build/intermediates/" .. outputdir .. "/%{prj.name}")
 
 	files
 	{
