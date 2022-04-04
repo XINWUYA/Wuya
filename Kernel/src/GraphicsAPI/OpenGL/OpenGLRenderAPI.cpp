@@ -26,6 +26,8 @@ namespace Wuya
 
 	void OpenGLRenderAPI::Init()
 	{
+		PROFILE_FUNCTION();
+
 #ifdef WUYA_DEBUG
 		glEnable(GL_DEBUG_OUTPUT);
 		glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);

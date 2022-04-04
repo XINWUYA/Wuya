@@ -13,6 +13,8 @@ namespace Wuya
 
 	void OpenGLContext::Init()
 	{
+		PROFILE_FUNCTION();
+
 		glfwMakeContextCurrent(m_pGLFWWindow);
 
 		// ≥ı ºªØGlad
@@ -30,6 +32,8 @@ namespace Wuya
 
 	void OpenGLContext::SwapBuffers()
 	{
+		PROFILE_FUNCTION();
+
 		glfwSwapBuffers(m_pGLFWWindow);
 	}
 }

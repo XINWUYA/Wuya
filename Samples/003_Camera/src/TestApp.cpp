@@ -119,5 +119,5 @@ void TestLayer::OnImGuiRender()
 
 TestApp::TestApp() : Application("003_Camera")
 {
-	PushLayer(new TestLayer());
+	PushLayer(Wuya::CreateSharedPtr<TestLayer>());
 }

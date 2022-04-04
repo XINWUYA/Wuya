@@ -10,6 +10,8 @@ namespace Wuya
 	EditorCamera::EditorCamera(float fov, float aspect_ratio, float near_clip, float far_clip)
 		: m_Fov(fov), m_AspectRatio(aspect_ratio), m_NearClip(near_clip), m_FarClip(far_clip)
 	{
+		PROFILE_FUNCTION();
+
 		UpdateCameraDirections();
 
 		UpdateProjectionMatrix();
@@ -22,6 +24,8 @@ namespace Wuya
 
 	void EditorCamera::OnUpdate()
 	{
+		PROFILE_FUNCTION();
+
 		switch (m_Mode)
 		{
 		case EditorCameraMode::Free: 
@@ -52,6 +56,8 @@ namespace Wuya
 
 	void EditorCamera::SetViewportSize(float width, float height)
 	{
+		PROFILE_FUNCTION();
+
 		m_ViewportWidth = width;
 		m_ViewportHeight = height;
 
@@ -72,6 +78,8 @@ namespace Wuya
 
 	void EditorCamera::UpdateViewMatrix()
 	{
+		PROFILE_FUNCTION();
+
 		switch (m_Mode)
 		{
 		case EditorCameraMode::Free:

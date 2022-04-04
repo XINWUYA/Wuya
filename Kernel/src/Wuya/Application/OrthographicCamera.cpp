@@ -33,6 +33,8 @@ namespace Wuya
 
 	void OrthographicCamera::UpdateCameraMatrix()
 	{
+		PROFILE_FUNCTION();
+
 		const glm::mat4 transform = glm::translate(glm::mat4(1.0f), m_Position) * glm::rotate(glm::mat4(1.0f), glm::radians(m_Rotation), glm::vec3(0.0f, 0.0f, 1.0f));
 
 		m_ViewMatrix = glm::inverse(transform);

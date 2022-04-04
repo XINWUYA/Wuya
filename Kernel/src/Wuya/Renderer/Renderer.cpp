@@ -7,6 +7,8 @@ namespace Wuya
 
 	void Renderer::Init()
 	{
+		PROFILE_FUNCTION();
+
 		m_pRenderAPI->Init();
 	}
 

@@ -7,21 +7,29 @@ namespace Wuya
 {
 	OpenGLVertexArray::OpenGLVertexArray()
 	{
+		PROFILE_FUNCTION();
+
 		glCreateVertexArrays(1, &m_VertexArrayId);
 	}
 
 	OpenGLVertexArray::~OpenGLVertexArray()
 	{
+		PROFILE_FUNCTION();
+
 		glDeleteVertexArrays(1, &m_VertexArrayId);
 	}
 
 	void OpenGLVertexArray::Bind() const
 	{
+		PROFILE_FUNCTION();
+
 		glBindVertexArray(m_VertexArrayId);
 	}
 
 	void OpenGLVertexArray::Unbind() const
 	{
+		PROFILE_FUNCTION();
+
 		glBindVertexArray(0);
 	}
 
@@ -48,6 +56,8 @@ namespace Wuya
 
 	void OpenGLVertexArray::AddVertexBuffer(const SharedPtr<VertexBuffer>& vertex_buffer)
 	{
+		PROFILE_FUNCTION();
+
 		CORE_ASSERT(vertex_buffer->GetLayout().GetElements().size(), "Vertex buffer has no layout!");
 
 		glBindVertexArray(m_VertexArrayId);
@@ -96,7 +106,7 @@ namespace Wuya
 			case BufferDataType::Mat4:
 			{
 				const auto count = element.GetComponentCount();
-				for (auto i = 0; i < count; ++i)
+				for (uint32_t i = 0; i < count; ++i)
 				{
 					glEnableVertexAttribArray(m_VertexBufferIdx);
 					glVertexAttribPointer(m_VertexBufferIdx,
@@ -123,6 +133,8 @@ namespace Wuya
 
 	void OpenGLVertexArray::SetIndexBuffer(const SharedPtr<IndexBuffer>& index_buffer)
 	{
+		PROFILE_FUNCTION();
+
 		glBindVertexArray(m_VertexArrayId);
 		index_buffer->Bind();
 

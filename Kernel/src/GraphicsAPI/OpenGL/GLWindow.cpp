@@ -12,6 +12,8 @@ namespace Wuya
 
 	GLWindow::GLWindow(const WindowConfig& config)
 	{
+		PROFILE_FUNCTION();
+
 		Init(config);
 	}
 
@@ -22,6 +24,8 @@ namespace Wuya
 
 	void GLWindow::OnUpdate()
 	{
+		PROFILE_FUNCTION();
+
 		glfwPollEvents();
 		m_pRenderContext->SwapBuffers();
 	}
@@ -43,6 +47,8 @@ namespace Wuya
 
 	void GLWindow::Init(const WindowConfig& config)
 	{
+		PROFILE_FUNCTION();
+
 		m_WindowInfo.Title = config.Title;
 		m_WindowInfo.Width = config.Width;
 		m_WindowInfo.Height = config.Height;
@@ -179,6 +185,8 @@ namespace Wuya
 
 	void GLWindow::ShutDown()
 	{
+		PROFILE_FUNCTION();
+
 		glfwDestroyWindow(m_pGLFWWindow);
 		--s_GLFWWindowCnt;
 

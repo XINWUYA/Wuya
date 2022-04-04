@@ -6,5 +6,5 @@
 
 EditorApp::EditorApp() : Application("Editor")
 {
-	PushLayer(new EditorLayer());
+	PushLayer(Wuya::CreateSharedPtr<EditorLayer>());
 }

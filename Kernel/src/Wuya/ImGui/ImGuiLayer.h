@@ -7,7 +7,7 @@ namespace Wuya
 	{
 	public:
 		ImGuiLayer();
-		~ImGuiLayer() = default;
+		~ImGuiLayer();
 
 		virtual void OnAttached() override;
 		virtual void OnDetached() override;

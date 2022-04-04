@@ -69,5 +69,5 @@ void TestLayer::OnEvent(Wuya::IEvent* event)
 
 TestApp::TestApp() : Application("001_Triangle")
 {
-	PushLayer(new TestLayer());
+	PushLayer(Wuya::CreateSharedPtr<TestLayer>());
 }

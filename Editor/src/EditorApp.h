@@ -5,10 +5,10 @@ class EditorApp : public Wuya::Application
 {
 public:
 	EditorApp();
-	~EditorApp() override {}
+	~EditorApp() {}
 };
 
-Wuya::Application* Wuya::CreateApplication()
+Wuya::UniquePtr<Wuya::Application> Wuya::CreateApplication()
 {
-	return new EditorApp();
+	return Wuya::CreateUniquePtr<EditorApp>();
 }

@@ -5,25 +5,25 @@ namespace Wuya
 {
 	LayerStack::~LayerStack()
 	{
-		for (auto* layer : m_Layers)
+		for (auto layer : m_Layers)
 		{
 			layer->OnDetached();
-			delete layer;
+			layer.reset();
 		}
 	}
 
-	void LayerStack::PushLayer(ILayer* layer)
+	void LayerStack::PushLayer(const SharedPtr<ILayer>& layer)
 	{
 		m_Layers.emplace(begin() + m_LayerInsertIndex, layer);
 		m_LayerInsertIndex++;
 	}
 
-	void LayerStack::PushOverlay(ILayer* layer)
+	void LayerStack::PushOverlay(const SharedPtr<ILayer>& layer)
 	{
 		m_Layers.emplace_back(layer);
 	}
 
-	void LayerStack::PopLayer(ILayer* layer)
+	void LayerStack::PopLayer(const SharedPtr<ILayer>& layer)
 	{
 		auto it = std::find(begin(), begin() + m_LayerInsertIndex, layer);
 		if (it != begin() + m_LayerInsertIndex)
@@ -38,7 +38,7 @@ namespace Wuya
 		}
 	}
 
-	void LayerStack::PopOverlay(ILayer* layer)
+	void LayerStack::PopOverlay(const SharedPtr<ILayer>& layer)
 	{
 		auto it = std::find(begin() + m_LayerInsertIndex, end(), layer);
 		if (it != end())

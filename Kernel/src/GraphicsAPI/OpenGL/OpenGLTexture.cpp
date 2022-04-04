@@ -9,6 +9,8 @@ namespace Wuya
 	OpenGLTexture2D::OpenGLTexture2D(uint32_t width, uint32_t height)
 		: m_Width(width), m_Height(height), m_InternalFormat(GL_RGBA8), m_DataFormat(GL_RGBA)
 	{
+		PROFILE_FUNCTION();
+
 		glCreateTextures(GL_TEXTURE_2D, 1, &m_TextureId);
 		glTextureStorage2D(m_TextureId, 1, m_InternalFormat, m_Width, m_Height);
 
@@ -21,6 +23,8 @@ namespace Wuya
 	OpenGLTexture2D::OpenGLTexture2D(const std::string& path)
 		: m_Path(path)
 	{
+		PROFILE_FUNCTION();
+
 		stbi_set_flip_vertically_on_load(1);
 
 		int width, height, channels;
@@ -64,16 +68,22 @@ namespace Wuya
 
 	OpenGLTexture2D::~OpenGLTexture2D()
 	{
+		PROFILE_FUNCTION();
+
 		glDeleteTextures(1, &m_TextureId);
 	}
 
 	void OpenGLTexture2D::Bind(uint32_t slot)
 	{
+		PROFILE_FUNCTION();
+
 		glBindTextureUnit(slot, m_TextureId);
 	}
 
 	void OpenGLTexture2D::SetData(void* data, uint32_t size)
 	{
+		PROFILE_FUNCTION();
+
 		const uint32_t channel = (m_DataFormat == GL_RGBA) ? 4 : 3;
 		CORE_ASSERT((size == m_Width * m_Height * channel), "Texture data is not completed!");
 

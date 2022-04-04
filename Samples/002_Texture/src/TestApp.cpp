@@ -72,5 +72,5 @@ void TestLayer::OnImGuiRender()
 
 TestApp::TestApp() : Application("002_Texture")
 {
-	PushLayer(new TestLayer());
+	PushLayer(Wuya::CreateSharedPtr<TestLayer>());
 }

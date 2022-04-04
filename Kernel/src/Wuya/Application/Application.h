@@ -17,17 +17,17 @@ namespace Wuya
 
 		virtual void Run();
 
-		void PushLayer(ILayer* layer);
-		void PushOverlay(ILayer* layer);
+		void PushLayer(SharedPtr<ILayer> layer);
+		void PushOverlay(SharedPtr<ILayer> layer);
 
 		virtual void OnEvent(IEvent* event);
 		virtual bool OnHandleWindowCloseEvent(IEvent* event);
 		virtual bool OnHandleWindowResizeEvent(IEvent* event);
 
 	protected:
-		static Application* s_Instance;
+		static Application* s_pInstance;
 		UniquePtr<IWindow> m_pWindow{ nullptr };
-		UniquePtr<ImGuiLayer> m_pImguiLayer{ nullptr };
+		SharedPtr<ImGuiLayer> m_pImGuiLayer{ nullptr };
 		LayerStack m_LayerStack{};
 		bool m_IsRunning{ true };
 		bool m_IsMinimized{ false };
@@ -35,5 +35,5 @@ namespace Wuya
 	};
 
 	// Implement in clients
-	Application* CreateApplication();
+	UniquePtr<Application> CreateApplication();
 }

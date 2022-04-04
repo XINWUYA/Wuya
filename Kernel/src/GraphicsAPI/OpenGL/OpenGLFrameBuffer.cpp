@@ -21,6 +21,8 @@ namespace Wuya
 	OpenGLFrameBuffer::OpenGLFrameBuffer(const FrameBufferDescription& desc)
 		: m_Description(desc)
 	{
+		PROFILE_FUNCTION();
+
 		for (auto frame_target : m_Description.Attachments.Targets)
 		{
 			if (!IsDepthFormat(frame_target.TextureFormat))
@@ -39,17 +41,23 @@ namespace Wuya
 
 	void OpenGLFrameBuffer::Bind()
 	{
+		PROFILE_FUNCTION();
+
 		glBindFramebuffer(GL_FRAMEBUFFER, m_FrameBufferId);
 		glViewport(0, 0, m_Description.Width, m_Description.Height);
 	}
 
 	void OpenGLFrameBuffer::Unbind()
 	{
+		PROFILE_FUNCTION();
+
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}
 
 	void OpenGLFrameBuffer::Resize(uint32_t width, uint32_t height)
 	{
+		PROFILE_FUNCTION();
+
 		if (width == 0 || height == 0 || width > MAX_FRAME_TARGET_SIZE || height > MAX_FRAME_TARGET_SIZE)
 		{
 			CORE_LOG_WARN("Attempted to rezize framebuffer to { 0 }, { 1 }, but not supported!", width, height);
@@ -64,6 +72,8 @@ namespace Wuya
 
 	int OpenGLFrameBuffer::ReadPixel(uint32_t attachment_index, int x, int y)
 	{
+		PROFILE_FUNCTION();
+
 		CORE_ASSERT(attachment_index < m_ColorAttachments.size());
 
 		glReadBuffer(GL_COLOR_ATTACHMENT0 + attachment_index);
@@ -89,6 +99,8 @@ namespace Wuya
 
 	void OpenGLFrameBuffer::ClearColorAttachment(uint32_t attachment_index, int value)
 	{
+		PROFILE_FUNCTION();
+
 		CORE_ASSERT(attachment_index < m_ColorAttachments.size());
 
 		auto& target = m_ColorTargets[attachment_index];
@@ -109,6 +121,8 @@ namespace Wuya
 
 	void OpenGLFrameBuffer::Invalidate()
 	{
+		PROFILE_FUNCTION();
+
 		if (m_FrameBufferId)
 		{
 			ReleaseAttachments();
@@ -230,6 +244,8 @@ namespace Wuya
 
 	void OpenGLFrameBuffer::ReleaseAttachments()
 	{
+		PROFILE_FUNCTION();
+
 		glDeleteFramebuffers(1, &m_FrameBufferId);
 		glDeleteTextures(m_ColorAttachments.size(), m_ColorAttachments.data());
 		glDeleteTextures(1, &m_DepthAttachment);

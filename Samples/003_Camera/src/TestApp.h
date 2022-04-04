@@ -31,7 +31,7 @@ public:
 	~TestApp() override {}
 };
 
-Wuya::Application* Wuya::CreateApplication()
+Wuya::UniquePtr<Wuya::Application> Wuya::CreateApplication()
 {
-	return new TestApp();
+	return Wuya::CreateUniquePtr<TestApp>();
 }

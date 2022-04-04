@@ -20,6 +20,8 @@ namespace Wuya
 
 	OpenGLShader::OpenGLShader(const std::string& filepath) : m_FilePath(filepath)
 	{
+		PROFILE_FUNCTION();
+
 		CreateShaderCacheDirectoryIfNeed();
 
 		const std::string shader_src = ReadFile(filepath);
@@ -38,6 +40,8 @@ namespace Wuya
 
 	OpenGLShader::OpenGLShader(const std::string& name, const std::string& vertex_src, const std::string& pixel_src) : m_Name(name)
 	{
+		PROFILE_FUNCTION();
+
 		// Preprocess shader src
 		m_OpenGLSourceCodes[GL_VERTEX_SHADER] = vertex_src;
 		m_OpenGLSourceCodes[GL_FRAGMENT_SHADER] = pixel_src;
@@ -48,63 +52,85 @@ namespace Wuya
 
 	OpenGLShader::~OpenGLShader()
 	{
+		PROFILE_FUNCTION();
+
 		glDeleteProgram(m_ProgramID);
 	}
 
 	void OpenGLShader::Bind()
 	{
+		PROFILE_FUNCTION();
+
 		glUseProgram(m_ProgramID);
 	}
 
 	void OpenGLShader::Unbind()
 	{
+		PROFILE_FUNCTION();
+
 		glUseProgram(0);
 	}
 
 	void OpenGLShader::SetInt(const std::string& name, int value)
 	{
+		PROFILE_FUNCTION();
+
 		const GLint location = glGetUniformLocation(m_ProgramID, name.c_str());
 		glUniform1i(location, value);
 	}
 
 	void OpenGLShader::SetIntArray(const std::string& name, int* values, uint32_t count)
 	{
+		PROFILE_FUNCTION();
+
 		const GLint location = glGetUniformLocation(m_ProgramID, name.c_str());
 		glUniform1iv(location, count, values);
 	}
 
 	void OpenGLShader::SetFloat(const std::string& name, float value)
 	{
+		PROFILE_FUNCTION();
+
 		const GLint location = glGetUniformLocation(m_ProgramID, name.c_str());
 		glUniform1f(location, value);
 	}
 
 	void OpenGLShader::SetFloat2(const std::string& name, const glm::vec2& value)
 	{
+		PROFILE_FUNCTION();
+
 		const GLint location = glGetUniformLocation(m_ProgramID, name.c_str());
 		glUniform2f(location, value.x, value.y);
 	}
 
 	void OpenGLShader::SetFloat3(const std::string& name, const glm::vec3& value)
 	{
+		PROFILE_FUNCTION();
+
 		const GLint location = glGetUniformLocation(m_ProgramID, name.c_str());
 		glUniform3f(location, value.x, value.y, value.z);
 	}
 
 	void OpenGLShader::SetFloat4(const std::string& name, const glm::vec4& value)
 	{
+		PROFILE_FUNCTION();
+
 		const GLint location = glGetUniformLocation(m_ProgramID, name.c_str());
 		glUniform4f(location, value.x, value.y, value.z, value.w);
 	}
 
 	void OpenGLShader::SetMat4(const std::string& name, const glm::mat4& value)
 	{
+		PROFILE_FUNCTION();
+
 		const GLint location = glGetUniformLocation(m_ProgramID, name.c_str());
 		glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(value));
 	}
 
 	std::string OpenGLShader::ReadFile(const std::string& filepath)
 	{
+		PROFILE_FUNCTION();
+
 		std::string result;
 		std::ifstream in(filepath, std::ios::in | std::ios::binary); // ifstream closes itself due to RAII
 		if (in)
@@ -145,6 +171,8 @@ namespace Wuya
 
 	void OpenGLShader::PreProcessShaderSrc(const std::string& source, std::unordered_map<GLenum, std::string>& shader_sources)
 	{
+		PROFILE_FUNCTION();
+
 		const char* type_token = "#type";
 		const size_t type_token_length = strlen(type_token);
 		size_t pos = source.find(type_token, 0); // Start of shader type declaration line
@@ -201,6 +229,8 @@ namespace Wuya
 
 	void OpenGLShader::CreateShaderProgram()
 	{
+		PROFILE_FUNCTION();
+
 		// Compile shaders
 		std::vector<GLuint> compiled_shaders;
 		for (auto& source_code : m_OpenGLSourceCodes)

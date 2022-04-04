@@ -8,7 +8,7 @@ public:
 	~EditorApp() override {}
 };
 
-Wuya::Application* Wuya::CreateApplication()
+Wuya::UniquePtr<Wuya::Application> Wuya::CreateApplication()
 {
-	return new EditorApp();
+	return CreateUniquePtr<EditorApp>();
 }

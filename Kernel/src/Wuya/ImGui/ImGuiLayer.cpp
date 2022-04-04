@@ -13,8 +13,14 @@ namespace Wuya
 	{
 	}
 
+	ImGuiLayer::~ImGuiLayer()
+	{
+	}
+
 	void ImGuiLayer::OnAttached()
 	{
+		PROFILE_FUNCTION();
+
 		IMGUI_CHECKVERSION();
 
 		ImGui::CreateContext();
@@ -42,6 +48,8 @@ namespace Wuya
 
 	void ImGuiLayer::OnDetached()
 	{
+		PROFILE_FUNCTION();
+
 		ImGui_ImplOpenGL3_Shutdown();
 		ImGui_ImplGlfw_Shutdown();
 		ImGui::DestroyContext();
@@ -66,6 +74,8 @@ namespace Wuya
 
 	void ImGuiLayer::Begin()
 	{
+		PROFILE_FUNCTION();
+
 		ImGui_ImplOpenGL3_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
@@ -73,6 +83,8 @@ namespace Wuya
 
 	void ImGuiLayer::End()
 	{
+		PROFILE_FUNCTION();
+
 		ImGui::Render();
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 

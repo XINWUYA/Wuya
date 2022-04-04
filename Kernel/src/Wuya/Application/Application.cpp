@@ -7,18 +7,20 @@
 
 namespace Wuya 
 {
-	Application* Application::s_Instance = nullptr;
+	Application* Application::s_pInstance = nullptr;
 
 	Application::Application(const std::string& window_title)
 	{
-		CORE_ASSERT(!s_Instance, "Application already exist!");
-		s_Instance = this;
+		PROFILE_FUNCTION();
+
+		CORE_ASSERT(!s_pInstance, "Application already exist!");
+		s_pInstance = this;
 
 		m_pWindow = IWindow::Create(WindowConfig(window_title));
 		m_pWindow->SetEventCallback(BIND_EVENT_FUNC(Application::OnEvent));
 
-		m_pImguiLayer = CreateUniquePtr<ImGuiLayer>();
-		PushOverlay(m_pImguiLayer.get());
+		m_pImGuiLayer = CreateSharedPtr<ImGuiLayer>();
+		PushOverlay(m_pImGuiLayer);
 	}
 
 	Application::~Application()
@@ -27,11 +29,13 @@ namespace Wuya
 
 	Application* Application::Instance()
 	{
-		return s_Instance;
+		return s_pInstance;
 	}
 
 	void Application::Run()
 	{
+		PROFILE_FUNCTION();
+
 		while (m_IsRunning)
 		{
 			const float time = (float)glfwGetTime();
@@ -41,14 +45,22 @@ namespace Wuya
 			if (!m_IsMinimized)
 			{
 				// Update layers
-				for (auto* layer : m_LayerStack)
-					layer->OnUpdate(timestep);
+				{
+					PROFILE_SCOPE("Update Layers");
+
+					for (auto layer : m_LayerStack)
+						layer->OnUpdate(timestep);
+				}
 
 				// Update layers' gui 
-				m_pImguiLayer->Begin();
-				for (auto* layer : m_LayerStack)
-					layer->OnImGuiRender();
-				m_pImguiLayer->End();
+				m_pImGuiLayer->Begin();
+				{
+					PROFILE_SCOPE("Update ImGui Layers");
+
+					for (auto layer : m_LayerStack)
+						layer->OnImGuiRender();
+				}
+				m_pImGuiLayer->End();
 			}
 
 			// Update window
@@ -56,20 +68,26 @@ namespace Wuya
 		}
 	}
 
-	void Application::PushLayer(ILayer* layer)
+	void Application::PushLayer(SharedPtr<ILayer> layer)
 	{
+		PROFILE_FUNCTION();
+
 		m_LayerStack.PushLayer(layer);
 		layer->OnAttached();
 	}
 
-	void Application::PushOverlay(ILayer* layer)
+	void Application::PushOverlay(SharedPtr<ILayer> layer)
 	{
+		PROFILE_FUNCTION();
+
 		m_LayerStack.PushOverlay(layer);
 		layer->OnAttached();
 	}
 
 	void Application::OnEvent(IEvent* event)
 	{
+		PROFILE_FUNCTION();
+
 		//CORE_LOG_INFO("{0}", *event);
 
 		EventDispatcher dispatcher(event);
@@ -84,7 +102,6 @@ namespace Wuya
 			
 			(*it)->OnEvent(event);
 		}
-
 	}
 
 	bool Application::OnHandleWindowCloseEvent(IEvent* event)
@@ -95,6 +112,8 @@ namespace Wuya
 
 	bool Application::OnHandleWindowResizeEvent(IEvent* event)
 	{
+		PROFILE_FUNCTION();
+
 		const auto resize_event = dynamic_cast<WindowResizeEvent*>(event);
 		if (resize_event->GetWidth() == 0 || resize_event->GetHeight() == 0)
 		{

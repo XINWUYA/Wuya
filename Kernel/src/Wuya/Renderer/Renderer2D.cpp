@@ -62,6 +62,8 @@ namespace Wuya
 
 	void Renderer2D::Init()
 	{
+		PROFILE_FUNCTION();
+
 		// Vertex Array
 		m_RenderData2D.pVertexArray = VertexArray::Create();
 
@@ -117,19 +119,22 @@ namespace Wuya
 
 	void Renderer2D::Release()
 	{
-		if (m_RenderData2D.pQuadVertexBufferBase)
-			delete[] m_RenderData2D.pQuadVertexBufferBase;
+		PROFILE_FUNCTION();
+
+		delete[] m_RenderData2D.pQuadVertexBufferBase;
 	}
 
 	void Renderer2D::Flush()
 	{
+		PROFILE_FUNCTION();
+
 		if (m_RenderData2D.TotalIndexCount == 0)
 			return;
 
 		const auto data_size = (uint32_t)((uint8_t*)m_RenderData2D.pQuadVertexBufferCurrent - (uint8_t*)m_RenderData2D.pQuadVertexBufferBase);
 		m_RenderData2D.pVertexArray->GetVertexBuffers()[0]->SetData(m_RenderData2D.pQuadVertexBufferBase, data_size);
 
-		for (auto i = 0; i < m_RenderData2D.TextureSlotIndex; ++i)
+		for (uint32_t i = 0; i < m_RenderData2D.TextureSlotIndex; ++i)
 			m_RenderData2D.TextureSlots[i]->Bind(i);
 
 		m_RenderData2D.pShader->Bind();
@@ -138,12 +143,16 @@ namespace Wuya
 
 	void Renderer2D::BeginScene(SharedPtr<OrthographicCamera> camera)
 	{
+		PROFILE_FUNCTION();
+
 		m_RenderData2D.CameraData.ViewProjectionMatrix = camera->GetViewProjectionMatrix();
 		m_RenderData2D.pCameraUniformBuffer->SetData(&m_RenderData2D.CameraData, sizeof(CameraData));
 	}
 
 	void Renderer2D::EndScene()
 	{
+		PROFILE_FUNCTION();
+
 		Flush();
 		m_RenderData2D.pQuadVertexBufferCurrent = m_RenderData2D.pQuadVertexBufferBase;
 	}

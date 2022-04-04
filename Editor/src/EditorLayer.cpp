@@ -8,6 +8,8 @@ EditorLayer::EditorLayer()
 
 void EditorLayer::OnAttached()
 {
+	PROFILE_FUNCTION();
+
 	// Texture
 	m_pTexture2D = Wuya::Texture2D::Create("assets/textures/game-sky.jpg");
 
@@ -58,11 +60,15 @@ void EditorLayer::OnAttached()
 
 void EditorLayer::OnDetached()
 {
+	PROFILE_FUNCTION();
+
 	ILayer::OnDetached();
 }
 
 void EditorLayer::OnImGuiRender()
 {
+	PROFILE_FUNCTION();
+
 	ImGui::Begin("Stats");
 	ImVec2 viewport_panel_size = ImGui::GetContentRegionAvail();
 	auto viewport_size = { viewport_panel_size.x, viewport_panel_size.y };
@@ -75,11 +81,15 @@ void EditorLayer::OnImGuiRender()
 
 void EditorLayer::OnEvent(Wuya::IEvent* event)
 {
+	PROFILE_FUNCTION();
+
 	m_pEditorCamera->OnEvent(event);
 }
 
 void EditorLayer::OnUpdate(float delta_time)
 {
+	PROFILE_FUNCTION();
+
 	m_pEditorCamera->OnUpdate();
 
 	m_pFrameBuffer->Bind();

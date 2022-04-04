@@ -133,5 +133,5 @@ void TestLayer::OnImGuiRender()
 
 TestApp::TestApp() : Application("004_FrameBuffer")
 {
-	PushLayer(new TestLayer());
+	PushLayer(Wuya::CreateSharedPtr<TestLayer>());
 }

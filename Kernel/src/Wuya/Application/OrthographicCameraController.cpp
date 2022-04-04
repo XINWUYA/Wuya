@@ -15,6 +15,8 @@ namespace Wuya
 
 	void OrthographicCameraController::OnUpdate(float delta_time)
 	{
+		PROFILE_FUNCTION();
+
 		if (Input::IsKeyPressed(Key::W)) // иорф
 		{
 			m_CameraPosition.x += sin(glm::radians(m_CameraRotation)) * m_CameraTranslateSpeed * delta_time;
@@ -61,6 +63,8 @@ namespace Wuya
 
 	void OrthographicCameraController::OnEvent(IEvent* event)
 	{
+		PROFILE_FUNCTION();
+
 		EventDispatcher dispatcher(event);
 		dispatcher.Dispatch<MouseScrolledEvent>(BIND_EVENT_FUNC(OrthographicCameraController::OnMouseScrolled));
 		dispatcher.Dispatch<WindowResizeEvent>(BIND_EVENT_FUNC(OrthographicCameraController::OnWindowResized));
@@ -68,12 +72,16 @@ namespace Wuya
 
 	void OrthographicCameraController::OnResize(float width, float height)
 	{
+		PROFILE_FUNCTION();
+
 		m_AspectRatio = width / height;
 		m_pCamera->SetProjection(-m_AspectRatio * m_ZoomLevel, m_AspectRatio * m_ZoomLevel, -m_ZoomLevel, m_ZoomLevel);
 	}
 
 	bool OrthographicCameraController::OnMouseScrolled(MouseScrolledEvent* event)
 	{
+		PROFILE_FUNCTION();
+
 		m_ZoomLevel -= event->GetYOffset() * 0.25f;
 		m_ZoomLevel = std::max(m_ZoomLevel, 0.25f);
 		m_pCamera->SetProjection(-m_AspectRatio * m_ZoomLevel, m_AspectRatio * m_ZoomLevel, -m_ZoomLevel, m_ZoomLevel);
@@ -82,6 +90,8 @@ namespace Wuya
 
 	bool OrthographicCameraController::OnWindowResized(WindowResizeEvent* event)
 	{
+		PROFILE_FUNCTION();
+
 		OnResize(static_cast<float>(event->GetWidth()), static_cast<float>(event->GetHeight()));
 		return false;
 	}
