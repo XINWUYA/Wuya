@@ -23,6 +23,7 @@ project "Editor"
 		"%{IncludeDirs.Glad}",
 		"%{IncludeDirs.ImGui}",
 		"%{IncludeDirs.glm}",
+		"%{IncludeDirs.entt}",
 	}
 
 	links

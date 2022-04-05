@@ -16,3 +16,6 @@
 [submodule "Kernel/third_party/stb"]
 	path = Kernel/third_party/stb
 	url = https://github.com/nothings/stb
+[submodule "Kernel/third_party/entt"]
+	path = Kernel/third_party/entt
+	url = https://github.com/skypjack/entt

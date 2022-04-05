@@ -23,6 +23,7 @@ project "001_Triangle"
 		"%{IncludeDirs.Glad}",
 		"%{IncludeDirs.ImGui}",
 		"%{IncludeDirs.glm}",
+		"%{IncludeDirs.entt}",
 	}
 
 	links

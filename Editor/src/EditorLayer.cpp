@@ -1,5 +1,7 @@
 #include "EditorLayer.h"
 #include <imgui.h>
+#include "Wuya/Events/KeyEvent.h"
+#include "Wuya/Events/MouseEvent.h"
 
 EditorLayer::EditorLayer()
 	: ILayer("EditorLayer")
@@ -57,6 +59,9 @@ void EditorLayer::OnAttached()
 	desc.Height = 720;
 	desc.Attachments = { Wuya::FrameBufferTargetFormat::RGBA8, Wuya::FrameBufferTargetFormat::RedInteger, Wuya::FrameBufferTargetFormat::Depth24Stencil8 };
 	m_pFrameBuffer = Wuya::FrameBuffer::Create(desc);
+
+	m_pMainScene = Wuya::CreateSharedPtr<Wuya::Scene>();
+	m_SceneHierarchy.SetOwnerScene(m_pMainScene);
 }
 
 void EditorLayer::OnDetached()
@@ -127,14 +132,14 @@ void EditorLayer::OnImGuiRender()
 	// 菜单栏
 	if (ImGui::BeginMenuBar())
 	{
-		if (ImGui::BeginMenu("File"))
+		if (ImGui::BeginMenu(u8"文件"))
 		{
-			if (ImGui::MenuItem("New", "Ctrl+N"))
+			if (ImGui::MenuItem(u8"新建场景", "Ctrl+N"))
 			{
-
+				NewScene();
 			}
 
-			if (ImGui::MenuItem("Exit"))
+			if (ImGui::MenuItem(u8"退出"))
 				Wuya::Application::Instance()->Close();
 
 			ImGui::EndMenu();
@@ -168,7 +173,7 @@ void EditorLayer::OnImGuiRender()
 	// 主窗口
 	{
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
-		ImGui::Begin("Viewport");
+		ImGui::Begin(u8"主视口");
 
 		// 若当前ImGui窗口不是主窗口，应阻塞事件传递
 		m_IsViewportFocused = ImGui::IsWindowFocused();
@@ -199,10 +204,10 @@ void EditorLayer::OnImGuiRender()
 
 	// 统计信息
 	{
-		ImGui::Begin("Stats");
+		ImGui::Begin(u8"绘制信息");
 		// todo: 帧率等
 		// Renderer2D Stats
-		if (ImGui::CollapsingHeader("Renderer2D Stats"))
+		if (ImGui::CollapsingHeader(u8"2D"))
 		{
 			auto statistics = Wuya::Renderer2D::GetStatisticsInfo();
 			ImGui::BulletText("Draw Calls: %d", statistics.DrawCalls);
@@ -211,13 +216,16 @@ void EditorLayer::OnImGuiRender()
 			ImGui::BulletText("Indices: %d", statistics.TotalIndexCount());
 		}
 		// Renderer3D Stats
-		if (ImGui::CollapsingHeader("Renderer3D Stats"))
+		if (ImGui::CollapsingHeader(u8"3D"))
 		{
 			// todo: 三角形、模型数量
 		}
 
 		ImGui::End();
 	}
+
+	// 场景管理及属性窗口
+	m_SceneHierarchy.OnImGuiRender();
 
 	bool open = true;
 	ImGui::ShowDemoWindow(&open);
@@ -229,6 +237,20 @@ void EditorLayer::OnEvent(Wuya::IEvent* event)
 
 	m_pOrthographicCameraController->OnEvent(event);
 	m_pEditorCamera->OnEvent(event);
+
+	Wuya::EventDispatcher dispatcher(event);
+	dispatcher.Dispatch<Wuya::KeyPressedEvent>(BIND_EVENT_FUNC(EditorLayer::OnKeyPressed));
+	dispatcher.Dispatch<Wuya::MouseButtonPressedEvent>(BIND_EVENT_FUNC(EditorLayer::OnMouseButtonPressed));
+}
+
+void EditorLayer::NewScene()
+{
+	m_pMainScene = Wuya::CreateSharedPtr<Wuya::Scene>();
+	m_SceneHierarchy.SetOwnerScene(m_pMainScene);
+}
+
+void EditorLayer::OpenScene()
+{
 }
 
 void EditorLayer::UpdateViewport()
@@ -241,6 +263,34 @@ void EditorLayer::UpdateViewport()
 		m_pEditorCamera->SetViewportSize(m_ViewportSize.x, m_ViewportSize.y);
 		m_pOrthographicCameraController->OnResize(m_ViewportSize.x, m_ViewportSize.y);
 	}
+}
+
+bool EditorLayer::OnKeyPressed(Wuya::KeyPressedEvent* event)
+{
+	if (event->GetRepeatCount() > 0)
+		return false;
+
+	bool is_ctrl_pressed = Wuya::Input::IsKeyPressed(Wuya::Key::LeftControl) || Wuya::Input::IsKeyPressed(Wuya::Key::RightControl);
+
+	switch (event->GetKeyCode())
+	{
+	case Wuya::Key::N: // Ctrl+N：新建一个场景
+	{
+		if (is_ctrl_pressed)
+			NewScene();
+		break;
+	}
+	}
+}
+
+bool EditorLayer::OnMouseButtonPressed(Wuya::MouseButtonPressedEvent* event)
+{
+	if (event->GetMouseButton() == Wuya::Mouse::ButtonLeft)
+	{
+		if (m_IsViewportHovered)
+			m_SceneHierarchy.SetSelectedEntity(m_HoveredEntity);
+	}
+	return false;
 }
 
 void EditorLayer::OnUpdate(float delta_time)

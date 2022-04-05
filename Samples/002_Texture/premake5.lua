@@ -23,6 +23,7 @@ project "002_Texture"
 		"%{IncludeDirs.Glad}",
 		"%{IncludeDirs.ImGui}",
 		"%{IncludeDirs.glm}",
+		"%{IncludeDirs.entt}",
 	}
 
 	links

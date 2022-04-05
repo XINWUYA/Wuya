@@ -26,6 +26,7 @@ project "Kernel"
 		"%{IncludeDirs.ImGui}",
 		"%{IncludeDirs.glm}",
 		"%{IncludeDirs.stb}",
+		"%{IncludeDirs.entt}",
 	}
 	
 	defines

@@ -23,6 +23,7 @@ project "004_FrameBuffer"
 		"%{IncludeDirs.Glad}",
 		"%{IncludeDirs.ImGui}",
 		"%{IncludeDirs.glm}",
+		"%{IncludeDirs.entt}",
 	}
 
 	links

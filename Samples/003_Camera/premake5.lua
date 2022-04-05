@@ -23,6 +23,7 @@ project "003_Camera"
 		"%{IncludeDirs.Glad}",
 		"%{IncludeDirs.ImGui}",
 		"%{IncludeDirs.glm}",
+		"%{IncludeDirs.entt}",
 	}
 
 	links

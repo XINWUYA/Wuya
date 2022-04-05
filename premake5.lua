@@ -7,6 +7,7 @@ IncludeDirs["Glad"] = "%{wks.location}/Kernel/third_party/glad/include"
 IncludeDirs["ImGui"] = "%{wks.location}/Kernel/third_party/imgui"
 IncludeDirs["glm"] = "%{wks.location}/Kernel/third_party/glm"
 IncludeDirs["stb"] = "%{wks.location}/Kernel/third_party/stb"
+IncludeDirs["entt"] = "%{wks.location}/Kernel/third_party/entt/single_include"
 
 -- Solution configuration
 workspace "Wuya"
