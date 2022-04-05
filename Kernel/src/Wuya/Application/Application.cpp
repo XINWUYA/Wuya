@@ -38,6 +38,8 @@ namespace Wuya
 
 		while (m_IsRunning)
 		{
+			PROFILE_SCOPE("Running Loops");
+
 			const float time = (float)glfwGetTime();
 			const float timestep = time - m_LastFrameTime;
 			m_LastFrameTime = time;

@@ -7,7 +7,7 @@ namespace Wuya
 {
 	UniquePtr<IRenderContext> IRenderContext::Create(void* window)
 	{
-		switch (Renderer::GetAPI())
+		switch (Renderer::CurrentAPI())
 		{
 		case RenderAPI::None:
 			CORE_LOG_ERROR("RenderAPI can't be None!");

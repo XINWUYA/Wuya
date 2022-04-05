@@ -8,7 +8,7 @@ namespace Wuya
 {
 	SharedPtr<VertexArray> VertexArray::Create()
 	{
-		switch (Renderer::GetAPI())
+		switch (Renderer::CurrentAPI())
 		{
 		case RenderAPI::None:
 			CORE_LOG_ERROR("RenderAPI can't be None!");

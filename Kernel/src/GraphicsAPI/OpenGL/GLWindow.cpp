@@ -6,6 +6,8 @@
 #include <Wuya/Renderer/RenderContext.h>
 #include <GLFW/glfw3.h>
 
+#include "Wuya/Renderer/Renderer.h"
+
 namespace Wuya
 {
 	static uint8_t s_GLFWWindowCnt = 0;
@@ -58,6 +60,8 @@ namespace Wuya
 
 		if (s_GLFWWindowCnt == 0)
 		{
+			PROFILE_SCOPE("glfwInit");
+
 			// 初始化GLFW
 			int success = glfwInit();
 
@@ -70,13 +74,17 @@ namespace Wuya
 		}
 
 #ifdef WUYA_DEBUG
-		// todo: 仅当API为OpenGL时，才启用
-		glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);
+		if (Renderer::CurrentAPI() == RenderAPI::OpenGL)
+			glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);
 #endif
 
 		// 创建GLFW窗口
-		m_pGLFWWindow = glfwCreateWindow(config.Width, config.Height, config.Title.c_str(), nullptr, nullptr);
-		++s_GLFWWindowCnt;
+		{
+			PROFILE_SCOPE("glfwCreateWindow");
+
+			m_pGLFWWindow = glfwCreateWindow(config.Width, config.Height, config.Title.c_str(), nullptr, nullptr);
+			++s_GLFWWindowCnt;
+		}
 
 		m_pRenderContext = IRenderContext::Create(m_pGLFWWindow);
 		m_pRenderContext->Init();

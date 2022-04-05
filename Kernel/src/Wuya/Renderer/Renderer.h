@@ -16,7 +16,7 @@ namespace Wuya
 
 		static void Submit(const SharedPtr<Shader>& shader, const SharedPtr<VertexArray>& vertex_array, uint32_t index_count = 0);
 
-		static int GetAPI() { return RenderAPI::GetAPI(); }
+		static int CurrentAPI() { return RenderAPI::GetAPI(); }
 
 	private:
 		static UniquePtr<RenderAPI> m_pRenderAPI;

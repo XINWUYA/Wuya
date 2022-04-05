@@ -7,7 +7,7 @@ namespace Wuya
 {
 	SharedPtr<FrameBuffer> FrameBuffer::Create(const FrameBufferDescription& desc)
 	{
-		switch (Renderer::GetAPI())
+		switch (Renderer::CurrentAPI())
 		{
 		case RenderAPI::None:
 			CORE_LOG_ERROR("RenderAPI can't be None!");

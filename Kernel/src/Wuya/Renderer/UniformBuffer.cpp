@@ -7,7 +7,7 @@ namespace Wuya
 {
 	SharedPtr<UniformBuffer> UniformBuffer::Create(uint32_t size, uint32_t binding_point)
 	{
-		switch (Renderer::GetAPI())
+		switch (Renderer::CurrentAPI())
 		{
 		case RenderAPI::None:
 			CORE_LOG_ERROR("RenderAPI can't be None!");

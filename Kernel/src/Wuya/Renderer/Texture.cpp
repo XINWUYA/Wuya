@@ -8,7 +8,7 @@ namespace Wuya
 {
 	SharedPtr<Texture2D> Texture2D::Create(uint32_t width, uint32_t height)
 	{
-		switch (Renderer::GetAPI())
+		switch (Renderer::CurrentAPI())
 		{
 		case RenderAPI::None:
 			CORE_LOG_ERROR("RenderAPI can't be None!");
@@ -23,7 +23,7 @@ namespace Wuya
 
 	SharedPtr<Texture2D> Texture2D::Create(const std::string& path)
 	{
-		switch (Renderer::GetAPI())
+		switch (Renderer::CurrentAPI())
 		{
 		case RenderAPI::None:
 			CORE_LOG_ERROR("RenderAPI can't be None!");

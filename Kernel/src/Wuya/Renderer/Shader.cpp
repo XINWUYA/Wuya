@@ -7,7 +7,7 @@ namespace Wuya
 {
 	SharedPtr<Shader> Shader::Create(const std::string& filepath)
 	{
-		switch(Renderer::GetAPI())
+		switch(Renderer::CurrentAPI())
 		{
 		case RenderAPI::None:
 			CORE_LOG_ERROR("RenderAPI can't be None!");
@@ -22,7 +22,7 @@ namespace Wuya
 
 	SharedPtr<Shader> Shader::Create(const std::string& name, const std::string& vertex_src, const std::string& pixel_src)
 	{
-		switch (Renderer::GetAPI())
+		switch (Renderer::CurrentAPI())
 		{
 		case RenderAPI::None:
 			CORE_LOG_ERROR("RenderAPI can't be None!");

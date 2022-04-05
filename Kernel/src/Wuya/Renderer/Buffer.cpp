@@ -72,7 +72,7 @@ namespace Wuya
 
 	SharedPtr<VertexBuffer> VertexBuffer::Create(uint32_t size)
 	{
-		switch (Renderer::GetAPI())
+		switch (Renderer::CurrentAPI())
 		{
 		case RenderAPI::None:
 			CORE_LOG_ERROR("RenderAPI can't be None!");
@@ -87,7 +87,7 @@ namespace Wuya
 
 	SharedPtr<VertexBuffer> VertexBuffer::Create(const float* vertices, uint32_t size)
 	{
-		switch (Renderer::GetAPI())
+		switch (Renderer::CurrentAPI())
 		{
 		case RenderAPI::None:
 			CORE_LOG_ERROR("RenderAPI can't be None!");
@@ -102,7 +102,7 @@ namespace Wuya
 
 	SharedPtr<IndexBuffer> IndexBuffer::Create(const uint32_t* indices, uint32_t count)
 	{
-		switch (Renderer::GetAPI())
+		switch (Renderer::CurrentAPI())
 		{
 		case RenderAPI::None:
 			CORE_LOG_ERROR("RenderAPI can't be None!");
