@@ -16,9 +16,12 @@ namespace Wuya
 		IWindow& GetWindow() { return *m_pWindow; }
 
 		virtual void Run();
+		void Close();
 
 		void PushLayer(SharedPtr<ILayer> layer);
 		void PushOverlay(SharedPtr<ILayer> layer);
+
+		SharedPtr<ImGuiLayer> GetImGuiLayer() const { return m_pImGuiLayer; }
 
 		virtual void OnEvent(IEvent* event);
 		virtual bool OnHandleWindowCloseEvent(IEvent* event);

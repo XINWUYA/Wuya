@@ -70,6 +70,11 @@ namespace Wuya
 		}
 	}
 
+	void Application::Close()
+	{
+		m_IsRunning = false;
+	}
+
 	void Application::PushLayer(SharedPtr<ILayer> layer)
 	{
 		PROFILE_FUNCTION();
@@ -108,7 +113,7 @@ namespace Wuya
 
 	bool Application::OnHandleWindowCloseEvent(IEvent* event)
 	{
-		m_IsRunning = false;
+		Close();
 		return true;
 	}
 

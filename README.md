@@ -4,4 +4,4 @@
 
 ## 生成工程
 
-执行`GenProj.bat`。
+执行`Win-GenProj.bat`。

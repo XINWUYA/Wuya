@@ -34,6 +34,7 @@ void EditorLayer::OnImGuiRender()
 	ImGui::Begin("Stats");
 	ImVec2 viewport_panel_size = ImGui::GetContentRegionAvail();
 	auto viewport_size = { viewport_panel_size.x, viewport_panel_size.y };
+	ImGui::Image((void*)m_pTexture2D->GetTextureID(), ImVec2{ 64.0f, 64.0f });
 
 	ImGui::End();
 }

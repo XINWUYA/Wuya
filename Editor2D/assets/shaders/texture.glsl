@@ -61,7 +61,7 @@ layout (binding = 0) uniform sampler2D u_Texture[32];
 void main()
 {
 	vec2 uv = Input.TexCoord * Input.TilingFactor;
-	vec4 texture_color = texture(u_Texture[int(Input.TextureIndex)], uv);
+	vec4 texture_color = texture(u_Texture[int(Input.TextureIndex)], uv * Input.TilingFactor);
 	gl_FragColor = vec4(texture_color.rgb, 1.0f) * Input.Color;
 	//gl_FragColor2 = EntityId;
 }

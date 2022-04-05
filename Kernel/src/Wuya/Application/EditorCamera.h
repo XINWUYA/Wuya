@@ -32,6 +32,7 @@ namespace Wuya
 
 		float GetPitch() const { return m_Pitch; }
 		float GetYaw() const { return m_Yaw; }
+		float GetAspectRatio() const { return m_AspectRatio; }
 
 		const glm::vec3& GetUpDir() const { return m_UpDirection; }
 		const glm::vec3& GetRightDir() const { return m_RightDirection; }
