@@ -16,7 +16,7 @@ void EditorSceneHierarchy::SetOwnerScene(const Wuya::SharedPtr<Wuya::Scene>& sce
 void EditorSceneHierarchy::OnImGuiRender()
 {
 	// 场景实体列表
-	ImGui::Begin(u8"场景管理");
+	ImGui::Begin("Scene Hierarchy");
 	{
 		m_pOwnerScene->GetRegistry().each(
 			[&](auto entity_id)
@@ -32,7 +32,7 @@ void EditorSceneHierarchy::OnImGuiRender()
 		// 空白处右键，唤出新建
 		if (ImGui::BeginPopupContextWindow(0, 1, false))
 		{
-			if (ImGui::MenuItem(u8"创建新实体"))
+			if (ImGui::MenuItem("New Entity"))
 			{
 				const auto entity = m_pOwnerScene->CreateEntity("New Entity");
 				m_SelectedEntity = entity;
@@ -43,7 +43,7 @@ void EditorSceneHierarchy::OnImGuiRender()
 	ImGui::End();
 
 	// 实体属性
-	ImGui::Begin(u8"属性");
+	ImGui::Begin("Properties");
 	{
 		if (m_SelectedEntity)
 			ShowEntityComponents(m_SelectedEntity);
@@ -73,7 +73,7 @@ void EditorSceneHierarchy::ShowEntityNode( Wuya::Entity& entity)
 	bool entity_deleted = false;
 	if (ImGui::BeginPopupContextItem())
 	{
-		if (ImGui::MenuItem(u8"删除"))
+		if (ImGui::MenuItem("Delete"))
 			entity_deleted = true;
 
 		ImGui::EndPopup();
@@ -205,7 +205,7 @@ static void DrawVec3Control(const std::string& label, glm::vec3& values, float r
 
 void EditorSceneHierarchy::ShowEntityComponents(Wuya::Entity& entity)
 {
-	if (ImGui::CollapsingHeader(u8"基本信息"))
+	if (ImGui::CollapsingHeader("Base"))
 	{
 		// 标签
 		if (entity.HasComponent<Wuya::TagComponent>())
@@ -215,7 +215,7 @@ void EditorSceneHierarchy::ShowEntityComponents(Wuya::Entity& entity)
 			char buffer[256];
 			memset(buffer, 0, sizeof(buffer));
 			std::strncpy(buffer, tag.c_str(), sizeof(buffer));
-			ImGui::Text(u8"标签:");
+			ImGui::Text("Tag:");
 			ImGui::SameLine();
 			if (ImGui::InputText("##Tag", buffer, sizeof(buffer)))
 			{
@@ -226,14 +226,14 @@ void EditorSceneHierarchy::ShowEntityComponents(Wuya::Entity& entity)
 		// 空间变换
 		if (entity.HasComponent<Wuya::TransformComponent>())
 		{
-			DrawComponent<Wuya::TransformComponent>(u8"变换", entity, 
+			DrawComponent<Wuya::TransformComponent>("Translation", entity, 
 				[](auto& component)
 				{
-					DrawVec3Control(u8"位置", component.Translation, 0.0f, 50.0f);
+					DrawVec3Control("Position", component.Translation, 0.0f, 50.0f);
 					glm::vec3 rotation = glm::degrees(component.Rotation);
-					DrawVec3Control(u8"旋转", rotation, 0.0f, 50.0f);
+					DrawVec3Control("Rotation", rotation, 0.0f, 50.0f);
 					component.Rotation = glm::radians(rotation);
-					DrawVec3Control(u8"缩放", component.Scale, 1.0f, 50.0f);
+					DrawVec3Control("Scale", component.Scale, 1.0f, 50.0f);
 
 				});
 		}

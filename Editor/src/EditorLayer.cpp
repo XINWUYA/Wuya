@@ -132,14 +132,14 @@ void EditorLayer::OnImGuiRender()
 	// 菜单栏
 	if (ImGui::BeginMenuBar())
 	{
-		if (ImGui::BeginMenu(u8"文件"))
+		if (ImGui::BeginMenu("File"))
 		{
-			if (ImGui::MenuItem(u8"新建场景", "Ctrl+N"))
+			if (ImGui::MenuItem("New Scene", "Ctrl+N"))
 			{
 				NewScene();
 			}
 
-			if (ImGui::MenuItem(u8"退出"))
+			if (ImGui::MenuItem("Exit"))
 				Wuya::Application::Instance()->Close();
 
 			ImGui::EndMenu();
@@ -173,7 +173,7 @@ void EditorLayer::OnImGuiRender()
 	// 主窗口
 	{
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
-		ImGui::Begin(u8"主视口");
+		ImGui::Begin("Scene");
 
 		// 若当前ImGui窗口不是主窗口，应阻塞事件传递
 		m_IsViewportFocused = ImGui::IsWindowFocused();
@@ -204,10 +204,10 @@ void EditorLayer::OnImGuiRender()
 
 	// 统计信息
 	{
-		ImGui::Begin(u8"绘制信息");
+		ImGui::Begin("Stat Info");
 		// todo: 帧率等
 		// Renderer2D Stats
-		if (ImGui::CollapsingHeader(u8"2D"))
+		if (ImGui::CollapsingHeader("2D"))
 		{
 			auto statistics = Wuya::Renderer2D::GetStatisticsInfo();
 			ImGui::BulletText("Draw Calls: %d", statistics.DrawCalls);
@@ -216,7 +216,7 @@ void EditorLayer::OnImGuiRender()
 			ImGui::BulletText("Indices: %d", statistics.TotalIndexCount());
 		}
 		// Renderer3D Stats
-		if (ImGui::CollapsingHeader(u8"3D"))
+		if (ImGui::CollapsingHeader("3D"))
 		{
 			// todo: 三角形、模型数量
 		}
@@ -226,6 +226,7 @@ void EditorLayer::OnImGuiRender()
 
 	// 场景管理及属性窗口
 	m_SceneHierarchy.OnImGuiRender();
+	m_ResourceBrowser.OnImGuiRenderer();
 
 	bool open = true;
 	ImGui::ShowDemoWindow(&open);
@@ -251,6 +252,7 @@ void EditorLayer::NewScene()
 
 void EditorLayer::OpenScene()
 {
+	//todo: 打开一个序列化的场景
 }
 
 void EditorLayer::UpdateViewport()
@@ -324,4 +326,6 @@ void EditorLayer::OnUpdate(float delta_time)
 	Wuya::Renderer::Submit(shader, m_pVertexArray);
 
 	m_pFrameBuffer->Unbind();
+
+	// todo: 鼠标点击选中物体
 }

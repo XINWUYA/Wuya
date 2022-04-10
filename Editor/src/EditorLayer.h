@@ -2,6 +2,7 @@
 #include <Wuya/Core/Layer.h>
 #include <Wuya.h>
 #include "EditorSceneHierarchy.h"
+#include "EditorResourceBrowser.h"
 
 namespace Wuya
 {
@@ -38,6 +39,7 @@ private:
 
 	Wuya::SharedPtr<Wuya::Scene> m_pMainScene;
 	EditorSceneHierarchy m_SceneHierarchy;
+	EditorResourceBrowser m_ResourceBrowser;
 	Wuya::Entity m_HoveredEntity;
 	glm::uvec2 m_ViewportSize{};
 	bool m_IsViewportFocused{ false };

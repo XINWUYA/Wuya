@@ -17,7 +17,7 @@ public:
 	void SetOwnerScene(const Wuya::SharedPtr<Wuya::Scene>& scene);
 	void OnImGuiRender();
 
-	Wuya::Entity GetSelectedEntity() const { return m_SelectedEntity; }
+	const Wuya::Entity& GetSelectedEntity() const { return m_SelectedEntity; }
 	void SetSelectedEntity(const Wuya::Entity& entity);
 
 private:
