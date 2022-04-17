@@ -1,4 +1,5 @@
 #include "EditorResourceBrowser.h"
+#include "EditorUtils.h"
 #include <imgui.h>
 #include <imgui_internal.h>
 
@@ -231,9 +232,7 @@ void EditorResourceBrowser::BuildFileUIListTreeDetail(const Wuya::SharedPtr<File
 			/* 展开文件夹节点 */
 			if (open)
 			{
-				for (const auto& cchild_node : child_node->ChildNodes)
-					BuildFileUIListTreeDetail(cchild_node);
-
+				BuildFileUIListTreeDetail(child_node);
 				ImGui::TreePop();
 			}
 		}
@@ -270,7 +269,7 @@ void EditorResourceBrowser::BuildFileUIListTreeDetail(const Wuya::SharedPtr<File
 			/* 文件大小 */
 			ImGui::TableNextColumn();
 			ImGui::SetNextItemWidth(300);
-			ImGui::TextUnformatted((std::to_string(child_node->FileSize) + +" KB").c_str());
+			ImGui::TextUnformatted((ConvertFloat2String(child_node->FileSize, 2) + "KB").c_str());
 		}
 	}
 }
