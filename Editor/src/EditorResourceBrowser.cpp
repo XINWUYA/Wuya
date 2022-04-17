@@ -1,26 +1,41 @@
 #include "EditorResourceBrowser.h"
 #include <imgui.h>
-
-#include "imgui_internal.h"
+#include <imgui_internal.h>
 
 extern const std::filesystem::path g_AssetPath = "assets";
 EditorResourceBrowser::EditorResourceBrowser()
-	: m_CurrentDirectory(g_AssetPath)
 {
-	m_pDirectoryIcon = Wuya::Texture2D::Create("editor_res/icons/directory_icon.png");
+	m_pFolderIcon = Wuya::Texture2D::Create("editor_res/icons/directory_icon.png");
 	m_pFileIcon = Wuya::Texture2D::Create("editor_res/icons/file_icon.png");
 	m_pFilterIcon = Wuya::Texture2D::Create("editor_res/icons/filter_icon.png");
 }
 
 void EditorResourceBrowser::OnImGuiRenderer()
 {
+	/* 重新生成文件目录节点树 */
+	if (m_IsDirty)
+	{
+		m_RootFileNodeTree = Wuya::CreateSharedPtr<FileNode>(g_AssetPath.string(), "", "Folder", 0, -1);
+		BuildFileNodeTree(m_RootFileNodeTree);
+	}
+
+	/* 文件目录列表窗口 */
+	ImGui::Begin("File List");
+	{
+		/* 根据文件节点树生成UI */
+		BuildFileUIListTreeSimple(m_RootFileNodeTree);
+	}
+	ImGui::End();
+
+	/* 详细资源列表窗口 */
 	ImGui::Begin("Resource Browser");
 	{
-		// Back
+		if (!m_CurrentFileNode)
+			m_CurrentFileNode = m_RootFileNodeTree; /* 默认为根节点 */
+
+		/* 上一级目录图标 */
 		{
-			bool disable_return_btn = true;
-			if (m_CurrentDirectory != std::filesystem::path(g_AssetPath))
-				disable_return_btn = false;
+			const bool disable_return_btn = (*m_CurrentFileNode) == (*m_RootFileNodeTree);
 
 			if (disable_return_btn)
 			{
@@ -28,7 +43,8 @@ void EditorResourceBrowser::OnImGuiRenderer()
 				ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
 			}
 			if (ImGui::Button(" << "))
-				m_CurrentDirectory = m_CurrentDirectory.parent_path();
+				m_CurrentFileNode = m_CurrentFileNode->ParentNode;
+
 			if (disable_return_btn)
 			{
 				ImGui::PopItemFlag();
@@ -36,18 +52,20 @@ void EditorResourceBrowser::OnImGuiRenderer()
 			}
 		}
 
-		static float padding = 16.0f;
+		/* 图标大小和间隔 */
 		static float thumbnail_size = 64.0f;
+		static float padding = 16.0f;
 
-		// Slider Controller
+		/* 图标大小和间隔调节控件 */
 		{
 			ImGui::PushItemWidth(100);
 
-			ImGui::SameLine(80);
+			ImGui::SameLine(80, 20);
 			ImGui::Text("Size: ");
 			ImGui::SameLine();
 			ImGui::SliderFloat("##", &thumbnail_size, 16, 128);
-			ImGui::SameLine(240);
+
+			ImGui::SameLine(240, 20);
 			ImGui::Text("Padding: ");
 			ImGui::SameLine();
 			ImGui::SliderFloat("##", &padding, 0, 32);
@@ -55,9 +73,10 @@ void EditorResourceBrowser::OnImGuiRenderer()
 			ImGui::PopItemWidth();
 		}
 
+		/* 窗口区域宽度 */
 		const float panel_width = ImGui::GetContentRegionAvail().x;
 
-		// Filter
+		/* 筛选控件 */
 		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
 		static ImGuiTextFilter filter;
 		ImGui::SameLine(panel_width - 160);
@@ -69,51 +88,227 @@ void EditorResourceBrowser::OnImGuiRenderer()
 
 		ImGui::Separator();
 
-		// Files
-		const float cell_size = thumbnail_size + padding;
-		int column_count = static_cast<int>(panel_width / cell_size);
-		if (column_count < 1)
-			column_count = 1;
-
-		ImGui::Columns(column_count, 0, false);
-		for (auto& directory_entry : std::filesystem::directory_iterator(m_CurrentDirectory))
+		/* 文件UI, 足够大时才显示图片，否则以清单形式显示 */
+		if (thumbnail_size > 32)
 		{
-			const auto& path = directory_entry.path();
-			auto relative_path = std::filesystem::relative(path, g_AssetPath);
-			std::string filename = relative_path.filename().string();
+			const float cell_size = thumbnail_size + padding;
+			int column_count = static_cast<int>(panel_width / cell_size);
+			if (column_count < 1)
+				column_count = 1;
 
-			if (filter.PassFilter(filename.c_str()))
+			ImGui::Columns(column_count, 0, false);
+
+			for (const auto& child_node : m_CurrentFileNode->ChildNodes)
 			{
-				ImGui::PushID(filename.c_str());
-				ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
+				auto filepath = std::filesystem::path(child_node->FilePath);
 
-				// 显示图标
-				const Wuya::SharedPtr<Wuya::Texture2D> icon_texture = directory_entry.is_directory() ? m_pDirectoryIcon : m_pFileIcon;
-				ImGui::ImageButton((ImTextureID)icon_texture->GetTextureID(), ImVec2(thumbnail_size, thumbnail_size), ImVec2(0, 1), ImVec2(1, 0));
-
-				// 拖动
-				if (ImGui::BeginDragDropSource())
+				/* 通过筛选的才需要显示 */
+				if (filter.PassFilter(child_node->FilePath.c_str()))
 				{
-					const wchar_t* item_path = relative_path.c_str();
-					ImGui::SetDragDropPayload("RESOURCE_BROWSER_ITEM", item_path, (wcslen(item_path) + 1) * sizeof(wchar_t));
-					ImGui::EndDragDropSource();
+					ImGui::PushID(child_node->FileName.c_str());
+					{
+						ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
+						{
+							/* 图标 */
+							const Wuya::SharedPtr<Wuya::Texture2D> icon_texture = child_node->FileType == "Folder" ? m_pFolderIcon : m_pFileIcon;
+							ImGui::ImageButton((ImTextureID)icon_texture->GetTextureID(), ImVec2(thumbnail_size, thumbnail_size), ImVec2(0, 1), ImVec2(1, 0));
+
+							/* 拖动 */
+							if (ImGui::BeginDragDropSource())
+							{
+								const wchar_t* item_path = filepath.c_str();
+								ImGui::SetDragDropPayload("RESOURCE_BROWSER_ITEM", item_path, (wcslen(item_path) + 1) * sizeof(wchar_t)); /* todo: */
+								ImGui::EndDragDropSource();
+							}
+						}
+						ImGui::PopStyleColor();
+
+						/* 双击打开 */
+						if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
+						{
+							if (child_node->FileType == "Folder")
+								m_CurrentFileNode = child_node;
+						}
+
+						/* 右键选项操作 */
+						if (ImGui::BeginPopupContextItem())
+						{
+							/* 在系统文件夹中显示 */
+							if (ImGui::MenuItem("Show in file explorer"))
+							{
+								/* todo: 打开所在系统文件夹 */
+								std::string path = g_AssetPath.string() + "\\" + child_node->FilePath;
+								EDITOR_LOG_DEBUG("File Abs Path: {}.", path);
+							}
+
+							ImGui::EndPopup();
+						}
+
+						/* 文件名 */
+						ImGui::TextWrapped(child_node->FileName.c_str());
+
+						/* 下一个文件 */
+						ImGui::NextColumn();
+					}
+					ImGui::PopID();
 				}
-
-				ImGui::PopStyleColor();
-
-				// 双击打开
-				if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
-				{
-					if (directory_entry.is_directory())
-						m_CurrentDirectory /= path.filename();
-				}
-				ImGui::TextWrapped(filename.c_str());
-
-				ImGui::NextColumn();
-				ImGui::PopID();
 			}
+			ImGui::Columns(1);
 		}
-		ImGui::Columns(1);
+		else /* 当图标过小时，转换为列表模式 */
+		{
+			ImGui::BeginTable("Assets List", 3);
+			{
+				ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_NoHide);
+				ImGui::TableSetupColumn("Type", ImGuiTableColumnFlags_WidthFixed);
+				ImGui::TableSetupColumn("Size", ImGuiTableColumnFlags_WidthFixed);
+				ImGui::TableHeadersRow();
+
+				/* 根据文件节点树生成UI */
+				BuildFileUIListTreeDetail(m_CurrentFileNode);
+			}
+			ImGui::EndTable();
+		}
 	}
 	ImGui::End();
+}
+
+void EditorResourceBrowser::BuildFileNodeTree(const Wuya::SharedPtr<FileNode>& parent_node)
+{
+	for (auto& directory_entry : std::filesystem::directory_iterator(g_AssetPath.string() + "\\" + parent_node->FilePath))
+	{
+		const auto& path = directory_entry.path();
+		auto relative_path = GetRelativePath(g_AssetPath, path);
+		auto filename = relative_path.filename();
+
+		/* 构造一个文件节点 */
+		auto file_node = Wuya::CreateSharedPtr<FileNode>();
+		file_node->ParentNode = parent_node;
+		file_node->FileName = filename.string();
+		file_node->FilePath = relative_path.string();
+		file_node->Depth = parent_node->Depth + 1;
+
+		if (directory_entry.is_directory()) /* 文件夹，递归子目录 */
+		{
+			file_node->FileType = "Folder";
+			parent_node->ChildNodes.emplace_back(file_node);
+			BuildFileNodeTree(file_node);
+		}
+		else
+		{
+			auto ext = filename.extension().string();
+			transform(ext.begin(), ext.end(), ext.begin(), ::toupper);
+			file_node->FileType = ext;
+			file_node->FileSize = static_cast<float>(std::filesystem::file_size(path)) / 1024.0f;
+			parent_node->ChildNodes.emplace_back(file_node);
+		}
+	}
+	m_IsDirty = false;
+}
+
+void EditorResourceBrowser::BuildFileUIListTreeDetail(const Wuya::SharedPtr<FileNode>& node)
+{
+	for (const auto& child_node : node->ChildNodes)
+	{
+		ImGui::TableNextRow();
+		ImGui::TableNextColumn();
+
+		if (child_node->FileType == "Folder") /* 文件夹 */
+		{
+			/* 文件节点 */
+			bool open = ImGui::TreeNodeEx(child_node->FileName.c_str(), ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanFullWidth);
+
+			/* 文件类型 */
+			ImGui::TableNextColumn();
+			ImGui::SetNextItemWidth(100);
+			ImGui::TextUnformatted(child_node->FileType.c_str());
+
+			/* 文件大小 */
+			ImGui::TableNextColumn();
+			ImGui::SetNextItemWidth(300);
+			ImGui::TextUnformatted("");
+
+			/* 展开文件夹节点 */
+			if (open)
+			{
+				for (const auto& cchild_node : child_node->ChildNodes)
+					BuildFileUIListTreeDetail(cchild_node);
+
+				ImGui::TreePop();
+			}
+		}
+		else
+		{
+			/* 文件节点 */
+			ImGui::TreeNodeEx(child_node->FileName.c_str(), ImGuiTreeNodeFlags_SpanFullWidth | ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen);
+
+			/* todo: 单击文件时的响应 */
+			if (ImGui::IsItemClicked() && ImGui::IsItemToggledOpen())
+			{
+				/**/
+			}
+
+			/* 右键选项操作 */
+			if (ImGui::BeginPopupContextItem())
+			{
+				/* 在系统文件夹中显示 */
+				if (ImGui::MenuItem("Show in file explorer"))
+				{
+					/* todo: 打开所在系统文件夹 */
+					std::string path = g_AssetPath.string() + "\\" + child_node->FilePath;
+					EDITOR_LOG_DEBUG("File Abs Path: {}.", path);
+				}
+
+				ImGui::EndPopup();
+			}
+
+			/* 文件类型 */
+			ImGui::TableNextColumn();
+			ImGui::SetNextItemWidth(160);
+			ImGui::TextUnformatted(child_node->FileType.c_str());
+
+			/* 文件大小 */
+			ImGui::TableNextColumn();
+			ImGui::SetNextItemWidth(300);
+			ImGui::TextUnformatted((std::to_string(child_node->FileSize) + +" KB").c_str());
+		}
+	}
+}
+
+void EditorResourceBrowser::BuildFileUIListTreeSimple(const Wuya::SharedPtr<FileNode>& node)
+{
+	if (node->FileType == "Folder") /* 文件夹 */
+	{
+		/* 文件节点 */
+		bool open = ImGui::TreeNodeEx(node->FileName.c_str(), ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanFullWidth);
+
+		/* 点击目录时，设置为当前文件目录 */
+		if (ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen())
+			m_CurrentFileNode = node;
+
+		/* 展开文件夹节点 */
+		if (open)
+		{
+			for (const auto& child_node : node->ChildNodes)
+				BuildFileUIListTreeSimple(child_node);
+
+			ImGui::TreePop();
+		}
+	}
+	else
+	{
+		/* 文件节点 */
+		ImGui::TreeNodeEx(node->FileName.c_str(), ImGuiTreeNodeFlags_SpanFullWidth | ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen);
+
+		/* todo: 单击文件时的响应 */
+		if (ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen())
+		{
+			/**/
+		}
+	}
+}
+
+std::filesystem::path EditorResourceBrowser::GetRelativePath(const std::filesystem::path& dir, const std::filesystem::path& path)
+{
+	return path.lexically_relative(dir);
 }

@@ -11,11 +11,11 @@ namespace Wuya
 		static void Init();
 
 		inline static SharedPtr<spdlog::logger>& GetCoreLogger() { return s_pCoreLogger; }
-		inline static SharedPtr<spdlog::logger>& GetClientLogger() { return s_pClientLogger; }
+		inline static SharedPtr<spdlog::logger>& GetEditorLogger() { return s_pEditorLogger; }
 
 	private:
 		static SharedPtr<spdlog::logger> s_pCoreLogger;
-		static SharedPtr<spdlog::logger> s_pClientLogger;
+		static SharedPtr<spdlog::logger> s_pEditorLogger;
 	};
 
 }
@@ -28,9 +28,9 @@ namespace Wuya
 #define CORE_LOG_DEBUG(...)			::Wuya::Logger::GetCoreLogger()->debug(__VA_ARGS__)
 #define CORE_LOG_CRITICAL(...)		::Wuya::Logger::GetCoreLogger()->critical(__VA_ARGS__)
 
-#define CLIENT_LOG(...)				::Wuya::Logger::GetClientLogger()->trace(__VA_ARGS__)
-#define CLIENT_LOG_INFO(...)		::Wuya::Logger::GetClientLogger()->info(__VA_ARGS__)
-#define CLIENT_LOG_WARN(...)		::Wuya::Logger::GetClientLogger()->warn(__VA_ARGS__)
-#define CLIENT_LOG_ERROR(...)		::Wuya::Logger::GetClientLogger()->error(__VA_ARGS__)
-#define CLIENT_LOG_DEBUG(...)		::Wuya::Logger::GetClientLogger()->debug(__VA_ARGS__)
-#define CLIENT_LOG_CRITICAL(...)	::Wuya::Logger::GetClientLogger()->critical(__VA_ARGS__)
+#define EDITOR_LOG(...)				::Wuya::Logger::GetEditorLogger()->trace(__VA_ARGS__)
+#define EDITOR_LOG_INFO(...)		::Wuya::Logger::GetEditorLogger()->info(__VA_ARGS__)
+#define EDITOR_LOG_WARN(...)		::Wuya::Logger::GetEditorLogger()->warn(__VA_ARGS__)
+#define EDITOR_LOG_ERROR(...)		::Wuya::Logger::GetEditorLogger()->error(__VA_ARGS__)
+#define EDITOR_LOG_DEBUG(...)		::Wuya::Logger::GetEditorLogger()->debug(__VA_ARGS__)
+#define EDITOR_LOG_CRITICAL(...)	::Wuya::Logger::GetEditorLogger()->critical(__VA_ARGS__)

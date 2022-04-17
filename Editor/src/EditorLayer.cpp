@@ -127,7 +127,7 @@ void EditorLayer::OnImGuiRender()
 	}
 
 	ImGuiStyle& style = ImGui::GetStyle();
-	style.WindowMinSize.x = 300.0f;
+	style.WindowMinSize.x = 200.0f;
 
 	// ²Ëµ¥À¸
 	if (ImGui::BeginMenuBar())
@@ -183,6 +183,7 @@ void EditorLayer::OnImGuiRender()
 		auto viewport_panel_size = ImGui::GetContentRegionAvail();
 		m_ViewportSize = { viewport_panel_size.x, viewport_panel_size.y };
 
+		// »æÖÆ³¡¾°
 		const uint64_t texture_id = m_pFrameBuffer->GetColorAttachmentByIndex(0);
 		ImGui::Image(reinterpret_cast<void*>(texture_id), viewport_panel_size, ImVec2{ 0, 1 }, ImVec2{ 1, 0 });
 

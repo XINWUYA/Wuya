@@ -6,7 +6,7 @@
 namespace Wuya
 {
 	SharedPtr<spdlog::logger> Logger::s_pCoreLogger;
-	SharedPtr<spdlog::logger> Logger::s_pClientLogger;
+	SharedPtr<spdlog::logger> Logger::s_pEditorLogger;
 
 	void Logger::Init()
 	{
@@ -17,15 +17,15 @@ namespace Wuya
 		log_sinks[0]->set_pattern("%^[%T] [thread %t] %n: %v%$");
 		log_sinks[1]->set_pattern("[%T] [thread %t] [%l] %n: %v");
 
-		s_pCoreLogger = CreateSharedPtr<spdlog::logger>("Wuya Kernel", std::begin(log_sinks), std::end(log_sinks));
+		s_pCoreLogger = CreateSharedPtr<spdlog::logger>("Kernel", std::begin(log_sinks), std::end(log_sinks));
 		spdlog::register_logger(s_pCoreLogger);
 		s_pCoreLogger->set_level(spdlog::level::trace);
 		s_pCoreLogger->flush_on(spdlog::level::trace);
 
-		s_pClientLogger = CreateSharedPtr<spdlog::logger>("Terminator", std::begin(log_sinks), std::end(log_sinks));
-		spdlog::register_logger(s_pClientLogger);
-		s_pClientLogger->set_level(spdlog::level::trace);
-		s_pClientLogger->flush_on(spdlog::level::trace);
+		s_pEditorLogger = CreateSharedPtr<spdlog::logger>("Editor", std::begin(log_sinks), std::end(log_sinks));
+		spdlog::register_logger(s_pEditorLogger);
+		s_pEditorLogger->set_level(spdlog::level::trace);
+		s_pEditorLogger->flush_on(spdlog::level::trace);
 
 	}
 }

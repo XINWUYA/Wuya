@@ -1,4 +1,5 @@
 #include "EditorSceneHierarchy.h"
+#include "EditorUICreator.h"
 #include <imgui.h>
 #include <imgui_internal.h>
 
@@ -237,5 +238,8 @@ void EditorSceneHierarchy::ShowEntityComponents(Wuya::Entity& entity)
 
 				});
 		}
+
+		// String
+		CREATE_UI("String", "test", "aaaaaaaaaaaaaa");
 	}
 }
