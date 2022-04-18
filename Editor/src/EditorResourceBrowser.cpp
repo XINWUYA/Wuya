@@ -9,6 +9,7 @@ EditorResourceBrowser::EditorResourceBrowser()
 	m_pFolderIcon = Wuya::Texture2D::Create("editor_res/icons/directory_icon.png");
 	m_pFileIcon = Wuya::Texture2D::Create("editor_res/icons/file_icon.png");
 	m_pFilterIcon = Wuya::Texture2D::Create("editor_res/icons/filter_icon.png");
+	m_pSettingIcon = Wuya::Texture2D::Create("editor_res/icons/setting_icon.png");
 }
 
 void EditorResourceBrowser::OnImGuiRenderer()
@@ -53,38 +54,38 @@ void EditorResourceBrowser::OnImGuiRenderer()
 			}
 		}
 
-		/* 图标大小和间隔 */
-		static float thumbnail_size = 64.0f;
-		static float padding = 16.0f;
-
-		/* 图标大小和间隔调节控件 */
-		{
-			ImGui::PushItemWidth(100);
-
-			ImGui::SameLine(80, 20);
-			ImGui::Text("Size: ");
-			ImGui::SameLine();
-			ImGui::SliderFloat("##", &thumbnail_size, 16, 128);
-
-			ImGui::SameLine(240, 20);
-			ImGui::Text("Padding: ");
-			ImGui::SameLine();
-			ImGui::SliderFloat("##", &padding, 0, 32);
-
-			ImGui::PopItemWidth();
-		}
-
 		/* 窗口区域宽度 */
 		const float panel_width = ImGui::GetContentRegionAvail().x;
 
 		/* 筛选控件 */
 		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
 		static ImGuiTextFilter filter;
-		ImGui::SameLine(panel_width - 160);
-		filter.Draw();
-		ImGui::SameLine(panel_width - 8);
+		ImGui::SameLine(40, 20);
+		filter.Draw("##", 200);
+		ImGui::SameLine(240);
 		const Wuya::SharedPtr<Wuya::Texture2D> filter_icon = m_pFilterIcon;
 		ImGui::Image((ImTextureID)filter_icon->GetTextureID(), ImVec2(16, 16), ImVec2(0, 1), ImVec2(1, 0));
+		//ImGui::PopStyleColor();
+
+		/* 图标大小和间隔 */
+		static float thumbnail_size = 64.0f;
+		static float padding = 16.0f;
+
+		/* 图标大小和间隔调节控件 */
+		ImGui::SameLine(panel_width - 16);
+		if (ImGui::ImageButton((ImTextureID)m_pSettingIcon->GetTextureID(), ImVec2(16, 16), ImVec2(0, 1), ImVec2(1, 0)))
+			ImGui::OpenPopup("SettingPopup");
+		if (ImGui::BeginPopup("SettingPopup"))
+		{
+			ImGui::PushItemWidth(120);
+
+			ImGui::SliderFloat("Size", &thumbnail_size, 16, 128);
+			ImGui::Separator();
+			ImGui::SliderFloat("Padding", &padding, 0, 32);
+
+			ImGui::PopItemWidth();
+			ImGui::EndPopup();
+		}
 		ImGui::PopStyleColor();
 
 		ImGui::Separator();

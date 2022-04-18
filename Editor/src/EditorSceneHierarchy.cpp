@@ -240,6 +240,7 @@ void EditorSceneHierarchy::ShowEntityComponents(Wuya::Entity& entity)
 		}
 
 		// String
-		CREATE_UI("String", "test", "aaaaaaaaaaaaaa");
+		std::string val = "aaaaaaaaaaaaaa";
+		CREATE_UI("String", "test", &val);
 	}
 }
