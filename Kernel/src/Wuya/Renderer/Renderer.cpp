@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "Renderer.h"
+#include "Renderer2D.h"
 
 namespace Wuya
 {
@@ -10,6 +11,7 @@ namespace Wuya
 		PROFILE_FUNCTION();
 
 		m_pRenderAPI->Init();
+		Renderer2D::Init();
 	}
 
 	void Renderer::Update()

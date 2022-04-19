@@ -22,7 +22,7 @@ namespace Wuya
 		case BufferDataType::Mat3:		return 4 * 3 * 3;
 		case BufferDataType::Mat4:		return 4 * 4 * 4;
 		default:
-			CORE_ASSERT(false, "Unknown BufferDataType!");
+			ASSERT(false, "Unknown BufferDataType!");
 			return 0;
 		}
 	}
@@ -47,7 +47,7 @@ namespace Wuya
 		case BufferDataType::Mat3:		return 3; // Mat need process specially
 		case BufferDataType::Mat4:		return 4; // Mat need process specially
 		default: 
-			CORE_ASSERT(false, "Unknown BufferDataType!");
+			ASSERT(false, "Unknown BufferDataType!");
 			return 0;
 		}
 	}

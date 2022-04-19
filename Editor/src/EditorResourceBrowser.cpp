@@ -9,7 +9,7 @@ EditorResourceBrowser::EditorResourceBrowser()
 	m_pFolderIcon = Wuya::Texture2D::Create("editor_res/icons/directory_icon.png");
 	m_pFileIcon = Wuya::Texture2D::Create("editor_res/icons/file_icon.png");
 	m_pFilterIcon = Wuya::Texture2D::Create("editor_res/icons/filter_icon.png");
-	m_pSettingIcon = Wuya::Texture2D::Create("editor_res/icons/setting_icon.png");
+	m_pSettingIcon = Wuya::Texture2D::Create("editor_res/icons/menu_icon.png");
 }
 
 void EditorResourceBrowser::OnImGuiRenderer()
@@ -62,18 +62,18 @@ void EditorResourceBrowser::OnImGuiRenderer()
 		static ImGuiTextFilter filter;
 		ImGui::SameLine(40, 20);
 		filter.Draw("##", 200);
-		ImGui::SameLine(240);
+		ImGui::SameLine(236);
 		const Wuya::SharedPtr<Wuya::Texture2D> filter_icon = m_pFilterIcon;
-		ImGui::Image((ImTextureID)filter_icon->GetTextureID(), ImVec2(16, 16), ImVec2(0, 1), ImVec2(1, 0));
+		ImGui::Image((ImTextureID)filter_icon->GetTextureID(), ImVec2(20, 20), ImVec2(0, 1), ImVec2(1, 0));
 		//ImGui::PopStyleColor();
 
 		/* 图标大小和间隔 */
 		static float thumbnail_size = 64.0f;
-		static float padding = 16.0f;
+		static float padding = 32.0f;
 
 		/* 图标大小和间隔调节控件 */
-		ImGui::SameLine(panel_width - 16);
-		if (ImGui::ImageButton((ImTextureID)m_pSettingIcon->GetTextureID(), ImVec2(16, 16), ImVec2(0, 1), ImVec2(1, 0)))
+		ImGui::SameLine(panel_width - 20);
+		if (ImGui::ImageButton((ImTextureID)m_pSettingIcon->GetTextureID(), ImVec2(20, 20), ImVec2(0, 1), ImVec2(1, 0)))
 			ImGui::OpenPopup("SettingPopup");
 		if (ImGui::BeginPopup("SettingPopup"))
 		{

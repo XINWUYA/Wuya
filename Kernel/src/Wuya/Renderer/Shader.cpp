@@ -51,7 +51,7 @@ namespace Wuya
 
 	SharedPtr<Shader> ShaderLibrary::GetShaderByName(const std::string& name)
 	{
-		CORE_ASSERT(IsExists(name), "Shader not found!");
+		ASSERT(IsExists(name), "Shader not found!");
 		return m_Shaders[name];
 	}
 
@@ -68,7 +68,7 @@ namespace Wuya
 
 	void ShaderLibrary::AddShader(const std::string& name, const SharedPtr<Shader>& shader)
 	{
-		CORE_ASSERT(!IsExists(name), "Shader already exists!");
+		ASSERT(!IsExists(name), "Shader already exists!");
 		m_Shaders[name] = shader;
 	}
 }

@@ -26,6 +26,14 @@ public:
 	void OpenScene();
 
 private:
+
+	/* 运行模式 */
+	enum class PlayMode : uint8_t
+	{
+		Edit = 0,	/* 编辑模式 */
+		Runtime		/* 运行模式 */
+	};
+
 	void UpdateViewport();
 	bool OnKeyPressed(Wuya::KeyPressedEvent* event);
 	bool OnMouseButtonPressed(Wuya::MouseButtonPressedEvent* event);
@@ -33,8 +41,8 @@ private:
 	Wuya::SharedPtr<Wuya::VertexArray> m_pVertexArray;
 	Wuya::SharedPtr<Wuya::Texture2D> m_pTexture2D;
 	Wuya::UniquePtr<Wuya::ShaderLibrary> m_pShaderLibrary;
-	Wuya::UniquePtr<Wuya::EditorCamera> m_pEditorCamera;
-	Wuya::UniquePtr<Wuya::OrthographicCameraController> m_pOrthographicCameraController;
+	Wuya::SharedPtr<Wuya::EditorCamera> m_pEditorCamera;
+	Wuya::SharedPtr<Wuya::OrthographicCameraController> m_pOrthographicCameraController;
 	Wuya::SharedPtr<Wuya::FrameBuffer> m_pFrameBuffer;
 
 	Wuya::SharedPtr<Wuya::Scene> m_pMainScene;
@@ -44,5 +52,6 @@ private:
 	glm::uvec2 m_ViewportSize{};
 	bool m_IsViewportFocused{ false };
 	bool m_IsViewportHovered{ false };
+	PlayMode m_PlayMode{ PlayMode::Edit }; /* 默认为编辑模式 */
 };
 

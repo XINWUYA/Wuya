@@ -18,8 +18,8 @@ private:
 		std::string FileName;
 		std::string FilePath;
 		std::string FileType;
-		float		FileSize;
-		int			Depth;
+		float		FileSize{ 0 };
+		int			Depth{ -1 };
 		std::vector<Wuya::SharedPtr<FileNode>> ChildNodes;
 		Wuya::SharedPtr<FileNode> ParentNode;
 

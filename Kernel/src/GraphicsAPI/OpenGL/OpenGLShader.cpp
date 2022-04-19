@@ -146,13 +146,13 @@ namespace Wuya
 			else
 			{
 				CORE_LOG_ERROR("Could not read from file '{0}'", filepath);
-				CORE_ASSERT(false);
+				ASSERT(false);
 			}
 		}
 		else
 		{
 			CORE_LOG_ERROR("Could not open file '{0}'", filepath);
-			CORE_ASSERT(false);
+			ASSERT(false);
 		}
 
 		return result;
@@ -165,7 +165,7 @@ namespace Wuya
 		if (type == "fragment" || type == "pixel")
 			return GL_FRAGMENT_SHADER;
 
-		CORE_ASSERT(false, "Unknown shader type!");
+		ASSERT(false, "Unknown shader type!");
 		return 0;
 	}
 
@@ -179,13 +179,13 @@ namespace Wuya
 		while (pos != std::string::npos)
 		{
 			const size_t eol = source.find_first_of("\r\n", pos); // End of shader type declaration line
-			CORE_ASSERT(eol != std::string::npos, "Syntax error");
+			ASSERT(eol != std::string::npos, "Syntax error");
 			const size_t begin = pos + type_token_length + 1; // Start of shader type name (after "#type " keyword)
 			std::string type = source.substr(begin, eol - begin);
-			CORE_ASSERT(ShaderTypeFromString(type), "Invalid shader type specified");
+			ASSERT(ShaderTypeFromString(type), "Invalid shader type specified");
 
 			const size_t next_line_pos = source.find_first_not_of("\r\n", eol); // Start of shader code after shader type declaration line
-			CORE_ASSERT(next_line_pos != std::string::npos, "Syntax error");
+			ASSERT(next_line_pos != std::string::npos, "Syntax error");
 			pos = source.find(type_token, next_line_pos); // Start of next shader type declaration line
 
 			shader_sources[ShaderTypeFromString(type)] = (pos == std::string::npos) ? source.substr(next_line_pos) : source.substr(next_line_pos, pos - next_line_pos);
@@ -252,7 +252,7 @@ namespace Wuya
 				std::vector<GLchar> info_log(max_length);
 				glGetShaderInfoLog(shader, max_length, &max_length, &info_log[0]);
 				CORE_LOG_ERROR("Shader compiled failed ({0}):\n{1}", m_FilePath, info_log.data());
-				CORE_ASSERT(false);
+				ASSERT(false);
 
 				// Delete current shader
 				glDeleteShader(shader);
@@ -288,7 +288,7 @@ namespace Wuya
 			std::vector<GLchar> info_log(maxLength);
 			glGetProgramInfoLog(program, maxLength, &maxLength, info_log.data());
 			CORE_LOG_ERROR("Shader linking failed ({0}):\n{1}", m_FilePath, info_log.data());
-			CORE_ASSERT(false);
+			ASSERT(false);
 
 			// Delete program
 			glDeleteProgram(program);

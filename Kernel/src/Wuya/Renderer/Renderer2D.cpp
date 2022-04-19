@@ -7,7 +7,9 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 #include "UniformBuffer.h"
+#include "Wuya/Application/EditorCamera.h"
 #include "Wuya/Application/OrthographicCamera.h"
+#include "Wuya/Scene/Components.h"
 
 namespace Wuya
 {
@@ -39,9 +41,9 @@ namespace Wuya
 	struct RenderData2D
 	{
 		static constexpr uint32_t MaxQuadNum{ 20000 };
-		static constexpr uint32_t MaxVertices{ MaxQuadNum * 4 };
-		static constexpr uint32_t MaxIndices{ MaxQuadNum * 6 };
-		static constexpr uint32_t MaxTextureSlots{ 32 };
+		static constexpr uint32_t MaxVertexNum{ MaxQuadNum * 4 };
+		static constexpr uint32_t MaxIndexNum{ MaxQuadNum * 6 };
+		static constexpr uint32_t MaxTextureSlotNum{ 32 };
 
 		SharedPtr<VertexArray> pVertexArray;
 		SharedPtr<Shader> pShader;
@@ -51,7 +53,7 @@ namespace Wuya
 		uint32_t TotalIndexCount{ 0 };
 
 		SharedPtr<Texture2D> pDefaultTexture;
-		std::array<SharedPtr<Texture2D>, MaxTextureSlots> TextureSlots;
+		std::array<SharedPtr<Texture2D>, MaxTextureSlotNum> TextureSlots;
 		uint32_t TextureSlotIndex = 1; // 0 : Default Texture
 
 		CameraData CameraData;
@@ -72,7 +74,7 @@ namespace Wuya
 		// Vertex Array
 		s_RenderData2D.pVertexArray = VertexArray::Create();
 
-		const auto vertex_buffer = VertexBuffer::Create(s_RenderData2D.MaxVertices * sizeof(QuadVertexData));
+		const auto vertex_buffer = VertexBuffer::Create(s_RenderData2D.MaxVertexNum * sizeof(QuadVertexData));
 		const VertexBufferLayout vertex_buffer_layout = {
 			{ "a_Position",			BufferDataType::Float3 },
 			{ "a_TexCoord",			BufferDataType::Float2 },
@@ -84,11 +86,11 @@ namespace Wuya
 		vertex_buffer->SetLayout(vertex_buffer_layout);
 		s_RenderData2D.pVertexArray->AddVertexBuffer(vertex_buffer);
 
-		s_RenderData2D.pQuadVertexBufferBase = new QuadVertexData[s_RenderData2D.MaxVertices];
+		s_RenderData2D.pQuadVertexBufferBase = new QuadVertexData[s_RenderData2D.MaxVertexNum];
 		s_RenderData2D.pQuadVertexBufferCurrent = s_RenderData2D.pQuadVertexBufferBase;
 
-		uint32_t* quad_indices = new uint32_t[s_RenderData2D.MaxIndices];
-		for (uint32_t offset = 0, i = 0; i < s_RenderData2D.MaxIndices; i += 6)
+		uint32_t* quad_indices = new uint32_t[s_RenderData2D.MaxIndexNum];
+		for (uint32_t offset = 0, i = 0; i < s_RenderData2D.MaxIndexNum; i += 6)
 		{
 			quad_indices[i + 0] = offset + 0;
 			quad_indices[i + 1] = offset + 1;
@@ -100,7 +102,7 @@ namespace Wuya
 
 			offset += 4;
 		}
-		auto index_buffer = IndexBuffer::Create(quad_indices, s_RenderData2D.MaxIndices);
+		auto index_buffer = IndexBuffer::Create(quad_indices, s_RenderData2D.MaxIndexNum);
 		s_RenderData2D.pVertexArray->SetIndexBuffer(index_buffer);
 		delete[] quad_indices;
 
@@ -139,6 +141,23 @@ namespace Wuya
 		memset(&s_StatisticsInfo, 0, sizeof(StatisticsInfo));
 	}
 
+	void Renderer2D::StartNewBatch()
+	{
+		/* 重置新批次的渲染数据 */
+		s_RenderData2D.TotalIndexCount = 0;
+		s_RenderData2D.pQuadVertexBufferCurrent = s_RenderData2D.pQuadVertexBufferBase;
+		s_RenderData2D.TextureSlotIndex = 1;
+	}
+
+	void Renderer2D::NextBatch()
+	{
+		/* 提交当前批次数据 */
+		Flush();
+
+		/* 开启新的合批 */
+		StartNewBatch();
+	}
+
 	void Renderer2D::Flush()
 	{
 		PROFILE_FUNCTION();
@@ -158,20 +177,44 @@ namespace Wuya
 		s_StatisticsInfo.DrawCalls++;
 	}
 
-	void Renderer2D::BeginScene(SharedPtr<OrthographicCamera> camera)
+	void Renderer2D::BeginScene(const SharedPtr<OrthographicCamera>& camera)
 	{
 		PROFILE_FUNCTION();
 
+		ResetStatisticsInfo();
+
 		s_RenderData2D.CameraData.ViewProjectionMatrix = camera->GetViewProjectionMatrix();
 		s_RenderData2D.pCameraUniformBuffer->SetData(&s_RenderData2D.CameraData, sizeof(CameraData));
+
+		StartNewBatch();
+	}
+
+	void Renderer2D::BeginScene(const SharedPtr<EditorCamera>& camera)
+	{
+		PROFILE_FUNCTION();
+
+		ResetStatisticsInfo();
+
+		s_RenderData2D.CameraData.ViewProjectionMatrix = camera->GetViewProjectionMatrix();
+		s_RenderData2D.pCameraUniformBuffer->SetData(&s_RenderData2D.CameraData, sizeof(CameraData));
+
+		StartNewBatch();
+	}
+
+	void Renderer2D::BeginScene(SharedPtr<Camera> camera)
+	{
+		PROFILE_FUNCTION();
+
+		ResetStatisticsInfo();
+		StartNewBatch();
 	}
 
 	void Renderer2D::EndScene()
 	{
 		PROFILE_FUNCTION();
 
+		/* 提交最后一个批次数据 */
 		Flush();
-		s_RenderData2D.pQuadVertexBufferCurrent = s_RenderData2D.pQuadVertexBufferBase;
 	}
 
 	void Renderer2D::DrawQuad(const glm::vec2& position, const glm::vec2& size, const glm::vec4& color)
@@ -185,8 +228,20 @@ namespace Wuya
 		DrawQuad(transform, color);
 	}
 
+	void Renderer2D::DrawQuad(const glm::vec3& position, const glm::vec2& size, const SharedPtr<Texture2D>& texture, const glm::vec4& color, float tiling_factor)
+	{
+		const glm::mat4 transform = glm::translate(glm::mat4(1.0f), position) * glm::scale(glm::mat4(1), glm::vec3(size.x, size.y, 1.0f));
+		DrawQuad(transform, texture, color, tiling_factor);
+	}
+
 	void Renderer2D::DrawQuad(const glm::mat4& transform, const glm::vec4& color, int entity_id)
 	{
+		PROFILE_FUNCTION();
+
+		/* 索引数量达到阈值时，开启新的合批 */
+		if (s_RenderData2D.TotalIndexCount >= RenderData2D::MaxIndexNum)
+			NextBatch();
+
 		constexpr glm::vec2 texture_coords[] = {
 			{ 0.0f, 0.0f },
 			{ 1.0f, 0.0f },
@@ -209,5 +264,76 @@ namespace Wuya
 		s_RenderData2D.TotalIndexCount += 6;
 
 		s_StatisticsInfo.QuadCount++;
+	}
+
+	void Renderer2D::DrawQuad(const glm::mat4& transform, const SharedPtr<Texture2D>& texture, const glm::vec4& color, float tiling_factor, int entity_id)
+	{
+		PROFILE_FUNCTION();
+
+		/* 索引数量达到阈值时，开启新的合批 */
+		if (s_RenderData2D.TotalIndexCount >= RenderData2D::MaxIndexNum)
+			NextBatch();
+
+		constexpr glm::vec2 texture_coords[] = {
+			{ 0.0f, 0.0f },
+			{ 1.0f, 0.0f },
+			{ 1.0f, 1.0f },
+			{ 0.0f, 1.0f }
+		};
+
+		/* 判断贴图是否已经存在 */
+		uint32_t texture_idx = 0;
+		for (uint32_t i = 0; i < s_RenderData2D.TextureSlotIndex; ++i)
+		{
+			if (*s_RenderData2D.TextureSlots[i] == *texture)
+			{
+				texture_idx = i;
+				break;
+			}
+		}
+
+		/* 若不存在，则将贴图放到一个slot */
+		if (texture_idx == 0)
+		{
+			/* 当贴图数量过多时，开启新的合批 */
+			if (s_RenderData2D.TextureSlotIndex >= RenderData2D::MaxTextureSlotNum)
+				NextBatch();
+
+			texture_idx = s_RenderData2D.TextureSlotIndex;
+			s_RenderData2D.TextureSlots[s_RenderData2D.TextureSlotIndex] = texture;
+			s_RenderData2D.TextureSlotIndex++;
+		}
+
+		/* 填充当前Quad数据 */
+		for (size_t i = 0; i < 4; ++i)
+		{
+			s_RenderData2D.pQuadVertexBufferCurrent->Position = transform * QuadVertexPositions[i];
+			s_RenderData2D.pQuadVertexBufferCurrent->TextureCoords = texture_coords[i];
+			s_RenderData2D.pQuadVertexBufferCurrent->Color = color;
+			s_RenderData2D.pQuadVertexBufferCurrent->TextureIndex = static_cast<float>(texture_idx);
+			s_RenderData2D.pQuadVertexBufferCurrent->TilingFactor = tiling_factor;
+			s_RenderData2D.pQuadVertexBufferCurrent->EntityId = entity_id;
+
+			s_RenderData2D.pQuadVertexBufferCurrent++;
+		}
+
+		/* 更新总索引数 */
+		s_RenderData2D.TotalIndexCount += 6;
+		/* 统计渲染信息 */
+		s_StatisticsInfo.QuadCount++;
+	}
+
+	void Renderer2D::DrawSprite(const glm::mat4& transform, const SpriteComponent* component, int entity_id)
+	{
+		PROFILE_FUNCTION();
+
+		if (component->Texture)
+		{
+			DrawQuad(transform, component->Texture, component->BaseColor, component->TilingFactor, entity_id);
+		}
+		else
+		{
+			DrawQuad(transform, component->BaseColor, entity_id);
+		}
 	}
 }

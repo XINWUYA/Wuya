@@ -49,7 +49,7 @@ namespace Wuya
 		case BufferDataType::Mat3:     return GL_FLOAT;
 		case BufferDataType::Mat4:     return GL_FLOAT;
 		default:
-			CORE_ASSERT(false, "Unknown BufferDataType!");
+			ASSERT(false, "Unknown BufferDataType!");
 			return 0;
 		}
 	}
@@ -58,7 +58,7 @@ namespace Wuya
 	{
 		PROFILE_FUNCTION();
 
-		CORE_ASSERT(vertex_buffer->GetLayout().GetElements().size(), "Vertex buffer has no layout!");
+		ASSERT(vertex_buffer->GetLayout().GetElements().size(), "Vertex buffer has no layout!");
 
 		glBindVertexArray(m_VertexArrayId);
 		vertex_buffer->Bind();
@@ -123,7 +123,7 @@ namespace Wuya
 				break;
 			}
 			default: 
-				CORE_ASSERT(false, "Unknown BufferDataType!");
+				ASSERT(false, "Unknown BufferDataType!");
 			}
 		}
 

@@ -74,7 +74,7 @@ namespace Wuya
 	{
 		PROFILE_FUNCTION();
 
-		CORE_ASSERT(attachment_index < m_ColorAttachments.size());
+		ASSERT(attachment_index < m_ColorAttachments.size());
 
 		glReadBuffer(GL_COLOR_ATTACHMENT0 + attachment_index);
 
@@ -92,7 +92,7 @@ namespace Wuya
 		case FrameBufferTargetFormat::RedInteger: 
 			return GL_RED_INTEGER;
 		default:
-			CORE_ASSERT(false);
+			ASSERT(false);
 			return 0;
 		}
 	}
@@ -101,7 +101,7 @@ namespace Wuya
 	{
 		PROFILE_FUNCTION();
 
-		CORE_ASSERT(attachment_index < m_ColorAttachments.size());
+		ASSERT(attachment_index < m_ColorAttachments.size());
 
 		auto& target = m_ColorTargets[attachment_index];
 		glClearTexImage(m_ColorAttachments[attachment_index],
@@ -114,7 +114,7 @@ namespace Wuya
 
 	uint32_t OpenGLFrameBuffer::GetColorAttachmentByIndex(uint32_t index) const
 	{
-		CORE_ASSERT(index < m_ColorAttachments.size());
+		ASSERT(index < m_ColorAttachments.size());
 
 		return m_ColorAttachments[index];
 	}
@@ -223,7 +223,7 @@ namespace Wuya
 		// todo: 最大支持4个Color Attachments (可以尝试自适应支持任意数量)
 		if (m_ColorAttachments.size() > 1)
 		{
-			CORE_ASSERT(m_ColorAttachments.size() <= 4, "Supports up to 4 color attachments!");
+			ASSERT(m_ColorAttachments.size() <= 4, "Supports up to 4 color attachments!");
 			const GLenum attachments[] = {
 				GL_COLOR_ATTACHMENT0,
 				GL_COLOR_ATTACHMENT1,
@@ -238,7 +238,7 @@ namespace Wuya
 			glDrawBuffer(GL_NONE);
 		}
 
-		CORE_ASSERT(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE, "Framebuffer is incomplete!");
+		ASSERT(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE, "Framebuffer is incomplete!");
 		Unbind();
 	}
 

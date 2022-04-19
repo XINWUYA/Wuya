@@ -57,7 +57,7 @@ namespace Wuya
 
 	uint32_t OpenGLVertexBuffer::GetCount() const
 	{
-		CORE_ASSERT(!(m_DataSize % m_Layout.GetStride()), "VertexBuffer data is not complete!");
+		ASSERT(!(m_DataSize % m_Layout.GetStride()), "VertexBuffer data is not complete!");
 		return m_DataSize / m_Layout.GetStride();
 	}
 

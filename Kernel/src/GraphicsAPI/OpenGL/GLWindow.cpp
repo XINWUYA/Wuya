@@ -65,11 +65,11 @@ namespace Wuya
 			// ≥ı ºªØGLFW
 			int success = glfwInit();
 
-			CORE_ASSERT(success, "Failed to init GLFW!");
+			ASSERT(success, "Failed to init GLFW!");
 			glfwSetErrorCallback([](int error_code, const char* msg)
 				{
 					CORE_LOG_ERROR("GLFW Error: {0}: {1}", error_code, msg);
-					CORE_ASSERT(false);
+					ASSERT(false);
 				});
 		}
 

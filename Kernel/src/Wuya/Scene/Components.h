@@ -3,14 +3,29 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/quaternion.hpp>
 
+#include "SceneCamera.h"
+#include "Wuya/Renderer/Texture.h"
+
 namespace Wuya
 {
-	// 空间变换组件
+	/* 实体名称组件 */
+	struct NameComponent
+	{
+		std::string Name;
+
+		NameComponent() = default;
+		NameComponent(const NameComponent&) = default;
+		NameComponent(std::string name)
+			: Name(std::move(name))
+		{}
+	};
+
+	/* 空间变换组件 */
 	struct TransformComponent
 	{
-		glm::vec3 Translation = { 0.0f, 0.0f, 0.0f };
-		glm::vec3 Rotation = { 0.0f, 0.0f, 0.0f };
-		glm::vec3 Scale = { 0.0f, 0.0f, 0.0f };
+		glm::vec3 Translation{ 0.0f, 0.0f, 0.0f };
+		glm::vec3 Rotation{ 0.0f, 0.0f, 0.0f };
+		glm::vec3 Scale{ 1.0f, 1.0f, 1.0f };
 
 		TransformComponent() = default;
 		TransformComponent(const TransformComponent&) = default;
@@ -27,15 +42,28 @@ namespace Wuya
 		}
 	};
 
-	// 标签组件
-	struct TagComponent
+	/* 场景相机组件 */
+	struct CameraComponent
 	{
-		std::string Tag;
+		SceneCamera Camera{};
+		bool IsPrimary{ true };
+		bool IsFixedAspectRatio{ false };
 
-		TagComponent() = default;
-		TagComponent(const TagComponent&) = default;
-		TagComponent(std::string tag)
-			: Tag(std::move(tag))
+		CameraComponent() = default;
+		CameraComponent(const CameraComponent&) = default;
+	};
+
+	/* 图片精灵组件 */
+	struct SpriteComponent
+	{
+		SharedPtr<Texture2D> Texture;
+		glm::vec4 BaseColor{ 1.0f, 1.0f, 1.0f, 1.0f };
+		float TilingFactor{ 1.0f };
+
+		SpriteComponent() = default;
+		SpriteComponent(const SpriteComponent&) = default;
+		SpriteComponent(const glm::vec4& basecolor)
+			: BaseColor(basecolor)
 		{}
 	};
 }

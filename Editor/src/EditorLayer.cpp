@@ -48,8 +48,8 @@ void EditorLayer::OnAttached()
 	m_pVertexArray->SetIndexBuffer(index_buffer);
 
 	// Camera
-	m_pEditorCamera = Wuya::CreateUniquePtr<Wuya::EditorCamera>(30.0f);
-	m_pOrthographicCameraController = Wuya::CreateUniquePtr<Wuya::OrthographicCameraController>(m_pEditorCamera->GetAspectRatio());
+	m_pEditorCamera = Wuya::CreateSharedPtr<Wuya::EditorCamera>(30.0f);
+	m_pOrthographicCameraController = Wuya::CreateSharedPtr<Wuya::OrthographicCameraController>(m_pEditorCamera->GetAspectRatio());
 	//m_pEditorCamera->SetViewportSize(1280, 720);
 	//m_pEditorCamera->SetDistance(1);
 
@@ -302,29 +302,46 @@ void EditorLayer::OnUpdate(float delta_time)
 
 	UpdateViewport();
 
-	if (m_IsViewportFocused)
-	{
-		m_pOrthographicCameraController->OnUpdate(delta_time);
-		m_pEditorCamera->OnUpdate();
-	}
-
 	m_pFrameBuffer->Bind();
 
 	Wuya::Renderer::SetClearColor(glm::vec4(0.2f, 0.3f, 0.3f, 1.0f));
 	Wuya::Renderer::Clear();
 	m_pFrameBuffer->ClearColorAttachment(1, -1);
 
-	m_pTexture2D->Bind();
+	if (m_pMainScene)
+	{
+		switch (m_PlayMode)
+		{
+			case PlayMode::Edit:
+				/* 更新相机信息 */
+				if (m_IsViewportFocused)
+				{
+					m_pOrthographicCameraController->OnUpdate(delta_time);
+				}
+				m_pEditorCamera->OnUpdate();
 
-	auto shader = m_pShaderLibrary->GetShaderByName("triangle");
-	/*glm::mat4 scale = glm::mat4(
-		2, 0, 0, 0,
-		0, 2, 0, 0,
-		0, 0, 2, 0,
-		0, 0, 0, 1);
-	shader->SetMat4("u_ViewProjectionMat", scale);*/
-	shader->SetMat4("u_ViewProjectionMat", m_pEditorCamera->GetViewProjectionMatrix());
-	Wuya::Renderer::Submit(shader, m_pVertexArray);
+				/* 更新场景中的实体 */
+				m_pMainScene->OnUpdateEditor(m_pEditorCamera, delta_time);
+				break;
+		case PlayMode::Runtime: 
+			break;
+		default: 
+			ASSERT(false);
+			break;
+		}
+	}
+
+	//m_pTexture2D->Bind();
+
+	//auto shader = m_pShaderLibrary->GetShaderByName("triangle");
+	///*glm::mat4 scale = glm::mat4(
+	//	2, 0, 0, 0,
+	//	0, 2, 0, 0,
+	//	0, 0, 2, 0,
+	//	0, 0, 0, 1);
+	//shader->SetMat4("u_ViewProjectionMat", scale);*/
+	//shader->SetMat4("u_ViewProjectionMat", m_pEditorCamera->GetViewProjectionMatrix());
+	//Wuya::Renderer::Submit(shader, m_pVertexArray);
 
 	m_pFrameBuffer->Unbind();
 

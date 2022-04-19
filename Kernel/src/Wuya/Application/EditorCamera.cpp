@@ -47,7 +47,7 @@ namespace Wuya
 		}
 		default: 
 			CORE_LOG_ERROR("Wrong camera mode!");
-			CORE_ASSERT(false);
+			ASSERT(false);
 			break;
 		}
 
@@ -99,7 +99,7 @@ namespace Wuya
 		}
 		default:
 			CORE_LOG_ERROR("Wrong camera mode!");
-			CORE_ASSERT(false);
+			ASSERT(false);
 			break;
 		}
 	}

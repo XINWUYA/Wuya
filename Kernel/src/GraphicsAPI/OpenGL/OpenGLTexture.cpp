@@ -50,7 +50,7 @@ namespace Wuya
 			m_InternalFormat = internal_format;
 			m_DataFormat = data_format;
 
-			CORE_ASSERT(internal_format & data_format, "Format not supported!");
+			ASSERT(internal_format & data_format, "Format not supported!");
 
 			glCreateTextures(GL_TEXTURE_2D, 1, &m_TextureId);
 			glTextureStorage2D(m_TextureId, 1, internal_format, m_Width, m_Height);
@@ -85,7 +85,7 @@ namespace Wuya
 		PROFILE_FUNCTION();
 
 		const uint32_t channel = (m_DataFormat == GL_RGBA) ? 4 : 3;
-		CORE_ASSERT((size == m_Width * m_Height * channel), "Texture data is not completed!");
+		ASSERT((size == m_Width * m_Height * channel), "Texture data is not completed!");
 
 		glTextureSubImage2D(m_TextureId, 0, 0, 0, m_Width, m_Height, m_DataFormat, GL_UNSIGNED_BYTE, data);
 	}

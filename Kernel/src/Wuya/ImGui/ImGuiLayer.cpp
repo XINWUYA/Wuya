@@ -31,7 +31,7 @@ namespace Wuya
 		io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;			// Enable Multi-Viewport / Platform Windows
 		//io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
 
-		float fontSize = 16.0f;// *2.0f;
+		const float fontSize = 20.0f;// *2.0f;
 		io.Fonts->AddFontFromFileTTF("editor_res/fonts/msyh.ttf", fontSize);
 		//io.Fonts->AddFontFromFileTTF("editor_res/fonts/opensans/OpenSans-Bold.ttf", fontSize, nullptr, io.Fonts->GetGlyphRangesChineseSimplifiedCommon());
 		//io.FontDefault = io.Fonts->AddFontFromFileTTF("editor_res/fonts/opensans/OpenSans-Regular.ttf", fontSize, nullptr, io.Fonts->GetGlyphRangesChineseSimplifiedCommon());
@@ -41,7 +41,7 @@ namespace Wuya
 		SetDarkThemeColors();
 
 		// Setup Platform/Renderer bindings
-		GLFWwindow* window = static_cast<GLFWwindow*>(Application::Instance()->GetWindow().GetNativeWindow());
+		auto* window = static_cast<GLFWwindow*>(Application::Instance()->GetWindow().GetNativeWindow());
 		ImGui_ImplGlfw_InitForOpenGL(window, true);
 		ImGui_ImplOpenGL3_Init("#version 430");
 	}

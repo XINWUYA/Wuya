@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "Application.h"
 #include <Wuya/Events/ApplicationEvent.h>
-#include <Wuya/Imgui/ImGuiLayer.h>
+#include <Wuya/ImGui/ImGuiLayer.h>
 #include "Wuya/Renderer/Renderer.h"
 #include <GLFW/glfw3.h>
 
@@ -13,10 +13,11 @@ namespace Wuya
 	{
 		PROFILE_FUNCTION();
 
-		CORE_ASSERT(!s_pInstance, "Application already exist!");
+		ASSERT(!s_pInstance, "Application already exist!");
 		s_pInstance = this;
 
-		m_pWindow = IWindow::Create(WindowConfig(window_title));
+		WindowConfig config{ window_title, 1920, 1080 }; /* todo: 由配置文件反序列化 */
+		m_pWindow = IWindow::Create(config);
 		m_pWindow->SetEventCallback(BIND_EVENT_FUNC(Application::OnEvent));
 
 		m_pImGuiLayer = CreateSharedPtr<ImGuiLayer>();
@@ -40,32 +41,32 @@ namespace Wuya
 		{
 			PROFILE_SCOPE("Running Loops");
 
-			const float time = (float)glfwGetTime();
-			const float timestep = time - m_LastFrameTime;
+			const float time = static_cast<float>(glfwGetTime());
+			const float delta_time = time - m_LastFrameTime;
 			m_LastFrameTime = time;
 
 			if (!m_IsMinimized)
 			{
-				// Update layers
+				/* 先更新逻辑层和渲染层 */
 				{
 					PROFILE_SCOPE("Update Layers");
 
-					for (auto layer : m_LayerStack)
-						layer->OnUpdate(timestep);
+					for (const auto& layer : m_LayerStack)
+						layer->OnUpdate(delta_time);
 				}
 
-				// Update layers' gui 
+				/* 后更新UI */
 				m_pImGuiLayer->Begin();
 				{
 					PROFILE_SCOPE("Update ImGui Layers");
 
-					for (auto layer : m_LayerStack)
+					for (const auto& layer : m_LayerStack)
 						layer->OnImGuiRender();
 				}
 				m_pImGuiLayer->End();
 			}
 
-			// Update window
+			// 渲染一帧
 			m_pWindow->OnUpdate();
 		}
 	}

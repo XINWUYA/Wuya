@@ -6,7 +6,6 @@ namespace Wuya
 	class VertexArray;
 	class Texture2D;
 	class Shader;
-	class OrthographicCamera;
 
 	class Renderer2D
 	{
@@ -15,13 +14,20 @@ namespace Wuya
 		static void Update();
 		static void Release();
 
-		static void BeginScene(SharedPtr<OrthographicCamera> camera);
+		static void BeginScene(const SharedPtr<class OrthographicCamera>& camera);
+		static void BeginScene(const SharedPtr<class EditorCamera>& camera);
+		static void BeginScene(SharedPtr<class Camera> camera);
 		static void EndScene();
 
-		// Draw Primitives
+		/* Draw Quads */
 		static void DrawQuad(const glm::vec2& position, const glm::vec2& size, const glm::vec4& color);
 		static void DrawQuad(const glm::vec3& position, const glm::vec2& size, const glm::vec4& color);
+		static void DrawQuad(const glm::vec3& position, const glm::vec2& size, const SharedPtr<Texture2D>& texture, const glm::vec4& color = { 1.0f, 1.0f, 1.0f, 1.0f }, float tiling_factor = 1.0f);
 		static void DrawQuad(const glm::mat4& transform, const glm::vec4& color, int entity_id = -1);
+		static void DrawQuad(const glm::mat4& transform, const SharedPtr<Texture2D>& texture, const glm::vec4& color = {1.0f, 1.0f, 1.0f, 1.0f}, float tiling_factor = 1.0f, int entity_id = -1);
+
+		/* 绘制一个2D图片 */
+		static void DrawSprite(const glm::mat4& transform, const struct SpriteComponent* component, int entity_id);
 
 		// 统计信息
 		struct StatisticsInfo
@@ -37,6 +43,8 @@ namespace Wuya
 		static void ResetStatisticsInfo();
 
 	private:
+		static void StartNewBatch();
+		static void NextBatch();
 		static void Flush();
 
 	};
