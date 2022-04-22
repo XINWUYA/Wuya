@@ -1,14 +1,21 @@
 #include "EditorSceneHierarchy.h"
 #include "EditorUICreator.h"
+#include "EditorAssetManager.h"
 #include <imgui.h>
 #include <imgui_internal.h>
 #include <glm/gtc/type_ptr.hpp>
 
 extern const std::filesystem::path g_AssetPath;
 
+EditorSceneHierarchy::EditorSceneHierarchy()
+{
+	InitIcons();
+}
+
 EditorSceneHierarchy::EditorSceneHierarchy(const Wuya::SharedPtr<Wuya::Scene>& scene)
 {
 	SetOwnerScene(scene);
+	InitIcons();
 }
 
 void EditorSceneHierarchy::SetOwnerScene(const Wuya::SharedPtr<Wuya::Scene>& scene)
@@ -19,7 +26,20 @@ void EditorSceneHierarchy::SetOwnerScene(const Wuya::SharedPtr<Wuya::Scene>& sce
 
 void EditorSceneHierarchy::OnImGuiRender()
 {
-	// 场景实体列表
+	/* 场景实体列表 */
+	ShowSceneHierarchyUI();
+
+	/* 实体属性 */
+	ShowEntityPropertiesUI();
+}
+
+void EditorSceneHierarchy::SetSelectedEntity(const Wuya::Entity& entity)
+{
+	m_SelectedEntity = entity;
+}
+
+void EditorSceneHierarchy::ShowSceneHierarchyUI()
+{
 	ImGui::Begin("Scene Hierarchy");
 	{
 		m_pOwnerScene->GetRegistry().each(
@@ -29,11 +49,11 @@ void EditorSceneHierarchy::OnImGuiRender()
 				ShowEntityNode(entity);
 			});
 
-		// 点击左键，选中
+		/* 点击左键，选中 */
 		if (ImGui::IsMouseDown(0) && ImGui::IsWindowHovered())
 			m_SelectedEntity = {};
 
-		// 空白处右键，唤出新建
+		/* 空白处右键，唤出新建 */
 		if (ImGui::BeginPopupContextWindow(0, 1, false))
 		{
 			if (ImGui::MenuItem("New Entity"))
@@ -45,8 +65,10 @@ void EditorSceneHierarchy::OnImGuiRender()
 		}
 	}
 	ImGui::End();
+}
 
-	// 实体属性
+void EditorSceneHierarchy::ShowEntityPropertiesUI()
+{
 	ImGui::Begin("Properties");
 	{
 		if (m_SelectedEntity)
@@ -55,9 +77,10 @@ void EditorSceneHierarchy::OnImGuiRender()
 	ImGui::End();
 }
 
-void EditorSceneHierarchy::SetSelectedEntity(const Wuya::Entity& entity)
+void EditorSceneHierarchy::InitIcons()
 {
-	m_SelectedEntity = entity;
+	m_pAddComponentIcon = EditorAssetManager::Instance()->GetOrCreateTexture("editor_res/icons/add.png");
+	m_pMenuIcon = EditorAssetManager::Instance()->GetOrCreateTexture("editor_res/icons/menu.png");
 }
 
 void EditorSceneHierarchy::ShowEntityNode( Wuya::Entity& entity)
@@ -101,44 +124,51 @@ void EditorSceneHierarchy::ShowEntityNode( Wuya::Entity& entity)
 	}
 }
 
-
+/* 组件框架 */
 template<typename T, typename UIFunction>
-static void DrawComponent(const std::string& name, Wuya::Entity& entity, UIFunction uiFunction)
+static void ShowComponent(const std::string& name, Wuya::Entity& entity, UIFunction function)
 {
-	const ImGuiTreeNodeFlags treeNodeFlags = ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_AllowItemOverlap | ImGuiTreeNodeFlags_FramePadding;
+	const ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_AllowItemOverlap | ImGuiTreeNodeFlags_FramePadding;
 	if (entity.HasComponent<T>())
 	{
 		auto& component = entity.GetComponent<T>();
-		ImVec2 contentRegionAvailable = ImGui::GetContentRegionAvail();
+		const float panel_width = ImGui::GetContentRegionAvail().x;
 
 		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2{ 4, 4 });
-		float lineHeight = GImGui->Font->FontSize + GImGui->Style.FramePadding.y * 2.0f;
+		//float lineHeight = GImGui->Font->FontSize + GImGui->Style.FramePadding.y * 2.0f;
 		ImGui::Separator();
-		bool open = ImGui::TreeNodeEx((void*)typeid(T).hash_code(), treeNodeFlags, name.c_str());
-		ImGui::PopStyleVar(
-		);
-		ImGui::SameLine(contentRegionAvailable.x - lineHeight * 0.5f);
-		if (ImGui::Button("+", ImVec2{ lineHeight, lineHeight }))
-		{
-			ImGui::OpenPopup("ComponentSettings");
-		}
+		bool open = ImGui::TreeNodeEx((void*)typeid(T).hash_code(), flags, name.c_str());
+		ImGui::PopStyleVar();
 
-		bool removeComponent = false;
+		/* 设置图标 */
+		START_TRANSPARENT_BUTTON;
+		START_STYLE_ALPHA(0.5f);
+		ImGui::SameLine(panel_width - 15);
+		const auto menu_icon = EditorAssetManager::Instance()->GetOrCreateTexture("editor_res/icons/menu.png");
+		if (ImGui::ImageButton((ImTextureID)menu_icon->GetTextureID(), ImVec2(20, 20), ImVec2(0, 1), ImVec2(1, 0)))
+			ImGui::OpenPopup("ComponentSettings");
+		END_STYLE_ALPHA;
+		END_TRANSPARENT_BUTTON;
+
+		/* 删除组件选项 */
+		bool remove = false;
 		if (ImGui::BeginPopup("ComponentSettings"))
 		{
-			if (ImGui::MenuItem("Remove component"))
-				removeComponent = true;
+			if (ImGui::MenuItem("Remove"))
+				remove = true;
 
 			ImGui::EndPopup();
 		}
 
+		/* 展开时显示组件内容 */
 		if (open)
 		{
-			uiFunction(component);
+			function(component);
 			ImGui::TreePop();
 		}
 
-		if (removeComponent)
+		/* 删除组件 */
+		if (remove)
 			entity.RemoveComponent<T>();
 	}
 }
@@ -151,7 +181,7 @@ static void DrawVec3Control(const std::string& label, glm::vec3& values, float r
 	ImGui::PushID(label.c_str());
 
 	ImGui::Columns(2);
-	ImGui::SetColumnWidth(0, columnWidth);
+	ImGui::SetColumnWidth(0, 80);
 	ImGui::Text(label.c_str());
 	ImGui::NextColumn();
 
@@ -211,101 +241,103 @@ static void DrawVec3Control(const std::string& label, glm::vec3& values, float r
 
 void EditorSceneHierarchy::ShowEntityComponents(Wuya::Entity& entity)
 {
-	//if (ImGui::CollapsingHeader("Base"))
+	/* 实体名称组件 */ 
+	if (entity.HasComponent<Wuya::NameComponent>())
 	{
-		/* 实体名组件 */ 
-		if (entity.HasComponent<Wuya::NameComponent>())
-		{
-			auto& name = entity.GetComponent<Wuya::NameComponent>().Name;
+		auto& name = entity.GetComponent<Wuya::NameComponent>().Name;
 
-			char buffer[256];
-			memset(buffer, 0, sizeof(buffer));
-			std::strncpy(buffer, name.c_str(), sizeof(buffer));
-			ImGui::Text("Name:");
-			ImGui::SameLine();
-			if (ImGui::InputText("##Name", buffer, sizeof(buffer)))
-			{
-				name = std::string(buffer);
-			}
-		}
-
-		/* 添加组件按钮 */
+		char buffer[256];
+		memset(buffer, 0, sizeof(buffer));
+		std::strncpy(buffer, name.c_str(), sizeof(buffer));
+		ImGui::Text("Name:");
 		ImGui::SameLine();
-		if (ImGui::Button("Add Component"))
-			ImGui::OpenPopup("AddComponentPopup");
-
-		if (ImGui::BeginPopup("AddComponentPopup"))
+		if (ImGui::InputText("##Name", buffer, sizeof(buffer)))
 		{
-			/* 相机 */
-			if (ImGui::MenuItem("Camera Component"))
-			{
-				if (m_SelectedEntity.HasComponent<Wuya::CameraComponent>()) /* 为什么不使用entity */
-					EDITOR_LOG_WARN("Another camera component has existed!");
-				else
-					m_SelectedEntity.AddComponent<Wuya::CameraComponent>();
-
-				ImGui::CloseCurrentPopup();
-			}
-
-			/* 图片精灵 */
-			if (ImGui::MenuItem("Sprite Component"))
-			{
-				if (m_SelectedEntity.HasComponent<Wuya::SpriteComponent>())
-					EDITOR_LOG_WARN("Another sprite component has existed!");
-				else
-					m_SelectedEntity.AddComponent<Wuya::SpriteComponent>();
-
-				ImGui::CloseCurrentPopup();
-			}
-
-			ImGui::EndPopup();
+			name = std::string(buffer);
 		}
-
-		/* 空间变换组件 */
-		if (entity.HasComponent<Wuya::TransformComponent>())
-		{
-			DrawComponent<Wuya::TransformComponent>("Translation", entity, 
-				[](auto& component)
-				{
-					DrawVec3Control("Position", component.Translation, 0.0f, 50.0f);
-					glm::vec3 rotation = glm::degrees(component.Rotation);
-					DrawVec3Control("Rotation", rotation, 0.0f, 50.0f);
-					component.Rotation = glm::radians(rotation);
-					DrawVec3Control("Scale", component.Scale, 1.0f, 50.0f);
-
-				});
-		}
-
-		/* 图片精灵组件 */
-		if (entity.HasComponent<Wuya::SpriteComponent>())
-		{
-			DrawComponent<Wuya::SpriteComponent>("Sprite", entity, 
-				[](auto& component)
-				{
-					ImGui::ColorEdit4("Color", glm::value_ptr(component.BaseColor));
-
-					ImGui::Button("Texture", ImVec2(100.0f, 0.0f));
-					if (ImGui::BeginDragDropTarget())
-					{
-						if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("RESOURCE_BROWSER_ITEM"))
-						{
-							const wchar_t* path = (const wchar_t*)payload->Data;
-							std::filesystem::path texturePath = std::filesystem::path(g_AssetPath) / path;
-							auto texture = Wuya::Texture2D::Create(texturePath.string());
-							if (texture->IsLoaded())
-								component.Texture = texture;
-							else
-								EDITOR_LOG_WARN("Failed to load texture {0}.", texturePath.filename().string());
-						}
-						ImGui::EndDragDropTarget();
-					}
-
-					ImGui::DragFloat("Tiling Factor", &component.TilingFactor, 0.1f, 0.0f, 100.0f);
-				});
-		}
-
-		// String
-		std::string val = "aaaaaaaaaaaaaa";
-		CREATE_UI("String", "test", &val);
 	}
+
+	/* 窗口区域宽度 */
+	const float panel_width = ImGui::GetContentRegionAvail().x;
+
+	/* 添加组件按钮 */
+	ImGui::SameLine(panel_width - 15);
+	START_STYLE_ALPHA(0.5f);
+	if (ImGui::ImageButton((ImTextureID)m_pAddComponentIcon->GetTextureID(), ImVec2(20, 20), ImVec2(0, 1), ImVec2(1, 0)))
+		ImGui::OpenPopup("AddComponentPopup");
+	END_STYLE_ALPHA;
+
+	if (ImGui::BeginPopup("AddComponentPopup"))
+	{
+		/* 相机 */
+		if (ImGui::MenuItem("Camera Component"))
+		{
+			if (m_SelectedEntity.HasComponent<Wuya::CameraComponent>()) /* 为什么不使用entity */
+				EDITOR_LOG_WARN("Another camera component has existed!");
+			else
+				m_SelectedEntity.AddComponent<Wuya::CameraComponent>();
+
+			ImGui::CloseCurrentPopup();
+		}
+
+		/* 图片精灵 */
+		if (ImGui::MenuItem("Sprite Component"))
+		{
+			if (m_SelectedEntity.HasComponent<Wuya::SpriteComponent>())
+				EDITOR_LOG_WARN("Another sprite component has existed!");
+			else
+				m_SelectedEntity.AddComponent<Wuya::SpriteComponent>();
+
+			ImGui::CloseCurrentPopup();
+		}
+
+		ImGui::EndPopup();
+	}
+
+	/* 空间变换组件 */
+	if (entity.HasComponent<Wuya::TransformComponent>())
+	{
+		ShowComponent<Wuya::TransformComponent>("Translation", entity,
+			[](auto& component)
+			{
+				DrawVec3Control("Position", component.Translation, 0.0f, 50.0f);
+				glm::vec3 rotation = glm::degrees(component.Rotation);
+				DrawVec3Control("Rotation", rotation, 0.0f, 50.0f);
+				component.Rotation = glm::radians(rotation);
+				DrawVec3Control("Scale", component.Scale, 1.0f, 50.0f);
+
+			});
+	}
+
+	/* 图片精灵组件 */
+	if (entity.HasComponent<Wuya::SpriteComponent>())
+	{
+		ShowComponent<Wuya::SpriteComponent>("Sprite", entity,
+			[](auto& component)
+			{
+				ImGui::ColorEdit4("Color", glm::value_ptr(component.BaseColor));
+
+				ImGui::Button("Texture", ImVec2(100.0f, 0.0f));
+				if (ImGui::BeginDragDropTarget())
+				{
+					if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("RESOURCE_BROWSER_ITEM"))
+					{
+						const wchar_t* path = (const wchar_t*)payload->Data;
+						const std::filesystem::path texture_path = std::filesystem::path(g_AssetPath) / path;
+						auto texture = EditorAssetManager::Instance()->GetOrCreateTexture(texture_path.string());
+						if (texture->IsLoaded())
+							component.Texture = texture;
+						else
+							EDITOR_LOG_WARN("Failed to load texture {0}.", texture_path.filename().string());
+					}
+					ImGui::EndDragDropTarget();
+				}
+
+				ImGui::DragFloat("Tiling Factor", &component.TilingFactor, 0.1f, 0.0f, 100.0f);
+			});
+	}
+
+	// String
+	std::string val = "aaaaaaaaaaaaaa";
+	CREATE_UI("String", "test", &val);
 }

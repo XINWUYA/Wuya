@@ -2,14 +2,17 @@
 #include "EditorUtils.h"
 #include <imgui.h>
 #include <imgui_internal.h>
+#include "EditorAssetManager.h"
+#include "EditorUICreator.h"
 
 extern const std::filesystem::path g_AssetPath = "assets";
 EditorResourceBrowser::EditorResourceBrowser()
 {
-	m_pFolderIcon = Wuya::Texture2D::Create("editor_res/icons/directory_icon.png");
-	m_pFileIcon = Wuya::Texture2D::Create("editor_res/icons/file_icon.png");
-	m_pFilterIcon = Wuya::Texture2D::Create("editor_res/icons/filter_icon.png");
-	m_pSettingIcon = Wuya::Texture2D::Create("editor_res/icons/menu_icon.png");
+	m_pFolderIcon = EditorAssetManager::Instance()->GetOrCreateTexture("editor_res/icons/directory.png");
+	m_pFileIcon = EditorAssetManager::Instance()->GetOrCreateTexture("editor_res/icons/file.png");
+	m_pFilterIcon = EditorAssetManager::Instance()->GetOrCreateTexture("editor_res/icons/filter.png");
+	m_pMenuIcon = EditorAssetManager::Instance()->GetOrCreateTexture("editor_res/icons/menu.png");
+	m_pReturnIcon = EditorAssetManager::Instance()->GetOrCreateTexture("editor_res/icons/return.png");
 }
 
 void EditorResourceBrowser::OnImGuiRenderer()
@@ -24,8 +27,11 @@ void EditorResourceBrowser::OnImGuiRenderer()
 	/* 文件目录列表窗口 */
 	ImGui::Begin("File List");
 	{
-		/* 根据文件节点树生成UI */
-		BuildFileUIListTreeSimple(m_RootFileNodeTree);
+		if (ImGui::CollapsingHeader(g_AssetPath.string().c_str()))
+		{
+			/* 根据文件节点树生成UI */
+			BuildFileUIListTreeSimple(m_RootFileNodeTree);
+		}
 	}
 	ImGui::End();
 
@@ -39,55 +45,73 @@ void EditorResourceBrowser::OnImGuiRenderer()
 		{
 			const bool disable_return_btn = (*m_CurrentFileNode) == (*m_RootFileNodeTree);
 
+			/* Button样式 */
+			float button_alpha = 0.5f;
 			if (disable_return_btn)
 			{
 				ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
-				ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
+				button_alpha = 0.25f;
 			}
-			if (ImGui::Button(" << "))
-				m_CurrentFileNode = m_CurrentFileNode->ParentNode;
 
+			START_STYLE_ALPHA(button_alpha);
+			if (ImGui::ImageButton((ImTextureID)m_pReturnIcon->GetTextureID(), ImVec2(20, 20), ImVec2(0, 1), ImVec2(1, 0)))
+				m_CurrentFileNode = m_CurrentFileNode->ParentNode;
+			END_STYLE_ALPHA;
+
+			/* 取消当前样式 */
 			if (disable_return_btn)
-			{
 				ImGui::PopItemFlag();
-				ImGui::PopStyleVar();
-			}
 		}
 
 		/* 窗口区域宽度 */
 		const float panel_width = ImGui::GetContentRegionAvail().x;
 
-		/* 筛选控件 */
-		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
-		static ImGuiTextFilter filter;
-		ImGui::SameLine(40, 20);
-		filter.Draw("##", 200);
-		ImGui::SameLine(236);
-		const Wuya::SharedPtr<Wuya::Texture2D> filter_icon = m_pFilterIcon;
-		ImGui::Image((ImTextureID)filter_icon->GetTextureID(), ImVec2(20, 20), ImVec2(0, 1), ImVec2(1, 0));
-		//ImGui::PopStyleColor();
-
 		/* 图标大小和间隔 */
 		static float thumbnail_size = 64.0f;
 		static float padding = 32.0f;
 
-		/* 图标大小和间隔调节控件 */
-		ImGui::SameLine(panel_width - 20);
-		if (ImGui::ImageButton((ImTextureID)m_pSettingIcon->GetTextureID(), ImVec2(20, 20), ImVec2(0, 1), ImVec2(1, 0)))
-			ImGui::OpenPopup("SettingPopup");
-		if (ImGui::BeginPopup("SettingPopup"))
+		/* 透明Button样式 */
+		START_TRANSPARENT_BUTTON;
+
+		/* 筛选窗口 */
+		static ImGuiTextFilter filter;
 		{
-			ImGui::PushItemWidth(120);
+			ImGui::SameLine(40, 20);
+			filter.Draw("##", 200);
+			ImGui::SameLine(236);
+			const Wuya::SharedPtr<Wuya::Texture2D> filter_icon = m_pFilterIcon;
 
-			ImGui::SliderFloat("Size", &thumbnail_size, 16, 128);
-			ImGui::Separator();
-			ImGui::SliderFloat("Padding", &padding, 0, 32);
-
-			ImGui::PopItemWidth();
-			ImGui::EndPopup();
+			START_STYLE_ALPHA(0.5f);
+			ImGui::Image((ImTextureID)filter_icon->GetTextureID(), ImVec2(20, 20), ImVec2(0, 1), ImVec2(1, 0));
+			END_STYLE_ALPHA;
 		}
-		ImGui::PopStyleColor();
 
+		/* 图标大小和间隔调节控件 */
+		{
+			ImGui::SameLine(panel_width - 15);
+			START_STYLE_ALPHA(0.5f);
+			if (ImGui::ImageButton((ImTextureID)m_pMenuIcon->GetTextureID(), ImVec2(20, 20), ImVec2(0, 1), ImVec2(1, 0)))
+				ImGui::OpenPopup("SettingPopup");
+			END_STYLE_ALPHA;
+
+			/* 展开弹窗时，显示控件 */
+			if (ImGui::BeginPopup("SettingPopup"))
+			{
+				ImGui::PushItemWidth(120);
+
+				ImGui::SliderFloat("Size", &thumbnail_size, 16, 128);
+				ImGui::Separator();
+				ImGui::SliderFloat("Padding", &padding, 0, 32);
+
+				ImGui::PopItemWidth();
+				ImGui::EndPopup();
+			}
+		}
+
+		/* 取消当前样式 */
+		END_TRANSPARENT_BUTTON;
+
+		/* 分割线 */
 		ImGui::Separator();
 
 		/* 文件UI, 足够大时才显示图片，否则以清单形式显示 */
@@ -177,7 +201,7 @@ void EditorResourceBrowser::OnImGuiRenderer()
 
 void EditorResourceBrowser::BuildFileNodeTree(const Wuya::SharedPtr<FileNode>& parent_node)
 {
-	for (auto& directory_entry : std::filesystem::directory_iterator(g_AssetPath.string() + "\\" + parent_node->FilePath))
+	for (auto& directory_entry : std::filesystem::directory_iterator(g_AssetPath / parent_node->FilePath))
 	{
 		const auto& path = directory_entry.path();
 		auto relative_path = GetRelativePath(g_AssetPath, path);
@@ -277,33 +301,34 @@ void EditorResourceBrowser::BuildFileUIListTreeDetail(const Wuya::SharedPtr<File
 
 void EditorResourceBrowser::BuildFileUIListTreeSimple(const Wuya::SharedPtr<FileNode>& node)
 {
-	if (node->FileType == "Folder") /* 文件夹 */
+	for (const auto& child_node : node->ChildNodes)
 	{
-		/* 文件节点 */
-		bool open = ImGui::TreeNodeEx(node->FileName.c_str(), ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanFullWidth);
-
-		/* 点击目录时，设置为当前文件目录 */
-		if (ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen())
-			m_CurrentFileNode = node;
-
-		/* 展开文件夹节点 */
-		if (open)
+		if (child_node->FileType == "Folder") /* 文件夹 */
 		{
-			for (const auto& child_node : node->ChildNodes)
+			/* 文件节点 */
+			bool open = ImGui::TreeNodeEx(child_node->FileName.c_str(), ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanFullWidth);
+
+			/* 点击目录时，设置为当前文件目录 */
+			if (ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen())
+				m_CurrentFileNode = child_node;
+
+			/* 展开文件夹节点 */
+			if (open)
+			{
 				BuildFileUIListTreeSimple(child_node);
-
-			ImGui::TreePop();
+				ImGui::TreePop();
+			}
 		}
-	}
-	else
-	{
-		/* 文件节点 */
-		ImGui::TreeNodeEx(node->FileName.c_str(), ImGuiTreeNodeFlags_SpanFullWidth | ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen);
-
-		/* todo: 单击文件时的响应 */
-		if (ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen())
+		else
 		{
-			/**/
+			/* 文件节点 */
+			ImGui::TreeNodeEx(child_node->FileName.c_str(), ImGuiTreeNodeFlags_SpanFullWidth | ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen);
+
+			/* todo: 单击文件时的响应 */
+			if (ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen())
+			{
+				/**/
+			}
 		}
 	}
 }

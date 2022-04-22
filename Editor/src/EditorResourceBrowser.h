@@ -60,6 +60,7 @@ private:
 	Wuya::SharedPtr<Wuya::Texture2D> m_pFolderIcon;
 	Wuya::SharedPtr<Wuya::Texture2D> m_pFileIcon;
 	Wuya::SharedPtr<Wuya::Texture2D> m_pFilterIcon;
-	Wuya::SharedPtr<Wuya::Texture2D> m_pSettingIcon;
+	Wuya::SharedPtr<Wuya::Texture2D> m_pMenuIcon;
+	Wuya::SharedPtr<Wuya::Texture2D> m_pReturnIcon;
 };
 

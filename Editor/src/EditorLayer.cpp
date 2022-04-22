@@ -1,5 +1,8 @@
 #include "EditorLayer.h"
 #include <imgui.h>
+
+#include "EditorAssetManager.h"
+#include "EditorUICreator.h"
 #include "Wuya/Events/KeyEvent.h"
 #include "Wuya/Events/MouseEvent.h"
 
@@ -75,157 +78,19 @@ void EditorLayer::OnImGuiRender()
 {
 	PROFILE_FUNCTION();
 
-	static bool p_open = true;
-	static bool opt_fullscreen = true;
-	static bool opt_padding = false;
-	static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_None;
+	/* 菜单 */
+	ShowMenuUI();
 
-	// We are using the ImGuiWindowFlags_NoDocking flag to make the parent window not dockable into,
-	// because it would be confusing to have two docking targets within each others.
-	ImGuiWindowFlags window_flags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking;
-	if (opt_fullscreen)
-	{
-		const ImGuiViewport* viewport = ImGui::GetMainViewport();
-		ImGui::SetNextWindowPos(viewport->WorkPos);
-		ImGui::SetNextWindowSize(viewport->WorkSize);
-		ImGui::SetNextWindowViewport(viewport->ID);
-		ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
-		ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
-		window_flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
-		window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
-	}
-	else
-	{
-		dockspace_flags &= ~ImGuiDockNodeFlags_PassthruCentralNode;
-	}
+	/* 主窗口 */
+	ShowSceneViewportUI();
 
-	// When using ImGuiDockNodeFlags_PassthruCentralNode, DockSpace() will render our background
-	// and handle the pass-thru hole, so we ask Begin() to not render a background.
-	if (dockspace_flags & ImGuiDockNodeFlags_PassthruCentralNode)
-		window_flags |= ImGuiWindowFlags_NoBackground;
+	/* 场景控制UI */
+	ShowSceneControllerUI();
 
-	// Important: note that we proceed even if Begin() returns false (aka window is collapsed).
-	// This is because we want to keep our DockSpace() active. If a DockSpace() is inactive,
-	// all active windows docked into it will lose their parent and become undocked.
-	// We cannot preserve the docking relationship between an active window and an inactive docking, otherwise
-	// any change of dockspace/settings would lead to windows being stuck in limbo and never being visible.
-	if (!opt_padding)
-		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
-	ImGui::Begin("DockSpace Demo", &p_open, window_flags);
-	if (!opt_padding)
-		ImGui::PopStyleVar();
+	/* 统计信息 */
+	ShowStatisticInfoUI();
 
-	if (opt_fullscreen)
-		ImGui::PopStyleVar(2);
-
-	// Submit the DockSpace
-	ImGuiIO& io = ImGui::GetIO();
-	if (io.ConfigFlags & ImGuiConfigFlags_DockingEnable)
-	{
-		ImGuiID dockspace_id = ImGui::GetID("MyDockSpace");
-		ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), dockspace_flags);
-	}
-
-	ImGuiStyle& style = ImGui::GetStyle();
-	style.WindowMinSize.x = 200.0f;
-
-	// 菜单栏
-	if (ImGui::BeginMenuBar())
-	{
-		if (ImGui::BeginMenu("File"))
-		{
-			if (ImGui::MenuItem("New Scene", "Ctrl+N"))
-			{
-				NewScene();
-			}
-
-			if (ImGui::MenuItem("Exit"))
-				Wuya::Application::Instance()->Close();
-
-			ImGui::EndMenu();
-		}
-
-		if (ImGui::BeginMenu("Options"))
-		{
-			// Disabling fullscreen would allow the window to be moved to the front of other windows,
-			// which we can't undo at the moment without finer window depth/z control.
-			ImGui::MenuItem("Fullscreen", NULL, &opt_fullscreen);
-			ImGui::MenuItem("Padding", NULL, &opt_padding);
-			ImGui::Separator();
-
-			if (ImGui::MenuItem("Flag: NoSplit", "", (dockspace_flags & ImGuiDockNodeFlags_NoSplit) != 0)) { dockspace_flags ^= ImGuiDockNodeFlags_NoSplit; }
-			if (ImGui::MenuItem("Flag: NoResize", "", (dockspace_flags & ImGuiDockNodeFlags_NoResize) != 0)) { dockspace_flags ^= ImGuiDockNodeFlags_NoResize; }
-			if (ImGui::MenuItem("Flag: NoDockingInCentralNode", "", (dockspace_flags & ImGuiDockNodeFlags_NoDockingInCentralNode) != 0)) { dockspace_flags ^= ImGuiDockNodeFlags_NoDockingInCentralNode; }
-			if (ImGui::MenuItem("Flag: AutoHideTabBar", "", (dockspace_flags & ImGuiDockNodeFlags_AutoHideTabBar) != 0)) { dockspace_flags ^= ImGuiDockNodeFlags_AutoHideTabBar; }
-			if (ImGui::MenuItem("Flag: PassthruCentralNode", "", (dockspace_flags & ImGuiDockNodeFlags_PassthruCentralNode) != 0, opt_fullscreen)) { dockspace_flags ^= ImGuiDockNodeFlags_PassthruCentralNode; }
-			ImGui::Separator();
-
-			if (ImGui::MenuItem("Close", NULL, false))
-				p_open = false;
-			ImGui::EndMenu();
-		}
-
-		ImGui::EndMenuBar();
-	}
-
-	ImGui::End();
-
-	// 主窗口
-	{
-		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
-		ImGui::Begin("Scene");
-
-		// 若当前ImGui窗口不是主窗口，应阻塞事件传递
-		m_IsViewportFocused = ImGui::IsWindowFocused();
-		m_IsViewportHovered = ImGui::IsWindowHovered();
-		Wuya::Application::Instance()->GetImGuiLayer()->BlockEvents(!m_IsViewportFocused && !m_IsViewportHovered);
-
-		auto viewport_panel_size = ImGui::GetContentRegionAvail();
-		m_ViewportSize = { viewport_panel_size.x, viewport_panel_size.y };
-
-		// 绘制场景
-		const uint64_t texture_id = m_pFrameBuffer->GetColorAttachmentByIndex(0);
-		ImGui::Image(reinterpret_cast<void*>(texture_id), viewport_panel_size, ImVec2{ 0, 1 }, ImVec2{ 1, 0 });
-
-		// 拖动资源到主窗口
-		if (ImGui::BeginDragDropTarget())
-		{
-			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM"))
-			{
-				// todo
-			}
-			ImGui::EndDragDropTarget();
-		}
-
-		// Gizmos
-
-		ImGui::End();
-		ImGui::PopStyleVar();
-	}
-
-	// 统计信息
-	{
-		ImGui::Begin("Stat Info");
-		// todo: 帧率等
-		// Renderer2D Stats
-		if (ImGui::CollapsingHeader("2D"))
-		{
-			auto statistics = Wuya::Renderer2D::GetStatisticsInfo();
-			ImGui::BulletText("Draw Calls: %d", statistics.DrawCalls);
-			ImGui::BulletText("Quads: %d", statistics.QuadCount);
-			ImGui::BulletText("Vertices: %d", statistics.TotalVertexCount());
-			ImGui::BulletText("Indices: %d", statistics.TotalIndexCount());
-		}
-		// Renderer3D Stats
-		if (ImGui::CollapsingHeader("3D"))
-		{
-			// todo: 三角形、模型数量
-		}
-
-		ImGui::End();
-	}
-
-	// 场景管理及属性窗口
+	/* 场景管理及属性窗口 */
 	m_SceneHierarchy.OnImGuiRender();
 	m_ResourceBrowser.OnImGuiRenderer();
 
@@ -254,6 +119,10 @@ void EditorLayer::NewScene()
 void EditorLayer::OpenScene()
 {
 	//todo: 打开一个序列化的场景
+}
+
+void EditorLayer::SaveScene()
+{
 }
 
 void EditorLayer::UpdateViewport()
@@ -296,6 +165,200 @@ bool EditorLayer::OnMouseButtonPressed(Wuya::MouseButtonPressedEvent* event)
 	return false;
 }
 
+void EditorLayer::OnPlayModeChanged()
+{
+	if (m_PlayMode == PlayMode::Edit) /* 编辑模式切换为运行模式 */
+	{
+		m_PlayMode = PlayMode::Runtime;
+	}
+	else if (m_PlayMode == PlayMode::Runtime) /* 运行模式切换为编辑模式 */
+	{
+		m_PlayMode = PlayMode::Edit;
+	}
+
+}
+
+void EditorLayer::ShowMenuUI()
+{
+	static bool p_open = true;
+	static bool opt_fullscreen = true;
+	static bool opt_padding = false;
+	static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_None;
+
+	// We are using the ImGuiWindowFlags_NoDocking flag to make the parent window not dockable into,
+	// because it would be confusing to have two docking targets within each others.
+	ImGuiWindowFlags window_flags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking;
+	if (opt_fullscreen)
+	{
+		const ImGuiViewport* viewport = ImGui::GetMainViewport();
+		ImGui::SetNextWindowPos(viewport->WorkPos);
+		ImGui::SetNextWindowSize(viewport->WorkSize);
+		ImGui::SetNextWindowViewport(viewport->ID);
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+		window_flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
+		window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
+	}
+	else
+	{
+		dockspace_flags &= ~ImGuiDockNodeFlags_PassthruCentralNode;
+	}
+
+	// When using ImGuiDockNodeFlags_PassthruCentralNode, DockSpace() will render our background
+	// and handle the pass-thru hole, so we ask Begin() to not render a background.
+	if (dockspace_flags & ImGuiDockNodeFlags_PassthruCentralNode)
+		window_flags |= ImGuiWindowFlags_NoBackground;
+
+	// Important: note that we proceed even if Begin() returns false (aka window is collapsed).
+	// This is because we want to keep our DockSpace() active. If a DockSpace() is inactive,
+	// all active windows docked into it will lose their parent and become undocked.
+	// We cannot preserve the docking relationship between an active window and an inactive docking, otherwise
+	// any change of dockspace/settings would lead to windows being stuck in limbo and never being visible.
+	if (!opt_padding)
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+	ImGui::Begin("DockSpace Demo", &p_open, window_flags);
+	{
+		if (!opt_padding)
+			ImGui::PopStyleVar();
+
+		if (opt_fullscreen)
+			ImGui::PopStyleVar(2);
+
+		// Submit the DockSpace
+		ImGuiIO& io = ImGui::GetIO();
+		if (io.ConfigFlags & ImGuiConfigFlags_DockingEnable)
+		{
+			ImGuiID dockspace_id = ImGui::GetID("MyDockSpace");
+			ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), dockspace_flags);
+		}
+
+		ImGuiStyle& style = ImGui::GetStyle();
+		style.WindowMinSize.x = 200.0f;
+
+		/* 菜单栏 */
+		if (ImGui::BeginMenuBar())
+		{
+			if (ImGui::BeginMenu("File"))
+			{
+				if (ImGui::MenuItem("New Scene", "Ctrl+N"))
+				{
+					NewScene();
+				}
+
+				if (ImGui::MenuItem("Exit"))
+					Wuya::Application::Instance()->Close();
+
+				ImGui::EndMenu();
+			}
+
+			if (ImGui::BeginMenu("Options"))
+			{
+				// Disabling fullscreen would allow the window to be moved to the front of other windows,
+				// which we can't undo at the moment without finer window depth/z control.
+				ImGui::MenuItem("Fullscreen", NULL, &opt_fullscreen);
+				ImGui::MenuItem("Padding", NULL, &opt_padding);
+				ImGui::Separator();
+
+				if (ImGui::MenuItem("Flag: NoSplit", "", (dockspace_flags & ImGuiDockNodeFlags_NoSplit) != 0)) { dockspace_flags ^= ImGuiDockNodeFlags_NoSplit; }
+				if (ImGui::MenuItem("Flag: NoResize", "", (dockspace_flags & ImGuiDockNodeFlags_NoResize) != 0)) { dockspace_flags ^= ImGuiDockNodeFlags_NoResize; }
+				if (ImGui::MenuItem("Flag: NoDockingInCentralNode", "", (dockspace_flags & ImGuiDockNodeFlags_NoDockingInCentralNode) != 0)) { dockspace_flags ^= ImGuiDockNodeFlags_NoDockingInCentralNode; }
+				if (ImGui::MenuItem("Flag: AutoHideTabBar", "", (dockspace_flags & ImGuiDockNodeFlags_AutoHideTabBar) != 0)) { dockspace_flags ^= ImGuiDockNodeFlags_AutoHideTabBar; }
+				if (ImGui::MenuItem("Flag: PassthruCentralNode", "", (dockspace_flags & ImGuiDockNodeFlags_PassthruCentralNode) != 0, opt_fullscreen)) { dockspace_flags ^= ImGuiDockNodeFlags_PassthruCentralNode; }
+				ImGui::Separator();
+
+				if (ImGui::MenuItem("Close", NULL, false))
+					p_open = false;
+				ImGui::EndMenu();
+			}
+
+			ImGui::EndMenuBar();
+		}
+	}
+	ImGui::End();
+}
+
+void EditorLayer::ShowSceneControllerUI()
+{
+	static Wuya::SharedPtr<Wuya::Texture2D> play_icon = EditorAssetManager::Instance()->GetOrCreateTexture("editor_res/icons/play.png");
+	static Wuya::SharedPtr<Wuya::Texture2D> stop_icon = EditorAssetManager::Instance()->GetOrCreateTexture("editor_res/icons/stop.png");
+
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 2)); /* 指定间隔 */
+	ImGui::PushStyleVar(ImGuiStyleVar_ItemInnerSpacing, ImVec2(0, 2));
+
+	ImGui::Begin("##Scene Controller", nullptr, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
+	{
+		const float icon_size = ImGui::GetWindowHeight() - 4.0f;
+		const float panel_width = ImGui::GetWindowContentRegionMax().x;
+		START_TRANSPARENT_BUTTON;
+		const auto icon = (m_PlayMode == PlayMode::Edit) ? play_icon : stop_icon;
+		ImGui::SetCursorPosX((panel_width - icon_size) * 0.5f);
+		if (ImGui::ImageButton((ImTextureID)icon->GetTextureID(), ImVec2(icon_size, icon_size), ImVec2(0, 1), ImVec2(1, 0), 0))
+		{
+			OnPlayModeChanged();
+		}
+		END_TRANSPARENT_BUTTON;
+	}
+
+	ImGui::End();
+	ImGui::PopStyleVar(2);
+}
+
+void EditorLayer::ShowSceneViewportUI()
+{
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+	ImGui::Begin("Scene");
+	{
+		// 若当前ImGui窗口不是主窗口，应阻塞事件传递
+		m_IsViewportFocused = ImGui::IsWindowFocused();
+		m_IsViewportHovered = ImGui::IsWindowHovered();
+		Wuya::Application::Instance()->GetImGuiLayer()->BlockEvents(!m_IsViewportFocused && !m_IsViewportHovered);
+
+		auto viewport_panel_size = ImGui::GetContentRegionAvail();
+		m_ViewportSize = { viewport_panel_size.x, viewport_panel_size.y };
+
+		// 绘制场景
+		const uint64_t texture_id = m_pFrameBuffer->GetColorAttachmentByIndex(0);
+		ImGui::Image((ImTextureID)(texture_id), viewport_panel_size, ImVec2{ 0, 1 }, ImVec2{ 1, 0 });
+
+		// 拖动资源到主窗口
+		if (ImGui::BeginDragDropTarget())
+		{
+			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("RESOURCE_BROWSER_ITEM"))
+			{
+				// todo
+			}
+			ImGui::EndDragDropTarget();
+		}
+
+		// Gizmos
+	}
+	ImGui::End();
+	ImGui::PopStyleVar();
+}
+
+void EditorLayer::ShowStatisticInfoUI()
+{
+	ImGui::Begin("Stat Info");
+	{
+		// todo: 帧率等
+		// Renderer2D Stats
+		if (ImGui::CollapsingHeader("2D"))
+		{
+			auto statistics = Wuya::Renderer2D::GetStatisticsInfo();
+			ImGui::BulletText("Draw Calls: %d", statistics.DrawCalls);
+			ImGui::BulletText("Quads: %d", statistics.QuadCount);
+			ImGui::BulletText("Vertices: %d", statistics.TotalVertexCount());
+			ImGui::BulletText("Indices: %d", statistics.TotalIndexCount());
+		}
+		// Renderer3D Stats
+		if (ImGui::CollapsingHeader("3D"))
+		{
+			// todo: 三角形、模型数量
+		}
+	}
+	ImGui::End();
+}
+
 void EditorLayer::OnUpdate(float delta_time)
 {
 	PROFILE_FUNCTION();
@@ -317,8 +380,8 @@ void EditorLayer::OnUpdate(float delta_time)
 				if (m_IsViewportFocused)
 				{
 					m_pOrthographicCameraController->OnUpdate(delta_time);
+					m_pEditorCamera->OnUpdate();
 				}
-				m_pEditorCamera->OnUpdate();
 
 				/* 更新场景中的实体 */
 				m_pMainScene->OnUpdateEditor(m_pEditorCamera, delta_time);
