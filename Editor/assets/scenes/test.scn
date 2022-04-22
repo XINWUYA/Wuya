@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Scene>
+    <Entities>
+        <Entity ID="1" Name="Object2">
+            <Transform Position="0.000000 0.000000 2.300000" Rotation="0.040143 0.000000 0.000000" Scale="1.000000 1.000000 1.000000"/>
+        </Entity>
+        <Entity ID="1" Name="Object1">
+            <Transform Position="3.100000 1.300000 0.000000" Rotation="0.000000 0.027925 0.000000" Scale="1.000000 1.000000 1.000000"/>
+        </Entity>
+    </Entities>
+</Scene>

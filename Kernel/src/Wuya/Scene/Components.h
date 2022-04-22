@@ -23,20 +23,20 @@ namespace Wuya
 	/* 空间变换组件 */
 	struct TransformComponent
 	{
-		glm::vec3 Translation{ 0.0f, 0.0f, 0.0f };
+		glm::vec3 Position{ 0.0f, 0.0f, 0.0f };
 		glm::vec3 Rotation{ 0.0f, 0.0f, 0.0f };
 		glm::vec3 Scale{ 1.0f, 1.0f, 1.0f };
 
 		TransformComponent() = default;
 		TransformComponent(const TransformComponent&) = default;
-		TransformComponent(const glm::vec3& translation)
-			: Translation(translation)
+		TransformComponent(const glm::vec3& position)
+			: Position(position)
 		{}
 
 		glm::mat4 GetTransform() const
 		{
 			const glm::mat4 rotation_mat = glm::toMat4(glm::quat(Rotation));
-			return glm::translate(glm::mat4(1.0f), Translation)
+			return glm::translate(glm::mat4(1.0f), Position)
 				* rotation_mat
 				* glm::scale(glm::mat4(1.0f), Scale);
 		}

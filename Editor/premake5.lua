@@ -24,6 +24,7 @@ project "Editor"
 		"%{IncludeDirs.ImGui}",
 		"%{IncludeDirs.glm}",
 		"%{IncludeDirs.entt}",
+		"%{IncludeDirs.tinyxml2}",
 	}
 
 	links

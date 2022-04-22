@@ -8,6 +8,7 @@ IncludeDirs["ImGui"] = "%{wks.location}/Kernel/third_party/imgui"
 IncludeDirs["glm"] = "%{wks.location}/Kernel/third_party/glm"
 IncludeDirs["stb"] = "%{wks.location}/Kernel/third_party/stb"
 IncludeDirs["entt"] = "%{wks.location}/Kernel/third_party/entt/single_include"
+IncludeDirs["tinyxml2"] = "%{wks.location}/Kernel/third_party/tinyxml2"
 
 -- Solution configuration
 workspace "Wuya"

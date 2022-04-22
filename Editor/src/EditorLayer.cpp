@@ -6,6 +6,8 @@
 #include "Wuya/Events/KeyEvent.h"
 #include "Wuya/Events/MouseEvent.h"
 
+extern const std::filesystem::path g_AssetPath;
+
 EditorLayer::EditorLayer()
 	: ILayer("EditorLayer")
 {
@@ -110,21 +112,6 @@ void EditorLayer::OnEvent(Wuya::IEvent* event)
 	dispatcher.Dispatch<Wuya::MouseButtonPressedEvent>(BIND_EVENT_FUNC(EditorLayer::OnMouseButtonPressed));
 }
 
-void EditorLayer::NewScene()
-{
-	m_pMainScene = Wuya::CreateSharedPtr<Wuya::Scene>();
-	m_SceneHierarchy.SetOwnerScene(m_pMainScene);
-}
-
-void EditorLayer::OpenScene()
-{
-	//todo: 打开一个序列化的场景
-}
-
-void EditorLayer::SaveScene()
-{
-}
-
 void EditorLayer::UpdateViewport()
 {
 	const auto desc = m_pFrameBuffer->GetDescription();
@@ -146,10 +133,16 @@ bool EditorLayer::OnKeyPressed(Wuya::KeyPressedEvent* event)
 
 	switch (event->GetKeyCode())
 	{
-	case Wuya::Key::N: // Ctrl+N：新建一个场景
+	case Wuya::Key::N: /* Ctrl+N：新建一个场景 */
 	{
 		if (is_ctrl_pressed)
 			NewScene();
+		break;
+	}
+	case Wuya::Key::S: /* Ctrl+S: 保存场景 */
+	{
+		if (is_ctrl_pressed)
+			SaveScene();
 		break;
 	}
 	}
@@ -176,6 +169,39 @@ void EditorLayer::OnPlayModeChanged()
 		m_PlayMode = PlayMode::Edit;
 	}
 
+}
+
+void EditorLayer::NewScene()
+{
+	m_pMainScene = Wuya::CreateSharedPtr<Wuya::Scene>();
+	m_SceneHierarchy.SetOwnerScene(m_pMainScene);
+}
+
+void EditorLayer::OpenScene()
+{
+	//std::string file_path = FileDialog
+	//todo: 打开一个序列化的场景
+}
+
+void EditorLayer::SaveScene()
+{
+	m_pMainScene->Serializer("assets/scenes/test.scn");
+}
+
+void EditorLayer::OpenScene(const std::filesystem::path& path)
+{
+	if (path.extension().string() != ".scn")
+	{
+		EDITOR_LOG_ERROR("File is not a scene file: {}.", path.filename().string());
+		return;
+	}
+
+	Wuya::SharedPtr<Wuya::Scene> new_scene = Wuya::CreateSharedPtr<Wuya::Scene>();
+	if (new_scene->Deserializer(path.string()))
+	{
+		m_pMainScene = new_scene;
+		m_SceneHierarchy.SetOwnerScene(m_pMainScene);
+	}
 }
 
 void EditorLayer::ShowMenuUI()
@@ -243,6 +269,11 @@ void EditorLayer::ShowMenuUI()
 				if (ImGui::MenuItem("New Scene", "Ctrl+N"))
 				{
 					NewScene();
+				}
+
+				if(ImGui::MenuItem("Open Scene", "Ctrl+O"))
+				{
+					OpenScene();
 				}
 
 				if (ImGui::MenuItem("Exit"))
@@ -325,7 +356,8 @@ void EditorLayer::ShowSceneViewportUI()
 		{
 			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("RESOURCE_BROWSER_ITEM"))
 			{
-				// todo
+				const wchar_t* path = (const wchar_t*)payload->Data;
+				OpenScene(g_AssetPath / path);
 			}
 			ImGui::EndDragDropTarget();
 		}

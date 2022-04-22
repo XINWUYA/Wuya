@@ -1,6 +1,11 @@
 #pragma once
 #include <entt/entt.hpp>
 
+namespace tinyxml2
+{
+	class XMLElement;
+}
+
 namespace Wuya
 {
 	class Entity;
@@ -30,10 +35,17 @@ namespace Wuya
 		/* 获取主相机实体 */
 		Entity GetPrimaryCameraEntity();
 
+		/* 序列化场景 */
+		void Serializer(const std::string& path);
+		bool Deserializer(const std::string& path);
+
 		template<typename T>
 		void OnComponentAdded(Entity& entity, T& component);
 
 	private:
+		/* 序列化一个实体 */
+		void SerializeEntity(tinyxml2::XMLElement* root_node, Entity& entity);
+
 		/* 场景中的所有实体都将注册到这里 */
 		entt::registry m_Registry;
 	};

@@ -297,10 +297,10 @@ void EditorSceneHierarchy::ShowEntityComponents(Wuya::Entity& entity)
 	/* 空间变换组件 */
 	if (entity.HasComponent<Wuya::TransformComponent>())
 	{
-		ShowComponent<Wuya::TransformComponent>("Translation", entity,
+		ShowComponent<Wuya::TransformComponent>("Transform", entity,
 			[](auto& component)
 			{
-				DrawVec3Control("Position", component.Translation, 0.0f, 50.0f);
+				DrawVec3Control("Position", component.Position, 0.0f, 50.0f);
 				glm::vec3 rotation = glm::degrees(component.Rotation);
 				DrawVec3Control("Rotation", rotation, 0.0f, 50.0f);
 				component.Rotation = glm::radians(rotation);
@@ -323,7 +323,7 @@ void EditorSceneHierarchy::ShowEntityComponents(Wuya::Entity& entity)
 					if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("RESOURCE_BROWSER_ITEM"))
 					{
 						const wchar_t* path = (const wchar_t*)payload->Data;
-						const std::filesystem::path texture_path = std::filesystem::path(g_AssetPath) / path;
+						const std::filesystem::path texture_path = g_AssetPath / path;
 						auto texture = EditorAssetManager::Instance()->GetOrCreateTexture(texture_path.string());
 						if (texture->IsLoaded())
 							component.Texture = texture;

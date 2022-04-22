@@ -27,6 +27,7 @@ project "Kernel"
 		"%{IncludeDirs.glm}",
 		"%{IncludeDirs.stb}",
 		"%{IncludeDirs.entt}",
+		"%{IncludeDirs.tinyxml2}",
 	}
 	
 	defines
@@ -41,6 +42,7 @@ project "Kernel"
 		"GLFW",
 		"Glad",
 		"ImGui",
+		"tinyxml2",
 		"opengl32.lib",
 	}
 

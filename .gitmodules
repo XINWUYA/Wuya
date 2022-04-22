@@ -19,3 +19,6 @@
 [submodule "Kernel/third_party/entt"]
 	path = Kernel/third_party/entt
 	url = https://github.com/skypjack/entt
+[submodule "Kernel/third_party/tinyxml2"]
+	path = Kernel/third_party/tinyxml2
+	url = https://github.com/leethomason/tinyxml2

@@ -22,13 +22,6 @@ public:
 	void OnImGuiRender() override;
 	void OnEvent(Wuya::IEvent* event) override;
 
-	/* 新建场景 */
-	void NewScene();
-	/* 打开场景 */
-	void OpenScene();
-	/* 保存场景 */
-	void SaveScene();
-
 private:
 	/* 更新视口 */
 	void UpdateViewport();
@@ -38,6 +31,15 @@ private:
 	bool OnMouseButtonPressed(Wuya::MouseButtonPressedEvent* event);
 	/* 切换运行模式 */
 	void OnPlayModeChanged();
+
+	/* 新建场景 */
+	void NewScene();
+	/* 打开场景：通过弹窗找到指定场景文件并打开 */
+	void OpenScene();
+	/* 保存场景 */
+	void SaveScene();
+	/* 打开指定场景 */
+	void OpenScene(const std::filesystem::path& path);
 
 	/* 显示菜单栏UI */
 	void ShowMenuUI();
