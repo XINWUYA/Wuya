@@ -1,19 +1,22 @@
+#include "pch.h"
 #include "EditorSceneHierarchy.h"
-#include "EditorUICreator.h"
+#include "EditorUIFunctions.h"
 #include "EditorAssetManager.h"
-#include <imgui.h>
-#include <imgui_internal.h>
 #include <glm/gtc/type_ptr.hpp>
 
 extern const std::filesystem::path g_AssetPath;
 
 EditorSceneHierarchy::EditorSceneHierarchy()
 {
+	PROFILE_FUNCTION();
+
 	InitIcons();
 }
 
 EditorSceneHierarchy::EditorSceneHierarchy(const Wuya::SharedPtr<Wuya::Scene>& scene)
 {
+	PROFILE_FUNCTION();
+
 	SetOwnerScene(scene);
 	InitIcons();
 }
@@ -26,6 +29,8 @@ void EditorSceneHierarchy::SetOwnerScene(const Wuya::SharedPtr<Wuya::Scene>& sce
 
 void EditorSceneHierarchy::OnImGuiRender()
 {
+	PROFILE_FUNCTION();
+
 	/* 场景实体列表 */
 	ShowSceneHierarchyUI();
 
@@ -40,6 +45,8 @@ void EditorSceneHierarchy::SetSelectedEntity(const Wuya::Entity& entity)
 
 void EditorSceneHierarchy::ShowSceneHierarchyUI()
 {
+	PROFILE_FUNCTION();
+
 	ImGui::Begin("Scene Hierarchy");
 	{
 		m_pOwnerScene->GetRegistry().each(
@@ -69,6 +76,8 @@ void EditorSceneHierarchy::ShowSceneHierarchyUI()
 
 void EditorSceneHierarchy::ShowEntityPropertiesUI()
 {
+	PROFILE_FUNCTION();
+
 	ImGui::Begin("Properties");
 	{
 		if (m_SelectedEntity)
@@ -79,12 +88,16 @@ void EditorSceneHierarchy::ShowEntityPropertiesUI()
 
 void EditorSceneHierarchy::InitIcons()
 {
+	PROFILE_FUNCTION();
+
 	m_pAddComponentIcon = EditorAssetManager::Instance()->GetOrCreateTexture("editor_res/icons/add.png");
 	m_pMenuIcon = EditorAssetManager::Instance()->GetOrCreateTexture("editor_res/icons/menu.png");
 }
 
 void EditorSceneHierarchy::ShowEntityNode( Wuya::Entity& entity)
 {
+	PROFILE_FUNCTION();
+
 	const auto& name = entity.GetComponent<Wuya::NameComponent>().Name;
 
 	ImGuiTreeNodeFlags flags = ((m_SelectedEntity == entity) ? ImGuiTreeNodeFlags_Selected : 0) | ImGuiTreeNodeFlags_OpenOnArrow;
@@ -126,8 +139,10 @@ void EditorSceneHierarchy::ShowEntityNode( Wuya::Entity& entity)
 
 /* 组件框架 */
 template<typename T, typename UIFunction>
-static void ShowComponent(const std::string& name, Wuya::Entity& entity, UIFunction function)
+static void ShowComponent(const std::string& name, Wuya::Entity& entity, UIFunction show_custom)
 {
+	PROFILE_FUNCTION();
+
 	const ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_AllowItemOverlap | ImGuiTreeNodeFlags_FramePadding;
 	if (entity.HasComponent<T>())
 	{
@@ -163,7 +178,7 @@ static void ShowComponent(const std::string& name, Wuya::Entity& entity, UIFunct
 		/* 展开时显示组件内容 */
 		if (open)
 		{
-			function(component);
+			show_custom(component);
 			ImGui::TreePop();
 		}
 
@@ -173,77 +188,15 @@ static void ShowComponent(const std::string& name, Wuya::Entity& entity, UIFunct
 	}
 }
 
-static void DrawVec3Control(const std::string& label, glm::vec3& values, float resetValue = 0.0f, float columnWidth = 100.0f)
-{
-	ImGuiIO& io = ImGui::GetIO();
-	auto boldFont = io.Fonts->Fonts[0];
-
-	ImGui::PushID(label.c_str());
-
-	ImGui::Columns(2);
-	ImGui::SetColumnWidth(0, 80);
-	ImGui::Text(label.c_str());
-	ImGui::NextColumn();
-
-	ImGui::PushMultiItemsWidths(3, ImGui::CalcItemWidth());
-	ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2{ 0, 0 });
-
-	float lineHeight = GImGui->Font->FontSize + GImGui->Style.FramePadding.y * 2.0f;
-	ImVec2 buttonSize = { lineHeight + 3.0f, lineHeight };
-
-	ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ 0.8f, 0.1f, 0.15f, 1.0f });
-	ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 0.9f, 0.2f, 0.2f, 1.0f });
-	ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 0.8f, 0.1f, 0.15f, 1.0f });
-	ImGui::PushFont(boldFont);
-	if (ImGui::Button("X", buttonSize))
-		values.x = resetValue;
-	ImGui::PopFont();
-	ImGui::PopStyleColor(3);
-
-	ImGui::SameLine();
-	ImGui::DragFloat("##X", &values.x, 0.1f, 0.0f, 0.0f, "%.2f");
-	ImGui::PopItemWidth();
-	ImGui::SameLine();
-
-	ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ 0.2f, 0.7f, 0.2f, 1.0f });
-	ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 0.3f, 0.8f, 0.3f, 1.0f });
-	ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 0.2f, 0.7f, 0.2f, 1.0f });
-	ImGui::PushFont(boldFont);
-	if (ImGui::Button("Y", buttonSize))
-		values.y = resetValue;
-	ImGui::PopFont();
-	ImGui::PopStyleColor(3);
-
-	ImGui::SameLine();
-	ImGui::DragFloat("##Y", &values.y, 0.1f, 0.0f, 0.0f, "%.2f");
-	ImGui::PopItemWidth();
-	ImGui::SameLine();
-
-	ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ 0.1f, 0.25f, 0.8f, 1.0f });
-	ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 0.2f, 0.35f, 0.9f, 1.0f });
-	ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 0.1f, 0.25f, 0.8f, 1.0f });
-	ImGui::PushFont(boldFont);
-	if (ImGui::Button("Z", buttonSize))
-		values.z = resetValue;
-	ImGui::PopFont();
-	ImGui::PopStyleColor(3);
-
-	ImGui::SameLine();
-	ImGui::DragFloat("##Z", &values.z, 0.1f, 0.0f, 0.0f, "%.2f");
-	ImGui::PopItemWidth();
-
-	ImGui::PopStyleVar();
-
-	ImGui::Columns(1);
-
-	ImGui::PopID();
-}
-
 void EditorSceneHierarchy::ShowEntityComponents(Wuya::Entity& entity)
 {
-	/* 实体名称组件 */ 
+	PROFILE_FUNCTION();
+
+	/* 实体名称组件 */
 	if (entity.HasComponent<Wuya::NameComponent>())
 	{
+		PROFILE_SCOPE("Show NameComponent");
+
 		auto& name = entity.GetComponent<Wuya::NameComponent>().Name;
 
 		char buffer[256];
@@ -297,14 +250,16 @@ void EditorSceneHierarchy::ShowEntityComponents(Wuya::Entity& entity)
 	/* 空间变换组件 */
 	if (entity.HasComponent<Wuya::TransformComponent>())
 	{
+		PROFILE_SCOPE("Show TransformComponent");
+
 		ShowComponent<Wuya::TransformComponent>("Transform", entity,
 			[](auto& component)
 			{
-				DrawVec3Control("Position", component.Position, 0.0f, 50.0f);
+				EditorUIFunctions::DrawVec3ControlUI("Position", component.Position, 0.0f);
 				glm::vec3 rotation = glm::degrees(component.Rotation);
-				DrawVec3Control("Rotation", rotation, 0.0f, 50.0f);
+				EditorUIFunctions::DrawVec3ControlUI("Rotation", rotation, 0.0f);
 				component.Rotation = glm::radians(rotation);
-				DrawVec3Control("Scale", component.Scale, 1.0f, 50.0f);
+				EditorUIFunctions::DrawVec3ControlUI("Scale", component.Scale, 1.0f);
 
 			});
 	}
@@ -312,32 +267,14 @@ void EditorSceneHierarchy::ShowEntityComponents(Wuya::Entity& entity)
 	/* 图片精灵组件 */
 	if (entity.HasComponent<Wuya::SpriteComponent>())
 	{
+		PROFILE_SCOPE("Show SpriteComonent");
+
 		ShowComponent<Wuya::SpriteComponent>("Sprite", entity,
 			[](auto& component)
 			{
-				ImGui::ColorEdit4("Color", glm::value_ptr(component.BaseColor));
-
-				ImGui::Button("Texture", ImVec2(100.0f, 0.0f));
-				if (ImGui::BeginDragDropTarget())
-				{
-					if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("RESOURCE_BROWSER_ITEM"))
-					{
-						const wchar_t* path = (const wchar_t*)payload->Data;
-						const std::filesystem::path texture_path = g_AssetPath / path;
-						auto texture = EditorAssetManager::Instance()->GetOrCreateTexture(texture_path.string());
-						if (texture->IsLoaded())
-							component.Texture = texture;
-						else
-							EDITOR_LOG_WARN("Failed to load texture {0}.", texture_path.filename().string());
-					}
-					ImGui::EndDragDropTarget();
-				}
-
-				ImGui::DragFloat("Tiling Factor", &component.TilingFactor, 0.1f, 0.0f, 100.0f);
+				EditorUIFunctions::DrawColorUI("BaseColor", component.BaseColor);
+				EditorUIFunctions::DrawTextureUI("Texture", component.Texture, component.TilingFactor);
 			});
 	}
-
-	// String
-	std::string val = "aaaaaaaaaaaaaa";
-	CREATE_UI("String", "test", &val);
+	
 }

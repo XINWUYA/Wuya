@@ -1,13 +1,14 @@
+#include "pch.h"
 #include "EditorResourceBrowser.h"
 #include "EditorUtils.h"
-#include <imgui.h>
-#include <imgui_internal.h>
 #include "EditorAssetManager.h"
-#include "EditorUICreator.h"
+#include "EditorUIFunctions.h"
 
 extern const std::filesystem::path g_AssetPath = "assets";
 EditorResourceBrowser::EditorResourceBrowser()
 {
+	PROFILE_FUNCTION();
+
 	m_pFolderIcon = EditorAssetManager::Instance()->GetOrCreateTexture("editor_res/icons/directory.png");
 	m_pFileIcon = EditorAssetManager::Instance()->GetOrCreateTexture("editor_res/icons/file.png");
 	m_pFilterIcon = EditorAssetManager::Instance()->GetOrCreateTexture("editor_res/icons/filter.png");
@@ -17,6 +18,8 @@ EditorResourceBrowser::EditorResourceBrowser()
 
 void EditorResourceBrowser::OnImGuiRenderer()
 {
+	PROFILE_FUNCTION();
+
 	/* 重新生成文件目录节点树 */
 	if (m_IsDirty)
 	{

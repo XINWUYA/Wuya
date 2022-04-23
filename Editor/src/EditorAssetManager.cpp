@@ -1,3 +1,4 @@
+#include "pch.h"
 #include "EditorAssetManager.h"
 #include <Wuya.h>
 
@@ -13,6 +14,8 @@ EditorAssetManager* EditorAssetManager::Instance()
 
 Wuya::SharedPtr<Wuya::Texture2D> EditorAssetManager::GetOrCreateTexture(const std::string& path)
 {
+	PROFILE_FUNCTION();
+
 	/* 先在map中查找 */
 	const auto it = m_TextureAssetMap.find(path);
 	if (it != m_TextureAssetMap.end())

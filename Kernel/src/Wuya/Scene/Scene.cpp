@@ -12,6 +12,8 @@ namespace Wuya
 {
 	Entity Scene::CreateEntity(const std::string& name)
 	{
+		PROFILE_FUNCTION();
+
 		Entity entity = { m_Registry.create(), this };
 
 		/* 默认添加名称组件和变换组件 */
@@ -25,17 +27,23 @@ namespace Wuya
 
 	void Scene::DestroyEntity(Entity& entity)
 	{
+		PROFILE_FUNCTION();
+
 		m_Registry.destroy(entity);
 	}
 
 	void Scene::OnUpdateRuntime(float delta_time)
 	{
+		PROFILE_FUNCTION();
+
 		/* 更新所有实体的变换 */
 		// auto entity_group = m_Registry.group<TransformComponent>(entt::get<>)
 	}
 
 	void Scene::OnUpdateEditor(const SharedPtr<EditorCamera>& camera, float delta_time)
 	{
+		PROFILE_FUNCTION();
+
 		/* 更新Renderer2D信息 */
 		Renderer2D::BeginScene(camera);
 
@@ -53,6 +61,8 @@ namespace Wuya
 
 	Entity Scene::GetPrimaryCameraEntity()
 	{
+		PROFILE_FUNCTION();
+
 		/* difference of view and group: https://github.com/skypjack/entt/discussions/638 */
 		const auto entity_view = m_Registry.view<CameraComponent>();
 		for (auto& entity : entity_view)
@@ -66,6 +76,8 @@ namespace Wuya
 
 	void Scene::Serializer(const std::string& path)
 	{
+		PROFILE_FUNCTION();
+
 		auto* doc = new tinyxml2::XMLDocument();
 		doc->InsertEndChild(doc->NewDeclaration());
 		tinyxml2::XMLElement* scene_root = doc->NewElement("Scene");
@@ -91,6 +103,8 @@ namespace Wuya
 
 	bool Scene::Deserializer(const std::string& path)
 	{
+		PROFILE_FUNCTION();
+
 		auto* doc = new tinyxml2::XMLDocument();
 		tinyxml2::XMLError error = doc->LoadFile(path.c_str());
 		if (error != tinyxml2::XML_SUCCESS)
@@ -135,6 +149,8 @@ namespace Wuya
 
 	void Scene::SerializeEntity(tinyxml2::XMLElement* root_node, Entity& entity)
 	{
+		PROFILE_FUNCTION();
+
 		tinyxml2::XMLElement* entity_root = root_node->InsertNewChildElement("Entity");
 
 		/* ID */

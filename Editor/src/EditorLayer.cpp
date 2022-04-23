@@ -1,8 +1,7 @@
+#include "pch.h"
 #include "EditorLayer.h"
-#include <imgui.h>
-
 #include "EditorAssetManager.h"
-#include "EditorUICreator.h"
+#include "EditorUIFunctions.h"
 #include "Wuya/Events/KeyEvent.h"
 #include "Wuya/Events/MouseEvent.h"
 
@@ -11,6 +10,7 @@ extern const std::filesystem::path g_AssetPath;
 EditorLayer::EditorLayer()
 	: ILayer("EditorLayer")
 {
+	PROFILE_FUNCTION();
 }
 
 void EditorLayer::OnAttached()
@@ -114,6 +114,8 @@ void EditorLayer::OnEvent(Wuya::IEvent* event)
 
 void EditorLayer::UpdateViewport()
 {
+	PROFILE_FUNCTION();
+
 	const auto desc = m_pFrameBuffer->GetDescription();
 	if (m_ViewportSize.x > 0 && m_ViewportSize.y > 0 &&
 		(desc.Width != m_ViewportSize.x || desc.Height != m_ViewportSize.y))
@@ -126,6 +128,8 @@ void EditorLayer::UpdateViewport()
 
 bool EditorLayer::OnKeyPressed(Wuya::KeyPressedEvent* event)
 {
+	PROFILE_FUNCTION();
+
 	if (event->GetRepeatCount() > 0)
 		return false;
 
@@ -150,6 +154,8 @@ bool EditorLayer::OnKeyPressed(Wuya::KeyPressedEvent* event)
 
 bool EditorLayer::OnMouseButtonPressed(Wuya::MouseButtonPressedEvent* event)
 {
+	PROFILE_FUNCTION();
+
 	if (event->GetMouseButton() == Wuya::Mouse::ButtonLeft)
 	{
 		if (m_IsViewportHovered)
@@ -160,6 +166,8 @@ bool EditorLayer::OnMouseButtonPressed(Wuya::MouseButtonPressedEvent* event)
 
 void EditorLayer::OnPlayModeChanged()
 {
+	PROFILE_FUNCTION();
+
 	if (m_PlayMode == PlayMode::Edit) /* 编辑模式切换为运行模式 */
 	{
 		m_PlayMode = PlayMode::Runtime;
@@ -173,23 +181,31 @@ void EditorLayer::OnPlayModeChanged()
 
 void EditorLayer::NewScene()
 {
+	PROFILE_FUNCTION();
+
 	m_pMainScene = Wuya::CreateSharedPtr<Wuya::Scene>();
 	m_SceneHierarchy.SetOwnerScene(m_pMainScene);
 }
 
 void EditorLayer::OpenScene()
 {
+	PROFILE_FUNCTION();
+
 	//std::string file_path = FileDialog
 	//todo: 打开一个序列化的场景
 }
 
 void EditorLayer::SaveScene()
 {
+	PROFILE_FUNCTION();
+
 	m_pMainScene->Serializer("assets/scenes/test.scn");
 }
 
 void EditorLayer::OpenScene(const std::filesystem::path& path)
 {
+	PROFILE_FUNCTION();
+
 	if (path.extension().string() != ".scn")
 	{
 		EDITOR_LOG_ERROR("File is not a scene file: {}.", path.filename().string());
@@ -206,6 +222,8 @@ void EditorLayer::OpenScene(const std::filesystem::path& path)
 
 void EditorLayer::ShowMenuUI()
 {
+	PROFILE_FUNCTION();
+
 	static bool p_open = true;
 	static bool opt_fullscreen = true;
 	static bool opt_padding = false;
@@ -310,6 +328,8 @@ void EditorLayer::ShowMenuUI()
 
 void EditorLayer::ShowSceneControllerUI()
 {
+	PROFILE_FUNCTION();
+
 	static Wuya::SharedPtr<Wuya::Texture2D> play_icon = EditorAssetManager::Instance()->GetOrCreateTexture("editor_res/icons/play.png");
 	static Wuya::SharedPtr<Wuya::Texture2D> stop_icon = EditorAssetManager::Instance()->GetOrCreateTexture("editor_res/icons/stop.png");
 
@@ -336,6 +356,8 @@ void EditorLayer::ShowSceneControllerUI()
 
 void EditorLayer::ShowSceneViewportUI()
 {
+	PROFILE_FUNCTION();
+
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
 	ImGui::Begin("Scene");
 	{
@@ -370,6 +392,8 @@ void EditorLayer::ShowSceneViewportUI()
 
 void EditorLayer::ShowStatisticInfoUI()
 {
+	PROFILE_FUNCTION();
+
 	ImGui::Begin("Stat Info");
 	{
 		// todo: 帧率等

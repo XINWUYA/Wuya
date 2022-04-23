@@ -122,6 +122,7 @@ namespace Wuya
 
 	void Renderer2D::Update()
 	{
+		PROFILE_FUNCTION();
 	}
 
 	void Renderer2D::Release()
@@ -143,6 +144,8 @@ namespace Wuya
 
 	void Renderer2D::StartNewBatch()
 	{
+		PROFILE_FUNCTION();
+
 		/* 重置新批次的渲染数据 */
 		s_RenderData2D.TotalIndexCount = 0;
 		s_RenderData2D.pQuadVertexBufferCurrent = s_RenderData2D.pQuadVertexBufferBase;
@@ -151,6 +154,8 @@ namespace Wuya
 
 	void Renderer2D::NextBatch()
 	{
+		PROFILE_FUNCTION();
+
 		/* 提交当前批次数据 */
 		Flush();
 

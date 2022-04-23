@@ -14,10 +14,15 @@ namespace Wuya
 		void Bind(uint32_t slot = 0) override;
 		void SetData(void* data, uint32_t size) override;
 
+		/* 获取纹理原始尺寸 */
 		uint32_t GetWidth() const override { return m_Width; }
 		uint32_t GetHeight() const override { return m_Height; }
+		/* 获取纹理所在路径 */
+		const std::string& GetPath() const override { return m_Path; }
 
+		/* 纹理ID */
 		uint32_t GetTextureID() const override { return m_TextureId; }
+		/* 纹理成功加载 */
 		bool IsLoaded() const override { return m_IsLoaded; }
 
 		bool operator==(const ITexture& other) const override

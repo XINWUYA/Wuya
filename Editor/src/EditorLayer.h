@@ -79,6 +79,8 @@ private:
 	/* 鼠标停留在视口上 */
 	bool m_IsViewportHovered{ false };
 	/* 默认为编辑模式 */
-	PlayMode m_PlayMode{ PlayMode::Edit }; 
+	PlayMode m_PlayMode{ PlayMode::Edit };
+	/* 移动，旋转，缩放UI */
+	int m_GizmoType = -1;
 };
 

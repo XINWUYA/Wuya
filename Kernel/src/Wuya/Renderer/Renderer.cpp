@@ -16,25 +16,34 @@ namespace Wuya
 
 	void Renderer::Update()
 	{
+		PROFILE_FUNCTION();
 	}
 
 	void Renderer::SetViewport(uint32_t x_start, uint32_t y_start, uint32_t width, uint32_t height)
 	{
+		PROFILE_FUNCTION();
+
 		m_pRenderAPI->SetViewport(x_start, y_start, width, height);
 	}
 
 	void Renderer::SetClearColor(const glm::vec4& color)
 	{
+		PROFILE_FUNCTION();
+
 		m_pRenderAPI->SetClearColor(color);
 	}
 
 	void Renderer::Clear()
 	{
+		PROFILE_FUNCTION();
+
 		m_pRenderAPI->Clear();
 	}
 
 	void Renderer::Submit(const SharedPtr<Shader>& shader, const SharedPtr<VertexArray>& vertex_array, uint32_t index_count)
 	{
+		PROFILE_FUNCTION();
+
 		shader->Bind();
 		vertex_array->Bind();
 
