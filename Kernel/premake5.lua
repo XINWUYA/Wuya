@@ -45,6 +45,13 @@ project "Kernel"
 		"tinyxml2",
 		"opengl32.lib",
 	}
+	
+	disablewarnings 
+	{ 
+		"4244", 
+		"4267", 
+		"4312" 
+	}
 
 	filter "system:windows"
 		systemversion "latest"

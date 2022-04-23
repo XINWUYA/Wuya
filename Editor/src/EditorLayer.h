@@ -49,6 +49,8 @@ private:
 	void ShowSceneViewportUI();
 	/* 显示渲染统计信息 */
 	void ShowStatisticInfoUI();
+	/* 选中Entity时显示操作Gizmo */
+	void ShowOperationGizmoUI();
 
 	/* 执行模式 */
 	enum class PlayMode : uint8_t
@@ -70,10 +72,12 @@ private:
 	EditorSceneHierarchy m_SceneHierarchy;
 	/* 资源管理窗口 */
 	EditorResourceBrowser m_ResourceBrowser;
-	/* */
+	/* 选中实体 */
 	Wuya::Entity m_HoveredEntity;
 	/* 视口尺寸 */
 	glm::uvec2 m_ViewportSize{};
+	/* 视口范围: x: width_min; y: height_min; z: width_max; w: height_max */
+	glm::vec4 m_ViewportRegion{};
 	/* 视口窗口被激活 */
 	bool m_IsViewportFocused{ false };
 	/* 鼠标停留在视口上 */

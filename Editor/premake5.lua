@@ -28,11 +28,19 @@ project "Editor"
 		"%{IncludeDirs.glm}",
 		"%{IncludeDirs.entt}",
 		"%{IncludeDirs.tinyxml2}",
+		"%{IncludeDirs.ImGuizmo}",
 	}
 
 	links
 	{
 		"Kernel",
+		"ImGuizmo",
+	}
+	
+	disablewarnings 
+	{ 
+		"4244", 
+		"4312" 
 	}
 
 	filter "system:windows"
@@ -41,6 +49,7 @@ project "Editor"
 		defines
 		{
 			"PLATFORM_WINDOWS",
+			"_CRT_SECURE_NO_WARNINGS",
 		}
 
 	filter "configurations:Debug"

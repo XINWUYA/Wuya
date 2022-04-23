@@ -22,3 +22,6 @@
 [submodule "Kernel/third_party/tinyxml2"]
 	path = Kernel/third_party/tinyxml2
 	url = https://github.com/leethomason/tinyxml2
+[submodule "Kernel/third_party/ImGuizmo"]
+	path = Kernel/third_party/ImGuizmo
+	url = https://github.com/CedricGuillemet/ImGuizmo

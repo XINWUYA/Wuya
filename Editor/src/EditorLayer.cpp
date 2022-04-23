@@ -1,7 +1,11 @@
 #include "pch.h"
 #include "EditorLayer.h"
+
+#include <glm/gtc/type_ptr.inl>
+
 #include "EditorAssetManager.h"
 #include "EditorUIFunctions.h"
+#include "ImGuizmo.h"
 #include "Wuya/Events/KeyEvent.h"
 #include "Wuya/Events/MouseEvent.h"
 
@@ -82,18 +86,15 @@ void EditorLayer::OnImGuiRender()
 
 	/* 菜单 */
 	ShowMenuUI();
-
 	/* 主窗口 */
 	ShowSceneViewportUI();
-
 	/* 场景控制UI */
 	ShowSceneControllerUI();
-
 	/* 统计信息 */
 	ShowStatisticInfoUI();
-
 	/* 场景管理及属性窗口 */
 	m_SceneHierarchy.OnImGuiRender();
+	/* 资源管理窗口 */
 	m_ResourceBrowser.OnImGuiRenderer();
 
 	bool open = true;
@@ -116,13 +117,13 @@ void EditorLayer::UpdateViewport()
 {
 	PROFILE_FUNCTION();
 
-	const auto desc = m_pFrameBuffer->GetDescription();
+	const Wuya::FrameBufferDescription desc = m_pFrameBuffer->GetDescription();
 	if (m_ViewportSize.x > 0 && m_ViewportSize.y > 0 &&
 		(desc.Width != m_ViewportSize.x || desc.Height != m_ViewportSize.y))
 	{
 		m_pFrameBuffer->Resize(m_ViewportSize.x, m_ViewportSize.y);
-		m_pEditorCamera->SetViewportSize(m_ViewportSize.x, m_ViewportSize.y);
-		m_pOrthographicCameraController->OnResize(m_ViewportSize.x, m_ViewportSize.y);
+		m_pEditorCamera->SetViewportSize(static_cast<float>(m_ViewportSize.x), static_cast<float>(m_ViewportSize.y));
+		m_pOrthographicCameraController->OnResize(static_cast<float>(m_ViewportSize.x), static_cast<float>(m_ViewportSize.y));
 	}
 }
 
@@ -149,7 +150,33 @@ bool EditorLayer::OnKeyPressed(Wuya::KeyPressedEvent* event)
 			SaveScene();
 		break;
 	}
+	case Wuya::Key::Q:
+	{
+		if (!ImGuizmo::IsUsing())
+			m_GizmoType = -1;
+		break;
 	}
+	case Wuya::Key::W:
+	{
+		if (!ImGuizmo::IsUsing())
+			m_GizmoType = ImGuizmo::OPERATION::TRANSLATE;
+		break;
+	}
+	case Wuya::Key::E:
+	{
+		if (!ImGuizmo::IsUsing())
+			m_GizmoType = ImGuizmo::OPERATION::ROTATE;
+		break;
+	}
+	case Wuya::Key::R:
+	{
+		if (!ImGuizmo::IsUsing())
+			m_GizmoType = ImGuizmo::OPERATION::SCALE;
+		break;
+	}
+	}
+
+	return true;
 }
 
 bool EditorLayer::OnMouseButtonPressed(Wuya::MouseButtonPressedEvent* event)
@@ -158,7 +185,7 @@ bool EditorLayer::OnMouseButtonPressed(Wuya::MouseButtonPressedEvent* event)
 
 	if (event->GetMouseButton() == Wuya::Mouse::ButtonLeft)
 	{
-		if (m_IsViewportHovered)
+		if (m_IsViewportHovered && !ImGuizmo::IsOver() && !Wuya::Input::IsKeyPressed(Wuya::Key::LeftAlt))
 			m_SceneHierarchy.SetSelectedEntity(m_HoveredEntity);
 	}
 	return false;
@@ -330,6 +357,10 @@ void EditorLayer::ShowSceneControllerUI()
 {
 	PROFILE_FUNCTION();
 
+	static Wuya::SharedPtr<Wuya::Texture2D> save_icon = EditorAssetManager::Instance()->GetOrCreateTexture("editor_res/icons/save.png");
+	static Wuya::SharedPtr<Wuya::Texture2D> translate_icon = EditorAssetManager::Instance()->GetOrCreateTexture("editor_res/icons/translate.png");
+	static Wuya::SharedPtr<Wuya::Texture2D> rotate_icon = EditorAssetManager::Instance()->GetOrCreateTexture("editor_res/icons/rotate.png");
+	static Wuya::SharedPtr<Wuya::Texture2D> scale_icon = EditorAssetManager::Instance()->GetOrCreateTexture("editor_res/icons/scale.png");
 	static Wuya::SharedPtr<Wuya::Texture2D> play_icon = EditorAssetManager::Instance()->GetOrCreateTexture("editor_res/icons/play.png");
 	static Wuya::SharedPtr<Wuya::Texture2D> stop_icon = EditorAssetManager::Instance()->GetOrCreateTexture("editor_res/icons/stop.png");
 
@@ -340,13 +371,60 @@ void EditorLayer::ShowSceneControllerUI()
 	{
 		const float icon_size = ImGui::GetWindowHeight() - 4.0f;
 		const float panel_width = ImGui::GetWindowContentRegionMax().x;
+
 		START_TRANSPARENT_BUTTON;
-		const auto icon = (m_PlayMode == PlayMode::Edit) ? play_icon : stop_icon;
+
+		constexpr float cursor_offset = 10.0f;
+		/* 保存场景按钮 */
+		ImGui::SetCursorPosX(cursor_offset);
+		if (ImGui::ImageButton((ImTextureID)save_icon->GetTextureID(), ImVec2(icon_size, icon_size), ImVec2(0, 1), ImVec2(1, 0), 0))
+		{
+			/*ImGui::OpenPopup("Save Scene");
+			EditorUIFunctions::RegisterPopupFunc("Save Scene", [&]()
+			{
+				bool never;
+				EditorUIFunctions::DrawModalUI("Save Scene", "Whether to save the current scene", never);
+			});*/
+			SaveScene();
+		}
+		//EditorUIFunctions::DrawPopups();
+
+		/* translate */
+		ImGui::SameLine(cursor_offset + icon_size * 2);
+		bool checked = m_GizmoType == ImGuizmo::OPERATION::TRANSLATE;
+		EditorUIFunctions::DrawCheckedImageButtonUI("Translate", translate_icon, ImVec2(icon_size, icon_size), checked,
+			[&]()
+			{
+				m_GizmoType = ImGuizmo::OPERATION::TRANSLATE;
+			});
+
+		/* rotate */
+		ImGui::SameLine();
+		checked = m_GizmoType == ImGuizmo::OPERATION::ROTATE;
+		EditorUIFunctions::DrawCheckedImageButtonUI("Rotate", rotate_icon, ImVec2(icon_size, icon_size), checked,
+			[&]()
+			{
+				m_GizmoType = ImGuizmo::OPERATION::ROTATE;
+			});
+
+		/* scale */
+		ImGui::SameLine();
+		checked = m_GizmoType == ImGuizmo::OPERATION::SCALE;
+		EditorUIFunctions::DrawCheckedImageButtonUI("Scale", scale_icon, ImVec2(icon_size, icon_size), checked,
+			[&]()
+			{
+				m_GizmoType = ImGuizmo::OPERATION::SCALE;
+			});
+
+		/* 切换执行模式 */
+		ImGui::SameLine();
+		const Wuya::SharedPtr<Wuya::Texture2D> icon = (m_PlayMode == PlayMode::Edit) ? play_icon : stop_icon;
 		ImGui::SetCursorPosX((panel_width - icon_size) * 0.5f);
 		if (ImGui::ImageButton((ImTextureID)icon->GetTextureID(), ImVec2(icon_size, icon_size), ImVec2(0, 1), ImVec2(1, 0), 0))
 		{
 			OnPlayModeChanged();
 		}
+
 		END_TRANSPARENT_BUTTON;
 	}
 
@@ -361,7 +439,18 @@ void EditorLayer::ShowSceneViewportUI()
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
 	ImGui::Begin("Scene");
 	{
-		// 若当前ImGui窗口不是主窗口，应阻塞事件传递
+		/* 获取窗口范围 */
+		const auto viewport_region_min = ImGui::GetWindowContentRegionMin();
+		const auto viewport_region_max = ImGui::GetWindowContentRegionMax();
+		const auto viewport_offset = ImGui::GetWindowPos();
+		m_ViewportRegion = {
+			viewport_region_min.x + viewport_offset.x,
+			viewport_region_min.y + viewport_offset.y,
+			viewport_region_max.x + viewport_offset.x,
+			viewport_region_max.y + viewport_offset.y
+		};
+
+		/* 若当前ImGui窗口不是主窗口，应阻塞事件传递 */
 		m_IsViewportFocused = ImGui::IsWindowFocused();
 		m_IsViewportHovered = ImGui::IsWindowHovered();
 		Wuya::Application::Instance()->GetImGuiLayer()->BlockEvents(!m_IsViewportFocused && !m_IsViewportHovered);
@@ -369,11 +458,11 @@ void EditorLayer::ShowSceneViewportUI()
 		auto viewport_panel_size = ImGui::GetContentRegionAvail();
 		m_ViewportSize = { viewport_panel_size.x, viewport_panel_size.y };
 
-		// 绘制场景
+		/* 绘制场景 */
 		const uint64_t texture_id = m_pFrameBuffer->GetColorAttachmentByIndex(0);
-		ImGui::Image((ImTextureID)(texture_id), viewport_panel_size, ImVec2{ 0, 1 }, ImVec2{ 1, 0 });
+		ImGui::Image((ImTextureID)texture_id, viewport_panel_size, ImVec2{ 0, 1 }, ImVec2{ 1, 0 });
 
-		// 拖动资源到主窗口
+		/* 拖动资源到主窗口 */
 		if (ImGui::BeginDragDropTarget())
 		{
 			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("RESOURCE_BROWSER_ITEM"))
@@ -384,7 +473,8 @@ void EditorLayer::ShowSceneViewportUI()
 			ImGui::EndDragDropTarget();
 		}
 
-		// Gizmos
+		/* Gizmos */
+		ShowOperationGizmoUI();
 	}
 	ImGui::End();
 	ImGui::PopStyleVar();
@@ -413,6 +503,51 @@ void EditorLayer::ShowStatisticInfoUI()
 		}
 	}
 	ImGui::End();
+}
+
+void EditorLayer::ShowOperationGizmoUI()
+{
+	Wuya::Entity selected_entity = m_SceneHierarchy.GetSelectedEntity();
+	if (selected_entity && m_GizmoType != -1)
+	{
+		ImGuizmo::SetOrthographic(false);
+		ImGuizmo::SetDrawlist();
+		ImGuizmo::SetRect(m_ViewportRegion.x, m_ViewportRegion.y, m_ViewportRegion.z - m_ViewportRegion.x, m_ViewportRegion.w - m_ViewportRegion.y);
+
+		// Editor camera
+		const glm::mat4& projection_mat = m_pEditorCamera->GetProjectionMatrix();
+		glm::mat4 view_mat = m_pEditorCamera->GetViewMatrix();
+
+		// Entity transform
+		auto& transform_component = selected_entity.GetComponent<Wuya::TransformComponent>();
+		glm::mat4 transform_mat = transform_component.GetTransform();
+
+		// Snapping
+		bool snap = Wuya::Input::IsKeyPressed(Wuya::Key::LeftControl);
+		float snap_value = 0.5f; // Snap to 0.5m for translation/scale
+		// Snap to 45 degrees for rotation
+		if (m_GizmoType == ImGuizmo::OPERATION::ROTATE)
+			snap_value = 45.0f;
+
+		float snap_values[3] = { snap_value, snap_value, snap_value };
+
+		ImGuizmo::Manipulate(glm::value_ptr(view_mat), glm::value_ptr(projection_mat),
+			(ImGuizmo::OPERATION)m_GizmoType, ImGuizmo::LOCAL, glm::value_ptr(transform_mat),
+			nullptr, snap ? snap_values : nullptr);
+
+		if (ImGuizmo::IsUsing())
+		{
+			/* 从变换矩阵中恢复 */
+			glm::vec3 position, rotation, scale;
+			DecomposeTransform(transform_mat, position, rotation, scale);
+
+			/* 更新组件信息 */
+			glm::vec3 delta_rotation = rotation - transform_component.Rotation;
+			transform_component.Position = position;
+			transform_component.Rotation += delta_rotation;
+			transform_component.Scale = scale;
+		}
+	}
 }
 
 void EditorLayer::OnUpdate(float delta_time)
@@ -462,7 +597,21 @@ void EditorLayer::OnUpdate(float delta_time)
 	//shader->SetMat4("u_ViewProjectionMat", m_pEditorCamera->GetViewProjectionMatrix());
 	//Wuya::Renderer::Submit(shader, m_pVertexArray);
 
-	m_pFrameBuffer->Unbind();
 
 	// todo: 鼠标点击选中物体
+	auto [mouse_x, mouse_y] = ImGui::GetMousePos();
+	mouse_x -= m_ViewportRegion.x;
+	mouse_y -= m_ViewportRegion.y;
+
+	const glm::vec2 viewport_size = glm::vec2(m_ViewportRegion.z - m_ViewportRegion.x, m_ViewportRegion.w - m_ViewportRegion.y);
+	mouse_y = viewport_size.y - mouse_y;
+
+	if (mouse_x > 0 && mouse_y > 0 && mouse_x < viewport_size.x && mouse_y < viewport_size.y)
+	{
+		int pixel_data = m_pFrameBuffer->ReadPixel(1, (int)mouse_x, (int)mouse_y);
+		m_HoveredEntity = pixel_data == -1 ? Wuya::Entity() : Wuya::Entity((entt::entity)pixel_data, m_pMainScene.get());
+		//EDITOR_LOG_ERROR(pixel_data);
+	}
+
+	m_pFrameBuffer->Unbind();
 }

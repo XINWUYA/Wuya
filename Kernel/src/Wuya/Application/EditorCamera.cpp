@@ -32,17 +32,19 @@ namespace Wuya
 			break;
 		case EditorCameraMode::Focus:
 		{
-			auto mouse_pos = Input::GetMousePos();
-			auto delta = (mouse_pos - m_LastMousePosition) * 0.003f;
-			m_LastMousePosition = mouse_pos;
+			if (Input::IsKeyPressed(Key::LeftAlt) || Input::IsKeyPressed(Key::RightAlt))
+			{
+				const auto mouse_pos = Input::GetMousePos();
+				const auto delta = (mouse_pos - m_LastMousePosition) * 0.003f;
+				m_LastMousePosition = mouse_pos;
 
-			if (Input::IsMouseButtonPressed(Mouse::ButtonMiddle))
-				OnMousePan(delta);
-			else if (Input::IsMouseButtonPressed(Mouse::ButtonLeft))
-				OnMouseRotate(delta);
-			else if (Input::IsMouseButtonPressed(Mouse::ButtonRight))
-				OnMouseZoom(delta.y);
-
+				if (Input::IsMouseButtonPressed(Mouse::ButtonMiddle))
+					OnMousePan(delta);
+				else if (Input::IsMouseButtonPressed(Mouse::ButtonLeft))
+					OnMouseRotate(delta);
+				else if (Input::IsMouseButtonPressed(Mouse::ButtonRight))
+					OnMouseZoom(delta.y);
+			}
 			break;
 		}
 		default: 

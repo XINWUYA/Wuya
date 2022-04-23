@@ -1,6 +1,5 @@
 #include "pch.h"
 #include "EditorResourceBrowser.h"
-#include "EditorUtils.h"
 #include "EditorAssetManager.h"
 #include "EditorUIFunctions.h"
 

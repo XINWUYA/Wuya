@@ -41,8 +41,8 @@ void main()
 #type fragment
 #version 450 core
 
-layout(location = 0) out vec4 gl_FragColor;
-//layout(location = 1) out int gl_FragColor2;
+layout(location = 0) out vec4 OutFragColor;
+layout(location = 1) out int OutEntityId;
 
 struct SVextex2Frag
 {
@@ -62,6 +62,6 @@ void main()
 {
 	vec2 uv = Input.TexCoord * Input.TilingFactor;
 	vec4 texture_color = texture(u_Texture[int(Input.TextureIndex)], uv * Input.TilingFactor);
-	gl_FragColor = vec4(texture_color.rgb, 1.0f) * Input.Color;
-	//gl_FragColor2 = EntityId;
+	OutFragColor = vec4(texture_color.rgb, 1.0f) * Input.Color;
+	OutEntityId = EntityId;
 }

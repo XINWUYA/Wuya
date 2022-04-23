@@ -61,12 +61,23 @@ void EditorSceneHierarchy::ShowSceneHierarchyUI()
 			m_SelectedEntity = {};
 
 		/* 空白处右键，唤出新建 */
-		if (ImGui::BeginPopupContextWindow(0, 1, false))
+		if (ImGui::BeginPopupContextWindow("New", 1, false))
 		{
-			if (ImGui::MenuItem("New Entity"))
+			if (ImGui::BeginMenu("New A Entity"))
 			{
-				const auto entity = m_pOwnerScene->CreateEntity("New Entity");
-				m_SelectedEntity = entity;
+				if (ImGui::MenuItem("Empty"))
+				{
+					const auto entity = m_pOwnerScene->CreateEntity("Empty");
+					m_SelectedEntity = entity;
+				}
+
+				if (ImGui::MenuItem("Sprite"))
+				{
+					auto entity = m_pOwnerScene->CreateEntity("New Sprite");
+					entity.AddComponent<Wuya::SpriteComponent>();
+					m_SelectedEntity = entity;
+				}
+				ImGui::EndMenu();
 			}
 			ImGui::EndPopup();
 		}
@@ -199,8 +210,7 @@ void EditorSceneHierarchy::ShowEntityComponents(Wuya::Entity& entity)
 
 		auto& name = entity.GetComponent<Wuya::NameComponent>().Name;
 
-		char buffer[256];
-		memset(buffer, 0, sizeof(buffer));
+		char buffer[256] = {};
 		std::strncpy(buffer, name.c_str(), sizeof(buffer));
 		ImGui::Text("Name:");
 		ImGui::SameLine();

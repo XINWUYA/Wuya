@@ -44,6 +44,8 @@ namespace Wuya
 		template<typename T>
 		bool HasComponent() const
 		{
+			/*if (!m_OwnerScene->GetRegistry().valid(m_EntityHandle))
+				return false;*/
 			return m_OwnerScene->GetRegistry().all_of<T>(m_EntityHandle);
 		}
 

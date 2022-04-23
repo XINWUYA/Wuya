@@ -30,7 +30,13 @@ project "Editor2D"
 	{
 		"Kernel",
 	}
-
+	
+	disablewarnings 
+	{ 
+		"4244", 
+		"4312" 
+	}
+	
 	filter "system:windows"
 		systemversion "latest"
 
