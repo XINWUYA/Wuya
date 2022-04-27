@@ -22,7 +22,7 @@ namespace Wuya
 	/* vec4 to string */
 	inline std::string ToString(const glm::vec4& value)
 	{
-		return std::to_string(value.x) + " " + std::to_string(value.y) + " " + std::to_string(value.z) + std::to_string(value.w);
+		return std::to_string(value.x) + " " + std::to_string(value.y) + " " + std::to_string(value.z) + " " + std::to_string(value.w);
 	}
 
 	/* string to vec3

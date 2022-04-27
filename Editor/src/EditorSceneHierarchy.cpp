@@ -224,41 +224,44 @@ void EditorSceneHierarchy::ShowEntityComponents(Wuya::Entity& entity)
 	const float panel_width = ImGui::GetContentRegionAvail().x;
 
 	/* 添加组件按钮 */
-	ImGui::SameLine(panel_width - 15);
-	START_STYLE_ALPHA(0.5f);
-	if (ImGui::ImageButton((ImTextureID)m_pAddComponentIcon->GetTextureID(), ImVec2(20, 20), ImVec2(0, 1), ImVec2(1, 0)))
-		ImGui::OpenPopup("AddComponentPopup");
-	END_STYLE_ALPHA;
-
-	if (ImGui::BeginPopup("AddComponentPopup"))
 	{
-		/* 相机 */
-		if (ImGui::MenuItem("Camera Component"))
+		PROFILE_SCOPE("Show AddComponent Button");
+
+		ImGui::SameLine(panel_width - 15);
+		START_STYLE_ALPHA(0.5f);
+		if (ImGui::ImageButton((ImTextureID)m_pAddComponentIcon->GetTextureID(), ImVec2(20, 20), ImVec2(0, 1), ImVec2(1, 0)))
+			ImGui::OpenPopup("AddComponentPopup");
+		END_STYLE_ALPHA;
+
+		if (ImGui::BeginPopup("AddComponentPopup"))
 		{
-			if (m_SelectedEntity.HasComponent<Wuya::CameraComponent>()) /* 为什么不使用entity */
-				EDITOR_LOG_WARN("Another camera component has existed!");
-			else
-				m_SelectedEntity.AddComponent<Wuya::CameraComponent>();
+			/* 相机 */
+			if (ImGui::MenuItem("Camera Component"))
+			{
+				if (m_SelectedEntity.HasComponent<Wuya::CameraComponent>()) /* todo: 为什么不使用entity */
+					EDITOR_LOG_WARN("Another camera component has existed!");
+				else
+					m_SelectedEntity.AddComponent<Wuya::CameraComponent>();
 
-			ImGui::CloseCurrentPopup();
+				ImGui::CloseCurrentPopup();
+			}
+
+			/* 图片精灵 */
+			if (ImGui::MenuItem("Sprite Component"))
+			{
+				if (m_SelectedEntity.HasComponent<Wuya::SpriteComponent>())
+					EDITOR_LOG_WARN("Another sprite component has existed!");
+				else
+					m_SelectedEntity.AddComponent<Wuya::SpriteComponent>();
+
+				ImGui::CloseCurrentPopup();
+			}
+
+			ImGui::EndPopup();
 		}
-
-		/* 图片精灵 */
-		if (ImGui::MenuItem("Sprite Component"))
-		{
-			if (m_SelectedEntity.HasComponent<Wuya::SpriteComponent>())
-				EDITOR_LOG_WARN("Another sprite component has existed!");
-			else
-				m_SelectedEntity.AddComponent<Wuya::SpriteComponent>();
-
-			ImGui::CloseCurrentPopup();
-		}
-
-		ImGui::EndPopup();
 	}
 
 	/* 空间变换组件 */
-	if (entity.HasComponent<Wuya::TransformComponent>())
 	{
 		PROFILE_SCOPE("Show TransformComponent");
 
@@ -275,7 +278,6 @@ void EditorSceneHierarchy::ShowEntityComponents(Wuya::Entity& entity)
 	}
 
 	/* 图片精灵组件 */
-	if (entity.HasComponent<Wuya::SpriteComponent>())
 	{
 		PROFILE_SCOPE("Show SpriteComonent");
 
@@ -286,5 +288,55 @@ void EditorSceneHierarchy::ShowEntityComponents(Wuya::Entity& entity)
 				EditorUIFunctions::DrawTextureUI("Texture", component.Texture, component.TilingFactor);
 			});
 	}
-	
+
+	/* 场景相机组件 */
+	{
+		PROFILE_SCOPE("Show CameraComponent");
+
+		ShowComponent<Wuya::CameraComponent>("Camera", entity,
+			[](auto& component)
+			{
+				EditorUIFunctions::DrawCheckboxUI("IsPrimary", component.IsPrimary);
+				EditorUIFunctions::DrawCheckboxUI("IsFixedAspectRatio", component.IsFixedAspectRatio);
+				auto& scene_camera = component.Camera;
+				int projection_idx = static_cast<int>(scene_camera.GetProjectionType());
+				EditorUIFunctions::DrawComboUI("ProjectionType", { "Perspective", "Orthographic" }, projection_idx, 
+					[&scene_camera](int selected_idx)
+					{
+						scene_camera.SetProjectionType(static_cast<Wuya::SceneCamera::ProjectionType>(selected_idx));
+					});
+
+				switch (scene_camera.GetProjectionType())
+				{
+				case Wuya::SceneCamera::ProjectionType::Perspective:
+					{
+						const auto& camera_desc = scene_camera.GetSceneCameraDesc_Perspective();
+
+						float fov = camera_desc->Fov;
+						EditorUIFunctions::DrawDragFloatUI("Fov", fov);
+						float near_clip = camera_desc->Near;
+						EditorUIFunctions::DrawDragFloatUI("Near", near_clip);
+						float far_clip = camera_desc->Far;
+						EditorUIFunctions::DrawDragFloatUI("Far", far_clip);
+
+						scene_camera.SetSceneCameraDesc_Perspective({ fov, near_clip, far_clip });
+					}
+					break;
+				case Wuya::SceneCamera::ProjectionType::Orthographic:
+					{
+					const auto& camera_desc = scene_camera.GetSceneCameraDesc_Orthographic();
+
+					float height_size = camera_desc->HeightSize;
+					EditorUIFunctions::DrawDragFloatUI("HeightSize", height_size);
+					float near_clip = camera_desc->Near;
+					EditorUIFunctions::DrawDragFloatUI("Near", near_clip);
+					float far_clip = camera_desc->Far;
+					EditorUIFunctions::DrawDragFloatUI("Far", far_clip);
+
+					scene_camera.SetSceneCameraDesc_Orthographic({ height_size, near_clip, far_clip });
+					}
+					break;
+				}
+			});
+	}
 }

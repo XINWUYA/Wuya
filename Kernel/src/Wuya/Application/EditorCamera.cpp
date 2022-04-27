@@ -72,6 +72,12 @@ namespace Wuya
 		return glm::quat(glm::vec3(-m_Pitch, -m_Yaw, 0.0f));
 	}
 
+	void EditorCamera::SetViewMatrix(const glm::mat4& view_mat)
+	{
+		m_ViewMatrix = view_mat;
+		m_ViewProjectionMatrix = m_ProjectionMatrix * m_ViewMatrix;
+	}
+
 	void EditorCamera::UpdateProjectionMatrix()
 	{
 		m_ProjectionMatrix = glm::perspective(glm::radians(m_Fov), m_AspectRatio, m_NearClip, m_FarClip);

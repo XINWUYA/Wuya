@@ -13,6 +13,25 @@ extern const std::filesystem::path g_AssetPath;
 /* 定义注册列表 */
 std::unordered_map<std::string, std::function<void()>> EditorUIFunctions::m_PopupUIRegistry{};
 
+void EditorUIFunctions::DrawDragFloatUI(const std::string& label, float& value, float label_width)
+{
+	PROFILE_FUNCTION();
+
+	ImGui::PushID(label.c_str());
+	ImGui::Columns(2);
+
+	/* Label */
+	ImGui::SetColumnWidth(0, label_width);
+	ImGui::Text(label.c_str());
+
+	/* DragFloat */
+	ImGui::NextColumn();
+	ImGui::DragFloat("##Float", &value);
+
+	ImGui::Columns(1);
+	ImGui::PopID();
+}
+
 void EditorUIFunctions::DrawVec3UI(const std::string& label, glm::vec3& values, float reset_value, float label_width)
 {
 	PROFILE_FUNCTION();
@@ -165,6 +184,8 @@ void EditorUIFunctions::DrawTextureUI(const std::string& label, Wuya::SharedPtr<
 
 void EditorUIFunctions::DrawCheckedImageButtonUI(const std::string& label, const Wuya::SharedPtr<Wuya::Texture2D>& texture, const ImVec2& size, bool checked, const std::function<void()>& button_func)
 {
+	PROFILE_FUNCTION();
+
 	ASSERT(texture);
 
 	/* 选中时样式 */
@@ -191,8 +212,73 @@ void EditorUIFunctions::DrawCheckedImageButtonUI(const std::string& label, const
 	}
 }
 
+void EditorUIFunctions::DrawCheckboxUI(const std::string& label, bool& value, float label_width)
+{
+	PROFILE_FUNCTION();
+
+	ImGui::PushID(label.c_str());
+	ImGui::Columns(2);
+
+	/* Label */
+	ImGui::SetColumnWidth(0, label_width);
+	ImGui::Text(label.c_str());
+
+	/* Checkbox */
+	ImGui::NextColumn();
+	ImGui::Checkbox("##Checkbox", &value);
+
+	ImGui::Columns(1);
+	ImGui::PopID();
+}
+
+void EditorUIFunctions::DrawComboUI(const std::string& label, const std::vector<std::string>& options, int& selected_idx, const std::function<void(int)>& callback, float label_width)
+{
+	PROFILE_FUNCTION();
+
+	ASSERT(!options.empty());
+
+	ImGui::PushID(label.c_str());
+	ImGui::Columns(2);
+
+	/* Label */
+	ImGui::SetColumnWidth(0, label_width);
+	ImGui::Text(label.c_str());
+
+	/* Combo */
+	ImGui::NextColumn();
+	{
+		std::vector<const char*> option_strs;
+		for (const auto& option : options)
+			option_strs.emplace_back(option.c_str());
+		const char* selected_option = option_strs[selected_idx];
+		if (ImGui::BeginCombo("##Combo", selected_option))
+		{
+			for (int i = 0; i < (int)options.size(); i++)
+			{
+				bool is_selectd = selected_option == option_strs[i];
+				if (ImGui::Selectable(option_strs[i], is_selectd))
+				{
+					selected_option = option_strs[i];
+					selected_idx = i;
+					callback(i);
+				}
+
+				if (is_selectd)
+					ImGui::SetItemDefaultFocus();
+			}
+
+			ImGui::EndCombo();
+		}
+	}
+
+	ImGui::Columns(1);
+	ImGui::PopID();
+}
+
 bool EditorUIFunctions::DrawModalUI(const std::string& label, const std::string& content_text, bool& never_ask)
 {
+	PROFILE_FUNCTION();
+
 	/* 显示在窗口中间 */
 	const ImVec2 center = ImGui::GetMainViewport()->GetCenter();
 	ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
@@ -251,6 +337,8 @@ std::string ConvertFloat2String(float value, int precision)
 
 bool DecomposeTransform(const glm::mat4& transform, glm::vec3& translation, glm::vec3& rotation, glm::vec3& scale)
 {
+	PROFILE_FUNCTION();
+
 	/* Ref: glm::decompose() */
 
 	glm::mat4 transform_t = transform;

@@ -1,8 +1,6 @@
 #include "pch.h"
 #include "EditorLayer.h"
-
 #include <glm/gtc/type_ptr.inl>
-
 #include "EditorAssetManager.h"
 #include "EditorUIFunctions.h"
 #include "ImGuizmo.h"
@@ -507,17 +505,17 @@ void EditorLayer::ShowStatisticInfoUI()
 
 void EditorLayer::ShowOperationGizmoUI()
 {
+	// Editor camera
+	const glm::mat4& projection_mat = m_pEditorCamera->GetProjectionMatrix();
+	glm::mat4 view_mat = m_pEditorCamera->GetViewMatrix();
+
+	ImGuizmo::SetOrthographic(false);
+	ImGuizmo::SetDrawlist();
+	ImGuizmo::SetRect(m_ViewportRegion.x, m_ViewportRegion.y, m_ViewportRegion.z - m_ViewportRegion.x, m_ViewportRegion.w - m_ViewportRegion.y);
+
 	Wuya::Entity selected_entity = m_SceneHierarchy.GetSelectedEntity();
 	if (selected_entity && m_GizmoType != -1)
 	{
-		ImGuizmo::SetOrthographic(false);
-		ImGuizmo::SetDrawlist();
-		ImGuizmo::SetRect(m_ViewportRegion.x, m_ViewportRegion.y, m_ViewportRegion.z - m_ViewportRegion.x, m_ViewportRegion.w - m_ViewportRegion.y);
-
-		// Editor camera
-		const glm::mat4& projection_mat = m_pEditorCamera->GetProjectionMatrix();
-		glm::mat4 view_mat = m_pEditorCamera->GetViewMatrix();
-
 		// Entity transform
 		auto& transform_component = selected_entity.GetComponent<Wuya::TransformComponent>();
 		glm::mat4 transform_mat = transform_component.GetTransform();
@@ -533,7 +531,7 @@ void EditorLayer::ShowOperationGizmoUI()
 
 		ImGuizmo::Manipulate(glm::value_ptr(view_mat), glm::value_ptr(projection_mat),
 			(ImGuizmo::OPERATION)m_GizmoType, ImGuizmo::LOCAL, glm::value_ptr(transform_mat),
-			nullptr, snap ? snap_values : nullptr);
+			nullptr, snap ? snap_values : nullptr); /* ImGuizmo::LOCAL/ ImGuizmo::WORLD */
 
 		if (ImGuizmo::IsUsing())
 		{
@@ -548,6 +546,11 @@ void EditorLayer::ShowOperationGizmoUI()
 			transform_component.Scale = scale;
 		}
 	}
+
+	/* 右上角方位视图 */
+	ImGuizmo::ViewManipulate(glm::value_ptr(view_mat), m_pEditorCamera->GetDistance(), ImVec2(m_ViewportRegion.z - 128, ImGui::GetWindowPos().y), ImVec2(128, 128), 0x00000000);
+	m_pEditorCamera->SetViewMatrix(view_mat);
+
 }
 
 void EditorLayer::OnUpdate(float delta_time)

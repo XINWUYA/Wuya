@@ -17,7 +17,7 @@ namespace Wuya
 			ASSERT(!HasComponent<T>(), "Component already existed!");
 
 			T& component = m_OwnerScene->GetRegistry().emplace<T>(m_EntityHandle, std::forward<Args>(args)...);
-			//m_OwnerScene->OnComponentAdded<T>(*this, component);
+			m_OwnerScene->OnComponentAdded<T>(*this, component);
 
 			return component;
 		}

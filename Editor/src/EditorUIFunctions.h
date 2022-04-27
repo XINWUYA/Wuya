@@ -14,6 +14,8 @@
 class EditorUIFunctions
 {
 public:
+	/* 绘制一个可拖动的Float UI */
+	static void DrawDragFloatUI(const std::string& label, float& value, float label_width = 100.0f);
 	/* 绘制一个常规vec3 UI */
 	static void DrawVec3UI(const std::string& label, glm::vec3& values, float reset_value = 0.0f, float label_width = 100.0f);
 	/* 绘制一个vec3 UI， 带XYZ */
@@ -24,6 +26,10 @@ public:
 	static void DrawTextureUI(const std::string& label, Wuya::SharedPtr<Wuya::Texture2D>& texture, float& tiling_factor, float label_width = 100.0f);
 	/* 绘制带选中的图像按钮UI */
 	static void DrawCheckedImageButtonUI(const std::string& label, const Wuya::SharedPtr<Wuya::Texture2D>& texture, const ImVec2& size, bool checked = false, const std::function<void()>& button_func = []() {});
+	/* 绘制一个Checkbox */
+	static void DrawCheckboxUI(const std::string& label, bool& value, float label_width = 100.0f);
+	/* 绘制一个Combo */
+	static void DrawComboUI(const std::string& label, const std::vector<std::string>& options, int& selected_idx, const std::function<void(int)>& callback = [](int) {}, float label_width = 100.0f);
 	/* 绘制一个询问弹窗UI(todo: 还不能用，需要调试) */
 	static bool DrawModalUI(const std::string& label, const std::string& content_text, bool& never_ask);
 

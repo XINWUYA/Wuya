@@ -132,7 +132,7 @@ namespace Wuya
 					auto entity = CreateEntity(name);
 
 					/* Transform */
-					if (auto* transform_root = entity_root->FirstChildElement("Transform"))
+					if (const auto* transform_root = entity_root->FirstChildElement("Transform"))
 					{
 						auto& transform_component = entity.GetComponent<TransformComponent>();
 						transform_component.Position = ToVec3(transform_root->Attribute("Position"));
@@ -140,7 +140,45 @@ namespace Wuya
 						transform_component.Scale = ToVec3(transform_root->Attribute("Scale"));
 					}
 
-					/* */
+					/* Sprite */
+					if (const auto* sprite_root = entity_root->FirstChildElement("Sprite"))
+					{
+						auto& sprite_component = entity.AddComponent<SpriteComponent>();
+						const std::string texture_path = sprite_root->Attribute("TexturePath");
+						sprite_component.Texture = Texture2D::Create(texture_path);
+						sprite_component.BaseColor = ToVec4(sprite_root->Attribute("BaseColor"));
+						sprite_component.TilingFactor = sprite_root->FloatAttribute("TilingFactor");
+					}
+
+					/* Camera */
+					if (const auto* camera_root = entity_root->FirstChildElement("Camera"))
+					{
+						auto& camera_component = entity.AddComponent<CameraComponent>();
+						camera_component.IsPrimary = camera_root->BoolAttribute("IsPrimary");
+						camera_component.IsFixedAspectRatio = camera_root->BoolAttribute("IsFixedAspectRatio");
+
+						const auto projection_type = static_cast<SceneCamera::ProjectionType>(camera_root->IntAttribute("ProjectionType"));
+						camera_component.Camera.SetProjectionType(projection_type);
+						switch (projection_type)
+						{
+						case SceneCamera::ProjectionType::Perspective:
+							{
+								const float fov = camera_root->FloatAttribute("Fov");
+								const float near_clip = camera_root->FloatAttribute("Near");
+								const float far_clip = camera_root->FloatAttribute("Far");
+								camera_component.Camera.SetSceneCameraDesc_Perspective({ fov, near_clip, far_clip });
+							}
+							break;
+						case SceneCamera::ProjectionType::Orthographic:
+							{
+								const float height_size = camera_root->FloatAttribute("HeightSize");
+								const float near_clip = camera_root->FloatAttribute("Near");
+								const float far_clip = camera_root->FloatAttribute("Far");
+								camera_component.Camera.SetSceneCameraDesc_Orthographic({ height_size, near_clip, far_clip });
+							}
+							break;
+						}
+					}
 				}
 			}	
 		}
@@ -174,6 +212,48 @@ namespace Wuya
 		}
 
 		/* Sprite */
+		if (entity.HasComponent<SpriteComponent>())
+		{
+			auto* sprite_root = entity_root->InsertNewChildElement("Sprite");
+			const auto& component = entity.GetComponent<SpriteComponent>();
+			sprite_root->SetAttribute("TexturePath", component.Texture->GetPath().c_str());
+			sprite_root->SetAttribute("BaseColor", ToString(component.BaseColor).c_str());
+			sprite_root->SetAttribute("TilingFactor", component.TilingFactor);
+		}
+
+		/* Camera */
+		if (entity.HasComponent<CameraComponent>())
+		{
+			auto* camera_root = entity_root->InsertNewChildElement("Camera");
+			const auto& component = entity.GetComponent<CameraComponent>();
+
+			camera_root->SetAttribute("IsPrimary", component.IsPrimary);
+			camera_root->SetAttribute("IsFixedAspectRatio", component.IsFixedAspectRatio);
+
+			const auto projection_type = component.Camera.GetProjectionType();
+			camera_root->SetAttribute("ProjectionType", static_cast<int>(projection_type));
+
+			switch (projection_type)
+			{
+			case SceneCamera::ProjectionType::Perspective:
+				{
+					const auto& camera_desc = component.Camera.GetSceneCameraDesc_Perspective();
+					camera_root->SetAttribute("Fov", camera_desc->Fov);
+					camera_root->SetAttribute("Near", camera_desc->Near);
+					camera_root->SetAttribute("Far", camera_desc->Far);
+				}
+				break;
+			case SceneCamera::ProjectionType::Orthographic:
+				{
+				const auto& camera_desc = component.Camera.GetSceneCameraDesc_Orthographic();
+				camera_root->SetAttribute("HeightSize", camera_desc->HeightSize);
+				camera_root->SetAttribute("Near", camera_desc->Near);
+				camera_root->SetAttribute("Far", camera_desc->Far);
+				}
+				break;
+			}
+			
+		}
 	}
 
 	template <typename T>
@@ -191,5 +271,17 @@ namespace Wuya
 	void Scene::OnComponentAdded<TransformComponent>(Entity& entity, TransformComponent& component)
 	{
 		
+	}
+
+	template<>
+	void Scene::OnComponentAdded<SpriteComponent>(Entity& entity, SpriteComponent& component)
+	{
+
+	}
+
+	template<>
+	void Scene::OnComponentAdded<CameraComponent>(Entity& entity, CameraComponent& component)
+	{
+
 	}
 }

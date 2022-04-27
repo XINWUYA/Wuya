@@ -40,6 +40,8 @@ namespace Wuya
 
 		glm::quat GetOrientation() const;
 
+		void SetViewMatrix(const glm::mat4& view_mat);
+
 	private:
 		void UpdateProjectionMatrix();
 		void UpdateViewMatrix();
