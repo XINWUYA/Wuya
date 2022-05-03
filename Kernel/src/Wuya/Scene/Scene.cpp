@@ -1,12 +1,11 @@
-#include "pch.h"
+#include "Pch.h"
 #include "Scene.h"
-#include "Entity.h"
-#include "Components.h"
-#include "Wuya/Renderer/Renderer2D.h"
-#include "Wuya/Application/EditorCamera.h"
 #include <tinyxml2.h>
-
+#include "Components.h"
+#include "Entity.h"
 #include "Wuya/Common/Utils.h"
+#include "Wuya/Renderer/Camera.h"
+#include "Wuya/Renderer/Renderer2D.h"
 
 namespace Wuya
 {
@@ -40,7 +39,7 @@ namespace Wuya
 		// auto entity_group = m_Registry.group<TransformComponent>(entt::get<>)
 	}
 
-	void Scene::OnUpdateEditor(const SharedPtr<EditorCamera>& camera, float delta_time)
+	void Scene::OnUpdateEditor(const SharedPtr<Camera>& camera, float delta_time)
 	{
 		PROFILE_FUNCTION();
 

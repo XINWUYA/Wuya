@@ -1,4 +1,4 @@
-#include "pch.h"
+#include "Pch.h"
 #include "Camera.h"
 
 namespace Wuya

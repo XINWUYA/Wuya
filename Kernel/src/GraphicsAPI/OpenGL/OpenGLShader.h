@@ -1,7 +1,6 @@
 #pragma once
-#include <Wuya/Renderer/Shader.h>
-
 #include <glad/glad.h>
+#include "Wuya/Renderer/Shader.h"
 
 namespace Wuya
 {

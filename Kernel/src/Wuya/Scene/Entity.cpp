@@ -1,6 +1,5 @@
-#include "pch.h"
+#include "Pch.h"
 #include "Entity.h"
-
 #include "Scene.h"
 
 namespace Wuya

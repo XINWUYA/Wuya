@@ -1,5 +1,5 @@
 #pragma once
-#include <Wuya/Core/Window.h>
+#include "Wuya/Core/Window.h"
 
 struct GLFWwindow;
 

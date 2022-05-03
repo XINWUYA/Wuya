@@ -1,7 +1,7 @@
-#include "pch.h"
+#include "Pch.h"
 #include "Input.h"
 #include <GLFW/glfw3.h>
-#include <Wuya/Application/Application.h>
+#include "Wuya/Application/Application.h"
 
 namespace Wuya
 {

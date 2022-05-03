@@ -14,9 +14,7 @@ namespace Wuya
 		static void Update();
 		static void Release();
 
-		static void BeginScene(const SharedPtr<class OrthographicCamera>& camera);
-		static void BeginScene(const SharedPtr<class EditorCamera>& camera);
-		static void BeginScene(SharedPtr<class Camera> camera);
+		static void BeginScene(const SharedPtr<class Camera>& camera);
 		static void EndScene();
 
 		/* Draw Quads */

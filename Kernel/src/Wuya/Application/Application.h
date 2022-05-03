@@ -1,6 +1,6 @@
 #pragma once
-#include <Wuya/Core/Window.h>
-#include <Wuya/Core/LayerStack.h>
+#include "Wuya/Core/Window.h"
+#include "Wuya/Core/LayerStack.h"
 
 namespace Wuya
 {

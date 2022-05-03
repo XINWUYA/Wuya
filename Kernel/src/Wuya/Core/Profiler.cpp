@@ -1,4 +1,4 @@
-#include "pch.h"
+#include "Pch.h"
 #include "Profiler.h"
 
 namespace Wuya

@@ -1,11 +1,10 @@
-#include "pch.h"
+#include "Pch.h"
 #include "GLWindow.h"
-#include <Wuya/Events/ApplicationEvent.h>
-#include <Wuya/Events/KeyEvent.h>
-#include <Wuya/Events/MouseEvent.h>
-#include <Wuya/Renderer/RenderContext.h>
 #include <GLFW/glfw3.h>
-
+#include "Wuya/Events/ApplicationEvent.h"
+#include "Wuya/Events/KeyEvent.h"
+#include "Wuya/Events/MouseEvent.h"
+#include "Wuya/Renderer/RenderContext.h"
 #include "Wuya/Renderer/Renderer.h"
 
 namespace Wuya

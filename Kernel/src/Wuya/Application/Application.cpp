@@ -1,9 +1,9 @@
-#include "pch.h"
+#include "Pch.h"
 #include "Application.h"
-#include <Wuya/Events/ApplicationEvent.h>
-#include <Wuya/ImGui/ImGuiLayer.h>
-#include "Wuya/Renderer/Renderer.h"
 #include <GLFW/glfw3.h>
+#include "Wuya/Events/ApplicationEvent.h"
+#include "Wuya/ImGui/ImGuiLayer.h"
+#include "Wuya/Renderer/Renderer.h"
 
 namespace Wuya 
 {

@@ -1,8 +1,8 @@
 #pragma once
-#include <Wuya/Common/Common.h>
-#include <Wuya/Core/Profiler.h>
-#include <sstream>
 #include <functional>
+#include <sstream>
+#include "Wuya/Common/Common.h"
+#include "Wuya/Core/Profiler.h"
 
 namespace Wuya
 {

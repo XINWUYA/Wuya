@@ -1,4 +1,4 @@
-#include "pch.h"
+#include "Pch.h"
 #include "OpenGLShader.h"
 
 #include <fstream>

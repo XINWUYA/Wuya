@@ -1,8 +1,8 @@
 #pragma once
-#include "Common.h"
-#include <Wuya/Core/Logger.h>
-#include <filesystem>
 #include <debugbreak.h>
+#include <filesystem>
+#include "Wuya/Core/Logger.h"
+#include "Common.h"
 
 #ifdef WUYA_DEBUG
 	#define Break() debug_break()

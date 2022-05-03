@@ -7,8 +7,8 @@ project "Kernel"
 	targetdir ("%{wks.location}/build/bin/" .. outputdir .. "/%{prj.name}")
 	objdir ("%{wks.location}/build/intermediates/" .. outputdir .. "/%{prj.name}")
 
-	pchheader "pch.h"
-	pchsource "src/pch.cpp"
+	pchheader "Pch.h"
+	pchsource "src/Pch.cpp"
 
 	files
 	{

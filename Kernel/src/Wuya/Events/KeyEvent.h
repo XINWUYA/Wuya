@@ -1,6 +1,6 @@
 #pragma once
 #include "Event.h"
-#include <Wuya/Core/KeyCodes.h>
+#include "Wuya/Core/KeyCodes.h"
 
 namespace Wuya
 {

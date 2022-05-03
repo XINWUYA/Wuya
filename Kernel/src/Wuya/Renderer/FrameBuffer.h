@@ -1,4 +1,5 @@
 #pragma once
+
 namespace Wuya
 {
 	enum class FrameBufferTargetFormat

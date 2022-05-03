@@ -1,4 +1,4 @@
-#include "pch.h"
+#include "Pch.h"
 #include "OpenGLTexture.h"
 
 #define STB_IMAGE_IMPLEMENTATION

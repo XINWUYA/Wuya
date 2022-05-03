@@ -30,7 +30,7 @@ namespace Wuya
 		void OnUpdateRuntime(float delta_time);
 
 		/* 编辑模式更新场景 */
-		void OnUpdateEditor(const SharedPtr<class EditorCamera>& camera, float delta_time);
+		void OnUpdateEditor(const SharedPtr<class Camera>& camera, float delta_time);
 
 		/* 获取主相机实体 */
 		Entity GetPrimaryCameraEntity();

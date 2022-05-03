@@ -1,6 +1,5 @@
-#include "pch.h"
+#include "Pch.h"
 #include "Texture.h"
-
 #include "Renderer.h"
 #include "GraphicsAPI/OpenGL/OpenGLTexture.h"
 

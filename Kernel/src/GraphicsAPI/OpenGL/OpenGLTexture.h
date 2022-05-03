@@ -1,7 +1,7 @@
 #pragma once
 #include <string>
-#include "Wuya/Renderer/Texture.h"
 #include <glad/glad.h>
+#include "Wuya/Renderer/Texture.h"
 namespace Wuya
 {
 	class OpenGLTexture2D : public Texture2D

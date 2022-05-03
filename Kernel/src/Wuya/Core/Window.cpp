@@ -1,6 +1,6 @@
-#include "pch.h"
+#include "Pch.h"
 #include "Window.h"
-#include <GraphicsAPI/OpenGL/GLWindow.h>
+#include "GraphicsAPI/OpenGL/GLWindow.h"
 
 namespace Wuya
 {

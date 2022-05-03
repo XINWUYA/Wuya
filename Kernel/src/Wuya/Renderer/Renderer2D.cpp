@@ -1,14 +1,12 @@
-#include "pch.h"
+#include "Pch.h"
 #include "Renderer2D.h"
-#include "Shader.h"
-#include "VertexArray.h"
-#include "Renderer.h"
-#include "Texture.h"
 #include <glm/gtc/matrix_transform.hpp>
-
+#include "Renderer.h"
+#include "Shader.h"
+#include "Texture.h"
+#include "VertexArray.h"
+#include "Camera.h"
 #include "UniformBuffer.h"
-#include "Wuya/Application/EditorCamera.h"
-#include "Wuya/Application/OrthographicCamera.h"
 #include "Wuya/Scene/Components.h"
 
 namespace Wuya
@@ -182,7 +180,7 @@ namespace Wuya
 		s_StatisticsInfo.DrawCalls++;
 	}
 
-	void Renderer2D::BeginScene(const SharedPtr<OrthographicCamera>& camera)
+	void Renderer2D::BeginScene(const SharedPtr<Camera>& camera)
 	{
 		PROFILE_FUNCTION();
 
@@ -191,26 +189,6 @@ namespace Wuya
 		s_RenderData2D.CameraData.ViewProjectionMatrix = camera->GetViewProjectionMatrix();
 		s_RenderData2D.pCameraUniformBuffer->SetData(&s_RenderData2D.CameraData, sizeof(CameraData));
 
-		StartNewBatch();
-	}
-
-	void Renderer2D::BeginScene(const SharedPtr<EditorCamera>& camera)
-	{
-		PROFILE_FUNCTION();
-
-		ResetStatisticsInfo();
-
-		s_RenderData2D.CameraData.ViewProjectionMatrix = camera->GetViewProjectionMatrix();
-		s_RenderData2D.pCameraUniformBuffer->SetData(&s_RenderData2D.CameraData, sizeof(CameraData));
-
-		StartNewBatch();
-	}
-
-	void Renderer2D::BeginScene(SharedPtr<Camera> camera)
-	{
-		PROFILE_FUNCTION();
-
-		ResetStatisticsInfo();
 		StartNewBatch();
 	}
 

@@ -1,14 +1,17 @@
 #pragma once
-#include <Wuya.h>
+#include <Kernel.h>
 
-class EditorApp : public Wuya::Application
+namespace Wuya
 {
-public:
-	EditorApp();
-	~EditorApp() {}
-};
+	class EditorApp : public Application
+	{
+	public:
+		EditorApp();
+		~EditorApp() {}
+	};
 
-Wuya::UniquePtr<Wuya::Application> Wuya::CreateApplication()
-{
-	return Wuya::CreateUniquePtr<EditorApp>();
+	UniquePtr<Application> CreateApplication()
+	{
+		return CreateUniquePtr<EditorApp>();
+	}
 }

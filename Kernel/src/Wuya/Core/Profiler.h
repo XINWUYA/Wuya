@@ -25,6 +25,7 @@ namespace Wuya
 		void EndSession();
 
 		void WriteProfileResult(const ProfileResult& result);
+
 	private:
 		TimeCostProfiler() = default;
 		~TimeCostProfiler();

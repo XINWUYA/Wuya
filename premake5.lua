@@ -41,7 +41,6 @@ group ""
 
 group "App"
 	include "Editor"
-	include "Editor2D"
 group ""
 
 group "Samples"

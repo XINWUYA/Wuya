@@ -1,8 +1,7 @@
 #pragma once
-
+#include <glm/glm.hpp>
 #include "KeyCodes.h"
 #include "MouseCodes.h"
-#include <glm/glm.hpp>
 
 namespace Wuya
 {
