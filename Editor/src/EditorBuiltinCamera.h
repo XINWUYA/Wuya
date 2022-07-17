@@ -1,5 +1,6 @@
 #pragma once
 #include <Wuya/Renderer/Camera.h>
+#include <Wuya/Renderer/RenderCommon.h>
 
 namespace Wuya
 {
@@ -13,7 +14,9 @@ namespace Wuya
 		void OnUpdate(float delta_time);
 		void OnEvent(class IEvent* event) {}
 
-		void SetViewportSize(float width, float height);
+		/* 设置视口区域 */
+		void SetViewportRegion(const ViewportRegion& region);
+		const ViewportRegion& GetViewportRegion() const { return m_ViewportRegion; }
 
 		bool IsFocus() const { return m_IsFocus; }
 		void SetFocus(bool focus) { m_IsFocus = focus; }
@@ -60,7 +63,6 @@ namespace Wuya
 
 		float m_Pitch{ 0.0f }, m_Yaw{ 0.0f };
 		float m_Distance{ 10.0f };
-		float m_ViewportWidth{ 1280.0f }, m_ViewportHeight{ 720.0f };
 
 		float m_MoveSpeed{ 1.0f };
 
@@ -76,5 +78,8 @@ namespace Wuya
 
 		glm::vec3 m_FocalPoint{ 0.0f, 0.0f, 0.0f };
 		glm::vec2 m_LastMousePosition{ 0.0f, 0.0f };
+
+		/* 视口区域 */
+		ViewportRegion m_ViewportRegion{};
 	};
 }

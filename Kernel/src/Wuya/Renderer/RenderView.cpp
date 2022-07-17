@@ -12,6 +12,11 @@ namespace Wuya
 	{
 	}
 
+	RenderView::~RenderView()
+	{
+		m_VisibleMeshObjects.clear();
+	}
+
 	/* 设置视口区域 */
 	void RenderView::SetViewportRegion(const ViewportRegion& region)
 	{

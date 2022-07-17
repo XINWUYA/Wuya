@@ -16,7 +16,7 @@ namespace Wuya
 			{
 				FrameGraphResourceHandleTyped<FrameGraphTexture> AttachmentArray[MAX_ATTACHMENT_NUM + 2] = {};
 
-				struct Typed
+				struct
 				{
 					FrameGraphResourceHandleTyped<FrameGraphTexture> ColorAttachments[MAX_ATTACHMENT_NUM];
 					FrameGraphResourceHandleTyped<FrameGraphTexture> DepthAttachment;

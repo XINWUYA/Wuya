@@ -52,7 +52,7 @@ namespace Wuya
 		for (auto& entity : entity_view)
 		{
 			const auto [name_component, camera_component] = entity_view.get<NameComponent, CameraComponent>(entity);
-			RenderView* render_view = new RenderView;
+			SharedPtr<RenderView> render_view = CreateSharedPtr<RenderView>();
 			render_view->SetName(name_component.Name);
 			render_view->SetCullingCamera(camera);// todo: 替换为组件对应的相机
 			m_RenderViews.emplace_back(render_view);
@@ -61,13 +61,14 @@ namespace Wuya
 		/* Editor Camera's RenderView */
 		if (camera)
 		{
-			RenderView* render_view = new RenderView("Builtin Editor Camera", camera);
-			render_view->SetOwnerScene(std::shared_ptr<Scene>(this));
+			SharedPtr<RenderView> render_view = CreateSharedPtr<RenderView>("Builtin Editor Camera", camera);
+			render_view->SetOwnerScene(shared_from_this());
+			//render_view->SetViewportRegion(camera->)
 			m_RenderViews.emplace_back(render_view);
 		}
 
 		/* 绘制所有View */
-		for (auto* view : m_RenderViews)
+		for (const auto& view : m_RenderViews)
 		{
 			Renderer::RenderAView(view);
 		}

@@ -142,7 +142,7 @@ namespace Wuya
 		/* »ñÈ¡UsageStr */
 		std::string GetUsageStr() const override
 		{
-			return std::to_string(m_Usage);
+			return "";//std::to_string(m_Usage);
 		}
 
 	private:

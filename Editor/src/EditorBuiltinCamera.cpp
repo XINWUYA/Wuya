@@ -85,16 +85,25 @@ namespace Wuya
 		UpdateViewMatrix();
 	}
 
-	void EditorCamera::SetViewportSize(float width, float height)
+	/* 设置视口区域 */
+	void EditorCamera::SetViewportRegion(const ViewportRegion& region)
+	{
+		PROFILE_FUNCTION();
+
+		m_ViewportRegion = region;
+
+		m_AspectRatio = static_cast<float>(m_ViewportRegion.Width()) / static_cast<float>(m_ViewportRegion.Height());
+		UpdateProjectionMatrix();
+	}
+
+	/*void EditorCamera::SetViewportSize(float width, float height)
 	{
 		PROFILE_FUNCTION();
 
 		m_ViewportWidth = width;
 		m_ViewportHeight = height;
 
-		m_AspectRatio = m_ViewportWidth / m_ViewportHeight;
-		UpdateProjectionMatrix();
-	}
+	}*/
 
 	glm::quat EditorCamera::GetOrientation() const
 	{
@@ -106,7 +115,6 @@ namespace Wuya
 		if (view_mat != m_ViewMatrix)
 		{
 			m_ViewMatrix = view_mat;
-			m_ViewProjectionMatrix = m_ProjectionMatrix * m_ViewMatrix;
 
 			/* 根据ViewMatrix恢复Pitch和Yaw */
 			/* todo： 数据未恢复全，仍存在问题，需要重新维护这部分 */
@@ -123,7 +131,6 @@ namespace Wuya
 	void EditorCamera::UpdateProjectionMatrix()
 	{
 		m_ProjectionMatrix = glm::perspective(glm::radians(m_Fov), m_AspectRatio, m_NearClip, m_FarClip);
-		m_ViewProjectionMatrix = m_ProjectionMatrix * m_ViewMatrix;
 	}
 
 	void EditorCamera::UpdateViewMatrix()
@@ -137,13 +144,11 @@ namespace Wuya
 				m_Position = m_FocalPoint - m_ForwardDirection * m_Distance; /* 相机始终围绕聚焦点 */
 				m_ViewMatrix = glm::translate(glm::mat4(1.0f), m_Position) * glm::toMat4(GetOrientation());
 				m_ViewMatrix = glm::inverse(m_ViewMatrix);
-				m_ViewProjectionMatrix = m_ProjectionMatrix * m_ViewMatrix;
 			}
 			else
 			{
 				m_ViewMatrix = glm::translate(glm::mat4(1.0f), m_Position) * glm::toMat4(GetOrientation());
 				m_ViewMatrix = glm::inverse(m_ViewMatrix);
-				m_ViewProjectionMatrix = m_ProjectionMatrix * m_ViewMatrix;
 			}
 
 			m_IsDirty = false;
@@ -192,10 +197,10 @@ namespace Wuya
 
 	glm::vec2 EditorCamera::PanSpeed() const
 	{
-		const float x = std::min(m_ViewportWidth / 1000.0f, 2.4f); // max = 2.4f
+		const float x = std::min(m_ViewportRegion.Width() / 1000.0f, 2.4f); // max = 2.4f
 		const float speed_x = 0.0366f * (x * x) - 0.1778f * x + 0.3021f;
 
-		const float y = std::min(m_ViewportHeight / 1000.0f, 2.4f); // max = 2.4f
+		const float y = std::min(m_ViewportRegion.Height() / 1000.0f, 2.4f); // max = 2.4f
 		const float speed_y = 0.0366f * (y * y) - 0.1778f * y + 0.3021f;
 
 		return glm::vec2(speed_x, speed_y);

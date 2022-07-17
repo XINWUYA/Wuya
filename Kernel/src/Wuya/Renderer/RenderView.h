@@ -30,7 +30,7 @@ namespace Wuya
 	public:
 		RenderView() = default;
 		RenderView(const std::string& name, const SharedPtr<Camera>& culling_camera, bool enable_culling = true);
-		~RenderView() = default;
+		~RenderView();
 
 		/* 设置名称 */
 		void SetName(const std::string& name) { m_Name = name; }
@@ -64,12 +64,12 @@ namespace Wuya
 
 		/* RenderView名 */
 		std::string m_Name{};
-		/* 相机 */
-		SharedPtr<Camera> m_pCullingCamera{ nullptr };
 		/* 视口区域 */
 		ViewportRegion m_ViewportRegion{};
 		/* 是否启用视锥体剔除 */
 		bool m_IsEnableCulling{ true };
+		/* 相机 */
+		SharedPtr<Camera> m_pCullingCamera{ nullptr };
 		/* 所属的Scene */
 		SharedPtr<Scene> m_pOwnerScene{ nullptr };
 		/* 视锥体剔除之后，对当前可见MeshSegment */

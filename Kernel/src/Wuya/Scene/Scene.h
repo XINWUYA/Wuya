@@ -12,7 +12,7 @@ namespace Wuya
 	class RenderView;
 
 	/* 场景类 */
-	class Scene
+	class Scene final : public std::enable_shared_from_this<Scene>
 	{
 	public:
 		Scene() = default;
@@ -51,6 +51,6 @@ namespace Wuya
 		entt::registry m_Registry;
 
 		/* RenderView列表 */
-		std::vector<RenderView*> m_RenderViews;
+		std::vector<SharedPtr<RenderView>> m_RenderViews;
 	};
 }

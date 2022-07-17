@@ -47,8 +47,20 @@ namespace Wuya
 	}
 
 	/* 绘制一个视图 */
-	void Renderer::RenderAView(RenderView* view)
+	void Renderer::RenderAView(const SharedPtr<RenderView>& view)
 	{
+		const auto viewport_region = view->GetViewportRegion();
+
+		FrameGraphTexture::Descriptor color_target_desc;
+		color_target_desc.Width = 1920;// viewport_region.Width();
+		color_target_desc.Height = 1080;// viewport_region.Height();
+		color_target_desc.TextureFormat = TextureFormat::R10G10B10A2;
+
+		FrameGraphTexture::Descriptor depth_target_desc;
+		depth_target_desc.Width = 1920;// viewport_region.Width();
+		depth_target_desc.Height = 1080;// viewport_region.Height();
+		depth_target_desc.TextureFormat = TextureFormat::Depth32;
+
 		/* 组装 FrameGraph */
 		FrameGraph frame_graph;
 
@@ -56,7 +68,7 @@ namespace Wuya
 		struct MainPassData
 		{
 			FrameGraphResourceHandleTyped<FrameGraphTexture> InputTexture;
-			FrameGraphResourceHandleTyped<FrameGraphTexture> OutputTexture;
+			FrameGraphResourceHandleTyped<FrameGraphTexture> ColorTexture;
 			FrameGraphResourceHandleTyped<FrameGraphTexture> DepthTexture;
 		};
 
@@ -64,14 +76,18 @@ namespace Wuya
 			[&](FrameGraphBuilder& builder, MainPassData& data)
 			{
 				data.InputTexture = builder.CreateTexture("InputTexture");
-				data.OutputTexture = builder.CreateTexture("OutputTexture");
+				data.ColorTexture = builder.CreateTexture("ColorTexture", color_target_desc);
+				data.DepthTexture = builder.CreateTexture("DepthTexture", depth_target_desc);
 				builder.BindInputResource(data.InputTexture);
-				builder.BindOutputResource(data.OutputTexture);
+				builder.BindOutputResource(data.ColorTexture, FrameGraphTexture::Usage::ColorAttachment);
+				builder.BindOutputResource(data.DepthTexture, FrameGraphTexture::Usage::DepthAttachment);
 				builder.AsSideEffect();
 
-				FrameGraphPassInfo::Descriptor descriptor;
-				descriptor.Attachments = { data.OutputTexture };
-				builder.CreateRenderPass("MainPassRenderTarget", descriptor);
+				FrameGraphPassInfo::Descriptor pass_desc;
+				pass_desc.Attachments.ColorAttachments[0] = data.ColorTexture;
+				pass_desc.Attachments.DepthAttachment = data.DepthTexture;
+				pass_desc.ViewportRegion = viewport_region;
+				builder.CreateRenderPass("MainPassRenderTarget", pass_desc);
 				view->Prepare();
 			},
 			[&](const FrameGraphResources& resources, const MainPassData& data)
@@ -87,6 +103,9 @@ namespace Wuya
 				}
 			}
 		);
+
+		/* 输出 */
+		auto ouput = main_pass.GetData().ColorTexture;
 
 		/* 执行FrameGraph */
 		frame_graph.Build();

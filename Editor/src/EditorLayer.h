@@ -71,8 +71,6 @@ namespace Wuya
 		EditorResourceBrowser m_ResourceBrowser;
 		/* 选中实体 */
 		Entity m_HoveredEntity;
-		/* 视口尺寸 */
-		glm::uvec2 m_ViewportSize{};
 		/* 视口范围: x: width_min; y: height_min; z: width_max; w: height_max */
 		ViewportRegion m_ViewportRegion{};
 		/* 视口窗口被激活 */

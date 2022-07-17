@@ -160,11 +160,3 @@ namespace Wuya
 		}
 	};
 }
-
-namespace std
-{
-	inline std::string to_string(Wuya::TextureUsage usage) noexcept
-	{
-		return "";
-	}
-}

@@ -117,12 +117,11 @@ namespace Wuya
 		PROFILE_FUNCTION();
 
 		const FrameBufferDescription desc = m_pFrameBuffer->GetDescription();
-		if (m_ViewportSize.x > 0 && m_ViewportSize.y > 0 &&
-			(desc.Width != m_ViewportSize.x || desc.Height != m_ViewportSize.y))
+		if (m_ViewportRegion.Width() > 0 && m_ViewportRegion.Height() > 0 && (desc.Width != m_ViewportRegion.Width() || desc.Height != m_ViewportRegion.Height()))
 		{
-			m_pFrameBuffer->Resize(m_ViewportSize.x, m_ViewportSize.y);
-			m_pEditorCamera->SetViewportSize(static_cast<float>(m_ViewportSize.x), static_cast<float>(m_ViewportSize.y));
-			m_pOrthographicCameraController->OnResize(static_cast<float>(m_ViewportSize.x), static_cast<float>(m_ViewportSize.y));
+			m_pFrameBuffer->Resize(m_ViewportRegion.Width(), m_ViewportRegion.Height());
+			m_pEditorCamera->SetViewportRegion(m_ViewportRegion);
+			m_pOrthographicCameraController->OnResize(static_cast<float>(m_ViewportRegion.Width()), static_cast<float>(m_ViewportRegion.Height()));
 		}
 	}
 
@@ -482,11 +481,9 @@ namespace Wuya
 			m_IsViewportHovered = ImGui::IsWindowHovered();
 			Application::Instance()->GetImGuiLayer()->BlockEvents(!m_IsViewportFocused && !m_IsViewportHovered);
 
-			auto viewport_panel_size = ImGui::GetContentRegionAvail();
-			m_ViewportSize = { viewport_panel_size.x, viewport_panel_size.y };
-
 			/* 绘制场景 */
 			const uint64_t texture_id = m_pFrameBuffer->GetColorAttachmentByIndex(0);
+			const auto viewport_panel_size = ImGui::GetContentRegionAvail();
 			ImGui::Image((ImTextureID)texture_id, viewport_panel_size, ImVec2{ 0, 1 }, ImVec2{ 1, 0 });
 
 			/* 拖动资源到主窗口 */
