@@ -14,8 +14,8 @@ namespace Wuya
 		static void Update();
 		static void Release();
 
-		static void BeginScene(const SharedPtr<class Camera>& camera);
-		static void EndScene();
+		static void BeginFrame(const SharedPtr<class Camera>& camera);
+		static void EndFrame();
 
 		/* Draw Quads */
 		static void DrawQuad(const glm::vec2& position, const glm::vec2& size, const glm::vec4& color);

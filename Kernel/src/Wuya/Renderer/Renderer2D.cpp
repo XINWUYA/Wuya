@@ -180,7 +180,7 @@ namespace Wuya
 		s_StatisticsInfo.DrawCalls++;
 	}
 
-	void Renderer2D::BeginScene(const SharedPtr<Camera>& camera)
+	void Renderer2D::BeginFrame(const SharedPtr<Camera>& camera)
 	{
 		PROFILE_FUNCTION();
 
@@ -192,7 +192,7 @@ namespace Wuya
 		StartNewBatch();
 	}
 
-	void Renderer2D::EndScene()
+	void Renderer2D::EndFrame()
 	{
 		PROFILE_FUNCTION();
 

@@ -9,8 +9,8 @@ namespace Wuya
 	{
 		PROFILE_FUNCTION();
 
-		m_pCameraDesc_Perspective = CreateSharedPtr<SceneCameraDesc_Perspective>();
-		m_pCameraDesc_Orthographic = CreateSharedPtr<SceneCameraDesc_Orthographic>();
+		m_pPerspectiveCameraDesc = CreateSharedPtr<PerspectiveCameraDesc>();
+		m_pOrthographicCameraDesc = CreateSharedPtr<OrthographicCameraDesc>();
 		UpdateProjectionMatrix();
 	}
 
@@ -20,37 +20,37 @@ namespace Wuya
 		UpdateProjectionMatrix();
 	}
 
-	void SceneCamera::SetSceneCameraDesc_Perspective(const SharedPtr<SceneCameraDesc_Perspective>& desc)
+	void SceneCamera::SetPerspectiveCameraDesc(const SharedPtr<PerspectiveCameraDesc>& desc)
 	{
-		m_pCameraDesc_Perspective = desc;
+		m_pPerspectiveCameraDesc = desc;
 		UpdateProjectionMatrix();
 	}
 
-	void SceneCamera::SetSceneCameraDesc_Perspective(const SceneCameraDesc_Perspective& desc)
+	void SceneCamera::SetPerspectiveCameraDesc(const PerspectiveCameraDesc& desc)
 	{
-		if (!m_pCameraDesc_Perspective)
-			m_pCameraDesc_Perspective = Wuya::CreateSharedPtr<SceneCameraDesc_Perspective>();
+		if (!m_pPerspectiveCameraDesc)
+			m_pPerspectiveCameraDesc = Wuya::CreateSharedPtr<PerspectiveCameraDesc>();
 
-		m_pCameraDesc_Perspective->Fov = desc.Fov;
-		m_pCameraDesc_Perspective->Near = desc.Near;
-		m_pCameraDesc_Perspective->Far = desc.Far;
+		m_pPerspectiveCameraDesc->Fov = desc.Fov;
+		m_pPerspectiveCameraDesc->Near = desc.Near;
+		m_pPerspectiveCameraDesc->Far = desc.Far;
 		UpdateProjectionMatrix();
 	}
 
-	void SceneCamera::SetSceneCameraDesc_Orthographic(const SharedPtr<SceneCameraDesc_Orthographic>& desc)
+	void SceneCamera::SetOrthographicCameraDesc(const SharedPtr<OrthographicCameraDesc>& desc)
 	{
-		m_pCameraDesc_Orthographic = desc;
+		m_pOrthographicCameraDesc = desc;
 		UpdateProjectionMatrix();
 	}
 
-	void SceneCamera::SetSceneCameraDesc_Orthographic(const SceneCameraDesc_Orthographic& desc)
+	void SceneCamera::SetOrthographicCameraDesc(const OrthographicCameraDesc& desc)
 	{
-		if (!m_pCameraDesc_Orthographic)
-			m_pCameraDesc_Orthographic = Wuya::CreateSharedPtr<SceneCameraDesc_Orthographic>();
+		if (!m_pOrthographicCameraDesc)
+			m_pOrthographicCameraDesc = Wuya::CreateSharedPtr<OrthographicCameraDesc>();
 
-		m_pCameraDesc_Orthographic->HeightSize = desc.HeightSize;
-		m_pCameraDesc_Orthographic->Near = desc.Near;
-		m_pCameraDesc_Orthographic->Far = desc.Far;
+		m_pOrthographicCameraDesc->HeightSize = desc.HeightSize;
+		m_pOrthographicCameraDesc->Near = desc.Near;
+		m_pOrthographicCameraDesc->Far = desc.Far;
 		UpdateProjectionMatrix();
 	}
 
@@ -68,21 +68,21 @@ namespace Wuya
 		{
 		case ProjectionType::Perspective:
 			m_ProjectionMatrix = glm::perspective(
-				m_pCameraDesc_Perspective->Fov, 
+				m_pPerspectiveCameraDesc->Fov,
 				m_AspectRatio, 
-				m_pCameraDesc_Perspective->Near, 
-				m_pCameraDesc_Perspective->Far
+				m_pPerspectiveCameraDesc->Near,
+				m_pPerspectiveCameraDesc->Far
 			);
 			break;
 		case ProjectionType::Orthographic:
 			{
 				m_ProjectionMatrix = glm::ortho(
-					-m_pCameraDesc_Orthographic->HeightSize * m_AspectRatio * 0.5f,
-					m_pCameraDesc_Orthographic->HeightSize * m_AspectRatio * 0.5f,
-					-m_pCameraDesc_Orthographic->HeightSize * 0.5f,
-					m_pCameraDesc_Orthographic->HeightSize * 0.5f,
-					m_pCameraDesc_Orthographic->Near,
-					m_pCameraDesc_Orthographic->Far
+					-m_pOrthographicCameraDesc->HeightSize * m_AspectRatio * 0.5f,
+					m_pOrthographicCameraDesc->HeightSize * m_AspectRatio * 0.5f,
+					-m_pOrthographicCameraDesc->HeightSize * 0.5f,
+					m_pOrthographicCameraDesc->HeightSize * 0.5f,
+					m_pOrthographicCameraDesc->Near,
+					m_pOrthographicCameraDesc->Far
 				);
 			}
 			break;

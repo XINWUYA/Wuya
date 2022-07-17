@@ -65,7 +65,7 @@ namespace Wuya
 		float m_MoveSpeed{ 1.0f };
 
 		/* 是否启用聚焦模式 */
-		bool m_IsFocus{ false };
+		bool m_IsFocus{ true };
 
 		/* 是否需要更新变换矩阵 */
 		bool m_IsDirty{ true };

@@ -312,7 +312,7 @@ namespace Wuya
 					{
 					case SceneCamera::ProjectionType::Perspective:
 					{
-						const auto& camera_desc = scene_camera.GetSceneCameraDesc_Perspective();
+						const auto& camera_desc = scene_camera.GetPerspectiveCameraDesc();
 
 						float fov = camera_desc->Fov;
 						EditorUIFunctions::DrawDragFloatUI("Fov", fov);
@@ -321,12 +321,12 @@ namespace Wuya
 						float far_clip = camera_desc->Far;
 						EditorUIFunctions::DrawDragFloatUI("Far", far_clip);
 
-						scene_camera.SetSceneCameraDesc_Perspective({ fov, near_clip, far_clip });
+						scene_camera.SetPerspectiveCameraDesc({ fov, near_clip, far_clip });
 					}
 					break;
 					case SceneCamera::ProjectionType::Orthographic:
 					{
-						const auto& camera_desc = scene_camera.GetSceneCameraDesc_Orthographic();
+						const auto& camera_desc = scene_camera.GetOrthographicCameraDesc();
 
 						float height_size = camera_desc->HeightSize;
 						EditorUIFunctions::DrawDragFloatUI("HeightSize", height_size);
@@ -335,7 +335,7 @@ namespace Wuya
 						float far_clip = camera_desc->Far;
 						EditorUIFunctions::DrawDragFloatUI("Far", far_clip);
 
-						scene_camera.SetSceneCameraDesc_Orthographic({ height_size, near_clip, far_clip });
+						scene_camera.SetOrthographicCameraDesc({ height_size, near_clip, far_clip });
 					}
 					break;
 					}

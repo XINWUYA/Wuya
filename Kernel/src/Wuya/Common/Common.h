@@ -4,6 +4,8 @@
 #define BIT(x) (1 << (x))
 #define EXPAND_MACRO(x) x
 #define STRINGIFY(x) #x
+#define SAFE_DELETE(p) { if (p) { delete (p); (p) = nullptr; } }
+#define SAFE_DELETE_ARRAY(p) { if (p) { delete[] (p); (p) = nullptr; } }
 #define BIND_EVENT_FUNC(func) [this](auto&& ...args)->decltype(auto) { return this->func(std::forward<decltype(args)>(args)...); }
 
 namespace Wuya

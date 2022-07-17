@@ -9,6 +9,7 @@ namespace tinyxml2
 namespace Wuya
 {
 	class Entity;
+	class RenderView;
 
 	/* 场景类 */
 	class Scene
@@ -48,5 +49,8 @@ namespace Wuya
 
 		/* 场景中的所有实体都将注册到这里 */
 		entt::registry m_Registry;
+
+		/* RenderView列表 */
+		std::vector<RenderView*> m_RenderViews;
 	};
 }

@@ -48,4 +48,12 @@ namespace Wuya
 		const std::vector<std::string> split_result = Split(value, " ");
 		return { std::stof(split_result[0]), std::stof(split_result[1]), std::stof(split_result[2]), std::stof(split_result[3]) };
 	}
+
+	/* Enum类型的位运算 */
+	template<typename Enum, std::enable_if_t<std::is_enum<Enum>::value>>
+	inline constexpr Enum operator| (Enum lt, Enum rt) noexcept
+	{
+		using underlying = std::underlying_type_t<Enum>;
+		return Enum(underlying(lt) | underlying(rt));
+	}
 }

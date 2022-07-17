@@ -2,9 +2,9 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/quaternion.hpp>
-
 #include "SceneCamera.h"
 #include "Wuya/Renderer/Texture.h"
+#include "Mesh.h"
 
 namespace Wuya
 {
@@ -65,5 +65,13 @@ namespace Wuya
 		SpriteComponent(const glm::vec4& basecolor)
 			: BaseColor(basecolor)
 		{}
+	};
+
+	/* 模型网格组件 */
+	struct MeshComponent
+	{
+		std::vector<SharedPtr<MeshSegment>> MeshSegments;
+		MeshComponent() = default;
+		MeshComponent(const MeshComponent&) = default;
 	};
 }

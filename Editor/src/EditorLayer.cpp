@@ -5,6 +5,7 @@
 #include "EditorBuiltinCamera.h"
 #include "EditorUIFunctions.h"
 #include "ImGuizmo.h"
+#include "Wuya/Scene/Material.h"
 
 namespace Wuya
 {
@@ -20,40 +21,10 @@ namespace Wuya
 	{
 		PROFILE_FUNCTION();
 
-		// Texture
-		m_pTexture2D = Texture2D::Create("assets/textures/game-sky.jpg");
-
 		// Shader
 		m_pShaderLibrary = CreateUniquePtr<ShaderLibrary>();
-		auto shader = m_pShaderLibrary->Load("assets/shaders/triangle.glsl");
-		shader->Bind();
-		shader->SetFloat3("color", glm::vec3(1, 1, 0));
-		shader->SetInt("u_Texture", 0);
 
 		Renderer::Init();
-
-		m_pVertexArray = VertexArray::Create();
-		m_pVertexArray->Bind();
-
-		// triangle vertices
-		const float vertices[3 * 3] = {
-			-0.5f, -0.5f, 0.0f,
-			 0.5f, -0.5f, 0.0f,
-			 0.0f,  0.5f, 0.0f
-		};
-		SharedPtr<VertexBuffer> vertex_buffer = VertexBuffer::Create(vertices, sizeof(vertices));
-		VertexBufferLayout vertex_buffer_layout = {
-			{ "a_Position", BufferDataType::Float3 }
-		};
-		vertex_buffer->SetLayout(vertex_buffer_layout);
-		m_pVertexArray->AddVertexBuffer(vertex_buffer);
-
-		// Indices
-		const uint32_t indices[3] = {
-			0, 1, 2
-		};
-		SharedPtr<IndexBuffer> index_buffer = IndexBuffer::Create(indices, sizeof(indices) / sizeof(uint32_t));
-		m_pVertexArray->SetIndexBuffer(index_buffer);
 
 		// Camera
 		m_pEditorCamera = CreateSharedPtr<EditorCamera>(30.0f);
@@ -70,6 +41,35 @@ namespace Wuya
 
 		m_pMainScene = CreateSharedPtr<Scene>();
 		m_SceneHierarchy.SetOwnerScene(m_pMainScene);
+
+		// Material
+		auto material = CreateSharedPtr<Material>();
+		const auto albedo_texture = Texture2D::Create("assets/textures/container.jpg");
+		material->SetTexture(albedo_texture, 0);
+		const auto shader = m_pShaderLibrary->Load("assets/shaders/cube.glsl");
+		material->SetShader(shader);
+
+		// Create MeshSegment
+		auto mesh_segment = CreatePrimitive(PrimitiveType::Cube, material);
+
+		// Add to Scene
+		{
+			Entity entity = m_pMainScene->CreateEntity("Cube");
+			auto& mesh_component = entity.AddComponent<MeshComponent>();
+			mesh_component.MeshSegments.emplace_back(mesh_segment);
+			auto& transform_component = entity.GetComponent<TransformComponent>();
+			transform_component.Position = glm::vec3(3, 0, 0);
+		}
+
+		{
+			Entity entity = m_pMainScene->CreateEntity("Cube2");
+			auto& mesh_component = entity.AddComponent<MeshComponent>();
+			mesh_component.MeshSegments.emplace_back(mesh_segment);
+			auto& transform_component = entity.GetComponent<TransformComponent>();
+			transform_component.Position = glm::vec3(0, 0, 0);
+		}
+
+
 	}
 
 	void EditorLayer::OnDetached()
@@ -472,12 +472,10 @@ namespace Wuya
 			const auto viewport_region_min = ImGui::GetWindowContentRegionMin();
 			const auto viewport_region_max = ImGui::GetWindowContentRegionMax();
 			const auto viewport_offset = ImGui::GetWindowPos();
-			m_ViewportRegion = {
-				viewport_region_min.x + viewport_offset.x,
-				viewport_region_min.y + viewport_offset.y,
-				viewport_region_max.x + viewport_offset.x,
-				viewport_region_max.y + viewport_offset.y
-			};
+			m_ViewportRegion.Left = viewport_region_min.x + viewport_offset.x;
+			m_ViewportRegion.Right = viewport_region_max.x + viewport_offset.x;
+			m_ViewportRegion.Bottom = viewport_region_min.y + viewport_offset.y;
+			m_ViewportRegion.Top = viewport_region_max.y + viewport_offset.y;
 
 			/* 若当前ImGui窗口不是主窗口，应阻塞事件传递 */
 			m_IsViewportFocused = ImGui::IsWindowFocused();
@@ -542,7 +540,7 @@ namespace Wuya
 
 		ImGuizmo::SetOrthographic(false);
 		ImGuizmo::SetDrawlist();
-		ImGuizmo::SetRect(m_ViewportRegion.x, m_ViewportRegion.y, m_ViewportRegion.z - m_ViewportRegion.x, m_ViewportRegion.w - m_ViewportRegion.y);
+		ImGuizmo::SetRect(m_ViewportRegion.Left, m_ViewportRegion.Top, m_ViewportRegion.Width(), m_ViewportRegion.Height());
 
 		Entity selected_entity = m_SceneHierarchy.GetSelectedEntity();
 		if (selected_entity && m_GizmoType != -1)
@@ -594,6 +592,24 @@ namespace Wuya
 
 	}
 
+	void EditorLayer::CheckMouseSelectEntity()
+	{
+		// todo: 存在bug
+		auto [mouse_x, mouse_y] = ImGui::GetMousePos();
+		mouse_x -= m_ViewportRegion.Left;
+		mouse_y -= m_ViewportRegion.Bottom;
+
+		const glm::vec2 viewport_size = glm::vec2(m_ViewportRegion.Width(), m_ViewportRegion.Height());
+		mouse_y = viewport_size.y - mouse_y;
+
+		if (mouse_x > 0 && mouse_y > 0 && mouse_x < viewport_size.x && mouse_y < viewport_size.y)
+		{
+			int pixel_data = m_pFrameBuffer->ReadPixel(1, (int)mouse_x, (int)mouse_y);
+			m_HoveredEntity = pixel_data == -1 ? Entity() : Entity((entt::entity)pixel_data, m_pMainScene.get());
+			//EDITOR_LOG_ERROR(pixel_data);
+		}
+	}
+
 	void EditorLayer::OnUpdate(float delta_time)
 	{
 		PROFILE_FUNCTION();
@@ -604,6 +620,8 @@ namespace Wuya
 
 		Renderer::SetClearColor(glm::vec4(0.2f, 0.3f, 0.3f, 1.0f));
 		Renderer::Clear();
+		Renderer::Update();
+
 		m_pFrameBuffer->ClearColorAttachment(1, -1);
 
 		if (m_pMainScene)
@@ -622,6 +640,8 @@ namespace Wuya
 				m_pMainScene->OnUpdateEditor(m_pEditorCamera, delta_time);
 				break;
 			case PlayMode::Runtime:
+				/* 更新场景 */
+				m_pMainScene->OnUpdateRuntime(delta_time);
 				break;
 			default:
 				ASSERT(false);
@@ -629,33 +649,8 @@ namespace Wuya
 			}
 		}
 
-		//m_pTexture2D->Bind();
-
-		//auto shader = m_pShaderLibrary->GetShaderByName("triangle");
-		///*glm::mat4 scale = glm::mat4(
-		//	2, 0, 0, 0,
-		//	0, 2, 0, 0,
-		//	0, 0, 2, 0,
-		//	0, 0, 0, 1);
-		//shader->SetMat4("u_ViewProjectionMat", scale);*/
-		//shader->SetMat4("u_ViewProjectionMat", m_pEditorCamera->GetViewProjectionMatrix());
-		//Renderer::Submit(shader, m_pVertexArray);
-
-
 		// todo: 鼠标点击选中物体
-		auto [mouse_x, mouse_y] = ImGui::GetMousePos();
-		mouse_x -= m_ViewportRegion.x;
-		mouse_y -= m_ViewportRegion.y;
-
-		const glm::vec2 viewport_size = glm::vec2(m_ViewportRegion.z - m_ViewportRegion.x, m_ViewportRegion.w - m_ViewportRegion.y);
-		mouse_y = viewport_size.y - mouse_y;
-
-		if (mouse_x > 0 && mouse_y > 0 && mouse_x < viewport_size.x && mouse_y < viewport_size.y)
-		{
-			int pixel_data = m_pFrameBuffer->ReadPixel(1, (int)mouse_x, (int)mouse_y);
-			m_HoveredEntity = pixel_data == -1 ? Entity() : Entity((entt::entity)pixel_data, m_pMainScene.get());
-			//EDITOR_LOG_ERROR(pixel_data);
-		}
+		CheckMouseSelectEntity();
 
 		m_pFrameBuffer->Unbind();
 	}

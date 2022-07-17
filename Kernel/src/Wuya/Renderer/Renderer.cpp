@@ -1,6 +1,12 @@
 #include "Pch.h"
 #include "Renderer.h"
+#include "Camera.h"
 #include "Renderer2D.h"
+#include "RenderView.h"
+#include "Texture.h"
+#include "FrameGraph/FrameGraph.h"
+#include "Wuya/Scene/Material.h"
+#include "Wuya/Scene/Mesh.h"
 
 namespace Wuya
 {
@@ -38,6 +44,55 @@ namespace Wuya
 		PROFILE_FUNCTION();
 
 		m_pRenderAPI->Clear();
+	}
+
+	/* 绘制一个视图 */
+	void Renderer::RenderAView(RenderView* view)
+	{
+		/* 组装 FrameGraph */
+		FrameGraph frame_graph;
+
+		/* Main Pass */
+		struct MainPassData
+		{
+			FrameGraphResourceHandleTyped<FrameGraphTexture> InputTexture;
+			FrameGraphResourceHandleTyped<FrameGraphTexture> OutputTexture;
+			FrameGraphResourceHandleTyped<FrameGraphTexture> DepthTexture;
+		};
+
+		auto& main_pass = frame_graph.AddPass<MainPassData>("MainPass",
+			[&](FrameGraphBuilder& builder, MainPassData& data)
+			{
+				data.InputTexture = builder.CreateTexture("InputTexture");
+				data.OutputTexture = builder.CreateTexture("OutputTexture");
+				builder.BindInputResource(data.InputTexture);
+				builder.BindOutputResource(data.OutputTexture);
+				builder.AsSideEffect();
+
+				FrameGraphPassInfo::Descriptor descriptor;
+				descriptor.Attachments = { data.OutputTexture };
+				builder.CreateRenderPass("MainPassRenderTarget", descriptor);
+				view->Prepare();
+			},
+			[&](const FrameGraphResources& resources, const MainPassData& data)
+			{
+				for (const auto& mesh_object : view->GetVisibleMeshObjects())
+				{
+					auto& material = mesh_object.MeshSegment->GetMaterial();
+					material->SetParameters("u_Local2WorldMat", mesh_object.Local2WorldMat);
+					material->SetParameters("u_ViewProjectionMat", view->GetCullingCamera()->GetViewProjectionMatrix());
+					material->SetTexture(resources.Get(data.InputTexture).Texture, 1);
+					material->Bind();
+					Submit(material->GetShader(), mesh_object.MeshSegment->GetVertexArray());
+				}
+			}
+		);
+
+		/* 执行FrameGraph */
+		frame_graph.Build();
+		frame_graph.Execute();
+
+		frame_graph.ExportGraphviz("framegraph.txt");
 	}
 
 	void Renderer::Submit(const SharedPtr<Shader>& shader, const SharedPtr<VertexArray>& vertex_array, uint32_t index_count)

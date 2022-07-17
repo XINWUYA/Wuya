@@ -368,3 +368,7 @@ MigrationBackup/
 FodyWeavers.xsd
 
 *.ini
+
+framegraph.txt
+TimeCostProfiler-Startup.json
+TimeCostProfiler-Runtime.json

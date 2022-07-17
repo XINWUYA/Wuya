@@ -48,6 +48,9 @@ namespace Wuya
 		/* 选中Entity时显示操作Gizmo */
 		void ShowOperationGizmoUI();
 
+		/* 鼠标选中Entity时的响应 */
+		void CheckMouseSelectEntity();
+
 		/* 执行模式 */
 		enum class PlayMode : uint8_t
 		{
@@ -55,8 +58,6 @@ namespace Wuya
 			Runtime		/* 运行模式 */
 		};
 
-		SharedPtr<VertexArray> m_pVertexArray;
-		SharedPtr<Texture2D> m_pTexture2D;
 		UniquePtr<ShaderLibrary> m_pShaderLibrary;
 		SharedPtr<class EditorCamera> m_pEditorCamera;
 		SharedPtr<OrthographicCameraController> m_pOrthographicCameraController;
@@ -73,7 +74,7 @@ namespace Wuya
 		/* 视口尺寸 */
 		glm::uvec2 m_ViewportSize{};
 		/* 视口范围: x: width_min; y: height_min; z: width_max; w: height_max */
-		glm::vec4 m_ViewportRegion{};
+		ViewportRegion m_ViewportRegion{};
 		/* 视口窗口被激活 */
 		bool m_IsViewportFocused{ false };
 		/* 鼠标停留在视口上 */

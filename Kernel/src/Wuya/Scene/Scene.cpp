@@ -3,9 +3,12 @@
 #include <tinyxml2.h>
 #include "Components.h"
 #include "Entity.h"
+#include "Material.h"
 #include "Wuya/Common/Utils.h"
 #include "Wuya/Renderer/Camera.h"
+#include "Wuya/Renderer/Renderer.h"
 #include "Wuya/Renderer/Renderer2D.h"
+#include "Wuya/Renderer/RenderView.h"
 
 namespace Wuya
 {
@@ -43,19 +46,46 @@ namespace Wuya
 	{
 		PROFILE_FUNCTION();
 
-		/* 更新Renderer2D信息 */
-		Renderer2D::BeginScene(camera);
-
-		/* 更新所有图片实体 */
-		const auto entity_group = m_Registry.group<TransformComponent>(entt::get<SpriteComponent>);
-		for (auto& entity : entity_group)
+		/* todo: 收集RenderView */
+		m_RenderViews.clear();
+		const auto& entity_view = GetRegistry().group<CameraComponent>(entt::get<NameComponent>);
+		for (auto& entity : entity_view)
 		{
-			auto [transform_component, sprite_component] = entity_group.get<TransformComponent, SpriteComponent>(entity);
-			Renderer2D::DrawSprite(transform_component.GetTransform(), &sprite_component, static_cast<int>(entity));
+			const auto [name_component, camera_component] = entity_view.get<NameComponent, CameraComponent>(entity);
+			RenderView* render_view = new RenderView;
+			render_view->SetName(name_component.Name);
+			render_view->SetCullingCamera(camera);// todo: 替换为组件对应的相机
+			m_RenderViews.emplace_back(render_view);
 		}
 
+		/* Editor Camera's RenderView */
+		if (camera)
+		{
+			RenderView* render_view = new RenderView("Builtin Editor Camera", camera);
+			render_view->SetOwnerScene(std::shared_ptr<Scene>(this));
+			m_RenderViews.emplace_back(render_view);
+		}
+
+		/* 绘制所有View */
+		for (auto* view : m_RenderViews)
+		{
+			Renderer::RenderAView(view);
+		}
+
+
+		/* 更新Renderer2D信息 */
+		Renderer2D::BeginFrame(camera);
+
+		/* 更新所有图片实体 */
+		/*const auto& sprite_entity_group = GetRegistry().group<TransformComponent>(entt::get<SpriteComponent>);
+		for (auto& entity : sprite_entity_group)
+		{
+			auto [transform_component, sprite_component] = sprite_entity_group.get<TransformComponent, SpriteComponent>(entity);
+			Renderer2D::DrawSprite(transform_component.GetTransform(), &sprite_component, static_cast<int>(entity));
+		}*/
+
 		/* 提交绘制数据 */
-		Renderer2D::EndScene();
+		Renderer2D::EndFrame();
 	}
 
 	Entity Scene::GetPrimaryCameraEntity()
@@ -165,7 +195,7 @@ namespace Wuya
 								const float fov = camera_root->FloatAttribute("Fov");
 								const float near_clip = camera_root->FloatAttribute("Near");
 								const float far_clip = camera_root->FloatAttribute("Far");
-								camera_component.Camera.SetSceneCameraDesc_Perspective({ fov, near_clip, far_clip });
+								camera_component.Camera.SetPerspectiveCameraDesc({ fov, near_clip, far_clip });
 							}
 							break;
 						case SceneCamera::ProjectionType::Orthographic:
@@ -173,11 +203,14 @@ namespace Wuya
 								const float height_size = camera_root->FloatAttribute("HeightSize");
 								const float near_clip = camera_root->FloatAttribute("Near");
 								const float far_clip = camera_root->FloatAttribute("Far");
-								camera_component.Camera.SetSceneCameraDesc_Orthographic({ height_size, near_clip, far_clip });
+								camera_component.Camera.SetOrthographicCameraDesc({ height_size, near_clip, far_clip });
 							}
 							break;
 						}
 					}
+
+					/* Mesh */
+					/* todo */
 				}
 			}	
 		}
@@ -236,7 +269,7 @@ namespace Wuya
 			{
 			case SceneCamera::ProjectionType::Perspective:
 				{
-					const auto& camera_desc = component.Camera.GetSceneCameraDesc_Perspective();
+					const auto& camera_desc = component.Camera.GetPerspectiveCameraDesc();
 					camera_root->SetAttribute("Fov", camera_desc->Fov);
 					camera_root->SetAttribute("Near", camera_desc->Near);
 					camera_root->SetAttribute("Far", camera_desc->Far);
@@ -244,7 +277,7 @@ namespace Wuya
 				break;
 			case SceneCamera::ProjectionType::Orthographic:
 				{
-				const auto& camera_desc = component.Camera.GetSceneCameraDesc_Orthographic();
+				const auto& camera_desc = component.Camera.GetOrthographicCameraDesc();
 				camera_root->SetAttribute("HeightSize", camera_desc->HeightSize);
 				camera_root->SetAttribute("Near", camera_desc->Near);
 				camera_root->SetAttribute("Far", camera_desc->Far);
@@ -280,6 +313,12 @@ namespace Wuya
 
 	template<>
 	void Scene::OnComponentAdded<CameraComponent>(Entity& entity, CameraComponent& component)
+	{
+
+	}
+
+	template<>
+	void Scene::OnComponentAdded<MeshComponent>(Entity& entity, MeshComponent& component)
 	{
 
 	}
