@@ -2,7 +2,8 @@ project "tinyxml2"
 	kind "StaticLib"
 	staticruntime "on"
 	language "C++"
-	cppdialect "C++latest"
+	--cppdialect "C++latest"
+	cppdialect "C++17"
 
 	targetdir ("%{wks.location}/build/bin/" .. outputdir .. "/%{prj.name}")
 	objdir ("%{wks.location}/build/intermediates/" .. outputdir .. "/%{prj.name}")
