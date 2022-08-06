@@ -1,6 +1,5 @@
 #include "Pch.h"
 #include "Material.h"
-
 #include "Wuya/Renderer/Shader.h"
 #include "Wuya/Renderer/Texture.h"
 
@@ -17,7 +16,7 @@ namespace Wuya
 		m_Parameters[name] = param;
 	}
 
-	void Material::SetTexture(const SharedPtr<ITexture>& texture, uint32_t slot)
+	void Material::SetTexture(const SharedPtr<Texture>& texture, uint32_t slot)
 	{
 		m_Textures.emplace(texture, slot);
 	}

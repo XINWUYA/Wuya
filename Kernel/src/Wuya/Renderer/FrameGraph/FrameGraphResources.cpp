@@ -17,6 +17,19 @@ namespace Wuya
 		return m_RenderPassNode.GetName();
 	}
 
+	/* 获取当前RenderPass的RenderTarget */
+	const SharedPtr<FrameBuffer>& FrameGraphResources::GetPassRenderTarget(uint32_t idx) const
+	{
+		const auto render_pass_data = m_RenderPassNode.GetRenderPassData(idx);
+		if (!render_pass_data)
+		{
+			CORE_LOG_ERROR("Failed to access the RenderTarget of RenderPass({}) by index({}).", m_RenderPassNode.GetName(), idx);
+			return nullptr;
+		}
+
+		return render_pass_data->m_pRenderTarget;
+	}
+
 	/* 从FrameGraph中获取资源 */
 	IResource* FrameGraphResources::GetResource(FrameGraphResourceHandle handle) const
 	{
@@ -35,6 +48,6 @@ namespace Wuya
 	/* 创建 */
 	void FrameGraphTexture::Create(const std::string& name, const Descriptor& desc, Usage usage)
 	{
-		Texture = Texture::Create(name, desc.Width, desc.Height, desc.Depth, desc.MipLevels, desc.Samples, desc.TextureFormat, desc.SamplerType, usage);
+		Texture = Texture::Create(name, { desc.Width, desc.Height, desc.Depth, desc.MipLevels, desc.Samples, desc.TextureFormat, desc.SamplerType, usage });
 	}
 }

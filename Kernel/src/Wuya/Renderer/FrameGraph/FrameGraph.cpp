@@ -78,6 +78,12 @@ namespace Wuya
 		return true;
 	}
 
+	/* 判断一个资源连线是否有效 */
+	bool FrameGraph::IsConnectionValid(const DependencyGraph::Connection* connection) const
+	{
+		return m_DependencyGraph.IsConnectionValid(connection);
+	}
+
 	/* 检查一个FrameGraphPass节点是否被优化掉 */
 	bool FrameGraph::IsPassCulled(IFrameGraphPass* pass) const
 	{
@@ -137,6 +143,13 @@ namespace Wuya
 					last_pass_node->GetResourcesNeedDestroy().emplace_back(resource);
 				}
 			}
+		}
+
+		/* 在Cull之后再更新资源的Usage */
+		for (auto& iter : m_ResourceToResourceNodeMap)
+		{
+			auto& resource_node = iter.second;
+			resource_node->UpdateResourceUsage();
 		}
 	}
 
@@ -204,19 +217,7 @@ namespace Wuya
 		RenderResourceNode* node = new RenderResourceNode(*this, resource_handle);
 		m_ResourceToResourceNodeMap.insert({ resource_handle.GetIndex(), node });
 
-		m_NameToResourceHandleMap.insert({ resource->GetName(), resource_handle });
-
 		return resource_handle;
-	}
-
-	/* 根据名字获取资源handle */
-	FrameGraphResourceHandle FrameGraph::GetResourceHandleByNameInternal(const std::string& name) const
-	{
-		const auto it = m_NameToResourceHandleMap.find(name);
-		if (it != m_NameToResourceHandleMap.end())
-			return it->second;
-
-		return {};
 	}
 
 	/* 为RenderPass绑定输入资源 */

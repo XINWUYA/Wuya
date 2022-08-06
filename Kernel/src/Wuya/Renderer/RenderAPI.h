@@ -1,6 +1,6 @@
 #pragma once
 #include <glm/glm.hpp>
-
+#include "RenderCommon.h"
 #include "VertexArray.h"
 
 namespace Wuya
@@ -21,8 +21,19 @@ namespace Wuya
 		virtual void SetClearColor(const glm::vec4& color) = 0;
 		virtual void Clear() = 0;
 
+		/* 应用光栅化参数 */
+		virtual void ApplyRasterState(RenderRasterState raster_state) = 0;
+
+		/* 调用绘制命令 */
 		virtual void DrawIndexed(const SharedPtr<VertexArray>& vertex_array, uint32_t index_count = 0) = 0;
 		virtual void DrawArrays(const SharedPtr<VertexArray>& vertex_array) = 0;
+
+		/* Flush */
+		virtual void Flush() = 0;
+
+		/* GroupMarker */
+		virtual void PushDebugGroup(const char* name) = 0;
+		virtual void PopDebugGroup() = 0;
 
 		static int GetAPI() { return m_API; }
 		static UniquePtr<RenderAPI> Create();

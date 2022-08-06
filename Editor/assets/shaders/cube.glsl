@@ -34,8 +34,10 @@ void main()
 #type fragment
 #version 450 core
 
-layout(location = 0) out vec4 OutFragColor;
-layout(location = 2) out int OutEntityId;
+layout(location = 0) out vec4 OutGBufferAlbedo;
+layout(location = 1) out vec4 OutGBufferNormal;
+layout(location = 2) out vec4 OutGBufferRoughness;
+layout(location = 4) out int OutEntityId;
 
 struct SVextex2Frag
 {
@@ -53,6 +55,9 @@ void main()
 {
 	vec4 albedo = texture(u_AlbedoTexture, Input.TexCoord);
 	vec4 color = texture(u_ColorTexture, Input.TexCoord);
-	OutFragColor = vec4(albedo.rgb * color.rgb, 1.0f);
+	//OutFragColor = vec4(albedo.rgb * color.rgb, 1.0f);
+	OutGBufferAlbedo = vec4(albedo.rgb, 1.0f);
+	OutGBufferNormal = vec4(0.0f, 0.0f, 1.0f, 1.0f);
+	OutGBufferRoughness = vec4(1.0f, 0.0f, 0.0f, 1.0f);
 	OutEntityId = EntityId;
 }

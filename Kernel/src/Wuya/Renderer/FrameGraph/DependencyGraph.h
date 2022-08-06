@@ -66,7 +66,7 @@ namespace Wuya
 		/* 获取指定节点的所有出射连线 */
 		std::vector<Connection*> GetOutgoingConnectionsOfNode(const Node* node) const;
 		/* 判断连线是否有效 */
-		bool IsValidConnection(const Connection* connection) const;
+		bool IsConnectionValid(const Connection* connection) const;
 
 		/* 输出可视化文本：便于调试（将输出字符复制到：http://www.webgraphviz.com/） */
 		std::string Graphvizify(const std::string& name = {}) const;

@@ -61,7 +61,6 @@ namespace Wuya
 		UniquePtr<ShaderLibrary> m_pShaderLibrary;
 		SharedPtr<class EditorCamera> m_pEditorCamera;
 		SharedPtr<OrthographicCameraController> m_pOrthographicCameraController;
-		SharedPtr<FrameBuffer> m_pFrameBuffer;
 
 		/* Ö÷³¡¾° */
 		SharedPtr<Scene> m_pMainScene;

@@ -1,42 +1,69 @@
 #include "Pch.h"
 #include "OpenGLFrameBuffer.h"
-
+#include "OpenGLCommon.h"
 #include <glad/glad.h>
+
+#include "OpenGLTexture.h"
 
 namespace Wuya
 {
 	constexpr uint32_t MAX_FRAME_TARGET_SIZE = 8192;
 
-	static bool IsDepthFormat(FrameBufferTargetFormat format)
-	{
-		switch (format)
-		{
-		case FrameBufferTargetFormat::Depth24Stencil8:  
-			return true;
-		default:
-			return false;
-		}
-	}
-
-	OpenGLFrameBuffer::OpenGLFrameBuffer(const FrameBufferDescription& desc)
-		: m_Description(desc)
+	OpenGLFrameBuffer::OpenGLFrameBuffer(const std::string& name, const FrameBufferDesc& desc)
+		: FrameBuffer(name, desc)
 	{
 		PROFILE_FUNCTION();
 
-		for (auto frame_target : m_Description.Attachments.Targets)
+		/* 1. 创建FrameBuffer */
+		glGenFramebuffers(1, &m_FrameBufferId);
+
+		/* 2. 附加ColorAttachments */
+		if (!!(desc.Usage & RenderBufferUsage::ColorAll))
 		{
-			if (!IsDepthFormat(frame_target.TextureFormat))
-				m_ColorTargets.emplace_back(frame_target);
-			else
-				m_DepthTarget = frame_target;
+			GLenum rbos[MAX_COLOR_ATTACHMENT_NUM] = { GL_NONE };
+			for (uint32_t i = 0; i < MAX_COLOR_ATTACHMENT_NUM; ++i)
+			{
+				if (!!(desc.Usage & GetRenderBufferUsageByIndex(i)))
+				{
+					AttachARenderBuffer(desc.ColorRenderBuffers[i], GL_COLOR_ATTACHMENT0 + i);
+					rbos[i] = GL_COLOR_ATTACHMENT0 + i;
+				}
+			}
+			glDrawBuffers(MAX_COLOR_ATTACHMENT_NUM, rbos);
+
+			CHECK_GL_ERROR;
 		}
 
-		Invalidate();
+		/* 3. 附加Depth/Stencil Attachment */
+		bool is_depth_stencil = false; /* Depth和Stencil附加到同一个RenderBuffer */
+		if ((desc.Usage & RenderBufferUsage::DepthStencil) == RenderBufferUsage::DepthStencil)
+		{
+			AttachARenderBuffer(desc.DepthRenderBuffer, GL_DEPTH_STENCIL_ATTACHMENT);
+			is_depth_stencil = true;
+		}
+		
+		if (!is_depth_stencil)
+		{
+			if (!!(desc.Usage & RenderBufferUsage::Depth)) /* 仅附加Depth */
+			{
+				AttachARenderBuffer(desc.DepthRenderBuffer, GL_DEPTH_ATTACHMENT);
+			}
+
+			if (!!(desc.Usage & RenderBufferUsage::Stencil)) /* 仅附加Stencil */
+			{
+				AttachARenderBuffer(desc.StencilRenderBuffer, GL_STENCIL_ATTACHMENT);
+			}
+		}
+
+		/* 先解绑 */
+		Unbind();
+
+		CHECK_GL_ERROR;
 	}
 
 	OpenGLFrameBuffer::~OpenGLFrameBuffer()
 	{
-		ReleaseAttachments();
+		glDeleteFramebuffers(1, &m_FrameBufferId);
 	}
 
 	void OpenGLFrameBuffer::Bind()
@@ -44,7 +71,7 @@ namespace Wuya
 		PROFILE_FUNCTION();
 
 		glBindFramebuffer(GL_FRAMEBUFFER, m_FrameBufferId);
-		glViewport(0, 0, m_Description.Width, m_Description.Height);
+		glViewport(0, 0, (GLsizei)m_FrameBufferDesc.Width, (GLsizei)m_FrameBufferDesc.Height);
 	}
 
 	void OpenGLFrameBuffer::Unbind()
@@ -64,17 +91,15 @@ namespace Wuya
 			return;
 		}
 
-		m_Description.Width = width;
-		m_Description.Height = height;
-
-		Invalidate();
+		m_FrameBufferDesc.Width = width;
+		m_FrameBufferDesc.Height = height;
 	}
 
 	int OpenGLFrameBuffer::ReadPixel(uint32_t attachment_index, int x, int y)
 	{
 		PROFILE_FUNCTION();
 
-		ASSERT(attachment_index < m_ColorAttachments.size());
+		ASSERT(attachment_index < m_FrameBufferDesc.ColorRenderBuffers.size());
 
 		glReadBuffer(GL_COLOR_ATTACHMENT0 + attachment_index);
 
@@ -83,174 +108,126 @@ namespace Wuya
 		return pixel_data;
 	}
 
-	static GLenum TranslateBufferTargetFormatToOpenGLBaseFormat(FrameBufferTargetFormat format)
+	/* 附加一个RenderBuffer到FrameBuffer */
+	void OpenGLFrameBuffer::AttachARenderBuffer(const RenderBufferInfo& render_buffer_info, GLenum attachment)
 	{
-		switch (format)
+		/* 获取该RenderBuffer的Usage */
+		RenderBufferUsage render_buffer_usage{};
+		switch (attachment)
 		{
-		case FrameBufferTargetFormat::RGBA8:
-			return GL_RGBA8;
-		case FrameBufferTargetFormat::RedInteger: 
-			return GL_RED_INTEGER;
-		default:
-			ASSERT(false);
-			return 0;
-		}
-	}
-
-	void OpenGLFrameBuffer::ClearColorAttachment(uint32_t attachment_index, int value)
-	{
-		PROFILE_FUNCTION();
-
-		ASSERT(attachment_index < m_ColorAttachments.size());
-
-		auto& target = m_ColorTargets[attachment_index];
-		glClearTexImage(m_ColorAttachments[attachment_index],
-			0,
-			TranslateBufferTargetFormatToOpenGLBaseFormat(target.TextureFormat),
-			GL_INT,
-			&value
-		);
-	}
-
-	uint32_t OpenGLFrameBuffer::GetColorAttachmentByIndex(uint32_t index) const
-	{
-		ASSERT(index < m_ColorAttachments.size());
-
-		return m_ColorAttachments[index];
-	}
-
-	void OpenGLFrameBuffer::Invalidate()
-	{
-		PROFILE_FUNCTION();
-
-		if (m_FrameBufferId)
-		{
-			ReleaseAttachments();
+		case GL_COLOR_ATTACHMENT0:
+		case GL_COLOR_ATTACHMENT1:
+		case GL_COLOR_ATTACHMENT2:
+		case GL_COLOR_ATTACHMENT3:
+		case GL_COLOR_ATTACHMENT4:
+		case GL_COLOR_ATTACHMENT5:
+		case GL_COLOR_ATTACHMENT6:
+		case GL_COLOR_ATTACHMENT7:
+			render_buffer_usage = GetRenderBufferUsageByIndex(attachment - GL_COLOR_ATTACHMENT0);
+			break;
+		case GL_DEPTH_ATTACHMENT:
+			render_buffer_usage = RenderBufferUsage::Depth;
+			break;
+		case GL_STENCIL_ATTACHMENT:
+			render_buffer_usage = RenderBufferUsage::Stencil;
+			break;
+		case GL_DEPTH_STENCIL_ATTACHMENT:
+			render_buffer_usage = RenderBufferUsage::DepthStencil;
+			break;
+		default: 
+			break;
 		}
 
-		glCreateFramebuffers(1, &m_FrameBufferId);
-		glBindFramebuffer(GL_FRAMEBUFFER, m_FrameBufferId);
-
-		const bool is_multi_sample = m_Description.Samples > 1;
-		const GLenum texture_target = is_multi_sample ? GL_TEXTURE_2D_MULTISAMPLE : GL_TEXTURE_2D;
-
-		// Color attachments
-		if (!m_ColorTargets.empty())
+		/* 1. 获取rt的格式 */
+		auto texture = std::dynamic_pointer_cast<OpenGLTexture>(render_buffer_info.RenderTarget);
+		GLenum texture_target = GL_TEXTURE_2D;
+		if (!!(texture->m_TextureDesc.Usage & TextureUsage::Sampleable)) /* 作为颜色rt */
 		{
-			m_ColorAttachments.resize(m_ColorTargets.size());
-
-			glCreateTextures(texture_target, m_ColorAttachments.size(), m_ColorAttachments.data());
-			for (auto i = 0; i < m_ColorAttachments.size(); ++i)
+			switch (texture->m_TextureTarget)
 			{
-				glBindTexture(texture_target, m_ColorAttachments[i]);
-				switch (m_ColorTargets[i].TextureFormat)
-				{
-				case FrameBufferTargetFormat::RGBA8:
-				{
-					if (is_multi_sample)
-					{
-						glTexImage2DMultisample(texture_target, m_Description.Samples, GL_RGBA8, m_Description.Width, m_Description.Height, GL_FALSE);
-					}
-					else
-					{
-						glTexImage2D(texture_target, 0, GL_RGBA8, m_Description.Width, m_Description.Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
-
-						glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-						glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-						glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-						glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-						glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-					}
-
-					glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, texture_target, m_ColorAttachments[i], 0);
-					break;
-				}
-				case FrameBufferTargetFormat::RedInteger: 
-				{
-					if (is_multi_sample)
-					{
-						glTexImage2DMultisample(texture_target, m_Description.Samples, GL_R32I, m_Description.Width, m_Description.Height, GL_FALSE);
-					}
-					else
-					{
-						glTexImage2D(texture_target, 0, GL_R32I, m_Description.Width, m_Description.Height, 0, GL_RED_INTEGER, GL_UNSIGNED_BYTE, nullptr);
-
-						glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-						glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-						glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-						glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-						glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-					}
-
-					glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, texture_target, m_ColorAttachments[i], 0);
-					break;
-				}
-				}
+			case GL_TEXTURE_2D:
+			case GL_TEXTURE_2D_MULTISAMPLE:
+			case GL_TEXTURE_2D_ARRAY:
+				texture_target = texture->m_TextureTarget;
+				break;
+			case GL_TEXTURE_CUBE_MAP:
+				texture_target = GL_TEXTURE_CUBE_MAP_POSITIVE_X + render_buffer_info.Layer;
+				break;
+			default:
+				break;
 			}
 		}
-
-		// Depth attachment
-		if (m_DepthTarget.TextureFormat != FrameBufferTargetFormat::None)
+		else /* 作为RenderBuffer */
 		{
-			glCreateTextures(texture_target, 1, &m_DepthAttachment);
-			glBindTexture(texture_target, m_DepthAttachment);
+			texture_target = GL_RENDERBUFFER;
+		}
 
-			switch (m_DepthTarget.TextureFormat)
+		/* 2. 将RenderBuffer附加到FrameBuffer */
+		/* 采样次数*/
+		if (texture->m_TextureDesc.Samples <= 1)
+		{
+			/* 绑定当前FrameBuffer */
+			glBindFramebuffer(GL_FRAMEBUFFER, m_FrameBufferId);
+
+			/* 附加 */
+			if (texture_target == GL_TEXTURE_2D_ARRAY)
 			{
-			case FrameBufferTargetFormat::Depth24Stencil8:
+				glFramebufferTextureLayer(GL_FRAMEBUFFER, attachment, texture->m_TextureId, render_buffer_info.Level, render_buffer_info.Layer);
+			}
+			else /* GL_TEXTURE_2D/GL_TEXTURE_2D_MULTISAMPLE/GL_TEXTURE_CUBE_MAP_POSITIVE_X... */
 			{
-				if (is_multi_sample)
+				if(!!(texture->m_TextureDesc.Usage & TextureUsage::Sampleable))
 				{
-					glTexImage2DMultisample(texture_target, m_Description.Samples, GL_DEPTH24_STENCIL8, m_Description.Width, m_Description.Height, GL_FALSE);
+					glFramebufferTexture2D(GL_FRAMEBUFFER, attachment, texture_target, texture->m_TextureId, render_buffer_info.Level);
 				}
 				else
 				{
-					glTexStorage2D(texture_target, 1, GL_DEPTH24_STENCIL8, m_Description.Width, m_Description.Height);
-
-					glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-					glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-					glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-					glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-					glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+					ASSERT(texture_target == GL_RENDERBUFFER);
+					glFramebufferRenderbuffer(GL_FRAMEBUFFER, attachment, texture_target, texture->m_TextureId);
 				}
-
-				glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, texture_target, m_DepthAttachment, 0);
-				break;
 			}
+
+			CHECK_GL_ERROR;
+		}
+		else
+		{
+			/* todo: 支持MultiSample */
+			if (!!(texture->m_TextureDesc.Usage & TextureUsage::Sampleable)) /* RenderBuffer不是Sampleable，直接附加 */
+			{
+				glBindFramebuffer(GL_FRAMEBUFFER, m_FrameBufferId);
+				glFramebufferRenderbuffer(GL_FRAMEBUFFER, attachment, GL_RENDERBUFFER, texture->m_TextureId);
+				render_buffer_usage = RenderBufferUsage::None;
+
+				CHECK_GL_ERROR;
+			}
+			else /* rt需要MultiSample */
+			{
+				/* 绑定当前FrameBuffer */
+				glBindFramebuffer(GL_FRAMEBUFFER, m_FrameBufferId);
+
+				/* 需要额外创建一个RenderBuffer, todo: 不需要每次都创建 */
+				GLuint rbo = 0;
+				glGenRenderbuffers(1, &rbo);
+				glBindRenderbuffer(GL_RENDERBUFFER, rbo);
+				glRenderbufferStorageMultisample(GL_RENDERBUFFER, texture->m_TextureDesc.Samples, texture->m_InternalFormat, (GLsizei)texture->m_TextureDesc.Width, (GLsizei)texture->m_TextureDesc.Height);
+				glBindRenderbuffer(GL_RENDERBUFFER, 0);
+
+				glFramebufferRenderbuffer(GL_FRAMEBUFFER, attachment, GL_RENDERBUFFER, rbo);
+
+				CHECK_GL_ERROR;
 			}
 		}
-
-		// todo: 最大支持4个Color Attachments (可以尝试自适应支持任意数量)
-		if (m_ColorAttachments.size() > 1)
+#if 0
+		if (!!(texture->m_TextureDesc.Usage & TextureUsage::Sampleable))
 		{
-			ASSERT(m_ColorAttachments.size() <= 4, "Supports up to 4 color attachments!");
-			const GLenum attachments[] = {
-				GL_COLOR_ATTACHMENT0,
-				GL_COLOR_ATTACHMENT1,
-				GL_COLOR_ATTACHMENT2,
-				GL_COLOR_ATTACHMENT3,
-			};
-			glDrawBuffers(m_ColorAttachments.size(), attachments);
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(texture_target, render_buffer_info.RenderTarget->GetTextureID());
+
+			/* 设置使用的Level */
+			glTexParameteri(texture_target, GL_TEXTURE_BASE_LEVEL, render_buffer_info.Level);
+			glTexParameteri(texture_target, GL_TEXTURE_MAX_LEVEL, render_buffer_info.Level);
 		}
-		else if (m_ColorAttachments.empty())
-		{
-			// Depth only
-			glDrawBuffer(GL_NONE);
-		}
-
-		ASSERT(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE, "Framebuffer is incomplete!");
-		Unbind();
-	}
-
-	void OpenGLFrameBuffer::ReleaseAttachments()
-	{
-		PROFILE_FUNCTION();
-
-		glDeleteFramebuffers(1, &m_FrameBufferId);
-		glDeleteTextures(m_ColorAttachments.size(), m_ColorAttachments.data());
-		glDeleteTextures(1, &m_DepthAttachment);
-
-		m_ColorAttachments.clear();
-		m_DepthAttachment = 0;
+#endif
+		CHECK_GL_FRAMEBUFFER_STATUS(GL_FRAMEBUFFER);
 	}
 }

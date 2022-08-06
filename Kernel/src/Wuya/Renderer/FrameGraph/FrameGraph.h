@@ -1,4 +1,5 @@
 #pragma once
+#include "Blackboard.h"
 #include "FrameGraphPass.h"
 #include "DependencyGraph.h"
 #include "FrameGraphResourceHandle.h"
@@ -44,12 +45,6 @@ namespace Wuya
 		/* 获取资源名 */
 		const std::string& GetResourceName(FrameGraphResourceHandle handle) const;
 
-		/* 根据名字获取资源handle */
-		template<typename ResourceType>
-		FrameGraphResourceHandleTyped<ResourceType> GetResourceHandle(const std::string& name) const
-		{
-			return m_FrameGraph.GetResourceHandleByName<ResourceType>(name);
-		}
 
 	private:
 		FrameGraphBuilder(FrameGraph& frame_graph, RenderPassNode* render_pass_node);
@@ -137,23 +132,21 @@ namespace Wuya
 				});
 		}
 
-		/* 根据名字获取资源handle */
-		template<typename ResourceType>
-		FrameGraphResourceHandleTyped<ResourceType> GetResourceHandleByName(const std::string& name) const
-		{
-			return static_cast<FrameGraphResourceHandleTyped<ResourceType>>(GetResourceHandleByNameInternal(name));
-		}
-
 		/* 获取资源 */
 		IResource* GetResource(FrameGraphResourceHandle handle);
 		/* 获取资源节点 */
 		RenderResourceNode* GetRenderResourceNode(FrameGraphResourceHandle handle);
 		/* 获取依赖关系图 */
 		DependencyGraph& GetDependencyGraph() { return m_DependencyGraph; }
+		/* 获取Blackboard */
+		Blackboard& GetBlackboard() { return m_Blackboard; }
+		const Blackboard& GetBlackboard() const { return m_Blackboard; }
 		//const DependencyGraph& GetDependencyGraph() const { return m_DependencyGraph; }
 
 		/* 检查一个资源节点是否有效 */
 		bool IsHandleValid(FrameGraphResourceHandle handle) const;
+		/* 判断一个资源连线是否有效 */
+		bool IsConnectionValid(const DependencyGraph::Connection* connection) const;
 		/* 检查一个FrameGraphPass节点是否被优化掉 */
 		bool IsPassCulled(IFrameGraphPass* pass) const;
 
@@ -172,9 +165,6 @@ namespace Wuya
 		/* 添加资源到m_ResourcesMap */
 		FrameGraphResourceHandle AddResourceInternal(IResource* resource);
 
-		/* 根据名字获取资源handle */
-		FrameGraphResourceHandle GetResourceHandleByNameInternal(const std::string& name) const;
-
 		/* 为RenderPass绑定输入资源 */
 		void BindInputResourceInternal(RenderPassNode* render_pass_node, FrameGraphResourceHandle handle, const std::function<bool(IResource*, RenderResourceNode*)>& callback = [](IResource*, RenderResourceNode*)->bool { return true; });
 
@@ -190,8 +180,8 @@ namespace Wuya
 		std::unordered_map<uint16_t, IResource*> m_ResourcesMap{};
 		/* 资源索引与资源节点索引的映射: first->IResource, second->RenderResourceNode */
 		std::unordered_map<uint16_t, RenderResourceNode*> m_ResourceToResourceNodeMap{};
-		/* 资源名与资源Handle的映射<name, FrameGraphResourceHandle> */
-		std::unordered_map<std::string, FrameGraphResourceHandle> m_NameToResourceHandleMap{};
+		/* Blackboard: 资源名到资源的映射 */
+		Blackboard m_Blackboard{};
 
 		/* Pass依赖关系图 */
 		DependencyGraph m_DependencyGraph;

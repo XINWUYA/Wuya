@@ -33,11 +33,11 @@ namespace Wuya
 		//m_pEditorCamera->SetDistance(1);
 
 		// Frame buffer
-		FrameBufferDescription desc;
+		/*FrameBufferDescription desc;
 		desc.Width = 1280;
 		desc.Height = 720;
 		desc.Attachments = { FrameBufferTargetFormat::RGBA8, FrameBufferTargetFormat::RedInteger, FrameBufferTargetFormat::Depth24Stencil8 };
-		m_pFrameBuffer = FrameBuffer::Create(desc);
+		m_pFrameBuffer = FrameBuffer::Create(desc);*/
 
 		m_pMainScene = CreateSharedPtr<Scene>();
 		m_SceneHierarchy.SetOwnerScene(m_pMainScene);
@@ -96,8 +96,8 @@ namespace Wuya
 		/* 资源管理窗口 */
 		m_ResourceBrowser.OnImGuiRenderer();
 
-		bool open = true;
-		ImGui::ShowDemoWindow(&open);
+		//bool open = true;
+		//ImGui::ShowDemoWindow(&open);
 	}
 
 	void EditorLayer::OnEvent(IEvent* event)
@@ -116,12 +116,12 @@ namespace Wuya
 	{
 		PROFILE_FUNCTION();
 
-		const FrameBufferDescription desc = m_pFrameBuffer->GetDescription();
-		if (m_ViewportRegion.Width() > 0 && m_ViewportRegion.Height() > 0 && (desc.Width != m_ViewportRegion.Width() || desc.Height != m_ViewportRegion.Height()))
+		//const FrameBufferDescription desc = m_pFrameBuffer->GetDescription();
+		if (m_ViewportRegion.Width() > 0 && m_ViewportRegion.Height() > 0/* && (desc.Width != m_ViewportRegion.Width() || desc.Height != m_ViewportRegion.Height())*/)
 		{
-			m_pFrameBuffer->Resize(m_ViewportRegion.Width(), m_ViewportRegion.Height());
+			//m_pFrameBuffer->Resize(m_ViewportRegion.Width(), m_ViewportRegion.Height());
 			m_pEditorCamera->SetViewportRegion(m_ViewportRegion);
-			m_pOrthographicCameraController->OnResize(static_cast<float>(m_ViewportRegion.Width()), static_cast<float>(m_ViewportRegion.Height()));
+			//m_pOrthographicCameraController->OnResize(static_cast<float>(m_ViewportRegion.Width()), static_cast<float>(m_ViewportRegion.Height()));
 		}
 	}
 
@@ -482,9 +482,13 @@ namespace Wuya
 			Application::Instance()->GetImGuiLayer()->BlockEvents(!m_IsViewportFocused && !m_IsViewportHovered);
 
 			/* 绘制场景 */
-			const uint64_t texture_id = m_pFrameBuffer->GetColorAttachmentByIndex(0);
-			const auto viewport_panel_size = ImGui::GetContentRegionAvail();
-			ImGui::Image((ImTextureID)texture_id, viewport_panel_size, ImVec2{ 0, 1 }, ImVec2{ 1, 0 });
+			auto output_rt = m_pMainScene->GetPrimaryCameraRenderTargetTexture();
+			if (output_rt)
+			{
+				const uint64_t texture_id = output_rt->GetTextureID();
+				const auto viewport_panel_size = ImGui::GetContentRegionAvail();
+				ImGui::Image((ImTextureID)texture_id, viewport_panel_size, ImVec2{ 0, 1 }, ImVec2{ 1, 0 });
+			}
 
 			/* 拖动资源到主窗口 */
 			if (ImGui::BeginDragDropTarget())
@@ -599,12 +603,13 @@ namespace Wuya
 		const glm::vec2 viewport_size = glm::vec2(m_ViewportRegion.Width(), m_ViewportRegion.Height());
 		mouse_y = viewport_size.y - mouse_y;
 
-		if (mouse_x > 0 && mouse_y > 0 && mouse_x < viewport_size.x && mouse_y < viewport_size.y)
-		{
-			int pixel_data = m_pFrameBuffer->ReadPixel(1, (int)mouse_x, (int)mouse_y);
-			m_HoveredEntity = pixel_data == -1 ? Entity() : Entity((entt::entity)pixel_data, m_pMainScene.get());
-			//EDITOR_LOG_ERROR(pixel_data);
-		}
+		//if (mouse_x > 0 && mouse_y > 0 && mouse_x < viewport_size.x && mouse_y < viewport_size.y)
+		//if (mouse_x > 0 && mouse_y > 0 && mouse_x < viewport_size.x && mouse_y < viewport_size.y)
+		//{
+		//	int pixel_data = m_pFrameBuffer->ReadPixel(1, (int)mouse_x, (int)mouse_y);
+		//	m_HoveredEntity = pixel_data == -1 ? Entity() : Entity((entt::entity)pixel_data, m_pMainScene.get());
+		//	//EDITOR_LOG_ERROR(pixel_data);
+		//}
 	}
 
 	void EditorLayer::OnUpdate(float delta_time)
@@ -613,13 +618,13 @@ namespace Wuya
 
 		UpdateViewport();
 
-		m_pFrameBuffer->Bind();
+		//m_pFrameBuffer->Bind();
 
 		Renderer::SetClearColor(glm::vec4(0.2f, 0.3f, 0.3f, 1.0f));
 		Renderer::Clear();
 		Renderer::Update();
 
-		m_pFrameBuffer->ClearColorAttachment(1, -1);
+		//m_pFrameBuffer->ClearColorAttachment(1, -1);
 
 		if (m_pMainScene)
 		{
@@ -629,7 +634,7 @@ namespace Wuya
 				/* 更新相机信息 */
 				if (m_IsViewportFocused)
 				{
-					m_pOrthographicCameraController->OnUpdate(delta_time);
+					//m_pOrthographicCameraController->OnUpdate(delta_time);
 					m_pEditorCamera->OnUpdate(delta_time);
 				}
 
@@ -647,8 +652,8 @@ namespace Wuya
 		}
 
 		// todo: 鼠标点击选中物体
-		CheckMouseSelectEntity();
+		//CheckMouseSelectEntity();
 
-		m_pFrameBuffer->Unbind();
+		//m_pFrameBuffer->Unbind();
 	}
 }

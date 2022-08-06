@@ -1,11 +1,15 @@
 #pragma once
 #include <any>
+#include "Wuya/Renderer/RenderCommon.h"
 
 namespace Wuya
 {
-	class ITexture;
+	class Texture;
 	class Shader;
 
+	/**
+	 * \brief 材质类
+	 */
 	class Material
 	{
 	public:
@@ -21,22 +25,25 @@ namespace Wuya
 		/* 设置参数 */
 		void SetParameters(const std::string& name, const std::any& param);
 		/* 设置纹理 */
-		void SetTexture(const SharedPtr<ITexture>& texture, uint32_t slot);
+		void SetTexture(const SharedPtr<Texture>& texture, uint32_t slot);
+		/* 设置光栅化状态 */
+		void SetRasterState(RenderRasterState state) { m_RasterState = state; }
+		RenderRasterState GetRasterState() const { return m_RasterState; }
+		RenderRasterState& GetRasterState() { return m_RasterState; }
+
 		/* 绑定材质中的各参数 */
 		void Bind();
 
 	private:
 		/* 材质路径 */
 		std::string m_Path{};
-		/* 颜色贴图 */
-		SharedPtr<ITexture> m_pAlbedoTexture{ nullptr };
-		/* 法线贴图 */
-		SharedPtr<ITexture> m_pNormalTexture{ nullptr };
 		/* Shader */
 		SharedPtr<Shader> m_pShader{ nullptr };
 		/* 材质所需的各种参数<Name, Vale> */
 		std::unordered_map<std::string, std::any> m_Parameters{};
 		/* 材质所需的各种纹理<Texture，Slot> */
-		std::unordered_map<SharedPtr<ITexture>, uint32_t> m_Textures{};
+		std::unordered_map<SharedPtr<Texture>, uint32_t> m_Textures{};
+		/* 光栅化状态配置 */
+		RenderRasterState m_RasterState{};
 	};
 }

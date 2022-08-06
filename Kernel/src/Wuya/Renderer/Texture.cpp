@@ -5,8 +5,12 @@
 
 namespace Wuya
 {
-	SharedPtr<Texture> Texture::Create(const std::string& name, uint32_t width, uint32_t height, uint32_t depth,
-		uint8_t mip_levels, uint8_t samples, TextureFormat format, SamplerType sampler, TextureUsage usage)
+	Texture::Texture(const std::string& name, const TextureDesc& texture_desc)
+		: m_DebugName(name), m_TextureDesc(texture_desc)
+	{
+	}
+
+	SharedPtr<Texture> Texture::Create(const std::string& name, const TextureDesc& texture_desc)
 	{
 		switch (Renderer::CurrentAPI())
 		{
@@ -14,7 +18,22 @@ namespace Wuya
 			CORE_LOG_ERROR("RenderAPI can't be None!");
 			return nullptr;
 		case RenderAPI::OpenGL:
-			return CreateSharedPtr<OpenGLTexture>(width, height, depth, mip_levels, samples, format, sampler, usage);
+			return CreateSharedPtr<OpenGLTexture>(name, texture_desc);
+		default:
+			CORE_LOG_ERROR("Unknown RenderAPI is unsupported!");
+			return nullptr;
+		}
+	}
+
+	SharedPtr<Texture> Texture::Create(const std::string& path)
+	{
+		switch (Renderer::CurrentAPI())
+		{
+		case RenderAPI::None:
+			CORE_LOG_ERROR("RenderAPI can't be None!");
+			return nullptr;
+		case RenderAPI::OpenGL:
+			return CreateSharedPtr<OpenGLTexture>(path);
 		default:
 			CORE_LOG_ERROR("Unknown RenderAPI is unsupported!");
 			return nullptr;

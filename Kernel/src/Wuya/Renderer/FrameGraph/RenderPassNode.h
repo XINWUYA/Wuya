@@ -10,6 +10,7 @@ namespace Wuya
 {
 	class IFrameGraphPass;
 	class RenderResourceNode;
+	class FrameBuffer;
 
 	/* 包含RenderPass所需的数据，一个RenderPass可能包含多组数据 */
 	struct RenderPassData
@@ -22,6 +23,12 @@ namespace Wuya
 		RenderResourceNode* IncomingResourceNodes[FrameGraphPassInfo::MAX_ATTACHMENT_NUM] = {};
 		/* 输出数据节点 */
 		RenderResourceNode* OutgoingResourceNodes[FrameGraphPassInfo::MAX_ATTACHMENT_NUM] = {};
+		/* 收集有效的Attachments */
+		FrameGraphResourceHandleTyped<FrameGraphTexture> ValidAttachments[FrameGraphPassInfo::MAX_ATTACHMENT_NUM] = {};
+		/* RenderBuffer的使用情况 */
+		RenderBufferUsage RenderBufferUsage{ RenderBufferUsage::None };
+		/* RenderTarget */
+		SharedPtr<FrameBuffer> m_pRenderTarget{ nullptr };
 	};
 
 	/* RenderPassNode类，作为FrameGraph依赖关系图中的一个节点 */

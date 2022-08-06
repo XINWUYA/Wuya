@@ -8,6 +8,7 @@
 #include "Camera.h"
 #include "UniformBuffer.h"
 #include "Wuya/Scene/Components.h"
+#include "Wuya/Scene/Material.h"
 
 namespace Wuya
 {
@@ -175,7 +176,9 @@ namespace Wuya
 			s_RenderData2D.TextureSlots[i]->Bind(i);
 
 		s_RenderData2D.pShader->Bind();
-		Renderer::Submit(s_RenderData2D.pShader, s_RenderData2D.pVertexArray, s_RenderData2D.TotalIndexCount);
+		SharedPtr<Material> material = CreateSharedPtr<Material>();
+		material->SetShader(s_RenderData2D.pShader);
+		Renderer::Submit(material, s_RenderData2D.pVertexArray, s_RenderData2D.TotalIndexCount);
 
 		s_StatisticsInfo.DrawCalls++;
 	}

@@ -36,6 +36,8 @@ namespace Wuya
 		virtual void DestroyConnection(DependencyGraph::Connection* connection) = 0;
 		/* 获取UsageStr */
 		virtual std::string GetUsageStr() const = 0;
+		/* 更新资源的Usage */
+		virtual void UpdateUsage(DependencyGraph::Connection* connection) = 0;
 
 	protected:
 		/* 资源名*/
@@ -54,24 +56,27 @@ namespace Wuya
 	template<typename ResourceType>
 	class Resource : public IResource
 	{
-		using ResourceUsage = typename ResourceType::Usage;
 	public:
+		using ResourceUsage = typename ResourceType::Usage;
+		using ResourceDescriptor = typename ResourceType::Descriptor;
+		using ResourceSubDescriptor = typename ResourceType::SubDescriptor;
+
 		/* 资源节点连线 */
 		struct ResourceConnection : public DependencyGraph::Connection
 		{
-			ResourceUsage Usg;
+			ResourceUsage Usage;
 
 			ResourceConnection(DependencyGraph& graph, DependencyGraph::Node* from, DependencyGraph::Node* to, ResourceUsage usage)
-				: DependencyGraph::Connection(graph, from, to), Usg(usage)
+				: DependencyGraph::Connection(graph, from, to), Usage(usage)
 			{}
 		};
 
-		explicit Resource(const std::string& name, const typename ResourceType::Descriptor& desc)
+		Resource(const std::string& name, const ResourceDescriptor& desc)
 			: IResource(name), m_Descriptor(desc)
 		{
 		}
-		Resource(const std::string& name, IResource* parent)
-			: IResource(name, parent)
+		Resource(const std::string& name, IResource* parent, const ResourceSubDescriptor& sub_desc)
+			: IResource(name, parent), m_SubDescriptor(sub_desc)
 		{
 		}
 		explicit Resource(const Resource&) = delete;
@@ -80,12 +85,16 @@ namespace Wuya
 		const ResourceType& GetResource() const { return m_Resource; }
 
 		/* 设置资源描述 */
-		void SetDescriptor(const typename ResourceType::Descriptor& descriptor) { m_Descriptor = descriptor; }
-		const typename ResourceType::Descriptor& GetDescriptor() const { return m_Descriptor; }
+		void SetDescriptor(const ResourceDescriptor& descriptor) { m_Descriptor = descriptor; }
+		const ResourceDescriptor& GetDescriptor() const { return m_Descriptor; }
+
+		/* 设置子资源描述 */
+		void SetSubDescriptor(const ResourceSubDescriptor& sub_descriptor) { m_SubDescriptor = sub_descriptor; }
+		const ResourceSubDescriptor& GetSubDescriptor() const { return m_SubDescriptor; }
 
 		/* 设置资源用途 */
-		void SetUsage(typename ResourceType::Usage usage) { m_Usage = usage; }
-		typename ResourceType::Usage GetUsage() const { return m_Usage; }
+		void SetUsage(ResourceUsage usage) { m_Usage = usage; }
+		ResourceUsage GetUsage() const { return m_Usage; }
 
 		/* 将资源节点作为输入连接到依赖图中 */
 		bool ConnectAsInput(DependencyGraph& dependency_graph, RenderPassNode* render_pass_node, RenderResourceNode* resource_node, ResourceUsage usage)
@@ -94,7 +103,7 @@ namespace Wuya
 			ResourceConnection* connection = static_cast<ResourceConnection*>(resource_node->GetIncomingConnectionOfPassNode(render_pass_node));
 			if (connection)
 			{
-				connection->Usg = ResourceUsage((uint8_t)connection->Usg | (uint8_t)usage);
+				connection->Usage |= usage;
 			}
 			else
 			{
@@ -111,7 +120,7 @@ namespace Wuya
 			ResourceConnection* connection = static_cast<ResourceConnection*>(resource_node->GetOutgoingConnectionOfPassNode(render_pass_node));
 			if (connection)
 			{
-				connection->Usg = ResourceUsage(std::underlying_type_t<ResourceUsage>(connection->Usg) | std::underlying_type_t<ResourceUsage>(usage));
+				connection->Usage |= usage;
 			}
 			else
 			{
@@ -145,9 +154,17 @@ namespace Wuya
 			return "";//std::to_string(m_Usage);
 		}
 
+		/* 更新资源的Usage */
+		void UpdateUsage(DependencyGraph::Connection* connection) override
+		{
+			ResourceConnection* conn = static_cast<ResourceConnection*>(connection);
+			m_Usage |= conn->Usage;
+		}
+
 	private:
 		ResourceType m_Resource{}; /* 资源本体数据 */
-		typename ResourceType::Descriptor m_Descriptor{}; /* 资源描述 */
-		typename ResourceType::Usage m_Usage; /* 资源用途 */
+		ResourceDescriptor m_Descriptor{}; /* 资源描述 */
+		ResourceSubDescriptor m_SubDescriptor{}; /* 子资源描述 */
+		ResourceUsage m_Usage{}; /* 资源用途 */
 	};
 }

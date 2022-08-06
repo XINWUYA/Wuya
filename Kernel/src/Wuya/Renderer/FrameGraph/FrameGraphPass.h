@@ -9,16 +9,16 @@ namespace Wuya
 	/* FrameGraphPass信息 */
 	struct FrameGraphPassInfo
 	{
-		static constexpr uint32_t MAX_ATTACHMENT_NUM = 8;
+		static constexpr uint32_t MAX_ATTACHMENT_NUM = MAX_COLOR_ATTACHMENT_NUM + 2;
 		struct TextureAttachments
 		{
 			union
 			{
-				FrameGraphResourceHandleTyped<FrameGraphTexture> AttachmentArray[MAX_ATTACHMENT_NUM + 2] = {};
+				FrameGraphResourceHandleTyped<FrameGraphTexture> AttachmentArray[MAX_ATTACHMENT_NUM] = {};
 
 				struct
 				{
-					FrameGraphResourceHandleTyped<FrameGraphTexture> ColorAttachments[MAX_ATTACHMENT_NUM];
+					FrameGraphResourceHandleTyped<FrameGraphTexture> ColorAttachments[MAX_COLOR_ATTACHMENT_NUM];
 					FrameGraphResourceHandleTyped<FrameGraphTexture> DepthAttachment;
 					FrameGraphResourceHandleTyped<FrameGraphTexture> StencilAttachment;
 				};
@@ -32,7 +32,7 @@ namespace Wuya
 			/* ClearColor */
 			glm::vec4 ClearColor{};
 			/* Sample */
-			uint8_t Samples{ 0 };
+			uint8_t Samples{ 1 };
 			/* 视口区域 */
 			ViewportRegion ViewportRegion{};
 		};

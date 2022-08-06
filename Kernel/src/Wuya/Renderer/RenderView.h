@@ -7,6 +7,7 @@ namespace Wuya
 	class Camera;
 	class Scene;
 	class MeshSegment;
+	class Texture;
 
 	struct VisibleMeshObject
 	{
@@ -52,6 +53,10 @@ namespace Wuya
 		void SetOwnerScene(const SharedPtr<Scene>& scene) { m_pOwnerScene = scene; }
 		const SharedPtr<Scene>& GetOwnerScene() const { return m_pOwnerScene; }
 
+		/* 设置RenderTarget Texture */
+		void SetRenderTargetTexture(const SharedPtr<Texture>& texture) { m_pRenderTargetTexture = texture; }
+		const SharedPtr<Texture>& GetRenderTargetTexture() const { return m_pRenderTargetTexture; }
+
 		/* 准备一帧的RenderView数据 */
 		void Prepare();
 
@@ -74,5 +79,7 @@ namespace Wuya
 		SharedPtr<Scene> m_pOwnerScene{ nullptr };
 		/* 视锥体剔除之后，对当前可见MeshSegment */
 		std::vector<VisibleMeshObject> m_VisibleMeshObjects{};
+		/* 当前View的RenderTarget Texture */
+		SharedPtr<Texture> m_pRenderTargetTexture{ nullptr };
 	};
 }

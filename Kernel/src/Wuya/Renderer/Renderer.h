@@ -1,10 +1,10 @@
 #pragma once
 #include "RenderAPI.h"
-#include "Shader.h"
 
 namespace Wuya
 {
 	class RenderView;
+	class Material;
 
 	class Renderer
 	{
@@ -19,11 +19,12 @@ namespace Wuya
 		/* 绘制一个视图 */
 		static void RenderAView(const SharedPtr<RenderView>& view);
 
-		static void Submit(const SharedPtr<Shader>& shader, const SharedPtr<VertexArray>& vertex_array, uint32_t index_count = 0);
+		static void Submit(const SharedPtr<Material>& material, const SharedPtr<VertexArray>& vertex_array, uint32_t index_count = 0);
 
 		static int CurrentAPI() { return RenderAPI::GetAPI(); }
 
 	private:
+		static SharedPtr<VertexArray> GetFullScreenVertexArray();
 
 		static UniquePtr<RenderAPI> m_pRenderAPI;
 		/* 当前帧数计数 */

@@ -7,7 +7,8 @@ namespace Wuya
 	/* 翻译到OpenGL对应的纹理类型 */
 	constexpr GLenum TranslateToOpenGLTextureFormat(TextureFormat format)
 	{
-		switch (format) {
+		switch (format)
+		{
 		case TextureFormat::R8:				 return GL_R8;
 		case TextureFormat::R8_SNorm:		 return GL_R8_SNORM; 
 		case TextureFormat::R16F:			 return GL_R16F;
@@ -56,4 +57,68 @@ namespace Wuya
 		}
 		return 0;
 	}
+
+	/* 翻译到OpenGL对应的比较方式 */
+	constexpr GLenum TranslateToOpenGLCompareFunc(CompareFunc func)
+	{
+		switch (func)
+		{
+		case CompareFunc::LessEqual:	return GL_LEQUAL;
+		case CompareFunc::GreaterEqual: return GL_GEQUAL;
+		case CompareFunc::Less:			return GL_LESS;
+		case CompareFunc::Greater:		return GL_GREATER;
+		case CompareFunc::Equal:		return GL_EQUAL;
+		case CompareFunc::NotEqual:		return GL_NOTEQUAL;
+		case CompareFunc::Always:		return GL_ALWAYS;
+		case CompareFunc::Never:		return GL_NEVER;
+		}
+		return 0;
+	}
+
+
+	/* 翻译到OpenGL对应的混合方程 */
+	constexpr GLenum TranslateToOpenGLBlendEquation(BlendEquation equation)
+	{
+		switch (equation)
+		{
+		case BlendEquation::Add:				return GL_FUNC_ADD;
+		case BlendEquation::Subtract:			return GL_FUNC_SUBTRACT;
+		case BlendEquation::ReverseSubtract:	return GL_FUNC_REVERSE_SUBTRACT;
+		case BlendEquation::Min:				return GL_MIN;
+		case BlendEquation::Max:				return GL_MAX;
+		}
+		return 0;
+	}
+
+	/* 翻译到OpenGL对应的混合方式 */
+	constexpr GLenum TranslateToOpenGLBlendFunc(BlendFunc func)
+	{
+		switch (func)
+		{
+		case BlendFunc::Zero:				return GL_ZERO;
+		case BlendFunc::One:				return GL_ONE;
+		case BlendFunc::SrcColor:			return GL_SRC_COLOR;
+		case BlendFunc::OneMinusSrcColor:	return GL_ONE_MINUS_SRC_COLOR;
+		case BlendFunc::DstColor:			return GL_DST_COLOR;
+		case BlendFunc::OneMinusDstColor:	return GL_ONE_MINUS_DST_COLOR;
+		case BlendFunc::SrcAlpha:			return GL_SRC_ALPHA;
+		case BlendFunc::OneMinusSrcAlpha:	return GL_ONE_MINUS_SRC_ALPHA;
+		case BlendFunc::DstAlpha:			return GL_DST_ALPHA;
+		case BlendFunc::OneMinusDstAlpha:	return GL_ONE_MINUS_DST_ALPHA;
+		case BlendFunc::SrcAlphaSaturate:	return GL_SRC_ALPHA_SATURATE;
+		}
+		return 0;
+	}
+
+	/* OpenGL 错误检查 */
+#if WUYA_DEBUG
+	void CheckGLError(const char* func_name, uint32_t line) noexcept;
+	void CheckGLFrameBufferStatus(GLenum target, const char* func_name, uint32_t line) noexcept;
+	#define CHECK_GL_ERROR { CheckGLError(__func__, __LINE__); }
+	#define CHECK_GL_FRAMEBUFFER_STATUS(target) { CheckGLFrameBufferStatus(target, __func__, __LINE__); }
+#else
+	#define CHECK_GL_ERROR
+	#define CHECK_GL_FRAMEBUFFER_STATUS(target)
+#endif
+
 }

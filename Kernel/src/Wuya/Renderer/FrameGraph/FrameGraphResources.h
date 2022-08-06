@@ -7,6 +7,7 @@ namespace Wuya
 	class FrameGraph;
 	class RenderPassNode;
 	class IResource;
+	class FrameBuffer;
 
 	/* FrameGraph中一个RenderPassNode中使用的资源 */
 	class FrameGraphResources
@@ -38,7 +39,8 @@ namespace Wuya
 			return static_cast<const Resource<ResourceType>*>(GetResource(handle))->GetUsage();
 		}
 
-		/* 获取当前RenderPass的信息 */
+		/* 获取当前RenderPass的RenderTarget */
+		const SharedPtr<FrameBuffer>& GetPassRenderTarget(uint32_t idx = 0) const;
 
 	private:
 		/* 从FrameGraph中获取资源 */
@@ -68,6 +70,15 @@ namespace Wuya
 
 			TextureFormat TextureFormat{ TextureFormat::RGBA8 };
 			SamplerType   SamplerType{ SamplerType::Sampler2D };
+		};
+
+		/* 子资源描述 */
+		struct SubDescriptor
+		{
+			/* Mip level */
+			uint16_t Level{ 0 };
+			/* Face or slice */
+			uint16_t Layer{ 0 };
 		};
 
 		/* 使用方式 */

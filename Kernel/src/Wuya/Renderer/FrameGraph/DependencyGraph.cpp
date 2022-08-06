@@ -80,7 +80,7 @@ namespace Wuya
 				Node* from_node = GetNode(connection->FromNodeIdx);
 				from_node->RefCount--;
 
-				if (from_node->RefCount == 0)
+				if (!from_node->IsValid())
 					invalid_nodes.emplace_back(from_node);
 			}
 		}
@@ -130,7 +130,7 @@ namespace Wuya
 		return result;
 	}
 
-	bool DependencyGraph::IsValidConnection(const Connection* connection) const
+	bool DependencyGraph::IsConnectionValid(const Connection* connection) const
 	{
 		const auto* from_node = GetNode(connection->FromNodeIdx);
 		const auto* to_node = GetNode(connection->ToNodeIdx);
@@ -164,7 +164,7 @@ namespace Wuya
 			auto iter_partition = std::partition(connections.begin(), connections.end(),
 				[this](auto const& edge)
 				{
-					return IsValidConnection(edge);
+					return IsConnectionValid(edge);
 				});
 
 			std::string s = node->GraphvizifyConnectionColor();

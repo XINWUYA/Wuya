@@ -58,7 +58,7 @@ namespace Wuya
 			m_RenderViews.emplace_back(render_view);
 		}
 
-		/* Editor Camera's RenderView */
+		/* Editor Camera's RenderView, 最后一个是编辑器RenderView */
 		if (camera)
 		{
 			SharedPtr<RenderView> render_view = CreateSharedPtr<RenderView>("Builtin Editor Camera", camera);
@@ -102,6 +102,13 @@ namespace Wuya
 				return Entity{ entity, this };
 		}
 		return {};
+	}
+
+	/* 获取主相机的RenderTarget Texture */
+	const SharedPtr<Texture>& Scene::GetPrimaryCameraRenderTargetTexture() const
+	{
+		auto& render_view = m_RenderViews.back();
+		return render_view->GetRenderTargetTexture();
 	}
 
 	void Scene::Serializer(const std::string& path)

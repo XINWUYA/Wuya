@@ -11,6 +11,7 @@ namespace Wuya
 
 		/* ÖØÔØ²Ù×÷·û */
 		FrameGraphResourceHandle& operator=(const FrameGraphResourceHandle&) = default;
+		operator bool() const { return IsInitialized(); }
 		bool operator<(const FrameGraphResourceHandle& other) const { return m_Index < other.m_Index; }
 		bool operator>(const FrameGraphResourceHandle& other) const { return m_Index > other.m_Index; }
 		bool operator==(const FrameGraphResourceHandle& other) const { return m_Index == other.m_Index; }
@@ -25,7 +26,7 @@ namespace Wuya
 		void Reset();
 
 	private:
-		FrameGraphResourceHandle() = default;
+		FrameGraphResourceHandle() noexcept = default;
 		explicit FrameGraphResourceHandle(uint16_t index)
 			: m_Index(index)
 		{}
@@ -37,6 +38,7 @@ namespace Wuya
 
 		friend class FrameGraph;
 		friend class FramwGraphResources;
+		friend class Blackboard;
 
 		template<typename ResourceType>
 		friend class FrameGraphResourceHandleTyped;

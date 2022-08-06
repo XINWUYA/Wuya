@@ -50,10 +50,60 @@ namespace Wuya
 	}
 
 	/* Enum类型的位运算 */
-	template<typename Enum, std::enable_if_t<std::is_enum<Enum>::value>>
-	inline constexpr Enum operator| (Enum lt, Enum rt) noexcept
+	template<typename Enum>
+	struct EnableBitmaskOperators : public std::false_type
+	{ };
+
+	template<typename Enum, typename std::enable_if_t<std::is_enum<Enum>::value && EnableBitmaskOperators<Enum>::value, int> = 0>
+	inline constexpr bool operator!(Enum e) noexcept
+	{
+		using underlying = std::underlying_type_t<Enum>;
+		return underlying(e) == 0;
+	}
+
+	template<typename Enum, typename std::enable_if_t<std::is_enum<Enum>::value && EnableBitmaskOperators<Enum>::value, int> = 0>
+	inline constexpr Enum operator~(Enum e) noexcept
+	{
+		using underlying = std::underlying_type_t<Enum>;
+		return Enum(~underlying(e));
+	}
+
+	template<typename Enum, typename std::enable_if_t<std::is_enum<Enum>::value && EnableBitmaskOperators<Enum>::value, int> = 0>
+	inline constexpr Enum operator|(Enum lt, Enum rt) noexcept
 	{
 		using underlying = std::underlying_type_t<Enum>;
 		return Enum(underlying(lt) | underlying(rt));
+	}
+
+	template<typename Enum, typename std::enable_if_t<std::is_enum<Enum>::value && EnableBitmaskOperators<Enum>::value, int> = 0>
+	inline constexpr Enum operator&(Enum lt, Enum rt) noexcept
+	{
+		using underlying = std::underlying_type_t<Enum>;
+		return Enum(underlying(lt) & underlying(rt));
+	}
+
+	template<typename Enum, typename std::enable_if_t<std::is_enum<Enum>::value && EnableBitmaskOperators<Enum>::value, int> = 0>
+	inline constexpr Enum operator^(Enum lt, Enum rt) noexcept
+	{
+		using underlying = std::underlying_type_t<Enum>;
+		return Enum(underlying(lt) ^ underlying(rt));
+	}
+
+	template<typename Enum, typename std::enable_if_t<std::is_enum<Enum>::value && EnableBitmaskOperators<Enum>::value, int> = 0>
+	inline constexpr Enum operator|=(Enum& lt, Enum rt) noexcept
+	{
+		return lt = lt | rt;
+	}
+
+	template<typename Enum, typename std::enable_if_t<std::is_enum<Enum>::value && EnableBitmaskOperators<Enum>::value, int> = 0>
+	inline constexpr Enum operator&=(Enum& lt, Enum rt) noexcept
+	{
+		return lt = lt & rt;
+	}
+
+	template<typename Enum, typename std::enable_if_t<std::is_enum<Enum>::value && EnableBitmaskOperators<Enum>::value, int> = 0>
+	inline constexpr Enum operator^=(Enum& lt, Enum rt) noexcept
+	{
+		return lt = lt ^ rt;
 	}
 }
