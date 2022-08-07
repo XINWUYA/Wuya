@@ -96,7 +96,7 @@ namespace Wuya
 // See the profiler result in: edge://tracing/
 // More suggested: https://ui.perfetto.dev/
 // Just Drag the json file in.
-#define WUYA_PROFILE 1
+#define WUYA_PROFILE 0
 
 #if WUYA_PROFILE
 	// Resolve which function signature macro will be used. Note that this only

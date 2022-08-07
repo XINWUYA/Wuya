@@ -53,8 +53,8 @@ namespace Wuya
 		FrameBuffer(const std::string& name, const FrameBufferDesc& desc);
 
 		/* √˚≥∆ */
-		std::string m_DebugName{ "Unnamed FrameBuffer" };
+		std::string m_DebugName;
 		/* FrameBuffer√Ë ˆ */
-		FrameBufferDesc m_FrameBufferDesc{};
+		FrameBufferDesc m_FrameBufferDesc;
 	};
 }
