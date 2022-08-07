@@ -5,6 +5,8 @@
 #include "EditorBuiltinCamera.h"
 #include "EditorUIFunctions.h"
 #include "ImGuizmo.h"
+#include "Wuya/Renderer/RenderView.h"
+#include "Wuya/Renderer/FrameGraph/FrameGraph.h"
 #include "Wuya/Scene/Material.h"
 
 namespace Wuya
@@ -117,7 +119,7 @@ namespace Wuya
 		PROFILE_FUNCTION();
 
 		//const FrameBufferDescription desc = m_pFrameBuffer->GetDescription();
-		if (m_ViewportRegion.Width() > 0 && m_ViewportRegion.Height() > 0/* && (desc.Width != m_ViewportRegion.Width() || desc.Height != m_ViewportRegion.Height())*/)
+		if (m_ViewportRegion.Width > 0 && m_ViewportRegion.Height > 0/* && (desc.Width != m_ViewportRegion.Width() || desc.Height != m_ViewportRegion.Height())*/)
 		{
 			//m_pFrameBuffer->Resize(m_ViewportRegion.Width(), m_ViewportRegion.Height());
 			m_pEditorCamera->SetViewportRegion(m_ViewportRegion);
@@ -464,6 +466,8 @@ namespace Wuya
 	{
 		PROFILE_FUNCTION();
 
+		//m_ViewportRegion = { 268, 2188, 317, 1371 };
+
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
 		ImGui::Begin("Scene");
 		{
@@ -471,10 +475,10 @@ namespace Wuya
 			const auto viewport_region_min = ImGui::GetWindowContentRegionMin();
 			const auto viewport_region_max = ImGui::GetWindowContentRegionMax();
 			const auto viewport_offset = ImGui::GetWindowPos();
-			m_ViewportRegion.Left = viewport_region_min.x + viewport_offset.x;
-			m_ViewportRegion.Right = viewport_region_max.x + viewport_offset.x;
-			m_ViewportRegion.Bottom = viewport_region_min.y + viewport_offset.y;
-			m_ViewportRegion.Top = viewport_region_max.y + viewport_offset.y;
+			m_ViewportRegion.MinX = viewport_region_min.x + viewport_offset.x;
+			m_ViewportRegion.Width = viewport_region_max.x - viewport_region_min.x;
+			m_ViewportRegion.MinY = viewport_region_min.y + viewport_offset.y;
+			m_ViewportRegion.Height = viewport_region_max.y - viewport_region_min.x;
 
 			/* 若当前ImGui窗口不是主窗口，应阻塞事件传递 */
 			m_IsViewportFocused = ImGui::IsWindowFocused();
@@ -482,7 +486,7 @@ namespace Wuya
 			Application::Instance()->GetImGuiLayer()->BlockEvents(!m_IsViewportFocused && !m_IsViewportHovered);
 
 			/* 绘制场景 */
-			auto output_rt = m_pMainScene->GetPrimaryCameraRenderTargetTexture();
+			auto output_rt = m_pEditorCamera->GetRenderView()->GetRenderTarget();
 			if (output_rt)
 			{
 				const uint64_t texture_id = output_rt->GetTextureID();
@@ -535,13 +539,15 @@ namespace Wuya
 
 	void EditorLayer::ShowOperationGizmoUI()
 	{
+		PROFILE_FUNCTION();
+
 		// Editor camera
 		const glm::mat4& projection_mat = m_pEditorCamera->GetProjectionMatrix();
 		glm::mat4 view_mat = m_pEditorCamera->GetViewMatrix();
 
 		ImGuizmo::SetOrthographic(false);
 		ImGuizmo::SetDrawlist();
-		ImGuizmo::SetRect(m_ViewportRegion.Left, m_ViewportRegion.Top, m_ViewportRegion.Width(), m_ViewportRegion.Height());
+		ImGuizmo::SetRect(m_ViewportRegion.MinX, m_ViewportRegion.MinY, m_ViewportRegion.Width, m_ViewportRegion.Height);
 
 		Entity selected_entity = m_SceneHierarchy.GetSelectedEntity();
 		if (selected_entity && m_GizmoType != -1)
@@ -595,12 +601,14 @@ namespace Wuya
 
 	void EditorLayer::CheckMouseSelectEntity()
 	{
+		PROFILE_FUNCTION();
+
 		// todo: 存在bug
 		auto [mouse_x, mouse_y] = ImGui::GetMousePos();
-		mouse_x -= m_ViewportRegion.Left;
-		mouse_y -= m_ViewportRegion.Bottom;
+		mouse_x -= m_ViewportRegion.MinX;
+		mouse_y -= m_ViewportRegion.MinY;
 
-		const glm::vec2 viewport_size = glm::vec2(m_ViewportRegion.Width(), m_ViewportRegion.Height());
+		const glm::vec2 viewport_size = glm::vec2(m_ViewportRegion.Width, m_ViewportRegion.Height);
 		mouse_y = viewport_size.y - mouse_y;
 
 		//if (mouse_x > 0 && mouse_y > 0 && mouse_x < viewport_size.x && mouse_y < viewport_size.y)
@@ -623,6 +631,38 @@ namespace Wuya
 		Renderer::SetClearColor(glm::vec4(0.2f, 0.3f, 0.3f, 1.0f));
 		Renderer::Clear();
 		Renderer::Update();
+
+		auto& editor_render_view = m_pEditorCamera->GetRenderView();
+		editor_render_view->SetOwnerScene(m_pMainScene);
+		m_pEditorCamera->ConstructRenderView();
+		/*auto& editor_frame_graph = editor_render_view->GetFrameGraph();
+		struct ImGuiPassData
+		{
+			FrameGraphResourceHandleTyped<FrameGraphTexture> ColorResult;
+		};
+		editor_frame_graph->AddPass<ImGuiPassData>("ImGuiPass",
+			[&](FrameGraphBuilder& builder, ImGuiPassData& data)
+			{
+				data.ColorResult = editor_frame_graph->GetBlackboard().GetResourceHandle<FrameGraphTexture>("SidePassOutput");
+				builder.BindInputResource(data.ColorResult, FrameGraphTexture::Usage::Sampleable);
+				builder.AsSideEffect();
+			},
+			[&](const FrameGraphResources& resources, const ImGuiPassData& data)
+			{
+				Renderer::GetRenderAPI()->PushDebugGroup("ImGuiPass");
+
+				auto& texture = resources.Get(data.ColorResult).Texture;
+				ImGui::Begin("Scene");
+				{
+					const auto viewport_panel_size = ImGui::GetContentRegionAvail();
+					ImGui::Image((ImTextureID)texture->GetTextureID(), viewport_panel_size, ImVec2{ 0, 1 }, ImVec2{ 1, 0 });
+				}
+				ImGui::End();
+
+				Renderer::GetRenderAPI()->PopDebugGroup();
+			}
+		);*/
+
 
 		//m_pFrameBuffer->ClearColorAttachment(1, -1);
 

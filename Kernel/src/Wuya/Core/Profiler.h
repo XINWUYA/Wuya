@@ -93,7 +93,9 @@ namespace Wuya
 
 }
 
-
+// See the profiler result in: edge://tracing/
+// More suggested: https://ui.perfetto.dev/
+// Just Drag the json file in.
 #define WUYA_PROFILE 1
 
 #if WUYA_PROFILE

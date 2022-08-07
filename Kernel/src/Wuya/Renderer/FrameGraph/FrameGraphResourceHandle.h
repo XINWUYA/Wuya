@@ -39,6 +39,7 @@ namespace Wuya
 		friend class FrameGraph;
 		friend class FramwGraphResources;
 		friend class Blackboard;
+		friend class RenderView;
 
 		template<typename ResourceType>
 		friend class FrameGraphResourceHandleTyped;

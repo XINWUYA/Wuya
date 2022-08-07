@@ -1,39 +1,70 @@
 #include "Pch.h"
 #include "RenderView.h"
-#include "Wuya/Scene/Mesh.h"
+#include "FrameGraph/FrameGraph.h"
 #include "Wuya/Scene/Scene.h"
 #include "Wuya/Scene/Components.h"
 #include "Wuya/Scene/Material.h"
 
 namespace Wuya
 {
-	RenderView::RenderView(const std::string& name, const SharedPtr<Camera>& culling_camera, bool enable_culling)
-		: m_Name(name), m_pCullingCamera(culling_camera), m_IsEnableCulling(enable_culling)
+	RenderView::RenderView(const std::string& name)
+		: m_DebugName(name)
 	{
+		PROFILE_FUNCTION();
+
+		m_pFrameGraph = CreateSharedPtr<FrameGraph>(m_DebugName + "_FrameGraph");
 	}
 
 	RenderView::~RenderView()
 	{
+		PROFILE_FUNCTION();
+
 		m_VisibleMeshObjects.clear();
 	}
 
 	/* 设置视口区域 */
 	void RenderView::SetViewportRegion(const ViewportRegion& region)
 	{
-		ASSERT(region.Width() > 0 && region.Height() > 0, "ViewprotRegion's width or height is invaild.");
+		PROFILE_FUNCTION();
+
+		ASSERT(region.Width > 0 && region.Height > 0, "ViewprotRegion's width or height is invaild.");
 		m_ViewportRegion = region;
+	}
+
+	const SharedPtr<Texture>& RenderView::GetRenderTarget() const
+	{
+		PROFILE_FUNCTION();
+
+		return static_cast<const Resource<FrameGraphTexture>*>(m_pFrameGraph->GetResource(m_RenderTargetHandle))->GetResource().Texture;
 	}
 
 	/* 准备一帧的RenderView数据 */
 	void RenderView::Prepare()
 	{
+		PROFILE_FUNCTION();
+
+		m_VisibleMeshObjects.clear();
+
 		/* 收集当前RenderView可见的对象 */
 		PrepareVisibleObjects();
+
+		/* 生成当前FrameBuffer */
+		m_pFrameGraph->Build();
+	}
+
+	/* 执行渲染当前View */
+	void RenderView::Execute()
+	{
+		PROFILE_FUNCTION();
+
+		m_pFrameGraph->Execute();
 	}
 
 	/* 视锥体剔除 */
 	void RenderView::PrepareVisibleObjects()
 	{
+		PROFILE_FUNCTION();
+
 		// todo: 视锥体剔除
 
 		/* 收集所有模型 */

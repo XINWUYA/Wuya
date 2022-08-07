@@ -33,6 +33,8 @@ namespace Wuya
 	/* 从FrameGraph中获取资源 */
 	IResource* FrameGraphResources::GetResource(FrameGraphResourceHandle handle) const
 	{
+		PROFILE_FUNCTION();
+
 		ASSERT(handle.IsInitialized(), "Handle is invalid.");
 		IResource* resource = m_FrameGraph.GetResource(handle);
 
@@ -48,6 +50,8 @@ namespace Wuya
 	/* 创建 */
 	void FrameGraphTexture::Create(const std::string& name, const Descriptor& desc, Usage usage)
 	{
+		PROFILE_FUNCTION();
+
 		Texture = Texture::Create(name, { desc.Width, desc.Height, desc.Depth, desc.MipLevels, desc.Samples, desc.TextureFormat, desc.SamplerType, usage });
 	}
 }

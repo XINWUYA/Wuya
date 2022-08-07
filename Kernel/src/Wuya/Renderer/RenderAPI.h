@@ -36,7 +36,8 @@ namespace Wuya
 		virtual void PopDebugGroup() = 0;
 
 		static int GetAPI() { return m_API; }
-		static UniquePtr<RenderAPI> Create();
+		/* 创建当前API */
+		static SharedPtr<RenderAPI> Create();
 
 	private:
 		static int m_API;

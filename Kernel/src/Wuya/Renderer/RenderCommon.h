@@ -218,19 +218,19 @@ namespace Wuya
 	/* 视口区域信息 */
 	struct ViewportRegion
 	{
-		int32_t Left;	/* 水平方向最小值 */
-		int32_t Right;	/* 水平方向最大值 */
-		int32_t Bottom; /* 数值方向最小值 */
-		int32_t Top;	/* 数值方向最大值 */
+		int32_t MinX;	/* 水平方向最小值 */
+		int32_t MinY;	/* 竖直方向最小值 */
+		int32_t Width;	/* 宽度值 */
+		int32_t Height;	/* 高度值 */
 
-		/* 区域宽度和高度 */
-		uint32_t Width() const { return std::abs(Right - Left); }
-		uint32_t Height() const { return std::abs(Top - Bottom); }
+		/* 区域水平最大值和竖直最大值 */
+		uint32_t MaxX() const { return MinX + Width; }
+		uint32_t MaxY() const { return MinY + Height; }
 
 		/* 判等操作 */
 		bool operator==(const ViewportRegion& other) noexcept
 		{
-			return Left == other.Left && Right == other.Right && Top == other.Top && Bottom == other.Bottom;
+			return MinX == other.MinX && MinY == other.MinY && Width == other.Width && Height == other.Height;
 		}
 		bool operator!=(const ViewportRegion& other) noexcept
 		{

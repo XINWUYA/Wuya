@@ -2,6 +2,9 @@
 #include "EditorBuiltinCamera.h"
 #include <glm/gtx/quaternion.hpp>
 #include <Kernel.h>
+#include <Wuya/Renderer/FrameGraph/FrameGraph.h>
+#include <Wuya/Renderer/RenderView.h>
+#include <Wuya/Scene/Material.h>
 
 namespace Wuya
 {
@@ -14,6 +17,8 @@ namespace Wuya
 
 		UpdateProjectionMatrix();
 		UpdateViewMatrix();
+
+		m_pRenderView = CreateSharedPtr<RenderView>("EditorBuiltinCamera_RenderView");
 	}
 
 	EditorCamera::~EditorCamera()
@@ -91,9 +96,140 @@ namespace Wuya
 		PROFILE_FUNCTION();
 
 		m_ViewportRegion = region;
+		m_pRenderView->SetViewportRegion(region);
 
-		m_AspectRatio = static_cast<float>(m_ViewportRegion.Width()) / static_cast<float>(m_ViewportRegion.Height());
+		m_AspectRatio = static_cast<float>(m_ViewportRegion.Width) / static_cast<float>(m_ViewportRegion.Height);
 		UpdateProjectionMatrix();
+	}
+
+	/* 构建内置的FrameGraph */
+	void EditorCamera::ConstructRenderView()
+	{
+		PROFILE_FUNCTION();
+
+		/*if (!m_IsFrameGraphDirty)
+			return;*/
+
+		m_pRenderView->SetCullingCamera(shared_from_this());
+
+		auto& frame_graph = m_pRenderView->GetFrameGraph();
+		frame_graph->Reset();
+
+		FrameGraphTexture::Descriptor color_target_desc;
+		color_target_desc.Width = m_ViewportRegion.Width;
+		color_target_desc.Height = m_ViewportRegion.Height;
+		color_target_desc.TextureFormat = TextureFormat::RGBA8;
+
+		FrameGraphTexture::Descriptor depth_target_desc;
+		depth_target_desc.Width = m_ViewportRegion.Width;
+		depth_target_desc.Height = m_ViewportRegion.Height;
+		depth_target_desc.TextureFormat = TextureFormat::Depth32;
+
+		/* GBuffer Pass */
+		struct GBufferPassData
+		{
+			FrameGraphResourceHandleTyped<FrameGraphTexture> GBufferAlbedo;
+			FrameGraphResourceHandleTyped<FrameGraphTexture> GBufferNormal;
+			FrameGraphResourceHandleTyped<FrameGraphTexture> GBufferRoughness;
+			FrameGraphResourceHandleTyped<FrameGraphTexture> GBufferDepth;
+		};
+
+		auto& main_pass = frame_graph->AddPass<GBufferPassData>("GBufferPass",
+			[&](FrameGraphBuilder& builder, GBufferPassData& data)
+			{
+				data.GBufferAlbedo = builder.CreateTexture("GBufferAlbedo", color_target_desc);
+				data.GBufferNormal = builder.CreateTexture("GBufferNormal", color_target_desc);
+				data.GBufferRoughness = builder.CreateTexture("GBufferRoughness", color_target_desc);
+				data.GBufferDepth = builder.CreateTexture("GBufferDepth", depth_target_desc);
+				builder.BindOutputResource(data.GBufferAlbedo, FrameGraphTexture::Usage::ColorAttachment);
+				builder.BindOutputResource(data.GBufferNormal, FrameGraphTexture::Usage::ColorAttachment);
+				builder.BindOutputResource(data.GBufferRoughness, FrameGraphTexture::Usage::ColorAttachment);
+				builder.BindOutputResource(data.GBufferDepth, FrameGraphTexture::Usage::DepthAttachment);
+
+				FrameGraphPassInfo::Descriptor pass_desc;
+				pass_desc.Attachments.ColorAttachments[0] = data.GBufferAlbedo;
+				pass_desc.Attachments.ColorAttachments[1] = data.GBufferNormal;
+				pass_desc.Attachments.ColorAttachments[2] = data.GBufferRoughness;
+				pass_desc.Attachments.DepthAttachment = data.GBufferDepth;
+				pass_desc.ViewportRegion = m_ViewportRegion;
+				builder.CreateRenderPass("GBufferPassRenderTarget", pass_desc);
+			},
+			[&](const FrameGraphResources& resources, const GBufferPassData& data)
+			{
+				Renderer::GetRenderAPI()->PushDebugGroup("GBufferPass");
+
+				const auto& render_pass_info = resources.GetPassRenderTarget();
+				render_pass_info->Bind();
+				Renderer::GetRenderAPI()->Clear();
+				for (const auto& mesh_object : m_pRenderView->GetVisibleMeshObjects())
+				{
+					auto& material = mesh_object.MeshSegment->GetMaterial();
+					auto& raster_state = material->GetRasterState();
+					raster_state.CullMode = CullMode::Cull_Front;
+					material->SetParameters("u_Local2WorldMat", mesh_object.Local2WorldMat);
+					material->SetParameters("u_ViewProjectionMat", GetViewProjectionMatrix());
+					Renderer::Submit(material, mesh_object.MeshSegment->GetVertexArray());
+				}
+				render_pass_info->Unbind();
+				Renderer::GetRenderAPI()->Flush();
+
+				Renderer::GetRenderAPI()->PopDebugGroup();
+			}
+		);
+		frame_graph->GetBlackboard()["GBufferAlbedo"] = main_pass.GetData().GBufferAlbedo;
+		frame_graph->GetBlackboard()["GBufferNormal"] = main_pass.GetData().GBufferNormal;
+		frame_graph->GetBlackboard()["GBufferRoughness"] = main_pass.GetData().GBufferRoughness;
+
+		/* Side Pass */
+		struct SidePassData
+		{
+			FrameGraphResourceHandleTyped<FrameGraphTexture> InputTexture;
+			FrameGraphResourceHandleTyped<FrameGraphTexture> OutputTexture;
+		};
+
+		auto& side_pass = frame_graph->AddPass<SidePassData>("SidePass",
+			[&](FrameGraphBuilder& builder, SidePassData& data)
+			{
+				data.InputTexture = frame_graph->GetBlackboard().GetResourceHandle<FrameGraphTexture>("GBufferAlbedo");
+				data.OutputTexture = builder.CreateTexture("OutputTexture", color_target_desc);
+
+				builder.BindInputResource(data.InputTexture, FrameGraphTexture::Usage::Sampleable);
+				builder.BindOutputResource(data.OutputTexture, FrameGraphTexture::Usage::Sampleable);
+
+				FrameGraphPassInfo::Descriptor pass_desc;
+				pass_desc.Attachments.ColorAttachments[0] = data.OutputTexture;
+				pass_desc.ViewportRegion = m_ViewportRegion;
+				builder.CreateRenderPass("SidePassRenderTarget", pass_desc);
+
+				builder.AsSideEffect();
+			},
+			[&](const FrameGraphResources& resources, const SidePassData& data)
+			{
+				Renderer::GetRenderAPI()->PushDebugGroup("SidePass");
+				const auto& render_pass_info = resources.GetPassRenderTarget();
+				render_pass_info->Bind();
+				Renderer::GetRenderAPI()->Clear();
+				SharedPtr<Material> material = CreateSharedPtr<Material>();
+				auto& raster_state = material->GetRasterState();
+				raster_state.EnableDepthWrite = false;
+				static const auto shader = Shader::Create("assets/shaders/side.glsl");
+				material->SetShader(shader);
+				material->SetTexture(resources.Get(data.InputTexture).Texture, 0);
+				Renderer::Submit(material, Renderer::GetFullScreenVertexArray());
+				render_pass_info->Unbind();
+
+				Renderer::GetRenderAPI()->PopDebugGroup();
+			}
+		);
+		frame_graph->GetBlackboard()["SidePassOutput"] = side_pass.GetData().OutputTexture;
+
+		m_pRenderView->Prepare();
+
+		/* 输出 */
+		auto output_handle = side_pass.GetData().OutputTexture;
+		m_pRenderView->SetRenderTargetHandle(output_handle);
+
+		//m_IsFrameGraphDirty = false;
 	}
 
 	/*void EditorCamera::SetViewportSize(float width, float height)
@@ -112,6 +248,8 @@ namespace Wuya
 
 	void EditorCamera::SetViewMatrix(const glm::mat4& view_mat)
 	{
+		PROFILE_FUNCTION();
+
 		if (view_mat != m_ViewMatrix)
 		{
 			m_ViewMatrix = view_mat;
@@ -130,6 +268,8 @@ namespace Wuya
 
 	void EditorCamera::UpdateProjectionMatrix()
 	{
+		PROFILE_FUNCTION();
+
 		m_ProjectionMatrix = glm::perspective(glm::radians(m_Fov), m_AspectRatio, m_NearClip, m_FarClip);
 	}
 
@@ -157,6 +297,8 @@ namespace Wuya
 
 	void EditorCamera::UpdateCameraDirections()
 	{
+		PROFILE_FUNCTION();
+
 		const auto orientation = GetOrientation();
 		m_UpDirection = glm::rotate(orientation, glm::vec3(0.0f, 1.0f, 0.0f));
 		m_RightDirection = glm::rotate(orientation, glm::vec3(1.0f, 0.0f, 0.0f));
@@ -165,6 +307,8 @@ namespace Wuya
 
 	void EditorCamera::OnMousePan(const glm::vec2& delta)
 	{
+		PROFILE_FUNCTION();
+
 		const auto speed = PanSpeed();
 		m_FocalPoint += -GetRightDir() * delta.x * speed.x * m_Distance;
 		m_FocalPoint += GetUpDir() * delta.y * speed.y * m_Distance;
@@ -174,6 +318,8 @@ namespace Wuya
 
 	void EditorCamera::OnMouseRotate(const glm::vec2& delta)
 	{
+		PROFILE_FUNCTION();
+
 		const float yaw_sign = GetUpDir().y < 0 ? -1.0f : 1.0f;
 		m_Yaw += yaw_sign * delta.x * RotateSpeed();
 		m_Pitch += delta.y * RotateSpeed();
@@ -185,6 +331,8 @@ namespace Wuya
 
 	void EditorCamera::OnMouseZoom(float delta)
 	{
+		PROFILE_FUNCTION();
+
 		m_Distance -= delta * ZoomSpeed();
 		if (m_Distance < 1.0f)
 		{
@@ -197,10 +345,12 @@ namespace Wuya
 
 	glm::vec2 EditorCamera::PanSpeed() const
 	{
-		const float x = std::min(m_ViewportRegion.Width() / 1000.0f, 2.4f); // max = 2.4f
+		PROFILE_FUNCTION();
+
+		const float x = std::min(m_ViewportRegion.Width / 1000.0f, 2.4f); // max = 2.4f
 		const float speed_x = 0.0366f * (x * x) - 0.1778f * x + 0.3021f;
 
-		const float y = std::min(m_ViewportRegion.Height() / 1000.0f, 2.4f); // max = 2.4f
+		const float y = std::min(m_ViewportRegion.Height / 1000.0f, 2.4f); // max = 2.4f
 		const float speed_y = 0.0366f * (y * y) - 0.1778f * y + 0.3021f;
 
 		return glm::vec2(speed_x, speed_y);
@@ -213,6 +363,8 @@ namespace Wuya
 
 	float EditorCamera::ZoomSpeed() const
 	{
+		PROFILE_FUNCTION();
+
 		float distance = m_Distance * 0.2f;
 		distance = std::max(distance, 0.0f);
 		float speed = distance * distance;

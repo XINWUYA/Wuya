@@ -23,10 +23,13 @@ namespace Wuya
 
 		static int CurrentAPI() { return RenderAPI::GetAPI(); }
 
-	private:
+		static const SharedPtr<RenderAPI>& GetRenderAPI() { return m_pRenderAPI; }
+
 		static SharedPtr<VertexArray> GetFullScreenVertexArray();
 
-		static UniquePtr<RenderAPI> m_pRenderAPI;
+	private:
+
+		static SharedPtr<RenderAPI> m_pRenderAPI;
 		/* 当前帧数计数 */
 		uint32_t m_FrameCounter{ 0 };
 	};

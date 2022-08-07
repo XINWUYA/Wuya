@@ -5,7 +5,7 @@
 namespace Wuya
 {
 	/* 编辑器内建相机类 */
-	class EditorCamera final : public Camera
+	class EditorCamera final : public Camera, public std::enable_shared_from_this<EditorCamera>
 	{
 	public:
 		EditorCamera(float fov = 45.0f, float aspect_ratio = 1.778f, float near_clip = 0.1f, float far_clip = 1000.0f);
@@ -42,6 +42,9 @@ namespace Wuya
 
 		void SetViewMatrix(const glm::mat4& view_mat);
 
+		/* 构建内置的FrameGraph */
+		void ConstructRenderView() override;
+
 	private:
 		void UpdateProjectionMatrix();
 		void UpdateViewMatrix();
@@ -68,9 +71,10 @@ namespace Wuya
 
 		/* 是否启用聚焦模式 */
 		bool m_IsFocus{ true };
-
 		/* 是否需要更新变换矩阵 */
 		bool m_IsDirty{ true };
+		/* 是否需要重新构建FrameGraph */
+		bool m_IsFrameGraphDirty = true;
 
 		glm::vec3 m_UpDirection{ 0.0f, 1.0f, 0.0f };
 		glm::vec3 m_RightDirection{ 1.0f, 0.0f, 0.0f };

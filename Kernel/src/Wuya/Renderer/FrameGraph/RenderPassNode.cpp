@@ -99,8 +99,7 @@ namespace Wuya
 		{
 			/* ππ‘ÏFrameBuffer√Ë ˆ */
 			FrameBufferDesc desc;
-			desc.Width = 1920;
-			desc.Height = 1080;
+			desc.ViewportRegion = { 0,0,1920, 1080 };
 			desc.Samples = render_pass_data.Descriptor.Samples;
 			desc.Usage = render_pass_data.RenderBufferUsage;
 

@@ -71,7 +71,7 @@ namespace Wuya
 		PROFILE_FUNCTION();
 
 		glBindFramebuffer(GL_FRAMEBUFFER, m_FrameBufferId);
-		glViewport(0, 0, (GLsizei)m_FrameBufferDesc.Width, (GLsizei)m_FrameBufferDesc.Height);
+		glViewport(m_FrameBufferDesc.ViewportRegion.MinX, m_FrameBufferDesc.ViewportRegion.MinY, (GLsizei)m_FrameBufferDesc.ViewportRegion.Width, (GLsizei)m_FrameBufferDesc.ViewportRegion.Height);
 	}
 
 	void OpenGLFrameBuffer::Unbind()
@@ -91,8 +91,8 @@ namespace Wuya
 			return;
 		}
 
-		m_FrameBufferDesc.Width = width;
-		m_FrameBufferDesc.Height = height;
+		m_FrameBufferDesc.ViewportRegion.Width = width;
+		m_FrameBufferDesc.ViewportRegion.Height = height;
 	}
 
 	int OpenGLFrameBuffer::ReadPixel(uint32_t attachment_index, int x, int y)
@@ -111,6 +111,8 @@ namespace Wuya
 	/* 附加一个RenderBuffer到FrameBuffer */
 	void OpenGLFrameBuffer::AttachARenderBuffer(const RenderBufferInfo& render_buffer_info, GLenum attachment)
 	{
+		PROFILE_FUNCTION();
+
 		/* 获取该RenderBuffer的Usage */
 		RenderBufferUsage render_buffer_usage{};
 		switch (attachment)
@@ -139,7 +141,7 @@ namespace Wuya
 		}
 
 		/* 1. 获取rt的格式 */
-		auto texture = std::dynamic_pointer_cast<OpenGLTexture>(render_buffer_info.RenderTarget);
+		const auto& texture = std::dynamic_pointer_cast<OpenGLTexture>(render_buffer_info.RenderTarget);
 		GLenum texture_target = GL_TEXTURE_2D;
 		if (!!(texture->m_TextureDesc.Usage & TextureUsage::Sampleable)) /* 作为颜色rt */
 		{
@@ -166,9 +168,14 @@ namespace Wuya
 		/* 采样次数*/
 		if (texture->m_TextureDesc.Samples <= 1)
 		{
-			/* 绑定当前FrameBuffer */
-			glBindFramebuffer(GL_FRAMEBUFFER, m_FrameBufferId);
+			PROFILE_SCOPE("Attach RenderBuffer");
 
+			/* 绑定当前FrameBuffer */
+			{
+				PROFILE_SCOPE("Bind FrameBuffer");
+
+				glBindFramebuffer(GL_FRAMEBUFFER, m_FrameBufferId);
+			}
 			/* 附加 */
 			if (texture_target == GL_TEXTURE_2D_ARRAY)
 			{
@@ -176,6 +183,8 @@ namespace Wuya
 			}
 			else /* GL_TEXTURE_2D/GL_TEXTURE_2D_MULTISAMPLE/GL_TEXTURE_CUBE_MAP_POSITIVE_X... */
 			{
+				PROFILE_SCOPE("FrameBuffer RenderBuffer");
+
 				if(!!(texture->m_TextureDesc.Usage & TextureUsage::Sampleable))
 				{
 					glFramebufferTexture2D(GL_FRAMEBUFFER, attachment, texture_target, texture->m_TextureId, render_buffer_info.Level);

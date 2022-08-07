@@ -6,6 +6,7 @@
 #include <backends/imgui_impl_opengl3.h>
 #include <GLFW/glfw3.h>
 #include "Wuya/Application/Application.h"
+#include "Wuya/Renderer/Renderer.h"
 
 namespace Wuya
 {
@@ -76,6 +77,8 @@ namespace Wuya
 	{
 		PROFILE_FUNCTION();
 
+		Renderer::GetRenderAPI()->PushDebugGroup("ImGuiPass");
+
 		ImGui_ImplOpenGL3_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
@@ -98,6 +101,8 @@ namespace Wuya
 			ImGui::RenderPlatformWindowsDefault();
 			glfwMakeContextCurrent(backup_current_context);
 		}
+
+		Renderer::GetRenderAPI()->PopDebugGroup();
 	}
 
 	void ImGuiLayer::SetDefaultStyle()

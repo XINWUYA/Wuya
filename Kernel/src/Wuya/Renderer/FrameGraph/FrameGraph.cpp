@@ -34,7 +34,8 @@ namespace Wuya
 	{
 	}
 
-	FrameGraph::FrameGraph()
+	FrameGraph::FrameGraph(const std::string& name)
+		: m_DebugName(name)
 	{
 		PROFILE_FUNCTION();
 	}
@@ -181,6 +182,12 @@ namespace Wuya
 		}
 	}
 
+	/* ÷ÿ÷√ */
+	void FrameGraph::Reset() noexcept
+	{
+		Destroy();
+	}
+
 	/* µº≥ˆ“¿¿µÕº */
 	void FrameGraph::ExportGraphviz(const std::string& path)
 	{
@@ -276,5 +283,7 @@ namespace Wuya
 		m_ResourcesMap.clear();
 
 		m_ResourceToResourceNodeMap.clear();
+
+		m_DependencyGraph.Clear();
 	}
 }

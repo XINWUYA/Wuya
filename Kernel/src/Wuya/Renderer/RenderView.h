@@ -2,20 +2,24 @@
 #include "RenderCommon.h"
 #include <glm/glm.hpp>
 
+#include "FrameGraph/FrameGraphResourceHandle.h"
+
 namespace Wuya
 {
 	class Camera;
 	class Scene;
 	class MeshSegment;
 	class Texture;
+	class FrameGraph;
 
+	/* 对当前RenderView可见的模型 */
 	struct VisibleMeshObject
 	{
 		glm::mat4 Local2WorldMat;
 		SharedPtr<MeshSegment> MeshSegment;
 
 		VisibleMeshObject() = default;
-		VisibleMeshObject(const glm::mat4& local_2_world, const SharedPtr<class MeshSegment> mesh_segment)
+		VisibleMeshObject(const glm::mat4& local_2_world, const SharedPtr<class MeshSegment>& mesh_segment)
 			: Local2WorldMat(local_2_world), MeshSegment(mesh_segment)
 		{}
 	};
@@ -29,13 +33,12 @@ namespace Wuya
 	class RenderView
 	{
 	public:
-		RenderView() = default;
-		RenderView(const std::string& name, const SharedPtr<Camera>& culling_camera, bool enable_culling = true);
+		RenderView(const std::string& name);
 		~RenderView();
 
 		/* 设置名称 */
-		void SetName(const std::string& name) { m_Name = name; }
-		const std::string& GetName() const { return m_Name; }
+		void SetName(const std::string& name) { m_DebugName = name; }
+		const std::string& GetName() const { return m_DebugName; }
 
 		/* 设置裁剪相机 */
 		void SetCullingCamera(const SharedPtr<Camera>& camera) { m_pCullingCamera = camera; }
@@ -53,12 +56,18 @@ namespace Wuya
 		void SetOwnerScene(const SharedPtr<Scene>& scene) { m_pOwnerScene = scene; }
 		const SharedPtr<Scene>& GetOwnerScene() const { return m_pOwnerScene; }
 
-		/* 设置RenderTarget Texture */
-		void SetRenderTargetTexture(const SharedPtr<Texture>& texture) { m_pRenderTargetTexture = texture; }
-		const SharedPtr<Texture>& GetRenderTargetTexture() const { return m_pRenderTargetTexture; }
+		/* 设置RenderTarget */
+		void SetRenderTargetHandle(FrameGraphResourceHandle handle) { m_RenderTargetHandle = handle; }
+		const SharedPtr<Texture>& GetRenderTarget() const;
+
+		/* 获取FrameGraph */
+		const SharedPtr<FrameGraph>& GetFrameGraph() const { return m_pFrameGraph; }
 
 		/* 准备一帧的RenderView数据 */
 		void Prepare();
+
+		/* 执行渲染当前View */
+		void Execute();
 
 		/* 获取可见MeshSegment */
 		const std::vector<VisibleMeshObject>& GetVisibleMeshObjects() const { return m_VisibleMeshObjects; }
@@ -68,7 +77,7 @@ namespace Wuya
 		void PrepareVisibleObjects();
 
 		/* RenderView名 */
-		std::string m_Name{};
+		std::string m_DebugName{ "Unnamed RenderView" };
 		/* 视口区域 */
 		ViewportRegion m_ViewportRegion{};
 		/* 是否启用视锥体剔除 */
@@ -79,7 +88,9 @@ namespace Wuya
 		SharedPtr<Scene> m_pOwnerScene{ nullptr };
 		/* 视锥体剔除之后，对当前可见MeshSegment */
 		std::vector<VisibleMeshObject> m_VisibleMeshObjects{};
-		/* 当前View的RenderTarget Texture */
-		SharedPtr<Texture> m_pRenderTargetTexture{ nullptr };
+		/* 当前View的渲染结果输出到该RenderTarget */
+		FrameGraphResourceHandle m_RenderTargetHandle{};
+		/* FrameGraph */
+		SharedPtr<FrameGraph> m_pFrameGraph{ nullptr };
 	};
 }

@@ -8,6 +8,8 @@ namespace Wuya
 	DependencyGraph::Node::Node(DependencyGraph& graph)
 		: Index(graph.GenerateNodeIndex())
 	{
+		PROFILE_FUNCTION();
+
 		graph.RegisterNode(this);
 	}
 
@@ -37,23 +39,31 @@ namespace Wuya
 	DependencyGraph::Connection::Connection(DependencyGraph& graph, Node* from, Node* to)
 		: FromNodeIdx(from->Index), ToNodeIdx(to->Index)
 	{
+		PROFILE_FUNCTION();
+
 		graph.RegisterConnection(this);
 	}
 
 	DependencyGraph::DependencyGraph()
 	{
+		PROFILE_FUNCTION();
+
 		m_Nodes.reserve(8);
 		m_Connections.reserve(16);
 	}
 
 	void DependencyGraph::Clear()
 	{
+		PROFILE_FUNCTION();
+
 		m_Nodes.clear();
 		m_Connections.clear();
 	}
 
 	void DependencyGraph::UpdateRefCount()
 	{
+		PROFILE_FUNCTION();
+
 		/* 更新节点的引用计数 */
 		for (const auto* connection : m_Connections)
 		{
@@ -88,6 +98,8 @@ namespace Wuya
 
 	const DependencyGraph::Node* DependencyGraph::GetNode(uint32_t node_idx) const
 	{
+		PROFILE_FUNCTION();
+
 		if (node_idx >= m_Nodes.size())
 			return nullptr;
 
@@ -96,6 +108,8 @@ namespace Wuya
 
 	DependencyGraph::Node* DependencyGraph::GetNode(uint32_t node_idx)
 	{
+		PROFILE_FUNCTION();
+
 		if (node_idx >= m_Nodes.size())
 			return nullptr;
 
@@ -104,6 +118,8 @@ namespace Wuya
 
 	std::vector<DependencyGraph::Connection*> DependencyGraph::GetIncomingConnectionsOfNode(const Node* node) const
 	{
+		PROFILE_FUNCTION();
+
 		std::vector<DependencyGraph::Connection*> result;
 
 		const uint32_t target_idx = node->Index;
@@ -118,6 +134,8 @@ namespace Wuya
 
 	std::vector<DependencyGraph::Connection*> DependencyGraph::GetOutgoingConnectionsOfNode(const Node* node) const
 	{
+		PROFILE_FUNCTION();
+
 		std::vector<Connection*> result;
 
 		const uint32_t target_idx = node->Index;
@@ -132,6 +150,8 @@ namespace Wuya
 
 	bool DependencyGraph::IsConnectionValid(const Connection* connection) const
 	{
+		PROFILE_FUNCTION();
+
 		const auto* from_node = GetNode(connection->FromNodeIdx);
 		const auto* to_node = GetNode(connection->ToNodeIdx);
 		return from_node->IsValid() && to_node->IsValid();
@@ -209,16 +229,22 @@ namespace Wuya
 
 	void DependencyGraph::RegisterNode(Node* node)
 	{
+		PROFILE_FUNCTION();
+
 		m_Nodes.emplace_back(node);
 	}
 
 	void DependencyGraph::RegisterConnection(Connection* connection)
 	{
+		PROFILE_FUNCTION();
+
 		m_Connections.emplace_back(connection);
 	}
 
 	uint32_t DependencyGraph::GenerateNodeIndex() const
 	{
+		PROFILE_FUNCTION();
+
 		return static_cast<uint32_t>(m_Nodes.size());
 	}
 }

@@ -65,6 +65,8 @@ namespace Wuya
 	/* 应用光栅化参数 */
 	void OpenGLRenderAPI::ApplyRasterState(RenderRasterState raster_state)
 	{
+		PROFILE_FUNCTION();
+
 		/* 设置CullMode */
 		switch (raster_state.CullMode)
 		{
@@ -130,23 +132,31 @@ namespace Wuya
 
 	void OpenGLRenderAPI::DrawIndexed(const SharedPtr<VertexArray>& vertex_array, uint32_t index_count)
 	{
+		PROFILE_FUNCTION();
+
 		const uint32_t count = index_count ? index_count : vertex_array->GetVertexCount();
 		glDrawElements(GL_TRIANGLES, (GLsizei)count, GL_UNSIGNED_INT, nullptr);
 	}
 
 	void OpenGLRenderAPI::DrawArrays(const SharedPtr<VertexArray>& vertex_array)
 	{
+		PROFILE_FUNCTION();
+
 		const auto count = vertex_array->GetVertexCount();
 		glDrawArrays(GL_TRIANGLES, 0, count);
 	}
 
 	void OpenGLRenderAPI::Flush()
 	{
+		PROFILE_FUNCTION();
+
 		glFlush();
 	}
 
 	void OpenGLRenderAPI::PushDebugGroup(const char* name)
 	{
+		PROFILE_FUNCTION();
+
 #ifdef WUYA_DEBUG
 	if (m_SupportedExtensions.KHR_debug)
 		glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, name);
@@ -155,6 +165,8 @@ namespace Wuya
 
 	void OpenGLRenderAPI::PopDebugGroup()
 	{
+		PROFILE_FUNCTION();
+
 #ifdef WUYA_DEBUG
 	if (m_SupportedExtensions.KHR_debug)
 		glPopDebugGroup();
@@ -164,6 +176,8 @@ namespace Wuya
 	/* 获取OpenGL支持的扩展 */
 	void OpenGLRenderAPI::InitOpenGLExtensions()
 	{
+		PROFILE_FUNCTION();
+
 		/* 获取扩展数 */
 		GLint num = 0;
 		glGetIntegerv(GL_NUM_EXTENSIONS, &num);

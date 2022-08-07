@@ -19,9 +19,8 @@ namespace Wuya
 	/* FrameBuffer信息描述 */
 	struct FrameBufferDesc
 	{
-		uint32_t Width{ 0 };								/* 宽度 */
-		uint32_t Height{ 0 };								/* 高度 */
 		uint32_t Samples{ 1 };								/* 采样次数 */
+		ViewportRegion ViewportRegion;						/* 视域范围 */
 		RenderBufferUsage Usage;							/* RenderBuffer使用情况 */
 		std::vector<RenderBufferInfo> ColorRenderBuffers;	/* Color RenderBuffers */
 		RenderBufferInfo DepthRenderBuffer;					/* Depth RenderBuffer */

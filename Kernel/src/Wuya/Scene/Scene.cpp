@@ -52,8 +52,8 @@ namespace Wuya
 		for (auto& entity : entity_view)
 		{
 			const auto [name_component, camera_component] = entity_view.get<NameComponent, CameraComponent>(entity);
-			SharedPtr<RenderView> render_view = CreateSharedPtr<RenderView>();
-			render_view->SetName(name_component.Name);
+			SharedPtr<RenderView> render_view = CreateSharedPtr<RenderView>(name_component.Name + "_RenderView");
+			//render_view->SetName(name_component.Name);
 			render_view->SetCullingCamera(camera);// todo: 替换为组件对应的相机
 			m_RenderViews.emplace_back(render_view);
 		}
@@ -61,7 +61,7 @@ namespace Wuya
 		/* Editor Camera's RenderView, 最后一个是编辑器RenderView */
 		if (camera)
 		{
-			SharedPtr<RenderView> render_view = CreateSharedPtr<RenderView>("Builtin Editor Camera", camera);
+			auto& render_view = camera->GetRenderView();
 			render_view->SetOwnerScene(shared_from_this());
 			//render_view->SetViewportRegion(camera->)
 			m_RenderViews.emplace_back(render_view);
@@ -107,8 +107,10 @@ namespace Wuya
 	/* 获取主相机的RenderTarget Texture */
 	const SharedPtr<Texture>& Scene::GetPrimaryCameraRenderTargetTexture() const
 	{
+		PROFILE_FUNCTION();
+
 		auto& render_view = m_RenderViews.back();
-		return render_view->GetRenderTargetTexture();
+		return render_view->GetRenderTarget();
 	}
 
 	void Scene::Serializer(const std::string& path)

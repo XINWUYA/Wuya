@@ -59,7 +59,7 @@ namespace Wuya
 	class FrameGraph 
 	{
 	public:
-		explicit FrameGraph();
+		explicit FrameGraph(const std::string& name);
 		FrameGraph(FrameGraph&) = delete;
 		FrameGraph& operator=(const FrameGraph&) = delete;
 		~FrameGraph();
@@ -154,6 +154,8 @@ namespace Wuya
 		void Build() noexcept;
 		/* 执行 */
 		void Execute() noexcept;
+		/* 重置 */
+		void Reset() noexcept;
 
 		/* 导出依赖图 http://dreampuf.github.io/GraphvizOnline/ */
 		void ExportGraphviz(const std::string& path);
@@ -174,6 +176,8 @@ namespace Wuya
 		/* 释放FrameGraph */
 		void Destroy();
 
+		/* 标记名 */
+		std::string m_DebugName{ "Unnamed FrameGraph" };
 		/* RenderPassNode列表，包含当前FrameGraph所有Pass节点，再Cull阶段才会剔除其中无效的节点 */
 		std::vector<RenderPassNode*> m_RenderPassNodes{};
 		/* 资源列表<IFrameGraphResourceHandle.m_Index, IResource> */

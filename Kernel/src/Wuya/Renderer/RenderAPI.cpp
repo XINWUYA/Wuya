@@ -6,7 +6,7 @@ namespace Wuya
 {
 	int RenderAPI::m_API = RenderAPI::OpenGL;
 
-	UniquePtr<RenderAPI> RenderAPI::Create()
+	SharedPtr<RenderAPI> RenderAPI::Create()
 	{
 		switch (m_API)
 		{
@@ -14,7 +14,7 @@ namespace Wuya
 			CORE_LOG_ERROR("RenderAPI can't be None!");
 			return nullptr;
 		case OpenGL:
-			return CreateUniquePtr<OpenGLRenderAPI>();
+			return CreateSharedPtr<OpenGLRenderAPI>();
 		default:
 			CORE_LOG_ERROR("Unknown RenderAPI is unsupported!");
 			return nullptr;
