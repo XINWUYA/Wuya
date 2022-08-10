@@ -22,9 +22,33 @@ namespace Wuya
 		return std::make_unique<T>(std::forward<Args>(args)...);
 	}
 
-	template <typename T, typename ... Args>
+	template<typename T, typename ... Args>
 	constexpr SharedPtr<T> CreateSharedPtr(Args&& ... args)
 	{
 		return std::make_shared<T>(std::forward<Args>(args)...);
+	}
+
+	template<typename T, typename ... Args>
+	constexpr SharedPtr<T> StaticPtrCast(Args&& ... args)
+	{
+		return std::static_pointer_cast<T>(std::forward<Args>(args)...);
+	}
+
+	template<typename T, typename ... Args>
+	constexpr SharedPtr<T> DynamicPtrCast(Args&& ... args)
+	{
+		return std::dynamic_pointer_cast<T>(std::forward<Args>(args)...);
+	}
+
+	template<typename T, typename ... Args>
+	constexpr SharedPtr<T> ConstPtrCast(Args&& ... args)
+	{
+		return std::const_pointer_cast<T>(std::forward<Args>(args)...);
+	}
+
+	template<typename T, typename ... Args>
+	constexpr SharedPtr<T> ReinterpretPtrCast(Args&& ... args)
+	{
+		return std::reinterpret_pointer_cast<T>(std::forward<Args>(args)...);
 	}
 }

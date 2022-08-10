@@ -13,7 +13,7 @@ void InitMemoryLeakDetector()
 
 	//the following statement is used to trigger a breakpoint when memory leak happens
 	//comment it out if there is no memory leak report;
-	_crtBreakAlloc = 267723;
+	//_crtBreakAlloc = 1544;
 #endif
 }
 

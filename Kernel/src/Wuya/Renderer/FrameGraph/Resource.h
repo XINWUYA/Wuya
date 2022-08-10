@@ -12,44 +12,44 @@ namespace Wuya
 	{
 	public:
 		IResource(const std::string& name);
-		IResource(const std::string& name, IResource* parent);
+		IResource(const std::string& name, const SharedPtr<IResource>& parent);
 		IResource(const IResource&) = delete;
 		IResource& operator=(const IResource&) = delete;
 		virtual ~IResource() = default;
 
 		/* 被Pass依赖 */
-		void NeedByPass(RenderPassNode* pass_node);
+		void NeedByPass(const SharedPtr<RenderPassNode>& pass_node);
 
 		/* 资源名 */
 		const std::string& GetName() const { return m_Name; }
 		/* 获取引用计数 */
 		uint32_t GetRefCount() const { return m_RefCount; }
 		/* 获取被依赖的Pass */
-		RenderPassNode* GetFirstPassNode() const { return m_FirstPassNode; }
-		RenderPassNode* GetLastPassNode() const { return m_LastPassNode; }
+		const SharedPtr<RenderPassNode>& GetFirstPassNode() const { return m_FirstPassNode; }
+		const SharedPtr<RenderPassNode>& GetLastPassNode() const { return m_LastPassNode; }
 
 		/* 创建资源 */
 		virtual void Create() = 0;
 		/* 销毁资源 */
 		virtual void Destroy() = 0;
 		/* 释放一条连线 */
-		virtual void DestroyConnection(DependencyGraph::Connection* connection) = 0;
+		virtual void DestroyConnection(const SharedPtr<DependencyGraph::Connection>& connection) = 0;
 		/* 获取UsageStr */
 		virtual std::string GetUsageStr() const = 0;
 		/* 更新资源的Usage */
-		virtual void UpdateUsage(DependencyGraph::Connection* connection) = 0;
+		virtual void UpdateUsage(const SharedPtr<DependencyGraph::Connection>& connection) = 0;
 
 	protected:
 		/* 资源名*/
 		std::string m_Name;
 		/* 父资源节点 */
-		IResource* m_Parent{ nullptr };
+		SharedPtr<IResource> m_Parent{ nullptr };
 		/* 资源引用计数 */
 		uint32_t m_RefCount{ 0 };
 		/* FrameGraph中第一次使用该资源的Pass */
-		RenderPassNode* m_FirstPassNode{ nullptr };
+		SharedPtr<RenderPassNode> m_FirstPassNode{ nullptr };
 		/* FrameGraph中最后一次使用该资源的Pass */
-		RenderPassNode* m_LastPassNode{ nullptr };
+		SharedPtr<RenderPassNode> m_LastPassNode{ nullptr };
 	};
 
 	/* 资源类 */
@@ -66,16 +66,18 @@ namespace Wuya
 		{
 			ResourceUsage Usage;
 
-			ResourceConnection(DependencyGraph& graph, DependencyGraph::Node* from, DependencyGraph::Node* to, ResourceUsage usage)
-				: DependencyGraph::Connection(graph, from, to), Usage(usage)
-			{}
+			ResourceConnection(const SharedPtr<DependencyGraph::Node>& from, const SharedPtr<DependencyGraph::Node>& to, ResourceUsage usage)
+				: DependencyGraph::Connection(from, to), Usage(usage)
+			{
+				
+			}
 		};
 
 		Resource(const std::string& name, const ResourceDescriptor& desc)
 			: IResource(name), m_Descriptor(desc)
 		{
 		}
-		Resource(const std::string& name, IResource* parent, const ResourceSubDescriptor& sub_desc)
+		Resource(const std::string& name, const SharedPtr<IResource>& parent, const ResourceSubDescriptor& sub_desc)
 			: IResource(name, parent), m_SubDescriptor(sub_desc)
 		{
 		}
@@ -97,34 +99,40 @@ namespace Wuya
 		ResourceUsage GetUsage() const { return m_Usage; }
 
 		/* 将资源节点作为输入连接到依赖图中 */
-		bool ConnectAsInput(DependencyGraph& dependency_graph, RenderPassNode* render_pass_node, RenderResourceNode* resource_node, ResourceUsage usage)
+		bool ConnectAsInput(DependencyGraph& dependency_graph, const SharedPtr<RenderPassNode>& render_pass_node, const SharedPtr<RenderResourceNode>& resource_node, ResourceUsage usage)
 		{
 			/* 获取当前RenderPass的输入连线 */
-			ResourceConnection* connection = static_cast<ResourceConnection*>(resource_node->GetIncomingConnectionOfPassNode(render_pass_node));
+			auto& connection = StaticPtrCast<ResourceConnection>(resource_node->GetIncomingConnectionOfPassNode(render_pass_node));
 			if (connection)
 			{
 				connection->Usage |= usage;
 			}
 			else
 			{
-				connection = new ResourceConnection(dependency_graph, resource_node, render_pass_node, usage);
+				connection = CreateSharedPtr<ResourceConnection>(resource_node, render_pass_node, usage);
+				/* 将连线注册到依赖图中 */
+				dependency_graph.RegisterConnection(connection);
+				/* 也将连线保存到当前资源节点 */
 				resource_node->AddOutgoingConnection(connection);
 			}
 			return true;
 		}
 
 		/* 将资源节点作为输出连接到依赖图中 */
-		bool ConnectAsOutput(DependencyGraph& dependency_graph, RenderPassNode* render_pass_node, RenderResourceNode* resource_node, ResourceUsage usage)
+		bool ConnectAsOutput(DependencyGraph& dependency_graph, const SharedPtr<RenderPassNode>& render_pass_node, const SharedPtr<RenderResourceNode>& resource_node, ResourceUsage usage)
 		{
 			/* 获取当前RenderPass的输出连线 */
-			ResourceConnection* connection = static_cast<ResourceConnection*>(resource_node->GetOutgoingConnectionOfPassNode(render_pass_node));
+			auto& connection = StaticPtrCast<ResourceConnection>(resource_node->GetOutgoingConnectionOfPassNode(render_pass_node));
 			if (connection)
 			{
 				connection->Usage |= usage;
 			}
 			else
 			{
-				connection = new ResourceConnection(dependency_graph, render_pass_node, resource_node, usage);
+				connection = CreateSharedPtr<ResourceConnection>(render_pass_node, resource_node, usage);
+				/* 将连线注册到依赖图中 */
+				dependency_graph.RegisterConnection(connection);
+				/* 也将连线保存到当前资源节点 */
 				resource_node->SetIncomingConnection(connection);
 			}
 			return true;
@@ -139,13 +147,13 @@ namespace Wuya
 		/* 销毁资源 */
 		void Destroy() override
 		{
-			
+			m_Resource.Destroy();
 		}
 
 		/* 释放一条连线 */
-		void DestroyConnection(DependencyGraph::Connection* connection) override
+		void DestroyConnection(const SharedPtr<DependencyGraph::Connection>& connection) override
 		{
-			delete static_cast<ResourceConnection*>(connection);
+			StaticPtrCast<ResourceConnection>(connection).reset();
 		}
 
 		/* 获取UsageStr */
@@ -155,9 +163,9 @@ namespace Wuya
 		}
 
 		/* 更新资源的Usage */
-		void UpdateUsage(DependencyGraph::Connection* connection) override
+		void UpdateUsage(const SharedPtr<DependencyGraph::Connection>& connection) override
 		{
-			ResourceConnection* conn = static_cast<ResourceConnection*>(connection);
+			auto conn = StaticPtrCast<ResourceConnection>(connection);
 			m_Usage |= conn->Usage;
 		}
 

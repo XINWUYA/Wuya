@@ -5,12 +5,6 @@
 
 namespace Wuya
 {
-	/* 使当前节点不会被优化掉，即使没有没使用到 */
-	void FrameGraphBuilder::AsSideEffect(bool value)
-	{
-		m_pRenderPassNode->IsTarget = value;
-	}
-
 	/* 根据描述创建一个RenderPass */
 	uint32_t FrameGraphBuilder::CreateRenderPass(const std::string& name, const FrameGraphPassInfo::Descriptor& desc)
 	{
@@ -23,13 +17,19 @@ namespace Wuya
 		return m_FrameGraph.CreateResource<FrameGraphTexture>(name, desc);
 	}
 
-	/* 获取资源名 */
+	/* 使当前节点不会被优化掉，即使没有没使用到 */
+	void FrameGraphBuilder::AsSideEffect(bool value)
+	{
+		m_pRenderPassNode->IsTarget = value;
+	}
+
+	/* 根据资源Handle在FrameGraph中获取资源名 */
 	const std::string& FrameGraphBuilder::GetResourceName(FrameGraphResourceHandle handle) const
 	{
 		return m_FrameGraph.GetResource(handle)->GetName();
 	}
 
-	FrameGraphBuilder::FrameGraphBuilder(FrameGraph& frame_graph, RenderPassNode* render_pass_node)
+	FrameGraphBuilder::FrameGraphBuilder(FrameGraph& frame_graph, const SharedPtr<RenderPassNode>& render_pass_node)
 		: m_FrameGraph(frame_graph), m_pRenderPassNode(render_pass_node)
 	{
 	}
@@ -46,7 +46,7 @@ namespace Wuya
 	}
 
 	/* 获取资源 */
-	IResource* FrameGraph::GetResource(FrameGraphResourceHandle handle)
+	const SharedPtr<IResource>& FrameGraph::GetResource(FrameGraphResourceHandle handle)
 	{
 		PROFILE_FUNCTION();
 
@@ -60,7 +60,7 @@ namespace Wuya
 	}
 
 	/* 获取资源节点 */
-	RenderResourceNode* FrameGraph::GetRenderResourceNode(FrameGraphResourceHandle handle)
+	const SharedPtr<RenderResourceNode>& FrameGraph::GetRenderResourceNode(FrameGraphResourceHandle handle)
 	{
 		const auto iter = m_ResourceToResourceNodeMap.find(handle.GetIndex());
 		if (iter != m_ResourceToResourceNodeMap.end())
@@ -80,13 +80,13 @@ namespace Wuya
 	}
 
 	/* 判断一个资源连线是否有效 */
-	bool FrameGraph::IsConnectionValid(const DependencyGraph::Connection* connection) const
+	bool FrameGraph::IsConnectionValid(const SharedPtr<DependencyGraph::Connection>& connection) const
 	{
 		return m_DependencyGraph.IsConnectionValid(connection);
 	}
 
 	/* 检查一个FrameGraphPass节点是否被优化掉 */
-	bool FrameGraph::IsPassCulled(IFrameGraphPass* pass) const
+	bool FrameGraph::IsPassCulled(const SharedPtr<IFrameGraphPass>& pass) const
 	{
 		return pass->GetRenderPassNode()->IsCulled();
 	}
@@ -102,21 +102,21 @@ namespace Wuya
 		auto iter_current = m_RenderPassNodes.begin();
 		while (iter_current != m_LastValidRenderPassNodeIter)
 		{
-			auto* current_node = *iter_current;
+			auto current_node = *iter_current;
 
 			/* 输入涉及资源 */
 			auto incoming_connections = m_DependencyGraph.GetIncomingConnectionsOfNode(current_node);
-			for (const auto* connection : incoming_connections)
+			for (const auto& connection : incoming_connections)
 			{
-				auto* from_node = (RenderResourceNode*)m_DependencyGraph.GetNode(connection->FromNodeIdx);
+				const auto& from_node = DynamicPtrCast<const RenderResourceNode>(m_DependencyGraph.GetNode(connection->FromNodeIdx));
 				current_node->RegisterResourceHandle(from_node->GetResourceHandle());
 			}
 
 			/* 输出涉及资源 */
 			auto outgoing_connections = m_DependencyGraph.GetOutgoingConnectionsOfNode(current_node);
-			for (const auto* connection : outgoing_connections)
+			for (const auto& connection : outgoing_connections)
 			{
-				auto* to_node = (RenderResourceNode*)m_DependencyGraph.GetNode(connection->ToNodeIdx);
+				const auto& to_node = DynamicPtrCast<const RenderResourceNode>(m_DependencyGraph.GetNode(connection->ToNodeIdx));
 				current_node->RegisterResourceHandle(to_node->GetResourceHandle());
 			}
 			/* 构建当前节点 */
@@ -129,11 +129,11 @@ namespace Wuya
 		/* 确定资源的构建和销毁时机 */
 		for (const auto& resource_item : m_ResourcesMap)
 		{
-			auto* resource = resource_item.second;
+			auto& resource = resource_item.second;
 			if (resource->GetRefCount() > 0)
 			{
-				RenderPassNode* first_pass_node = resource->GetFirstPassNode();
-				RenderPassNode* last_pass_node = resource->GetLastPassNode();
+				auto& first_pass_node = resource->GetFirstPassNode();
+				auto& last_pass_node = resource->GetLastPassNode();
 
 				if (first_pass_node && last_pass_node)
 				{
@@ -163,10 +163,10 @@ namespace Wuya
 		auto iter_current = m_RenderPassNodes.begin();
 		while (iter_current != m_LastValidRenderPassNodeIter)
 		{
-			auto* current_node = *iter_current;
+			auto& current_node = *iter_current;
 
 			/* 准备当前节点所需的资源 */
-			for (auto* resource : current_node->GetResourcesNeedPrepared())
+			for (auto& resource : current_node->GetResourcesNeedPrepared())
 				resource->Create();
 
 			/* 执行Pass */
@@ -174,7 +174,7 @@ namespace Wuya
 			current_node->Execute(resources);
 
 			/* 及时销毁不再使用的资源 */
-			for (auto* resource : current_node->GetResourcesNeedDestroy())
+			for (auto& resource : current_node->GetResourcesNeedDestroy())
 				resource->Destroy();
 
 			/* 下一个 */
@@ -215,27 +215,29 @@ namespace Wuya
 	}
 
 	/* 添加资源到m_ResourcesMap */
-	FrameGraphResourceHandle FrameGraph::AddResourceInternal(IResource* resource)
+	FrameGraphResourceHandle FrameGraph::AddResourceInternal(const SharedPtr<IResource>& resource)
 	{
 		const FrameGraphResourceHandle resource_handle(m_ResourcesMap.size());
 		m_ResourcesMap.insert({ resource_handle.GetIndex(), resource });
 
 		/* 新增一个RenderResourceNode */
-		RenderResourceNode* node = new RenderResourceNode(*this, resource_handle);
-		m_ResourceToResourceNodeMap.insert({ resource_handle.GetIndex(), node });
+		auto resource_node = CreateSharedPtr<RenderResourceNode>(*this, resource_handle);
+		/* 将资源节点添加到依赖图 */
+		m_DependencyGraph.RegisterNode(resource_node);
+		m_ResourceToResourceNodeMap.insert({ resource_handle.GetIndex(), resource_node });
 
 		return resource_handle;
 	}
 
 	/* 为RenderPass绑定输入资源 */
-	void FrameGraph::BindInputResourceInternal(RenderPassNode* render_pass_node, FrameGraphResourceHandle handle,
-		const std::function<bool(IResource*, RenderResourceNode*)>& callback)
+	void FrameGraph::BindInputResourceInternal(const SharedPtr<RenderPassNode>& render_pass_node, FrameGraphResourceHandle handle,
+		const std::function<bool(const SharedPtr<IResource>&, const SharedPtr<RenderResourceNode>&)>& callback)
 	{
 		if (!IsHandleValid(handle))
 			return;
 
-		IResource* resource = GetResource(handle);
-		RenderResourceNode* resource_node = GetRenderResourceNode(handle);
+		const SharedPtr<IResource>& resource = GetResource(handle);
+		auto& resource_node = GetRenderResourceNode(handle);
 
 		if (!resource_node->HasOutgoingConnection())
 		{
@@ -250,14 +252,14 @@ namespace Wuya
 	}
 
 	/* 为RenderPass绑定输出资源 */
-	void FrameGraph::BindOutputResourceInternal(RenderPassNode* render_pass_node, FrameGraphResourceHandle handle,
-		const std::function<bool(IResource*, RenderResourceNode*)>& callback)
+	void FrameGraph::BindOutputResourceInternal(const SharedPtr<RenderPassNode>& render_pass_node, FrameGraphResourceHandle handle,
+		const std::function<bool(const SharedPtr<IResource>&, const SharedPtr<RenderResourceNode>&)>& callback)
 	{
 		if (!IsHandleValid(handle))
 			return;
 
-		IResource* resource = GetResource(handle);
-		RenderResourceNode* resource_node = GetRenderResourceNode(handle);
+		const SharedPtr<IResource>& resource = GetResource(handle);
+		auto& resource_node = GetRenderResourceNode(handle);
 
 		if (!resource_node->HasIncomingConnection())
 		{
@@ -274,15 +276,18 @@ namespace Wuya
 	/* 释放FrameGraph */
 	void FrameGraph::Destroy()
 	{
-		for (auto* render_pass_node: m_RenderPassNodes)
+		for (const auto& render_pass_node: m_RenderPassNodes)
 			render_pass_node->Destroy();
 		m_RenderPassNodes.clear();
+
+		/* 必须先销毁ResourceNode，才能销毁Resource */
+		for (const auto& resource_node_itr : m_ResourceToResourceNodeMap)
+			resource_node_itr.second->Destroy();
+		m_ResourceToResourceNodeMap.clear();
 
 		for (const auto& resource_node: m_ResourcesMap)
 			resource_node.second->Destroy();
 		m_ResourcesMap.clear();
-
-		m_ResourceToResourceNodeMap.clear();
 
 		m_DependencyGraph.Clear();
 	}

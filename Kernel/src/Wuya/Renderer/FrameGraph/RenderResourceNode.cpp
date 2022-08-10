@@ -14,28 +14,20 @@ namespace Wuya
 
 	RenderResourceNode::~RenderResourceNode()
 	{
-		/* 需通过Resource来释放 */
-		IResource* resource = m_FrameGraph.GetResource(m_ResourceHandle);
-
-		resource->DestroyConnection(m_pIncomingConnection);
-		m_pIncomingConnection = nullptr;
-
-		for (auto* conn : m_OutgoingConnections)
-			resource->DestroyConnection(conn);
-		m_OutgoingConnections.clear();
+		Destroy();
 	}
 
-	DependencyGraph::Connection* RenderResourceNode::GetOutgoingConnectionOfPassNode(const RenderPassNode* node) const
+	const SharedPtr<DependencyGraph::Connection>& RenderResourceNode::GetOutgoingConnectionOfPassNode(const SharedPtr<RenderPassNode>& node) const
 	{
 		/* 判断资源的输入连线是否来自该PassNode */
 		return m_pIncomingConnection && (m_pIncomingConnection->FromNodeIdx == node->Index) ? m_pIncomingConnection : nullptr;
 	}
 
-	DependencyGraph::Connection* RenderResourceNode::GetIncomingConnectionOfPassNode(const RenderPassNode* node) const
+	const SharedPtr<DependencyGraph::Connection>& RenderResourceNode::GetIncomingConnectionOfPassNode(const SharedPtr<RenderPassNode>& node) const
 	{
 		/* 遍历资源的输出连线，判断是否具有到指定PassNode的连线 */
 		const auto find_pos = std::find_if(m_OutgoingConnections.begin(), m_OutgoingConnections.end(),
-			[node](const DependencyGraph::Connection* connection)->bool
+			[node](const SharedPtr<DependencyGraph::Connection>& connection)->bool
 			{
 				return connection->ToNodeIdx == node->Index;
 			});
@@ -46,7 +38,7 @@ namespace Wuya
 	/* 更新资源的Usage */
 	void RenderResourceNode::UpdateResourceUsage()
 	{
-		IResource* resource = m_FrameGraph.GetResource(m_ResourceHandle);
+		auto& resource = m_FrameGraph.GetResource(m_ResourceHandle);
 		if (resource && resource->GetRefCount())
 		{
 			/* 资源作为输出的Usage */
@@ -66,10 +58,23 @@ namespace Wuya
 		}
 	}
 
+	void RenderResourceNode::Destroy()
+	{
+		/* 需通过Resource来释放 */
+		auto& resource = m_FrameGraph.GetResource(m_ResourceHandle);
+
+		resource->DestroyConnection(m_pIncomingConnection);
+		m_pIncomingConnection = nullptr;
+
+		for (auto& conn : m_OutgoingConnections)
+			resource->DestroyConnection(conn);
+		m_OutgoingConnections.clear();
+	}
+
 	/* 输出可视化设置 */
 	std::string RenderResourceNode::Graphvizify() const
 	{
-		auto* resource = m_FrameGraph.GetResource(m_ResourceHandle);
+		auto& resource = m_FrameGraph.GetResource(m_ResourceHandle);
 
 		std::string result_str;
 		result_str.reserve(128);

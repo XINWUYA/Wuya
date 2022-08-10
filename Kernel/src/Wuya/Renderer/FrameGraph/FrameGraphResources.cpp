@@ -27,16 +27,16 @@ namespace Wuya
 			return nullptr;
 		}
 
-		return render_pass_data->m_pRenderTarget;
+		return render_pass_data->FrameBuffer;
 	}
 
 	/* 从FrameGraph中获取资源 */
-	IResource* FrameGraphResources::GetResource(FrameGraphResourceHandle handle) const
+	const SharedPtr<IResource>& FrameGraphResources::GetResource(FrameGraphResourceHandle handle) const
 	{
 		PROFILE_FUNCTION();
 
 		ASSERT(handle.IsInitialized(), "Handle is invalid.");
-		IResource* resource = m_FrameGraph.GetResource(handle);
+		auto& resource = m_FrameGraph.GetResource(handle);
 
 		if (!m_RenderPassNode.IsResourceHandleRegistered(handle))
 		{
@@ -53,5 +53,11 @@ namespace Wuya
 		PROFILE_FUNCTION();
 
 		Texture = Texture::Create(name, { desc.Width, desc.Height, desc.Depth, desc.MipLevels, desc.Samples, desc.TextureFormat, desc.SamplerType, usage });
+	}
+
+	/* 销毁 */
+	void FrameGraphTexture::Destroy()
+	{
+		Texture.reset();
 	}
 }

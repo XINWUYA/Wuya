@@ -134,7 +134,7 @@ namespace Wuya
 			FrameGraphResourceHandleTyped<FrameGraphTexture> GBufferDepth;
 		};
 
-		auto& main_pass = frame_graph->AddPass<GBufferPassData>("GBufferPass",
+		auto gbuffer_pass = frame_graph->AddPass<GBufferPassData>("GBufferPass",
 			[&](FrameGraphBuilder& builder, GBufferPassData& data)
 			{
 				data.GBufferAlbedo = builder.CreateTexture("GBufferAlbedo", color_target_desc);
@@ -176,9 +176,9 @@ namespace Wuya
 				Renderer::GetRenderAPI()->PopDebugGroup();
 			}
 		);
-		frame_graph->GetBlackboard()["GBufferAlbedo"] = main_pass.GetData().GBufferAlbedo;
-		frame_graph->GetBlackboard()["GBufferNormal"] = main_pass.GetData().GBufferNormal;
-		frame_graph->GetBlackboard()["GBufferRoughness"] = main_pass.GetData().GBufferRoughness;
+		frame_graph->GetBlackboard()["GBufferAlbedo"] = gbuffer_pass->GetData().GBufferAlbedo;
+		frame_graph->GetBlackboard()["GBufferNormal"] = gbuffer_pass->GetData().GBufferNormal;
+		frame_graph->GetBlackboard()["GBufferRoughness"] = gbuffer_pass->GetData().GBufferRoughness;
 
 		/* Side Pass */
 		struct SidePassData
@@ -187,7 +187,7 @@ namespace Wuya
 			FrameGraphResourceHandleTyped<FrameGraphTexture> OutputTexture;
 		};
 
-		auto& side_pass = frame_graph->AddPass<SidePassData>("SidePass",
+		auto side_pass = frame_graph->AddPass<SidePassData>("SidePass",
 			[&](FrameGraphBuilder& builder, SidePassData& data)
 			{
 				data.InputTexture = frame_graph->GetBlackboard().GetResourceHandle<FrameGraphTexture>("GBufferAlbedo");
@@ -221,12 +221,12 @@ namespace Wuya
 				Renderer::GetRenderAPI()->PopDebugGroup();
 			}
 		);
-		frame_graph->GetBlackboard()["SidePassOutput"] = side_pass.GetData().OutputTexture;
+		frame_graph->GetBlackboard()["SidePassOutput"] = side_pass->GetData().OutputTexture;
 
 		m_pRenderView->Prepare();
 
 		/* Êä³ö */
-		auto output_handle = side_pass.GetData().OutputTexture;
+		auto output_handle = side_pass->GetData().OutputTexture;
 		m_pRenderView->SetRenderTargetHandle(output_handle);
 
 		//m_IsFrameGraphDirty = false;

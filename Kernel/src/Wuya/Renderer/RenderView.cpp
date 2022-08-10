@@ -35,7 +35,7 @@ namespace Wuya
 	{
 		PROFILE_FUNCTION();
 
-		return static_cast<const Resource<FrameGraphTexture>*>(m_pFrameGraph->GetResource(m_RenderTargetHandle))->GetResource().Texture;
+		return DynamicPtrCast<Resource<FrameGraphTexture>>(m_pFrameGraph->GetResource(m_RenderTargetHandle))->GetResource().Texture;
 	}
 
 	/* 准备一帧的RenderView数据 */

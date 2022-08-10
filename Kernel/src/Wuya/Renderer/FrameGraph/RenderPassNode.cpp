@@ -5,17 +5,22 @@
 
 namespace Wuya
 {
-	RenderPassNode::RenderPassNode(FrameGraph& frame_graph, const std::string& name, IFrameGraphPass* frame_graph_pass)
+	RenderPassNode::RenderPassNode(FrameGraph& frame_graph, const std::string& name, const SharedPtr<IFrameGraphPass>& frame_graph_pass)
 		: Node(frame_graph.GetDependencyGraph()), m_OwnerFrameGraph(frame_graph), m_OwnerFrameGraphPass(frame_graph_pass)
 	{
 		Name = name;
 	}
 
+	RenderPassNode::~RenderPassNode()
+	{
+		Destroy();
+	}
+
 	/* 注册资源Handle */
 	void RenderPassNode::RegisterResourceHandle(FrameGraphResourceHandle handle)
 	{
-		IResource* resource = m_OwnerFrameGraph.GetResource(handle);
-		resource->NeedByPass(this);
+		auto& resource = m_OwnerFrameGraph.GetResource(handle);
+		resource->NeedByPass(shared_from_this());
 		m_RegisteredHandleIndices.insert(handle.GetIndex());
 	}
 
@@ -34,7 +39,7 @@ namespace Wuya
 		auto& attachments = data.Descriptor.Attachments;
 
 		const auto& dependency_graph = m_OwnerFrameGraph.GetDependencyGraph();
-		const auto incoming_connections = dependency_graph.GetIncomingConnectionsOfNode(this);
+		const auto incoming_connections = dependency_graph.GetIncomingConnectionsOfNode(shared_from_this());
 
 		for (uint32_t i = 0; i < FrameGraphPassInfo::MAX_ATTACHMENT_NUM; ++i)
 		{
@@ -47,8 +52,8 @@ namespace Wuya
 				/* 判断资源节点是否为输入节点 */
 				for (const auto& conn : incoming_connections)
 				{
-					RenderResourceNode* resource_node = (RenderResourceNode*)(dependency_graph.GetNode(conn->FromNodeIdx));
-					if (resource_node->GetResourceHandle() == target_resource_handle)
+					auto resource_node = DynamicPtrCast<RenderResourceNode>(dependency_graph.GetNode(conn->FromNodeIdx));
+					if (resource_node && (resource_node->GetResourceHandle() == target_resource_handle))
 					{
 						data.IncomingResourceNodes[i] = resource_node;
 						break;
@@ -109,7 +114,7 @@ namespace Wuya
 			{
 				if (render_pass_data.ValidAttachments[i])
 				{
-					const auto fg_texture = dynamic_cast<const Resource<FrameGraphTexture>*>(m_OwnerFrameGraph.GetResource(render_pass_data.ValidAttachments[i]));
+					const auto& fg_texture = DynamicPtrCast<const Resource<FrameGraphTexture>>(m_OwnerFrameGraph.GetResource(render_pass_data.ValidAttachments[i]));
 					desc.ColorRenderBuffers.push_back({ fg_texture->GetResource().Texture, fg_texture->GetSubDescriptor().Level, fg_texture->GetSubDescriptor().Layer });
 				}
 			}
@@ -117,7 +122,7 @@ namespace Wuya
 			/* 准备Depth Attachment */
 			if (render_pass_data.ValidAttachments[MAX_COLOR_ATTACHMENT_NUM])
 			{
-				const auto fg_texture = dynamic_cast<const Resource<FrameGraphTexture>*>(m_OwnerFrameGraph.GetResource(render_pass_data.ValidAttachments[MAX_COLOR_ATTACHMENT_NUM]));
+				const auto& fg_texture = DynamicPtrCast<const Resource<FrameGraphTexture>>(m_OwnerFrameGraph.GetResource(render_pass_data.ValidAttachments[MAX_COLOR_ATTACHMENT_NUM]));
 				desc.DepthRenderBuffer.RenderTarget = fg_texture->GetResource().Texture;
 				desc.DepthRenderBuffer.Level = fg_texture->GetSubDescriptor().Level;
 				desc.DepthRenderBuffer.Layer = fg_texture->GetSubDescriptor().Layer;
@@ -126,29 +131,29 @@ namespace Wuya
 			/* 准备Stencil Attachment */
 			if (render_pass_data.ValidAttachments[MAX_COLOR_ATTACHMENT_NUM + 1])
 			{
-				const auto fg_texture = dynamic_cast<const Resource<FrameGraphTexture>*>(m_OwnerFrameGraph.GetResource(render_pass_data.ValidAttachments[MAX_COLOR_ATTACHMENT_NUM + 1]));
+				const auto& fg_texture = DynamicPtrCast<const Resource<FrameGraphTexture>>(m_OwnerFrameGraph.GetResource(render_pass_data.ValidAttachments[MAX_COLOR_ATTACHMENT_NUM + 1]));
 				desc.StencilRenderBuffer.RenderTarget = fg_texture->GetResource().Texture;
 				desc.StencilRenderBuffer.Level = fg_texture->GetSubDescriptor().Level;
 				desc.StencilRenderBuffer.Layer = fg_texture->GetSubDescriptor().Layer;
 			}
 
 			/* 创建FrameBuffer */
-			render_pass_data.m_pRenderTarget = FrameBuffer::Create(render_pass_data.Name + "_FrameBuffer", desc);
+			render_pass_data.FrameBuffer = FrameBuffer::Create(render_pass_data.Name + "_FrameBuffer", desc);
 		}
 
 		/* 执行当前Pass */
 		m_OwnerFrameGraphPass->Execute(resources);
-
-		/* 销毁当前节点的资源数据 */
-		for (auto& render_pass_data : m_RenderPassDatas)
-		{
-			/* 销毁资源数据 */
-		}
 	}
 
 	/* 销毁 */
 	void RenderPassNode::Destroy()
 	{
+		/* 销毁当前节点的资源数据 */
+		for (auto& render_pass_data : m_RenderPassDatas)
+		{
+			/* 销毁资源数据 */
+			render_pass_data.FrameBuffer.reset();
+		}
 	}
 
 	/* 输出可视化文本 */

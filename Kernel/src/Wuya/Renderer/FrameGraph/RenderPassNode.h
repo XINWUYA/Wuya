@@ -20,31 +20,31 @@ namespace Wuya
 		/* 描述 */
 		FrameGraphPassInfo::Descriptor Descriptor{};
 		/* 输入数据节点 */
-		RenderResourceNode* IncomingResourceNodes[FrameGraphPassInfo::MAX_ATTACHMENT_NUM] = {};
+		SharedPtr<RenderResourceNode> IncomingResourceNodes[FrameGraphPassInfo::MAX_ATTACHMENT_NUM] = {};
 		/* 输出数据节点 */
-		RenderResourceNode* OutgoingResourceNodes[FrameGraphPassInfo::MAX_ATTACHMENT_NUM] = {};
+		SharedPtr<RenderResourceNode> OutgoingResourceNodes[FrameGraphPassInfo::MAX_ATTACHMENT_NUM] = {};
 		/* 收集有效的Attachments */
 		FrameGraphResourceHandleTyped<FrameGraphTexture> ValidAttachments[FrameGraphPassInfo::MAX_ATTACHMENT_NUM] = {};
 		/* RenderBuffer的使用情况 */
 		RenderBufferUsage RenderBufferUsage{ RenderBufferUsage::None };
-		/* RenderTarget */
-		SharedPtr<FrameBuffer> m_pRenderTarget{ nullptr };
+		/* FrameBuffer */
+		SharedPtr<FrameBuffer> FrameBuffer{ nullptr };
 	};
 
 	/* RenderPassNode类，作为FrameGraph依赖关系图中的一个节点 */
-	class RenderPassNode : public DependencyGraph::Node
+	class RenderPassNode : public DependencyGraph::Node, public std::enable_shared_from_this<RenderPassNode>
 	{
 	public:
-		RenderPassNode(FrameGraph& frame_graph, const std::string& name, IFrameGraphPass* frame_graph_pass);
-		virtual ~RenderPassNode() = default;
+		RenderPassNode(FrameGraph& frame_graph, const std::string& name, const SharedPtr<IFrameGraphPass>& frame_graph_pass);
+		virtual ~RenderPassNode() override;
 
 		/* 获取Pass名 */
 		const std::string& GetName() const { return Name; }
 		/* 获取资源 */
-		std::vector<IResource*>& GetResourcesNeedPrepared() { return m_ResourcesNeedPrepared; }
-		const std::vector<IResource*>& GetResourcesNeedPrepared() const { return m_ResourcesNeedPrepared; }
-		std::vector<IResource*>& GetResourcesNeedDestroy() { return m_ResourcesNeedDestroy; }
-		const std::vector<IResource*>& GetResourcesNeedDestroy() const { return m_ResourcesNeedDestroy; }
+		std::vector<SharedPtr<IResource>>& GetResourcesNeedPrepared() { return m_ResourcesNeedPrepared; }
+		const std::vector<SharedPtr<IResource>>& GetResourcesNeedPrepared() const { return m_ResourcesNeedPrepared; }
+		std::vector<SharedPtr<IResource>>& GetResourcesNeedDestroy() { return m_ResourcesNeedDestroy; }
+		const std::vector<SharedPtr<IResource>>& GetResourcesNeedDestroy() const { return m_ResourcesNeedDestroy; }
 
 		/* 注册资源Handle */
 		void RegisterResourceHandle(FrameGraphResourceHandle handle);
@@ -70,13 +70,13 @@ namespace Wuya
 		/* 所属FrameGraph */
 		FrameGraph& m_OwnerFrameGraph;
 		/* 所属的FrameGraphPass */
-		IFrameGraphPass* m_OwnerFrameGraphPass;
+		SharedPtr<IFrameGraphPass> m_OwnerFrameGraphPass{ nullptr };
 		/* 已注册的资源Handles */
 		std::unordered_set<uint16_t> m_RegisteredHandleIndices{};
-		/* 需要准备的资源 */
-		std::vector<IResource*> m_ResourcesNeedPrepared{};
-		/* 需要释放的资源 */
-		std::vector<IResource*> m_ResourcesNeedDestroy{};
+		/* 需要准备的资源，仅持有指针，内存由FrameGraph统一管理 */
+		std::vector<SharedPtr<IResource>> m_ResourcesNeedPrepared{};
+		/* 需要释放的资源，仅持有指针，内存由FrameGraph统一管理 */
+		std::vector<SharedPtr<IResource>> m_ResourcesNeedDestroy{};
 		/*当前Pass数据 */
 		std::vector<RenderPassData> m_RenderPassDatas{};
 	};

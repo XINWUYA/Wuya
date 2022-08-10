@@ -22,21 +22,21 @@ namespace Wuya
 		template<typename ResourceType>
 		const ResourceType& Get(FrameGraphResourceHandleTyped<ResourceType> handle) const
 		{
-			return static_cast<const Resource<ResourceType>*>(GetResource(handle))->GetResource();
+			return StaticPtrCast<const Resource<ResourceType>>(GetResource(handle))->GetResource();
 		}
 
 		/* 获取指定资源的描述 */
 		template <typename ResourceType>
 		const typename ResourceType::Descriptor& GetDescriptor(FrameGraphResourceHandleTyped<ResourceType> handle) const
 		{
-			return static_cast<const Resource<ResourceType>*>(GetResource(handle))->GetDescriptor();
+			return StaticPtrCast<const Resource<ResourceType>>(GetResource(handle))->GetDescriptor();
 		}
 
 		/* 获取指定资源的用途 */
 		template <typename ResourceType>
 		const typename ResourceType::Usage& GetUsage(FrameGraphResourceHandleTyped<ResourceType> handle) const
 		{
-			return static_cast<const Resource<ResourceType>*>(GetResource(handle))->GetUsage();
+			return StaticPtrCast<const Resource<ResourceType>>(GetResource(handle))->GetUsage();
 		}
 
 		/* 获取当前RenderPass的RenderTarget */
@@ -44,7 +44,7 @@ namespace Wuya
 
 	private:
 		/* 从FrameGraph中获取资源 */
-		IResource* GetResource(FrameGraphResourceHandle handle) const;
+		const SharedPtr<IResource>& GetResource(FrameGraphResourceHandle handle) const;
 
 		/* 所属FrameGraph */
 		FrameGraph& m_FrameGraph;
@@ -88,5 +88,7 @@ namespace Wuya
 
 		/* 创建 */
 		void Create(const std::string& name, const Descriptor& desc, Usage usage);
+		/* 销毁 */
+		void Destroy();
 	};
 }

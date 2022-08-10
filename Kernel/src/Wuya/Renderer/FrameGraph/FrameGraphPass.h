@@ -41,22 +41,24 @@ namespace Wuya
 		uint32_t Idx{ 0 };
 	};
 
-	/* FrameGraph中一个Pass */
+	/* FrameGraphPass基类
+	 * 一个FrameGraphPass对应一个RenderPass，包含该RenderPass的私有数据和执行方法
+	 */
 	class IFrameGraphPass
 	{
 	public:
 		virtual ~IFrameGraphPass() = default;
 
 		/* 设置RenderPassNode */
-		void SetRenderPassNode(RenderPassNode* node) { m_pNode = node; }
+		void SetRenderPassNode(const SharedPtr<RenderPassNode>& node) { m_pNode = node; }
 		/* 获取RenderPassNode */
-		const RenderPassNode* GetRenderPassNode() const { return m_pNode; }
+		const SharedPtr<RenderPassNode>& GetRenderPassNode() const { return m_pNode; }
 
 		/* 执行阶段 */
 		virtual void Execute(const FrameGraphResources& resources) = 0;
 
 	protected:
-		RenderPassNode* m_pNode{ nullptr };
+		SharedPtr<RenderPassNode> m_pNode{ nullptr };
 	};
 
 

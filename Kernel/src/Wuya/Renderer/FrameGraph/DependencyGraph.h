@@ -16,6 +16,8 @@ namespace Wuya
 
 			Node(DependencyGraph& graph);
 			Node(Node&&) = default;
+			virtual ~Node() = default;
+
 			Node(const Node&) = delete;
 			Node& operator=(const Node&) = delete;
 
@@ -37,7 +39,7 @@ namespace Wuya
 			uint32_t FromNodeIdx{ 0 };
 			uint32_t ToNodeIdx{ 0 };
 
-			Connection(DependencyGraph& graph, Node* from, Node* to);
+			Connection(const SharedPtr<Node>& from, const SharedPtr<Node>& to);
 			Connection(const Connection&) = delete;
 			Connection& operator=(const Connection&) = delete;
 			bool operator==(const Connection& other) const
@@ -49,39 +51,39 @@ namespace Wuya
 		DependencyGraph();
 		virtual~DependencyGraph() = default;
 
+		/* 注册一个节点 */
+		void RegisterNode(const SharedPtr<Node>& node);
+		/* 注册一个连线 */
+		void RegisterConnection(const SharedPtr<Connection>& connection);
+
 		/* 清楚所有节点和连线 */
 		void Clear();
 		/* 更新节点的引用计数 */
 		void UpdateRefCount();
 
 		/* 获取指定节点 */
-		const Node* GetNode(uint32_t node_idx) const;
-		Node* GetNode(uint32_t node_idx);
+		const SharedPtr<Node>& GetNode(uint32_t node_idx) const;
 		/* 获取所有节点 */
-		const std::vector<Node*>& GetNodes() const { return m_Nodes; }
+		const std::vector<SharedPtr<Node>>& GetNodes() const { return m_Nodes; }
 		/* 获取所有连线 */
-		const std::vector<Connection*>& GetConnections() const { return m_Connections; }
+		const std::vector<SharedPtr<Connection>>& GetConnections() const { return m_Connections; }
 		/* 获取指定节点的所有入射连线 */
-		std::vector<Connection*> GetIncomingConnectionsOfNode(const Node* node) const;
+		std::vector<SharedPtr<DependencyGraph::Connection>> GetIncomingConnectionsOfNode(const SharedPtr<Node>& node) const;
 		/* 获取指定节点的所有出射连线 */
-		std::vector<Connection*> GetOutgoingConnectionsOfNode(const Node* node) const;
+		std::vector<SharedPtr<DependencyGraph::Connection>> GetOutgoingConnectionsOfNode(const SharedPtr<Node>& node) const;
 		/* 判断连线是否有效 */
-		bool IsConnectionValid(const Connection* connection) const;
+		bool IsConnectionValid(const SharedPtr<Connection>& connection) const;
 
 		/* 输出可视化文本：便于调试（将输出字符复制到：http://www.webgraphviz.com/） */
 		std::string Graphvizify(const std::string& name = {}) const;
 
 	private:
-		/* 注册一个节点 */
-		void RegisterNode(Node* node);
-		/* 注册一个连线 */
-		void RegisterConnection(Connection* connection);
 		/* 生成节点索引 */
 		uint32_t GenerateNodeIndex() const;
 
 		/* 图中节点集合 */
-		std::vector<Node*> m_Nodes;
+		std::vector<SharedPtr<Node>> m_Nodes;
 		/* 图中的连线集合 */
-		std::vector<Connection*> m_Connections;
+		std::vector<SharedPtr<Connection>> m_Connections;
 	};
 }
