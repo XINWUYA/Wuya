@@ -14,16 +14,16 @@ namespace Wuya
 	/* 获取当前RenderPassNode名 */
 	const std::string& FrameGraphResources::GetPassName() const
 	{
-		return m_RenderPassNode.GetName();
+		return m_RenderPassNode.GetDebugName();
 	}
 
 	/* 获取当前RenderPass的RenderTarget */
-	const SharedPtr<FrameBuffer>& FrameGraphResources::GetPassRenderTarget(uint32_t idx) const
+	SharedPtr<FrameBuffer> FrameGraphResources::GetPassRenderTarget(uint32_t idx) const
 	{
-		const auto render_pass_data = m_RenderPassNode.GetRenderPassData(idx);
+		const auto& render_pass_data = m_RenderPassNode.GetRenderPassData(idx);
 		if (!render_pass_data)
 		{
-			CORE_LOG_ERROR("Failed to access the RenderTarget of RenderPass({}) by index({}).", m_RenderPassNode.GetName(), idx);
+			CORE_LOG_ERROR("Failed to access the RenderTarget of RenderPass({}) by index({}).", m_RenderPassNode.GetDebugName(), idx);
 			return nullptr;
 		}
 
@@ -40,7 +40,7 @@ namespace Wuya
 
 		if (!m_RenderPassNode.IsResourceHandleRegistered(handle))
 		{
-			CORE_LOG_ERROR("RenderPassNode({}) has not register the resource({}).", m_RenderPassNode.GetName(), resource->GetName());
+			CORE_LOG_ERROR("RenderPassNode({}) has not register the resource({}).", m_RenderPassNode.GetDebugName(), resource->GetName());
 		}
 		ASSERT(resource->GetRefCount(), "Resource is not needed by this RenderPassNode.");
 
@@ -58,6 +58,6 @@ namespace Wuya
 	/* 销毁 */
 	void FrameGraphTexture::Destroy()
 	{
-		Texture.reset();
+		Texture = nullptr;
 	}
 }

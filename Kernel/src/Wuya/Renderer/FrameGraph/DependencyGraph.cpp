@@ -5,18 +5,19 @@
 
 namespace Wuya
 {
-	DependencyGraph::Node::Node(DependencyGraph& graph)
-		: Index(graph.GenerateNodeIndex())
+	DependencyGraph::Node::Node(std::string name, DependencyGraph& graph)
+		: DebugName(std::move(name)), Index(graph.GenerateNodeIndex()), m_OwnerGraph(graph)
 	{
 		PROFILE_FUNCTION();
 	}
 
+	/* 输出可视化文本 */
 	std::string DependencyGraph::Node::Graphvizify() const
 	{
 		std::string result_str;
 		result_str.reserve(128);
 		result_str.append("[label=\"");
-		result_str.append(Name);
+		result_str.append(DebugName);
 		result_str.append("\\nrefs: ");
 		result_str.append(std::to_string(RefCount));
 		result_str.append(", id: ");
@@ -29,6 +30,7 @@ namespace Wuya
 		return  result_str;
 	}
 
+	/* 指定当前节点发出的连线的可视化颜色 */
 	std::string DependencyGraph::Node::GraphvizifyConnectionColor() const
 	{
 		return "darkolivegreen";
@@ -48,6 +50,7 @@ namespace Wuya
 		m_Connections.reserve(16);
 	}
 
+	/* 清楚所有节点和连线 */
 	void DependencyGraph::Clear()
 	{
 		PROFILE_FUNCTION();
@@ -56,6 +59,7 @@ namespace Wuya
 		m_Connections.clear();
 	}
 
+	/* 更新节点的引用计数 */
 	void DependencyGraph::UpdateRefCount()
 	{
 		PROFILE_FUNCTION();
@@ -83,7 +87,7 @@ namespace Wuya
 			const auto incoming_connections = GetIncomingConnectionsOfNode(node);
 			for(const auto& connection: incoming_connections)
 			{
-				auto& from_node = GetNode(connection->FromNodeIdx);
+				auto from_node = GetNode(connection->FromNodeIdx);
 				from_node->RefCount--;
 
 				if (!from_node->IsValid())
@@ -92,7 +96,8 @@ namespace Wuya
 		}
 	}
 
-	const SharedPtr<DependencyGraph::Node>& DependencyGraph::GetNode(uint32_t node_idx) const
+	/* 获取指定节点 */
+	SharedPtr<DependencyGraph::Node> DependencyGraph::GetNode(uint32_t node_idx) const
 	{
 		PROFILE_FUNCTION();
 
@@ -102,11 +107,12 @@ namespace Wuya
 		return m_Nodes[node_idx];
 	}
 
+	/* 获取指定节点的所有入射连线 */
 	std::vector<SharedPtr<DependencyGraph::Connection>> DependencyGraph::GetIncomingConnectionsOfNode(const SharedPtr<Node>& node) const
 	{
 		PROFILE_FUNCTION();
 
-		std::vector<SharedPtr<DependencyGraph::Connection>> result;
+		std::vector<SharedPtr<Connection>> result;
 
 		const uint32_t target_idx = node->Index;
 		std::copy_if(m_Connections.begin(), m_Connections.end(), std::back_inserter(result),
@@ -118,11 +124,12 @@ namespace Wuya
 		return result;
 	}
 
+	/* 获取指定节点的所有出射连线 */
 	std::vector<SharedPtr<DependencyGraph::Connection>> DependencyGraph::GetOutgoingConnectionsOfNode(const SharedPtr<Node>& node) const
 	{
 		PROFILE_FUNCTION();
 
-		std::vector<SharedPtr<DependencyGraph::Connection>> result;
+		std::vector<SharedPtr<Connection>> result;
 
 		const uint32_t target_idx = node->Index;
 		std::copy_if(m_Connections.begin(), m_Connections.end(), std::back_inserter(result),
@@ -134,15 +141,17 @@ namespace Wuya
 		return result;
 	}
 
+	/* 判断连线是否有效 */
 	bool DependencyGraph::IsConnectionValid(const SharedPtr<Connection>& connection) const
 	{
 		PROFILE_FUNCTION();
 
-		const auto& from_node = GetNode(connection->FromNodeIdx);
-		const auto& to_node = GetNode(connection->ToNodeIdx);
+		const auto from_node = GetNode(connection->FromNodeIdx);
+		const auto to_node = GetNode(connection->ToNodeIdx);
 		return from_node->IsValid() && to_node->IsValid();
 	}
 
+	/* 输出可视化文本：便于调试（将输出字符复制到：http://www.webgraphviz.com/） */
 	std::string DependencyGraph::Graphvizify(const std::string& name) const
 	{
 		std::ostringstream out_stream;
@@ -213,6 +222,7 @@ namespace Wuya
 		return out_stream.str();
 	}
 
+	/* 注册一个节点到依赖图 */
 	void DependencyGraph::RegisterNode(const SharedPtr<Node>& node)
 	{
 		PROFILE_FUNCTION();
@@ -220,6 +230,7 @@ namespace Wuya
 		m_Nodes.emplace_back(node);
 	}
 
+	/* 注册一个连线到依赖图 */
 	void DependencyGraph::RegisterConnection(const SharedPtr<Connection>& connection)
 	{
 		PROFILE_FUNCTION();
@@ -227,6 +238,7 @@ namespace Wuya
 		m_Connections.emplace_back(connection);
 	}
 
+	/* 生成节点索引 */
 	uint32_t DependencyGraph::GenerateNodeIndex() const
 	{
 		PROFILE_FUNCTION();

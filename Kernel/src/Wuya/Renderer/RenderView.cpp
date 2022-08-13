@@ -31,9 +31,12 @@ namespace Wuya
 		m_ViewportRegion = region;
 	}
 
-	const SharedPtr<Texture>& RenderView::GetRenderTarget() const
+	SharedPtr<Texture> RenderView::GetRenderTarget() const
 	{
 		PROFILE_FUNCTION();
+
+		if (!m_RenderTargetHandle.IsInitialized())
+			return nullptr;
 
 		return DynamicPtrCast<Resource<FrameGraphTexture>>(m_pFrameGraph->GetResource(m_RenderTargetHandle))->GetResource().Texture;
 	}

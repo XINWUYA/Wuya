@@ -146,7 +146,7 @@ namespace Wuya
 		/* Texture */
 		ImGui::NextColumn();
 		{
-			const SharedPtr<Texture2D> show_texture = texture ? texture : EditorAssetManager::Instance()->GetOrCreateTexture("editor_res/icons/default_texture.png");
+			const SharedPtr<Texture2D> show_texture = texture ? texture : EditorAssetManager::Instance().GetOrCreateTexture("editor_res/icons/default_texture.png");
 
 			/* Image */
 			ImGui::ImageButton((ImTextureID)show_texture->GetTextureID(), ImVec2(80, 80), ImVec2(0, 1), ImVec2(1, 0), 0);
@@ -156,7 +156,7 @@ namespace Wuya
 				{
 					const wchar_t* path = (const wchar_t*)payload->Data;
 					const std::filesystem::path texture_path = g_AssetPath / path;
-					const auto new_texture = EditorAssetManager::Instance()->GetOrCreateTexture(texture_path.string());
+					const auto new_texture = EditorAssetManager::Instance().GetOrCreateTexture(texture_path.string());
 					if (new_texture->IsLoaded())
 						texture = new_texture;
 					else

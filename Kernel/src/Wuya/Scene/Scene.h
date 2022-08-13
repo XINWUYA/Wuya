@@ -17,7 +17,7 @@ namespace Wuya
 	{
 	public:
 		Scene() = default;
-		~Scene() = default;
+		~Scene();
 
 		/* 创建一个实体 */
 		Entity CreateEntity(const std::string& name = std::string());

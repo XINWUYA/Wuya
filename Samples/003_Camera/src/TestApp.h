@@ -1,5 +1,7 @@
 #pragma once
-#include <Wuya.h>
+#include <Kernel.h>
+
+#include "EditorBuiltinCamera.h"
 
 class TestLayer : public Wuya::ILayer
 {

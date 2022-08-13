@@ -1,8 +1,7 @@
 #include "TestApp.h"
 #include <imgui.h>
 
-/* 程序主入口点，需要保证放在Wuya.h之后 */
-#include <Wuya/Application/EntryPoint.h>
+#include "Wuya/Scene/Material.h"
 
 TestLayer::~TestLayer()
 {
@@ -93,7 +92,7 @@ void TestLayer::OnDetached()
 
 void TestLayer::OnUpdate(float delta_time)
 {
-	m_pEditorCamera->OnUpdate();
+	m_pEditorCamera->OnUpdate(delta_time);
 
 	Wuya::Renderer::SetClearColor(glm::vec4(0.2f, 0.3f, 0.3f, 1.0f));
 	Wuya::Renderer::Clear();
@@ -103,8 +102,10 @@ void TestLayer::OnUpdate(float delta_time)
 	m_CameraParams.ViewProjection = m_pEditorCamera->GetViewProjectionMatrix();
 	m_pCameraCBuffer->SetData(&m_CameraParams, sizeof(CameraParams));
 
+	Wuya::SharedPtr<Wuya::Material> material = Wuya::CreateSharedPtr<Wuya::Material>();
 	auto shader = m_pShaderLibrary->GetShaderByName("texture");
-	Wuya::Renderer::Submit(shader, m_pVertexArray);
+	material->SetShader(shader);
+	Wuya::Renderer::Submit(material, m_pVertexArray);
 }
 
 void TestLayer::OnImGuiRender()

@@ -21,7 +21,7 @@ namespace Wuya
 		void PushLayer(SharedPtr<ILayer> layer);
 		void PushOverlay(SharedPtr<ILayer> layer);
 
-		SharedPtr<ImGuiLayer> GetImGuiLayer() const { return m_pImGuiLayer; }
+		const SharedPtr<ImGuiLayer>& GetImGuiLayer() const { return m_pImGuiLayer; }
 
 		virtual void OnEvent(IEvent* event);
 		virtual bool OnHandleWindowCloseEvent(IEvent* event);

@@ -4,14 +4,12 @@
 
 namespace Wuya
 {
-	EditorAssetManager* EditorAssetManager::s_pInstance = nullptr;
 
-	EditorAssetManager* EditorAssetManager::Instance()
+	EditorAssetManager& EditorAssetManager::Instance()
 	{
-		if (!s_pInstance)
-			s_pInstance = new EditorAssetManager;
+		static EditorAssetManager instance;
 
-		return s_pInstance;
+		return instance;
 	}
 
 	SharedPtr<Texture2D> EditorAssetManager::GetOrCreateTexture(const std::string& path)

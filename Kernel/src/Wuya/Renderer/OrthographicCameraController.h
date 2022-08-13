@@ -25,8 +25,8 @@ namespace Wuya
 		void SetCameraTranslateSpeed(float speed) { m_CameraTranslateSpeed = speed; }
 		void SetCameraRotateSpeed(float speed) { m_CameraRotateSpeed = speed; }
 
-		SharedPtr<OrthographicCamera> GetCamera() { return m_pCamera; }
-		SharedPtr<OrthographicCamera> GetCamera() const { return m_pCamera; }
+		const SharedPtr<OrthographicCamera>& GetCamera() { return m_pCamera; }
+		const SharedPtr<OrthographicCamera>& GetCamera() const { return m_pCamera; }
 
 	private:
 		bool OnMouseScrolled(MouseScrolledEvent* event);

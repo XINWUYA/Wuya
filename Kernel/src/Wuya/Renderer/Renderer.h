@@ -11,6 +11,7 @@ namespace Wuya
 	public:
 		static void Init();
 		static void Update();
+		static void Release();
 
 		static void SetViewport(uint32_t x_start, uint32_t y_start, uint32_t width, uint32_t height);
 		static void SetClearColor(const glm::vec4& color);

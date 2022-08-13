@@ -1,18 +1,17 @@
 #pragma once
 #include "DependencyGraph.h"
 #include "RenderResourceNode.h"
-#include "RenderPassNode.h"
 
 namespace Wuya
 {
-	//class RenderPassNode;
+	class RenderPassNode;
 
 	/* 资源类基类 */
 	class IResource
 	{
 	public:
-		IResource(const std::string& name);
-		IResource(const std::string& name, const SharedPtr<IResource>& parent);
+		IResource(std::string name);
+		IResource(std::string name, const SharedPtr<IResource>& parent);
 		IResource(const IResource&) = delete;
 		IResource& operator=(const IResource&) = delete;
 		virtual ~IResource() = default;
@@ -69,8 +68,9 @@ namespace Wuya
 			ResourceConnection(const SharedPtr<DependencyGraph::Node>& from, const SharedPtr<DependencyGraph::Node>& to, ResourceUsage usage)
 				: DependencyGraph::Connection(from, to), Usage(usage)
 			{
-				
 			}
+
+			~ResourceConnection() override = default;
 		};
 
 		Resource(const std::string& name, const ResourceDescriptor& desc)
@@ -102,7 +102,7 @@ namespace Wuya
 		bool ConnectAsInput(DependencyGraph& dependency_graph, const SharedPtr<RenderPassNode>& render_pass_node, const SharedPtr<RenderResourceNode>& resource_node, ResourceUsage usage)
 		{
 			/* 获取当前RenderPass的输入连线 */
-			auto& connection = StaticPtrCast<ResourceConnection>(resource_node->GetIncomingConnectionOfPassNode(render_pass_node));
+			auto connection = StaticPtrCast<ResourceConnection>(resource_node->GetIncomingConnectionOfPassNode(render_pass_node));
 			if (connection)
 			{
 				connection->Usage |= usage;
@@ -122,7 +122,7 @@ namespace Wuya
 		bool ConnectAsOutput(DependencyGraph& dependency_graph, const SharedPtr<RenderPassNode>& render_pass_node, const SharedPtr<RenderResourceNode>& resource_node, ResourceUsage usage)
 		{
 			/* 获取当前RenderPass的输出连线 */
-			auto& connection = StaticPtrCast<ResourceConnection>(resource_node->GetOutgoingConnectionOfPassNode(render_pass_node));
+			auto connection = StaticPtrCast<ResourceConnection>(resource_node->GetOutgoingConnectionOfPassNode(render_pass_node));
 			if (connection)
 			{
 				connection->Usage |= usage;

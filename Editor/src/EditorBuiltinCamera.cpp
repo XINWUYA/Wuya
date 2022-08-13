@@ -86,7 +86,7 @@ namespace Wuya
 				}
 			}
 		}
-		EDITOR_LOG_DEBUG("Camera Position: {}, {}, {}", m_Position.x, m_Position.y, m_Position.z);
+		//EDITOR_LOG_DEBUG("Camera Position: {}, {}, {}", m_Position.x, m_Position.y, m_Position.z);
 		UpdateViewMatrix();
 	}
 
@@ -158,7 +158,7 @@ namespace Wuya
 			{
 				Renderer::GetRenderAPI()->PushDebugGroup("GBufferPass");
 
-				const auto& render_pass_info = resources.GetPassRenderTarget();
+				const auto render_pass_info = resources.GetPassRenderTarget();
 				render_pass_info->Bind();
 				Renderer::GetRenderAPI()->Clear();
 				for (const auto& mesh_object : m_pRenderView->GetVisibleMeshObjects())
@@ -206,7 +206,7 @@ namespace Wuya
 			[&](const FrameGraphResources& resources, const SidePassData& data)
 			{
 				Renderer::GetRenderAPI()->PushDebugGroup("SidePass");
-				const auto& render_pass_info = resources.GetPassRenderTarget();
+				const auto render_pass_info = resources.GetPassRenderTarget();
 				render_pass_info->Bind();
 				Renderer::GetRenderAPI()->Clear();
 				SharedPtr<Material> material = CreateSharedPtr<Material>();
@@ -222,12 +222,11 @@ namespace Wuya
 			}
 		);
 		frame_graph->GetBlackboard()["SidePassOutput"] = side_pass->GetData().OutputTexture;
-
+		//frame_graph->ExportGraphviz("framegraph.txt");
 		m_pRenderView->Prepare();
 
 		/* Êä³ö */
-		auto output_handle = side_pass->GetData().OutputTexture;
-		m_pRenderView->SetRenderTargetHandle(output_handle);
+		m_pRenderView->SetRenderTargetHandle(side_pass->GetData().OutputTexture);
 
 		//m_IsFrameGraphDirty = false;
 	}

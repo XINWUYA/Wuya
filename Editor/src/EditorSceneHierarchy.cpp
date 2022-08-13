@@ -103,8 +103,8 @@ namespace Wuya
 	{
 		PROFILE_FUNCTION();
 
-		m_pAddComponentIcon = EditorAssetManager::Instance()->GetOrCreateTexture("editor_res/icons/add.png");
-		m_pMenuIcon = EditorAssetManager::Instance()->GetOrCreateTexture("editor_res/icons/menu.png");
+		m_pAddComponentIcon = EditorAssetManager::Instance().GetOrCreateTexture("editor_res/icons/add.png");
+		m_pMenuIcon = EditorAssetManager::Instance().GetOrCreateTexture("editor_res/icons/menu.png");
 	}
 
 	void EditorSceneHierarchy::ShowEntityNode(Entity& entity)
@@ -172,7 +172,7 @@ namespace Wuya
 			START_TRANSPARENT_BUTTON;
 			START_STYLE_ALPHA(0.5f);
 			ImGui::SameLine(panel_width - 15);
-			const auto menu_icon = EditorAssetManager::Instance()->GetOrCreateTexture("editor_res/icons/menu.png");
+			const auto menu_icon = EditorAssetManager::Instance().GetOrCreateTexture("editor_res/icons/menu.png");
 			if (ImGui::ImageButton((ImTextureID)menu_icon->GetTextureID(), ImVec2(20, 20), ImVec2(0, 1), ImVec2(1, 0)))
 				ImGui::OpenPopup("ComponentSettings");
 			END_STYLE_ALPHA;

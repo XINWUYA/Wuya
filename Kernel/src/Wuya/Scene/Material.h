@@ -15,7 +15,7 @@ namespace Wuya
 	public:
 		Material() = default;
 		Material(const std::string& path);
-		~Material() = default;
+		~Material();
 
 		/* 获取材质路径 */
 		const std::string& GetPath() const { return m_Path; }

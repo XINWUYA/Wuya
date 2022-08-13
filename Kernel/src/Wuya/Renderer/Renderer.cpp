@@ -27,6 +27,13 @@ namespace Wuya
 		PROFILE_FUNCTION();
 	}
 
+	void Renderer::Release()
+	{
+		PROFILE_FUNCTION();
+
+		Renderer2D::Release();
+	}
+
 	void Renderer::SetViewport(uint32_t x_start, uint32_t y_start, uint32_t width, uint32_t height)
 	{
 		PROFILE_FUNCTION();

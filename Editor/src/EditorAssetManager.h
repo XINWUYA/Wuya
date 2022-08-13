@@ -12,7 +12,7 @@ namespace Wuya
 	{
 	public:
 		/* 单例 */
-		static EditorAssetManager* Instance();
+		static EditorAssetManager& Instance();
 
 		/* 获取Texture */
 		SharedPtr<Texture2D> GetOrCreateTexture(const std::string& path);
@@ -20,6 +20,5 @@ namespace Wuya
 	private:
 		EditorAssetManager() = default;
 		std::unordered_map<std::string, SharedPtr<Texture2D>> m_TextureAssetMap; /* 改成使用相对路径的Hash值作为Key */
-		static EditorAssetManager* s_pInstance;
 	};
 }

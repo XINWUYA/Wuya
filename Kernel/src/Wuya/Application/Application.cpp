@@ -26,6 +26,9 @@ namespace Wuya
 
 	Application::~Application()
 	{
+		PROFILE_FUNCTION();
+
+		Renderer::Release();
 	}
 
 	Application* Application::Instance()

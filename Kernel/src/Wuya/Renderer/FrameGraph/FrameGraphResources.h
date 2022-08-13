@@ -40,7 +40,7 @@ namespace Wuya
 		}
 
 		/* 获取当前RenderPass的RenderTarget */
-		const SharedPtr<FrameBuffer>& GetPassRenderTarget(uint32_t idx = 0) const;
+		SharedPtr<FrameBuffer> GetPassRenderTarget(uint32_t idx = 0) const;
 
 	private:
 		/* 从FrameGraph中获取资源 */

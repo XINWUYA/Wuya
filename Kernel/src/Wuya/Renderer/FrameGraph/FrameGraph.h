@@ -70,32 +70,15 @@ namespace Wuya
 		FrameGraph& operator=(const FrameGraph&) = delete;
 		~FrameGraph();
 
-		/* 添加一个无执行阶段的Pass */
-		template<typename Data, typename SetupFunc>
-		SharedPtr<FrameGraphPass<Data>> AddPass(const std::string& name, SetupFunc setup_func)
-		{
-			auto frame_graph_pass = CreateSharedPtr<FrameGraphPass<Data>>();
-			auto render_pass_node = CreateSharedPtr<RenderPassNode>(*this, name, frame_graph_pass);
-			/* 将Pass节点注册到依赖图中 */
-			m_DependencyGraph.RegisterNode(render_pass_node);
-
-			frame_graph_pass->SetRenderPassNode(render_pass_node);
-			m_RenderPassNodes.emplace_back(render_pass_node);
-
-			FrameGraphBuilder builder(*this, render_pass_node);
-
-			/* 执行Setup阶段 */
-			setup_func(builder, const_cast<Data&>(frame_graph_pass->GetData()));
-
-			return frame_graph_pass;
-		}
-
-		/* 添加一个带执行阶段的Pass */
+		/* 添加一个FrameGraphPass：
+		 * SetupFunc将被立即执行；
+		 * ExecuteFunc将在执行整个FrameGraph时才会执行；
+		 */
 		template<typename Data, typename SetupFunc, typename ExecuteFunc>
-		SharedPtr<FrameGraphPass<Data>> AddPass(const std::string& name, SetupFunc setup_func, ExecuteFunc&& execute_func)
+		SharedPtr<FrameGraphPass<Data, ExecuteFunc>> AddPass(const std::string& name, SetupFunc setup_func, ExecuteFunc&& execute_func)
 		{
-			auto frame_graph_pass = CreateSharedPtr<FrameGraphPass_WithExecute<Data, ExecuteFunc>>(std::forward<ExecuteFunc>(execute_func));
-			auto render_pass_node = CreateSharedPtr<RenderPassNode>(*this, name, frame_graph_pass);
+			auto frame_graph_pass = CreateSharedPtr<FrameGraphPass<Data, ExecuteFunc>>(std::forward<ExecuteFunc>(execute_func));
+			auto render_pass_node = CreateSharedPtr<RenderPassNode>(name, *this, frame_graph_pass);
 			/* 将Pass节点注册到依赖图中 */
 			m_DependencyGraph.RegisterNode(render_pass_node);
 
@@ -145,22 +128,22 @@ namespace Wuya
 		}
 
 		/* 获取资源 */
-		const SharedPtr<IResource>& GetResource(FrameGraphResourceHandle handle);
+		[[nodiscard]] SharedPtr<IResource> GetResource(FrameGraphResourceHandle handle);
 		/* 获取资源节点 */
-		const SharedPtr<RenderResourceNode>& GetRenderResourceNode(FrameGraphResourceHandle handle);
+		[[nodiscard]] SharedPtr<RenderResourceNode> GetRenderResourceNode(FrameGraphResourceHandle handle);
 		/* 获取依赖关系图 */
-		DependencyGraph& GetDependencyGraph() { return m_DependencyGraph; }
+		[[nodiscard]] DependencyGraph& GetDependencyGraph() { return m_DependencyGraph; }
 		/* 获取Blackboard */
-		Blackboard& GetBlackboard() { return m_Blackboard; }
-		const Blackboard& GetBlackboard() const { return m_Blackboard; }
+		[[nodiscard]] Blackboard& GetBlackboard() { return m_Blackboard; }
+		[[nodiscard]] const Blackboard& GetBlackboard() const { return m_Blackboard; }
 		//const DependencyGraph& GetDependencyGraph() const { return m_DependencyGraph; }
 
 		/* 检查一个资源节点是否有效 */
-		bool IsHandleValid(FrameGraphResourceHandle handle) const;
+		[[nodiscard]] bool IsHandleValid(FrameGraphResourceHandle handle) const;
 		/* 判断一个资源连线是否有效 */
-		bool IsConnectionValid(const SharedPtr<DependencyGraph::Connection>& connection) const;
+		[[nodiscard]] bool IsConnectionValid(const SharedPtr<DependencyGraph::Connection>& connection) const;
 		/* 检查一个FrameGraphPass节点是否被优化掉 */
-		bool IsPassCulled(const SharedPtr<IFrameGraphPass>& pass) const;
+		[[nodiscard]] bool IsPassCulled(const SharedPtr<IFrameGraphPass>& pass) const;
 
 		/* 构建FrameGraph */
 		void Build() noexcept;

@@ -10,11 +10,11 @@ namespace Wuya
 	{
 		PROFILE_FUNCTION();
 
-		m_pFolderIcon = EditorAssetManager::Instance()->GetOrCreateTexture("editor_res/icons/directory.png");
-		m_pFileIcon = EditorAssetManager::Instance()->GetOrCreateTexture("editor_res/icons/file.png");
-		m_pFilterIcon = EditorAssetManager::Instance()->GetOrCreateTexture("editor_res/icons/filter.png");
-		m_pMenuIcon = EditorAssetManager::Instance()->GetOrCreateTexture("editor_res/icons/menu.png");
-		m_pReturnIcon = EditorAssetManager::Instance()->GetOrCreateTexture("editor_res/icons/return.png");
+		m_pFolderIcon = EditorAssetManager::Instance().GetOrCreateTexture("editor_res/icons/directory.png");
+		m_pFileIcon = EditorAssetManager::Instance().GetOrCreateTexture("editor_res/icons/file.png");
+		m_pFilterIcon = EditorAssetManager::Instance().GetOrCreateTexture("editor_res/icons/filter.png");
+		m_pMenuIcon = EditorAssetManager::Instance().GetOrCreateTexture("editor_res/icons/menu.png");
+		m_pReturnIcon = EditorAssetManager::Instance().GetOrCreateTexture("editor_res/icons/return.png");
 	}
 
 	void EditorResourceBrowser::OnImGuiRenderer()

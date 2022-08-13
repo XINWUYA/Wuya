@@ -11,6 +11,13 @@ namespace Wuya
 		// todo: Load from file
 	}
 
+	Material::~Material()
+	{
+		m_pShader.reset();
+		m_Parameters.clear();
+		m_Textures.clear();
+	}
+
 	void Material::SetParameters(const std::string& name, const std::any& param)
 	{
 		m_Parameters[name] = param;

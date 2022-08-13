@@ -12,6 +12,11 @@
 
 namespace Wuya
 {
+	Scene::~Scene()
+	{
+		m_RenderViews.clear();
+	}
+
 	Entity Scene::CreateEntity(const std::string& name)
 	{
 		PROFILE_FUNCTION();

@@ -58,7 +58,7 @@ namespace Wuya
 
 		/* …Ë÷√RenderTarget */
 		void SetRenderTargetHandle(FrameGraphResourceHandle handle) { m_RenderTargetHandle = handle; }
-		const SharedPtr<Texture>& GetRenderTarget() const;
+		SharedPtr<Texture> GetRenderTarget() const;
 
 		/* ªÒ»°FrameGraph */
 		const SharedPtr<FrameGraph>& GetFrameGraph() const { return m_pFrameGraph; }

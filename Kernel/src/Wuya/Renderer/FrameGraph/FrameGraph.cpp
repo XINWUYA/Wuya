@@ -46,11 +46,12 @@ namespace Wuya
 	}
 
 	/* 获取资源 */
-	const SharedPtr<IResource>& FrameGraph::GetResource(FrameGraphResourceHandle handle)
+	SharedPtr<IResource> FrameGraph::GetResource(FrameGraphResourceHandle handle)
 	{
 		PROFILE_FUNCTION();
 
-		ASSERT(handle.IsInitialized());
+		if (!handle.IsInitialized())
+			return nullptr;
 
 		const auto iter = m_ResourcesMap.find(handle.GetIndex());
 		if (iter != m_ResourcesMap.end())
@@ -60,7 +61,7 @@ namespace Wuya
 	}
 
 	/* 获取资源节点 */
-	const SharedPtr<RenderResourceNode>& FrameGraph::GetRenderResourceNode(FrameGraphResourceHandle handle)
+	SharedPtr<RenderResourceNode> FrameGraph::GetRenderResourceNode(FrameGraphResourceHandle handle)
 	{
 		const auto iter = m_ResourceToResourceNodeMap.find(handle.GetIndex());
 		if (iter != m_ResourceToResourceNodeMap.end())
@@ -108,7 +109,7 @@ namespace Wuya
 			auto incoming_connections = m_DependencyGraph.GetIncomingConnectionsOfNode(current_node);
 			for (const auto& connection : incoming_connections)
 			{
-				const auto& from_node = DynamicPtrCast<const RenderResourceNode>(m_DependencyGraph.GetNode(connection->FromNodeIdx));
+				const auto from_node = DynamicPtrCast<const RenderResourceNode>(m_DependencyGraph.GetNode(connection->FromNodeIdx));
 				current_node->RegisterResourceHandle(from_node->GetResourceHandle());
 			}
 
@@ -116,7 +117,7 @@ namespace Wuya
 			auto outgoing_connections = m_DependencyGraph.GetOutgoingConnectionsOfNode(current_node);
 			for (const auto& connection : outgoing_connections)
 			{
-				const auto& to_node = DynamicPtrCast<const RenderResourceNode>(m_DependencyGraph.GetNode(connection->ToNodeIdx));
+				const auto to_node = DynamicPtrCast<const RenderResourceNode>(m_DependencyGraph.GetNode(connection->ToNodeIdx));
 				current_node->RegisterResourceHandle(to_node->GetResourceHandle());
 			}
 			/* 构建当前节点 */
@@ -173,10 +174,12 @@ namespace Wuya
 			FrameGraphResources resources(*this, *current_node);
 			current_node->Execute(resources);
 
-			/* 及时销毁不再使用的资源 */
-			for (auto& resource : current_node->GetResourcesNeedDestroy())
-				resource->Destroy();
-
+			/* 及时销毁不再使用的资源, 最后Target Pass的资源暂不释放，因为ImGui需要用到，todo:只有输出不用释放，输入应正常释放 */
+			if (!current_node->IsTarget)
+			{
+				for (auto& resource : current_node->GetResourcesNeedDestroy())
+					resource->Destroy();
+			}
 			/* 下一个 */
 			++iter_current;
 		}
@@ -221,7 +224,7 @@ namespace Wuya
 		m_ResourcesMap.insert({ resource_handle.GetIndex(), resource });
 
 		/* 新增一个RenderResourceNode */
-		auto resource_node = CreateSharedPtr<RenderResourceNode>(*this, resource_handle);
+		auto resource_node = CreateSharedPtr<RenderResourceNode>(resource->GetName(), *this, resource_handle);
 		/* 将资源节点添加到依赖图 */
 		m_DependencyGraph.RegisterNode(resource_node);
 		m_ResourceToResourceNodeMap.insert({ resource_handle.GetIndex(), resource_node });

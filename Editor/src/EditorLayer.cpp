@@ -106,6 +106,9 @@ namespace Wuya
 	{
 		PROFILE_FUNCTION();
 
+		if (!event)
+			return;
+
 		m_pOrthographicCameraController->OnEvent(event);
 		m_pEditorCamera->OnEvent(event);
 
@@ -122,7 +125,7 @@ namespace Wuya
 		if (m_ViewportRegion.Width > 0 && m_ViewportRegion.Height > 0/* && (desc.Width != m_ViewportRegion.Width() || desc.Height != m_ViewportRegion.Height())*/)
 		{
 			//m_pFrameBuffer->Resize(m_ViewportRegion.Width(), m_ViewportRegion.Height());
-			m_pEditorCamera->SetViewportRegion(m_ViewportRegion);
+			m_pEditorCamera->SetViewportRegion({ 0,0,m_ViewportRegion.Width, m_ViewportRegion.Height });
 			//m_pOrthographicCameraController->OnResize(static_cast<float>(m_ViewportRegion.Width()), static_cast<float>(m_ViewportRegion.Height()));
 		}
 	}
@@ -358,13 +361,13 @@ namespace Wuya
 	{
 		PROFILE_FUNCTION();
 
-		static SharedPtr<Texture2D> save_icon = EditorAssetManager::Instance()->GetOrCreateTexture("editor_res/icons/save.png");
-		static SharedPtr<Texture2D> translate_icon = EditorAssetManager::Instance()->GetOrCreateTexture("editor_res/icons/translate.png");
-		static SharedPtr<Texture2D> rotate_icon = EditorAssetManager::Instance()->GetOrCreateTexture("editor_res/icons/rotate.png");
-		static SharedPtr<Texture2D> scale_icon = EditorAssetManager::Instance()->GetOrCreateTexture("editor_res/icons/scale.png");
-		static SharedPtr<Texture2D> play_icon = EditorAssetManager::Instance()->GetOrCreateTexture("editor_res/icons/play.png");
-		static SharedPtr<Texture2D> stop_icon = EditorAssetManager::Instance()->GetOrCreateTexture("editor_res/icons/stop.png");
-		static SharedPtr<Texture2D> menu_icon = EditorAssetManager::Instance()->GetOrCreateTexture("editor_res/icons/menu.png");
+		static SharedPtr<Texture2D> save_icon = EditorAssetManager::Instance().GetOrCreateTexture("editor_res/icons/save.png");
+		static SharedPtr<Texture2D> translate_icon = EditorAssetManager::Instance().GetOrCreateTexture("editor_res/icons/translate.png");
+		static SharedPtr<Texture2D> rotate_icon = EditorAssetManager::Instance().GetOrCreateTexture("editor_res/icons/rotate.png");
+		static SharedPtr<Texture2D> scale_icon = EditorAssetManager::Instance().GetOrCreateTexture("editor_res/icons/scale.png");
+		static SharedPtr<Texture2D> play_icon = EditorAssetManager::Instance().GetOrCreateTexture("editor_res/icons/play.png");
+		static SharedPtr<Texture2D> stop_icon = EditorAssetManager::Instance().GetOrCreateTexture("editor_res/icons/stop.png");
+		static SharedPtr<Texture2D> menu_icon = EditorAssetManager::Instance().GetOrCreateTexture("editor_res/icons/menu.png");
 
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 2)); /* Ö¸¶¨¼ä¸ô */
 		ImGui::PushStyleVar(ImGuiStyleVar_ItemInnerSpacing, ImVec2(0, 2));
@@ -625,6 +628,9 @@ namespace Wuya
 		PROFILE_FUNCTION();
 
 		UpdateViewport();
+
+		if (m_ViewportRegion.Width <= 0 || m_ViewportRegion.Height <= 0)
+			return;
 
 		//m_pFrameBuffer->Bind();
 

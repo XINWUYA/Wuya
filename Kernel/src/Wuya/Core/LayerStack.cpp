@@ -5,7 +5,7 @@ namespace Wuya
 {
 	LayerStack::~LayerStack()
 	{
-		for (auto layer : m_Layers)
+		for (auto& layer : m_Layers)
 		{
 			layer->OnDetached();
 			layer.reset();

@@ -3,13 +3,13 @@
 
 namespace Wuya
 {
-	IResource::IResource(const std::string& name)
-		: m_Name(name)
+	IResource::IResource(std::string name)
+		: m_Name(std::move(name))
 	{
 	}
 
-	IResource::IResource(const std::string& name, const SharedPtr<IResource>& parent)
-		: m_Name(name), m_Parent(parent)
+	IResource::IResource(std::string name, const SharedPtr<IResource>& parent)
+		: m_Name(std::move(name)), m_Parent(parent)
 	{
 	}
 
