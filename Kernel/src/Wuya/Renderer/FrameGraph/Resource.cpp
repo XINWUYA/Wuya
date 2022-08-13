@@ -15,7 +15,7 @@ namespace Wuya
 
 	void IResource::NeedByPass(const SharedPtr<RenderPassNode>& pass_node)
 	{
-		if (!m_FirstPassNode)
+		if (!m_FirstPassNode.lock())
 		{
 			m_FirstPassNode = m_LastPassNode = pass_node;
 		}

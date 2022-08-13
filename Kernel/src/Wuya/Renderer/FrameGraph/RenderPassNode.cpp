@@ -18,7 +18,7 @@ namespace Wuya
 	/* ×¢²á×ÊÔ´Handle */
 	void RenderPassNode::RegisterResourceHandle(FrameGraphResourceHandle handle)
 	{
-		auto& resource = m_OwnerFrameGraph.GetResource(handle);
+		auto resource = m_OwnerFrameGraph.GetResource(handle);
 		resource->NeedByPass(shared_from_this());
 		m_RegisteredHandleIndices.insert(handle.GetIndex());
 	}

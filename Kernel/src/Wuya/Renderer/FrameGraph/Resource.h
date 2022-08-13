@@ -24,8 +24,8 @@ namespace Wuya
 		/* 获取引用计数 */
 		uint32_t GetRefCount() const { return m_RefCount; }
 		/* 获取被依赖的Pass */
-		const SharedPtr<RenderPassNode>& GetFirstPassNode() const { return m_FirstPassNode; }
-		const SharedPtr<RenderPassNode>& GetLastPassNode() const { return m_LastPassNode; }
+		[[nodiscard]] SharedPtr<RenderPassNode> GetFirstPassNode() const { return m_FirstPassNode.lock(); }
+		[[nodiscard]] SharedPtr<RenderPassNode> GetLastPassNode() const { return m_LastPassNode.lock(); }
 
 		/* 创建资源 */
 		virtual void Create() = 0;
@@ -46,9 +46,9 @@ namespace Wuya
 		/* 资源引用计数 */
 		uint32_t m_RefCount{ 0 };
 		/* FrameGraph中第一次使用该资源的Pass */
-		SharedPtr<RenderPassNode> m_FirstPassNode{ nullptr };
+		WeakPtr<RenderPassNode> m_FirstPassNode;
 		/* FrameGraph中最后一次使用该资源的Pass */
-		SharedPtr<RenderPassNode> m_LastPassNode{ nullptr };
+		WeakPtr<RenderPassNode> m_LastPassNode;
 	};
 
 	/* 资源类 */
@@ -82,6 +82,7 @@ namespace Wuya
 		{
 		}
 		explicit Resource(const Resource&) = delete;
+		~Resource() override = default;
 
 		/* 获取资源本体 */
 		const ResourceType& GetResource() const { return m_Resource; }

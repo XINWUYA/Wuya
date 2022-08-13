@@ -54,7 +54,7 @@ namespace Wuya
 			m_pOwnerScene->GetRegistry().each(
 				[&](auto entity_id)
 				{
-					Entity entity{ entity_id, m_pOwnerScene.get() };
+					Entity entity{ entity_id, m_pOwnerScene };
 					ShowEntityNode(entity);
 				});
 

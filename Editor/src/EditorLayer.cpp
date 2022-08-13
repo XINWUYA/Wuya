@@ -30,7 +30,7 @@ namespace Wuya
 
 		// Camera
 		m_pEditorCamera = CreateSharedPtr<EditorCamera>(30.0f);
-		m_pOrthographicCameraController = CreateSharedPtr<OrthographicCameraController>(m_pEditorCamera->GetAspectRatio());
+		//m_pOrthographicCameraController = CreateSharedPtr<OrthographicCameraController>(m_pEditorCamera->GetAspectRatio());
 		//m_pEditorCamera->SetViewportSize(1280, 720);
 		//m_pEditorCamera->SetDistance(1);
 
@@ -109,7 +109,7 @@ namespace Wuya
 		if (!event)
 			return;
 
-		m_pOrthographicCameraController->OnEvent(event);
+		//m_pOrthographicCameraController->OnEvent(event);
 		m_pEditorCamera->OnEvent(event);
 
 		EventDispatcher dispatcher(event);

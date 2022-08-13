@@ -5,10 +5,11 @@ struct GLFWwindow;
 
 namespace Wuya
 {
-	class OpenGLContext : public IRenderContext
+	class OpenGLContext final : public IRenderContext
 	{
 	public:
 		OpenGLContext(GLFWwindow* window);
+		~OpenGLContext() override = default;
 
 		void Init() override;
 		void SwapBuffers() override;

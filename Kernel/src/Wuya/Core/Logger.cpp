@@ -28,4 +28,9 @@ namespace Wuya
 		s_pEditorLogger->flush_on(spdlog::level::trace);
 
 	}
+
+	void Logger::Shutdown()
+	{
+		spdlog::shutdown();
+	}
 }

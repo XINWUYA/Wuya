@@ -71,7 +71,8 @@ namespace Wuya
 		// todo: 视锥体剔除
 
 		/* 收集所有模型 */
-		const auto mesh_entity_group = m_pOwnerScene->GetRegistry().group<TransformComponent>(entt::get<MeshComponent>);
+		const auto owner_scene = m_pOwnerScene.lock();
+		const auto mesh_entity_group = owner_scene->GetRegistry().group<TransformComponent>(entt::get<MeshComponent>);
 		for (auto& entity : mesh_entity_group)
 		{
 			auto [transform_component, mesh_component] = mesh_entity_group.get<TransformComponent, MeshComponent>(entity);

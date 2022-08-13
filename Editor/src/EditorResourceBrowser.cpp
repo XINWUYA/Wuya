@@ -59,7 +59,7 @@ namespace Wuya
 
 				START_STYLE_ALPHA(button_alpha);
 				if (ImGui::ImageButton((ImTextureID)m_pReturnIcon->GetTextureID(), ImVec2(20, 20), ImVec2(0, 1), ImVec2(1, 0)))
-					m_CurrentFileNode = m_CurrentFileNode->ParentNode;
+					m_CurrentFileNode = m_CurrentFileNode->ParentNode.lock();
 				END_STYLE_ALPHA;
 
 				/* 取消当前样式 */

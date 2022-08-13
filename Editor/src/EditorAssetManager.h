@@ -11,6 +11,8 @@ namespace Wuya
 	class EditorAssetManager
 	{
 	public:
+		~EditorAssetManager();
+
 		/* µ¥Àý */
 		static EditorAssetManager& Instance();
 

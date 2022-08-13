@@ -42,7 +42,6 @@ namespace Wuya
 
 		/* 设置裁剪相机 */
 		void SetCullingCamera(const SharedPtr<Camera>& camera) { m_pCullingCamera = camera; }
-		const SharedPtr<Camera>& GetCullingCamera() const { return m_pCullingCamera; }
 
 		/* 设置启用视锥体剔除 */
 		void SetEnableFrustumCulling(bool enable) { m_IsEnableCulling = enable; }
@@ -54,7 +53,6 @@ namespace Wuya
 
 		/* 设置所属的Scene */
 		void SetOwnerScene(const SharedPtr<Scene>& scene) { m_pOwnerScene = scene; }
-		const SharedPtr<Scene>& GetOwnerScene() const { return m_pOwnerScene; }
 
 		/* 设置RenderTarget */
 		void SetRenderTargetHandle(FrameGraphResourceHandle handle) { m_RenderTargetHandle = handle; }
@@ -83,9 +81,9 @@ namespace Wuya
 		/* 是否启用视锥体剔除 */
 		bool m_IsEnableCulling{ true };
 		/* 相机 */
-		SharedPtr<Camera> m_pCullingCamera{ nullptr };
+		WeakPtr<Camera> m_pCullingCamera;
 		/* 所属的Scene */
-		SharedPtr<Scene> m_pOwnerScene{ nullptr };
+		WeakPtr<Scene> m_pOwnerScene;
 		/* 视锥体剔除之后，对当前可见MeshSegment */
 		std::vector<VisibleMeshObject> m_VisibleMeshObjects{};
 		/* 当前View的渲染结果输出到该RenderTarget */

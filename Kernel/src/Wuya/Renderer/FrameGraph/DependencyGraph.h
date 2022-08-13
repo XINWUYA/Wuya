@@ -50,7 +50,7 @@ namespace Wuya
 		};
 
 		DependencyGraph();
-		virtual~DependencyGraph() = default;
+		virtual ~DependencyGraph() = default;
 
 		/* 注册一个节点到依赖图 */
 		void RegisterNode(const SharedPtr<Node>& node);

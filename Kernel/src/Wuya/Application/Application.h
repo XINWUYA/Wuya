@@ -18,8 +18,8 @@ namespace Wuya
 		virtual void Run();
 		void Close();
 
-		void PushLayer(SharedPtr<ILayer> layer);
-		void PushOverlay(SharedPtr<ILayer> layer);
+		void PushLayer(const SharedPtr<ILayer>& layer);
+		void PushOverlay(const SharedPtr<ILayer>& layer);
 
 		const SharedPtr<ImGuiLayer>& GetImGuiLayer() const { return m_pImGuiLayer; }
 

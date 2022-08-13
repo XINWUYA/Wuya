@@ -4,6 +4,10 @@
 
 namespace Wuya
 {
+	EditorAssetManager::~EditorAssetManager()
+	{
+		m_TextureAssetMap.clear();
+	}
 
 	EditorAssetManager& EditorAssetManager::Instance()
 	{

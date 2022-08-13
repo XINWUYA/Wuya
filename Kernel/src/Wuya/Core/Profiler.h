@@ -19,7 +19,7 @@ namespace Wuya
 		TimeCostProfiler(const TimeCostProfiler&) = delete;
 		TimeCostProfiler(TimeCostProfiler&&) = delete;
 
-		static TimeCostProfiler* Instance();
+		static TimeCostProfiler& Instance();
 
 		void BeginSession(const std::string& name, const std::string& outfile = "ProfileResult-TimeCost.json");
 		void EndSession();
@@ -39,8 +39,6 @@ namespace Wuya
 		{
 			std::string Name;
 		};
-
-		static TimeCostProfiler* s_pInstance;
 
 		std::mutex m_Mutex{};
 		SharedPtr<SessionInfo> m_pSessionInfo{ nullptr };
@@ -121,9 +119,9 @@ namespace Wuya
 	#endif
 
 	// 开启一个耗时分析
-	#define PROFILER_BEGIN_SESSION(name, filepath) ::Wuya::TimeCostProfiler::Instance()->BeginSession(name, filepath)
+	#define PROFILER_BEGIN_SESSION(name, filepath) ::Wuya::TimeCostProfiler::Instance().BeginSession(name, filepath)
 	// 关闭一个耗时分析
-	#define PROFILER_END_SESSION() ::Wuya::TimeCostProfiler::Instance()->EndSession()
+	#define PROFILER_END_SESSION() ::Wuya::TimeCostProfiler::Instance().EndSession()
 	// 分析当前指令段耗时
 	#define PROFILE_SCOPE_LINE(name, line) constexpr auto fixed_name_##line = ::Wuya::ProfilerUtils::CleanupOutputString(name, "__cdecl "); /*去掉前缀*/\
 											::Wuya::ProfilerTimer timer_##line(fixed_name_##line.Data)

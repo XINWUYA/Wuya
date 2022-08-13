@@ -3,11 +3,10 @@
 
 namespace Wuya
 {
-	TimeCostProfiler* TimeCostProfiler::s_pInstance = new TimeCostProfiler;
-
-	TimeCostProfiler* TimeCostProfiler::Instance()
+	TimeCostProfiler& TimeCostProfiler::Instance()
 	{
-		return s_pInstance;
+		static TimeCostProfiler instance;
+		return instance;
 	}
 
 	void TimeCostProfiler::BeginSession(const std::string& name, const std::string& outfile)
@@ -114,7 +113,7 @@ namespace Wuya
 		const auto high_res_start = std::chrono::duration<double, std::micro>{ m_StartTimePoint.time_since_epoch() };
 		const auto elapsed_time = std::chrono::time_point_cast<std::chrono::microseconds>(end_time_point).time_since_epoch() - std::chrono::time_point_cast<std::chrono::microseconds>(m_StartTimePoint).time_since_epoch();
 
-		TimeCostProfiler::Instance()->WriteProfileResult({ m_pName, high_res_start, elapsed_time, std::this_thread::get_id() });
+		TimeCostProfiler::Instance().WriteProfileResult({ m_pName, high_res_start, elapsed_time, std::this_thread::get_id() });
 
 		m_Stopped = true;
 	}

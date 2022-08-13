@@ -8,7 +8,8 @@ namespace Wuya
 	{
 	public:
 		Entity() = default;
-		Entity(entt::entity handle, Scene* owner_scene);
+		Entity(entt::entity handle, const SharedPtr<Scene>& owner_scene);
+		~Entity() = default;
 
 		/* 添加一个组件 */
 		template<typename T, typename ... Args>
@@ -16,8 +17,8 @@ namespace Wuya
 		{
 			ASSERT(!HasComponent<T>(), "Component already existed!");
 
-			T& component = m_OwnerScene->GetRegistry().emplace<T>(m_EntityHandle, std::forward<Args>(args)...);
-			m_OwnerScene->OnComponentAdded<T>(*this, component);
+			T& component = m_OwnerScene.lock()->GetRegistry().emplace<T>(m_EntityHandle, std::forward<Args>(args)...);
+			m_OwnerScene.lock()->OnComponentAdded<T>(*this, component);
 
 			return component;
 		}
@@ -28,7 +29,7 @@ namespace Wuya
 		{
 			ASSERT(HasComponent<T>(), "Entity doesn't have component!");
 
-			m_OwnerScene->GetRegistry().remove<T>(m_EntityHandle);
+			m_OwnerScene.lock()->GetRegistry().remove<T>(m_EntityHandle);
 		}
 
 		/* 获取组件 */
@@ -37,7 +38,7 @@ namespace Wuya
 		{
 			ASSERT(HasComponent<T>(), "Entity doesn't have component!");
 
-			return m_OwnerScene->GetRegistry().get<T>(m_EntityHandle);
+			return m_OwnerScene.lock()->GetRegistry().get<T>(m_EntityHandle);
 		}
 
 		/* 是否具有组件 */
@@ -46,7 +47,7 @@ namespace Wuya
 		{
 			/*if (!m_OwnerScene->GetRegistry().valid(m_EntityHandle))
 				return false;*/
-			return m_OwnerScene->GetRegistry().all_of<T>(m_EntityHandle);
+			return m_OwnerScene.lock()->GetRegistry().all_of<T>(m_EntityHandle);
 		}
 
 		/* 重载 */
@@ -60,6 +61,6 @@ namespace Wuya
 		/* Entity索引 */
 		entt::entity m_EntityHandle{ entt::null };
 		/* Entity所属场景 */
-		Scene* m_OwnerScene{ nullptr };
+		WeakPtr<Scene> m_OwnerScene;
 	};
 }

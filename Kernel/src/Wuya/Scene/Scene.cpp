@@ -21,7 +21,7 @@ namespace Wuya
 	{
 		PROFILE_FUNCTION();
 
-		Entity entity = { m_Registry.create(), this };
+		Entity entity = { m_Registry.create(), shared_from_this() };
 
 		/* 默认添加名称组件和变换组件 */
 		auto& name_component = entity.AddComponent<NameComponent>();
@@ -104,7 +104,7 @@ namespace Wuya
 		{
 			const auto& camera_component = entity_view.get<CameraComponent>(entity);
 			if (camera_component.IsPrimary)
-				return Entity{ entity, this };
+				return Entity{ entity, shared_from_this() };
 		}
 		return {};
 	}
@@ -133,7 +133,7 @@ namespace Wuya
 		m_Registry.each(
 			[&](auto& entity_id)
 			{
-				Entity entity = { entity_id, this };
+				Entity entity = { entity_id, shared_from_this() };
 				if (!entity)
 					return;
 
@@ -143,6 +143,8 @@ namespace Wuya
 
 		/* 保存到文本 */
 		doc->SaveFile(path.c_str());
+
+		delete doc;
 	}
 
 	bool Scene::Deserializer(const std::string& path)
@@ -229,6 +231,8 @@ namespace Wuya
 				}
 			}	
 		}
+
+		delete doc;
 		return true;
 	}
 

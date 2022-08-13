@@ -79,7 +79,7 @@ namespace Wuya
 		m_IsRunning = false;
 	}
 
-	void Application::PushLayer(SharedPtr<ILayer> layer)
+	void Application::PushLayer(const SharedPtr<ILayer>& layer)
 	{
 		PROFILE_FUNCTION();
 
@@ -87,7 +87,7 @@ namespace Wuya
 		layer->OnAttached();
 	}
 
-	void Application::PushOverlay(SharedPtr<ILayer> layer)
+	void Application::PushOverlay(const SharedPtr<ILayer>& layer)
 	{
 		PROFILE_FUNCTION();
 

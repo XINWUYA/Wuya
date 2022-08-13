@@ -9,6 +9,7 @@ namespace Wuya
 	{
 	public:
 		static void Init();
+		static void Shutdown();
 
 		inline static SharedPtr<spdlog::logger>& GetCoreLogger() { return s_pCoreLogger; }
 		inline static SharedPtr<spdlog::logger>& GetEditorLogger() { return s_pEditorLogger; }

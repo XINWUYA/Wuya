@@ -52,14 +52,14 @@ namespace Wuya
 		/* 设置RenderPassNode */
 		void SetRenderPassNode(const SharedPtr<RenderPassNode>& node) { m_pRenderPassNode = node; }
 		/* 获取RenderPassNode */
-		const SharedPtr<RenderPassNode>& GetRenderPassNode() const { return m_pRenderPassNode; }
+		[[nodiscard]] SharedPtr<RenderPassNode> GetRenderPassNode() const { return m_pRenderPassNode.lock(); }
 
 		/* 执行阶段 */
 		virtual void Execute(const FrameGraphResources& resources) = 0;
 
 	protected:
 		/* 对应的RenderPassNode */
-		SharedPtr<RenderPassNode> m_pRenderPassNode{ nullptr };
+		WeakPtr<RenderPassNode> m_pRenderPassNode;
 	};
 
 	/* 带执行阶段的FrameGraphPass */
@@ -70,6 +70,7 @@ namespace Wuya
 		FrameGraphPass(ExecuteFunc&& execute_func)
 			: m_ExecuteFunc(std::move(execute_func))
 		{}
+		~FrameGraphPass() override = default;
 
 		/* 数据 */
 		void SetData(const Data& data) { m_Data = data; }

@@ -195,6 +195,7 @@ namespace Wuya
 		PROFILE_FUNCTION();
 
 		glfwDestroyWindow(m_pGLFWWindow);
+		m_pGLFWWindow = nullptr;
 		--s_GLFWWindowCnt;
 
 		if (s_GLFWWindowCnt == 0)

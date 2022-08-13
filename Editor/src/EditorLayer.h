@@ -10,7 +10,7 @@ namespace Wuya
 	{
 	public:
 		EditorLayer();
-		virtual ~EditorLayer() = default;
+		~EditorLayer() override = default;
 
 		void OnAttached() override;
 		void OnDetached() override;

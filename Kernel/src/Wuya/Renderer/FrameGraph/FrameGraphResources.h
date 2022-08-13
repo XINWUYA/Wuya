@@ -14,6 +14,7 @@ namespace Wuya
 	{
 	public:
 		FrameGraphResources(FrameGraph& frame_graph, RenderPassNode& render_pass_node);
+		~FrameGraphResources() = default;
 
 		/* 获取当前RenderPassNode名 */
 		const std::string& GetPassName() const;
