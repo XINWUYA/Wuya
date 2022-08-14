@@ -18,7 +18,8 @@ namespace Wuya
 			std::filesystem::create_directories(shader_cache_dir);
 	}
 
-	OpenGLShader::OpenGLShader(const std::string& filepath) : m_FilePath(filepath)
+	OpenGLShader::OpenGLShader(const std::string& filepath)
+		: m_FilePath(filepath)
 	{
 		PROFILE_FUNCTION();
 
@@ -35,10 +36,11 @@ namespace Wuya
 		last_slash = (last_slash == std::string::npos) ? 0 : last_slash + 1;
 		const auto last_dot = filepath.rfind('.');
 		const auto count = (last_dot == std::string::npos) ? filepath.size() - last_slash : last_dot - last_slash;
-		m_Name = filepath.substr(last_slash, count);
+		m_DebugName = filepath.substr(last_slash, count);
 	}
 
-	OpenGLShader::OpenGLShader(const std::string& name, const std::string& vertex_src, const std::string& pixel_src) : m_Name(name)
+	OpenGLShader::OpenGLShader(std::string name, const std::string& vertex_src, const std::string& pixel_src)
+		: m_DebugName(std::move(name))
 	{
 		PROFILE_FUNCTION();
 

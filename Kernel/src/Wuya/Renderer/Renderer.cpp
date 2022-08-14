@@ -200,6 +200,9 @@ namespace Wuya
 			m_pRenderAPI->DrawIndexed(vertex_array, index_count);
 		else
 			m_pRenderAPI->DrawArrays(vertex_array);
+
+		material->Unbind();
+		vertex_array->Unbind();
 	}
 
 	SharedPtr<VertexArray> Renderer::GetFullScreenVertexArray()

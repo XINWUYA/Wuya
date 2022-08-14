@@ -4,7 +4,7 @@
 
 namespace Wuya
 {
-	/* Shader类 */
+	/* Shader基类 */
 	class Shader
 	{
 	public:
@@ -25,7 +25,7 @@ namespace Wuya
 		virtual void SetMat4(const std::string& name, const glm::mat4& value) = 0;
 
 		/* 获取Shader名 */
-		virtual const std::string& GetName() const = 0;
+		virtual const std::string& GetDebugName() const = 0;
 
 		/* 创建Shader */
 		static SharedPtr<Shader> Create(const std::string& filepath);
@@ -33,6 +33,7 @@ namespace Wuya
 	};
 
 	/* Shader库：
+	 * 单例类；
 	 * 用于管理Shader
 	 */
 	class ShaderLibrary
@@ -43,21 +44,10 @@ namespace Wuya
 
 		/* 从文件中加载Shader */
 		SharedPtr<Shader> GetOrLoad(const std::string& filepath);
-		/* 加载Shader */
-		SharedPtr<Shader> Load(const std::string& name, const std::string& filepath);
-
-		/* 根据名称获取Shader */
-		SharedPtr<Shader> GetShaderByName(const std::string& name);
-		/* 判断Shader是否存在 */
-		[[nodiscard]] bool IsExists(const std::string& name) const;
 
 	private:
-		/* 添加Shader */
-		void AddShader(const SharedPtr<Shader>& shader);
-		void AddShader(const std::string& name, const SharedPtr<Shader>& shader);
-
-		/* Shader名到Shader的映射<Name, SharedPtr<Shader>> */
-		std::unordered_map<std::string, SharedPtr<Shader>> m_Shaders;
+		/* Shader名Hash到Shader的映射<NameHash, SharedPtr<Shader>> */
+		std::unordered_map<uint32_t, SharedPtr<Shader>> m_Shaders;
 	};
 }
 

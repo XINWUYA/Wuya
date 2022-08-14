@@ -33,6 +33,8 @@ namespace Wuya
 
 		/* 绑定材质中的各参数 */
 		void Bind();
+		/* 解绑材质 */
+		void Unbind();
 
 	private:
 		/* 材质路径 */

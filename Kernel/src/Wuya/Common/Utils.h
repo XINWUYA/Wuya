@@ -49,6 +49,11 @@ namespace Wuya
 		return { std::stof(split_result[0]), std::stof(split_result[1]), std::stof(split_result[2]), std::stof(split_result[3]) };
 	}
 
+	/* string to Id
+	 * use xxHash
+	 */
+	uint32_t ToID(const std::string& value);
+
 	/* Enum类型的位运算 */
 	template<typename Enum>
 	struct EnableBitmaskOperators : public std::false_type

@@ -47,48 +47,17 @@ namespace Wuya
 	/* 从文件中加载Shader */
 	SharedPtr<Shader> ShaderLibrary::GetOrLoad(const std::string& filepath)
 	{
-		auto shader = Shader::Create(filepath);
-		AddShader(shader);
-		return shader;
-	}
+		const auto key = ToID(filepath);
+		const auto iter = m_Shaders.find(key);
 
-	/* 从文件中加载Shader */
-	SharedPtr<Shader> ShaderLibrary::Load(const std::string& name, const std::string& filepath)
-	{
-		auto shader = Shader::Create(filepath);
-		AddShader(name, shader);
-		return shader;
-	}
-
-	/* 根据名称获取Shader */
-	SharedPtr<Shader> ShaderLibrary::GetShaderByName(const std::string& name)
-	{
-		if (!IsExists(name))
+		/* 不存在则从路径中加载 */
+		if (iter == m_Shaders.end())
 		{
-			ASSERT(false, "Shader not found!");
-			return nullptr;
+			auto shader = Shader::Create(filepath);
+			m_Shaders[key] = shader;
+			return shader;
 		}
 
-		return m_Shaders[name];
-	}
-
-	/* 判断Shader是否存在 */
-	bool ShaderLibrary::IsExists(const std::string& name) const
-	{
-		return m_Shaders.find(name) != m_Shaders.end();
-	}
-
-	/* 添加Shader */
-	void ShaderLibrary::AddShader(const SharedPtr<Shader>& shader)
-	{
-		auto& name = shader->GetName();
-		AddShader(name, shader);
-	}
-
-	/* 添加Shader */
-	void ShaderLibrary::AddShader(const std::string& name, const SharedPtr<Shader>& shader)
-	{
-		ASSERT(!IsExists(name), "Shader already exists!");
-		m_Shaders[name] = shader;
+		return iter->second;
 	}
 }

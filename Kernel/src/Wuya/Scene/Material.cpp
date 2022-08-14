@@ -31,9 +31,10 @@ namespace Wuya
 	/* 绑定材质中的各参数 */
 	void Material::Bind()
 	{
+		/* 先绑定Shader */
 		m_pShader->Bind();
 
-		/* 绑定参数 */
+		/* 绑定Uniform参数 */
 		for (auto& param : m_Parameters)
 		{
 			auto& value = param.second;
@@ -85,5 +86,11 @@ namespace Wuya
 			const auto& texture = texture_info.first;
 			texture->Bind(texture_info.second);
 		}
+	}
+
+	/* 解绑材质 */
+	void Material::Unbind()
+	{
+		m_pShader->Unbind();
 	}
 }

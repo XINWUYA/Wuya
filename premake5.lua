@@ -10,6 +10,7 @@ IncludeDirs["stb"] = "%{wks.location}/Kernel/third_party/stb"
 IncludeDirs["entt"] = "%{wks.location}/Kernel/third_party/entt/single_include"
 IncludeDirs["tinyxml2"] = "%{wks.location}/Kernel/third_party/tinyxml2"
 IncludeDirs["ImGuizmo"] = "%{wks.location}/Kernel/third_party/ImGuizmo"
+IncludeDirs["xxHash"] = "%{wks.location}/Kernel/third_party/xxHash"
 
 -- Solution configuration
 workspace "Wuya"
