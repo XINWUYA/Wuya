@@ -50,7 +50,7 @@ namespace Wuya
 
 	protected:
 		FrameBuffer() = default;
-		FrameBuffer(const std::string& name, const FrameBufferDesc& desc);
+		FrameBuffer(std::string name, FrameBufferDesc desc);
 
 		/* Ãû³Æ */
 		std::string m_DebugName;

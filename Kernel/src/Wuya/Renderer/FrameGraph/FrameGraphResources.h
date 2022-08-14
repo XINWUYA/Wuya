@@ -17,7 +17,7 @@ namespace Wuya
 		~FrameGraphResources() = default;
 
 		/* 获取当前RenderPassNode名 */
-		const std::string& GetPassName() const;
+		[[nodiscard]] const std::string& GetPassName() const;
 
 		/* 获取指定资源 */
 		template<typename ResourceType>
@@ -41,11 +41,11 @@ namespace Wuya
 		}
 
 		/* 获取当前RenderPass的RenderTarget */
-		SharedPtr<FrameBuffer> GetPassRenderTarget(uint32_t idx = 0) const;
+		[[nodiscard]] SharedPtr<FrameBuffer> GetPassRenderTarget(uint32_t idx = 0) const;
 
 	private:
 		/* 从FrameGraph中获取资源 */
-		const SharedPtr<IResource>& GetResource(FrameGraphResourceHandle handle) const;
+		[[nodiscard]] const SharedPtr<IResource>& GetResource(FrameGraphResourceHandle handle) const;
 
 		/* 所属FrameGraph */
 		FrameGraph& m_FrameGraph;

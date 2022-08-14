@@ -5,9 +5,8 @@
 
 namespace Wuya
 {
-
-	FrameBuffer::FrameBuffer(const std::string& name, const FrameBufferDesc& desc)
-		: m_DebugName(name), m_FrameBufferDesc(desc)
+	FrameBuffer::FrameBuffer(std::string name, FrameBufferDesc desc)
+		: m_DebugName(std::move(name)), m_FrameBufferDesc(std::move(desc))
 	{
 	}
 

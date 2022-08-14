@@ -13,6 +13,7 @@ namespace Wuya
 	{
 	}
 
+	/* ±ªPass“¿¿µ */
 	void IResource::NeedByPass(const SharedPtr<RenderPassNode>& pass_node)
 	{
 		if (!m_FirstPassNode.lock())

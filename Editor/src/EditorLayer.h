@@ -58,7 +58,6 @@ namespace Wuya
 			Runtime		/* 运行模式 */
 		};
 
-		UniquePtr<ShaderLibrary> m_pShaderLibrary;
 		SharedPtr<class EditorCamera> m_pEditorCamera;
 		SharedPtr<OrthographicCameraController> m_pOrthographicCameraController;
 

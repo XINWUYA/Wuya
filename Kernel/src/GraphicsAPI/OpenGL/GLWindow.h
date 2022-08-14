@@ -7,35 +7,50 @@ namespace Wuya
 {
 	class IRenderContext;
 
+	/* GLWindow类：
+	 * 使用GLFWwindow创建OpenGL窗口
+	 */
 	class GLWindow : public IWindow
 	{
 	public:
-		GLWindow(const WindowConfig& config);
-		virtual ~GLWindow();
+		GLWindow(const WindowDesc& desc);
+		~GLWindow() override;
 
+		/* 更新，交换一帧 */
 		void OnUpdate() override;
 
-		virtual uint32_t GetWidth() const override { return m_WindowInfo.Width; }
-		virtual uint32_t GetHeight() const override { return m_WindowInfo.Height; }
-		virtual bool IsVSync() const override;
-		virtual void SetVSync(bool enable) override;
+		/* 获取宽度/高度 */
+		[[nodiscard]] uint32_t GetWidth() const override { return m_WindowInfo.Descriptor.Width; }
+		[[nodiscard]] uint32_t GetHeight() const override { return m_WindowInfo.Descriptor.Height; }
 
-		virtual void* GetNativeWindow() const override { return m_pGLFWWindow; }
+		/* 设置垂直同步 */
+		[[nodiscard]] bool IsVSync() const override { return m_WindowInfo.Descriptor.IsVSync; }
+		void SetVSync(bool enable) override;
+
+		/* 获取GLFWwindow* */
+		[[nodiscard]] void* GetNativeWindow() const override { return m_pGLFWWindow; }
+
+		/* 设置响应事件 */
 		virtual void SetEventCallback(const EventCallbackFunc& callback) override { m_WindowInfo.CallBackFunc = callback; }
 
 	private:
-		void Init(const WindowConfig& config);
-		void ShutDown();
+		/* 创建窗口；创建上下文；绑定响应事件 */
+		void Build(const WindowDesc& desc);
+		/* 销毁窗口 */
+		void Destroy();
 
+		/* 窗口信息 */
 		struct WindowInfo
 		{
-			std::string Title;
-			uint32_t Width, Height;
-			bool IsVSync;
-			EventCallbackFunc CallBackFunc;
+			WindowDesc Descriptor;			/* 窗口描述 */
+			EventCallbackFunc CallBackFunc; /* 窗口事件回调 */
 		};
+
+		/* GLFWwindow指针 */
 		GLFWwindow* m_pGLFWWindow{ nullptr };
+		/* 窗口信息*/
 		WindowInfo m_WindowInfo{};
+		/* 窗口上下文 */
 		UniquePtr<IRenderContext> m_pRenderContext{ nullptr };
 	};
 

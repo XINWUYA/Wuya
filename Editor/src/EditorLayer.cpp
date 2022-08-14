@@ -22,10 +22,7 @@ namespace Wuya
 	void EditorLayer::OnAttached()
 	{
 		PROFILE_FUNCTION();
-
-		// Shader
-		m_pShaderLibrary = CreateUniquePtr<ShaderLibrary>();
-
+		
 		Renderer::Init();
 
 		// Camera
@@ -48,7 +45,7 @@ namespace Wuya
 		auto material = CreateSharedPtr<Material>();
 		const auto albedo_texture = Texture2D::Create("assets/textures/container.jpg");
 		material->SetTexture(albedo_texture, 0);
-		const auto shader = m_pShaderLibrary->Load("assets/shaders/cube.glsl");
+		const auto shader = ShaderLibrary::Instance().GetOrLoad("assets/shaders/cube.glsl");
 		material->SetShader(shader);
 
 		// Create MeshSegment

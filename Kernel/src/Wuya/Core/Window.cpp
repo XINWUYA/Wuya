@@ -4,8 +4,9 @@
 
 namespace Wuya
 {
-    UniquePtr<IWindow> Wuya::IWindow::Create(const WindowConfig& config)
+    /* 根据描述创建窗口 */
+    UniquePtr<IWindow> IWindow::Create(const WindowDesc& desc)
     {
-        return CreateUniquePtr<GLWindow>(config);
+        return CreateUniquePtr<GLWindow>(desc);
     }
 }

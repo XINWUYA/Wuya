@@ -48,7 +48,7 @@ namespace Wuya
 		void AsSideEffect(bool value = true);
 
 		/* 根据资源Handle在FrameGraph中获取资源名 */
-		const std::string& GetResourceName(FrameGraphResourceHandle handle) const;
+		[[nodiscard]] const std::string& GetResourceName(FrameGraphResourceHandle handle) const;
 
 
 	private:

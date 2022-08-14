@@ -212,7 +212,7 @@ namespace Wuya
 				SharedPtr<Material> material = CreateSharedPtr<Material>();
 				auto& raster_state = material->GetRasterState();
 				raster_state.EnableDepthWrite = false;
-				static const auto shader = Shader::Create("assets/shaders/side.glsl");
+				static const auto shader = ShaderLibrary::Instance().GetOrLoad("assets/shaders/side.glsl");
 				material->SetShader(shader);
 				material->SetTexture(resources.Get(data.InputTexture).Texture, 0);
 				Renderer::Submit(material, Renderer::GetFullScreenVertexArray());

@@ -1,5 +1,5 @@
 #pragma once
-#include "glad/glad.h"
+#include <glad/glad.h>
 #include "Wuya/Renderer/FrameBuffer.h"
 
 namespace Wuya

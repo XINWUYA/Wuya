@@ -36,7 +36,7 @@ namespace Wuya
 		PROFILE_FUNCTION();
 
 		ASSERT(handle.IsInitialized(), "Handle is invalid.");
-		auto& resource = m_FrameGraph.GetResource(handle);
+		auto resource = m_FrameGraph.GetResource(handle);
 
 		if (!m_RenderPassNode.IsResourceHandleRegistered(handle))
 		{

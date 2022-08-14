@@ -11,18 +11,19 @@ namespace Wuya
 {
 	static uint8_t s_GLFWWindowCnt = 0;
 
-	GLWindow::GLWindow(const WindowConfig& config)
+	GLWindow::GLWindow(const WindowDesc& desc)
 	{
 		PROFILE_FUNCTION();
 
-		Init(config);
+		Build(desc);
 	}
 
 	GLWindow::~GLWindow()
 	{
-		ShutDown();
+		Destroy();
 	}
 
+	/* 更新，交换一帧 */
 	void GLWindow::OnUpdate()
 	{
 		PROFILE_FUNCTION();
@@ -31,11 +32,7 @@ namespace Wuya
 		m_pRenderContext->SwapBuffers();
 	}
 
-	bool GLWindow::IsVSync() const
-	{
-		return m_WindowInfo.IsVSync;
-	}
-
+	/* 设置垂直同步 */
 	void GLWindow::SetVSync(bool enable)
 	{
 		if (enable)
@@ -46,20 +43,18 @@ namespace Wuya
 
 	}
 
-	void GLWindow::Init(const WindowConfig& config)
+	/* 创建窗口；创建上下文；绑定响应事件 */
+	void GLWindow::Build(const WindowDesc& desc)
 	{
 		PROFILE_FUNCTION();
 
-		m_WindowInfo.Title = config.Title;
-		m_WindowInfo.Width = config.Width;
-		m_WindowInfo.Height = config.Height;
-		m_WindowInfo.IsVSync = config.IsVSync;
+		m_WindowInfo.Descriptor = desc;
 
-		CORE_LOG_INFO("Create GLFW window {0}: {1}x{2}", config.Title, config.Width, config.Height);
+		CORE_LOG_INFO("Create GLFW window {0}: {1}x{2}", desc.Title, desc.Width, desc.Height);
 
 		if (s_GLFWWindowCnt == 0)
 		{
-			PROFILE_SCOPE("glfwInit");
+			PROFILE_SCOPE("glfwInit()");
 
 			// 初始化GLFW
 			int success = glfwInit();
@@ -81,7 +76,7 @@ namespace Wuya
 		{
 			PROFILE_SCOPE("glfwCreateWindow");
 
-			m_pGLFWWindow = glfwCreateWindow(config.Width, config.Height, config.Title.c_str(), nullptr, nullptr);
+			m_pGLFWWindow = glfwCreateWindow(desc.Width, desc.Height, desc.Title.c_str(), nullptr, nullptr);
 			++s_GLFWWindowCnt;
 		}
 
@@ -90,14 +85,14 @@ namespace Wuya
 
 		// 指定窗口信息
 		glfwSetWindowUserPointer(m_pGLFWWindow, &m_WindowInfo);
-		SetVSync(config.IsVSync);
+		SetVSync(desc.IsVSync);
 
 		// 设置窗口Resize回调
 		glfwSetWindowSizeCallback(m_pGLFWWindow, [](GLFWwindow* window, int width, int height)
 			{
 				WindowInfo& info = *(WindowInfo*)glfwGetWindowUserPointer(window);
-				info.Width = width;
-				info.Height = height;
+				info.Descriptor.Width = width;
+				info.Descriptor.Height = height;
 
 				WindowResizeEvent event(width, height);
 				info.CallBackFunc(&event);
@@ -190,7 +185,8 @@ namespace Wuya
 			});
 	}
 
-	void GLWindow::ShutDown()
+	/* 销毁窗口 */
+	void GLWindow::Destroy()
 	{
 		PROFILE_FUNCTION();
 

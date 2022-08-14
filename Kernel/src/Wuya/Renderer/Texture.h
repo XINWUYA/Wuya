@@ -6,14 +6,14 @@ namespace Wuya
 	/* 纹理信息描述 */
 	struct TextureDesc
 	{
-		uint32_t Width{ 1 };				/* 宽度 */
-		uint32_t Height{ 1 };			/* 高度 */
-		uint32_t Depth{ 1 };				/* 深度 */
-		uint8_t MipLevels{ 1 };			/* Mip层级 */
-		uint8_t Samples{ 1 };			/* 采样次数 */
+		uint32_t Width{ 1 };								/* 宽度 */
+		uint32_t Height{ 1 };								/* 高度 */
+		uint32_t Depth{ 1 };								/* 深度 */
+		uint8_t MipLevels{ 1 };								/* Mip层级 */
+		uint8_t Samples{ 0 };								/* 采样次数 */
 		TextureFormat Format{ TextureFormat::RGBA8 };		/* 像素格式：RxGxBxAx等 */
 		SamplerType SamplerType{ SamplerType::Sampler2D };	/* 采样方式： Sampler2D/2DArray/CubeMap/3D等 */
-		TextureUsage Usage;			/* 使用方式：ColorAttachment/DepthAttachment/StencilAttachment/Sampleable等 */
+		TextureUsage Usage;									/* 使用方式：ColorAttachment/DepthAttachment/StencilAttachment/Sampleable等 */
 	};
 
 	/* 通用纹理类，根据描述和用途创建不同类型的纹理 */

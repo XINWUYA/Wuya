@@ -35,6 +35,7 @@ namespace Wuya
 		virtual void PushDebugGroup(const char* name) = 0;
 		virtual void PopDebugGroup() = 0;
 
+		/* 使用平台 */
 		static int GetAPI() { return m_API; }
 		/* 创建当前API */
 		static SharedPtr<RenderAPI> Create();

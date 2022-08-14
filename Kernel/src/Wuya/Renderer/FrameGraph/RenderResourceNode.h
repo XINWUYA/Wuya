@@ -27,9 +27,11 @@ namespace Wuya
 		/* 增加使用节点 */
 		void SetIncomingConnection(const SharedPtr<DependencyGraph::Connection>& connection) { m_pIncomingConnection = connection; }
 		void AddOutgoingConnection(const SharedPtr<DependencyGraph::Connection>& connection) { m_OutgoingConnections.emplace_back(connection); }
+
 		/* 获取资源的作为输入/输出的使用情况 */
 		[[nodiscard]] bool HasOutgoingConnection() const { return !m_OutgoingConnections.empty(); }
 		[[nodiscard]] bool HasIncomingConnection() const { return m_pIncomingConnection != nullptr; }
+
 		/* 从节点的角度出发，获取与资源之间的连线 */
 		[[nodiscard]] SharedPtr<DependencyGraph::Connection> GetOutgoingConnectionOfPassNode(const SharedPtr<RenderPassNode>& node) const;
 		[[nodiscard]] SharedPtr<DependencyGraph::Connection> GetIncomingConnectionOfPassNode(const SharedPtr<RenderPassNode>& node) const;

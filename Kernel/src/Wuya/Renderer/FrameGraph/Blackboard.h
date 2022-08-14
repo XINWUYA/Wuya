@@ -27,7 +27,7 @@ namespace Wuya
 
 	private:
 		/* 根据名称获取资源 */
-		FrameGraphResourceHandle GetResourceHandleInternal(const std::string& name) const noexcept;
+		[[nodiscard]] FrameGraphResourceHandle GetResourceHandleInternal(const std::string& name) const noexcept;
 
 		/* 资源名与资源Handle的映射<name, FrameGraphResourceHandle> */
 		std::unordered_map<std::string, FrameGraphResourceHandle> m_NameToResourceHandleMap{};
