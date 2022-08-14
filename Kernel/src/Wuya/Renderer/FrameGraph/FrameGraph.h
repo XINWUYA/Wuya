@@ -22,6 +22,7 @@ namespace Wuya
 	public:
 		explicit FrameGraphBuilder(FrameGraphBuilder&) = delete;
 		FrameGraphBuilder& operator=(const FrameGraphBuilder&) = delete;
+		~FrameGraphBuilder() = default;
 
 		/* 根据描述创建RenderPass */
 		uint32_t CreateRenderPass(const std::string& name, const FrameGraphPassInfo::Descriptor& desc = {});

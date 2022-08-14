@@ -16,8 +16,7 @@ namespace Wuya
 		ASSERT(!s_pInstance, "Application already exist!");
 		s_pInstance = this;
 
-		WindowConfig config{ window_title, 1920, 1080 }; /* todo: 由配置文件反序列化 */
-		m_pWindow = IWindow::Create(config);
+		m_pWindow = IWindow::Create({ window_title, 1920, 1080 }); /* todo: 由配置文件反序列化 */
 		m_pWindow->SetEventCallback(BIND_EVENT_FUNC(Application::OnEvent));
 
 		m_pImGuiLayer = CreateSharedPtr<ImGuiLayer>();

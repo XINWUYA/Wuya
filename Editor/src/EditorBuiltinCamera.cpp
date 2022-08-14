@@ -107,8 +107,8 @@ namespace Wuya
 	{
 		PROFILE_FUNCTION();
 
-		/*if (!m_IsFrameGraphDirty)
-			return;*/
+		if (!m_IsFrameGraphDirty)
+			return;
 
 		m_pRenderView->SetCullingCamera(shared_from_this());
 
@@ -228,7 +228,7 @@ namespace Wuya
 		/* Êä³ö */
 		m_pRenderView->SetRenderTargetHandle(side_pass->GetData().OutputTexture);
 
-		//m_IsFrameGraphDirty = false;
+		m_IsFrameGraphDirty = false;
 	}
 
 	/*void EditorCamera::SetViewportSize(float width, float height)
