@@ -41,6 +41,7 @@ namespace Wuya
 		m_pMainScene = CreateSharedPtr<Scene>();
 		m_SceneHierarchy.SetOwnerScene(m_pMainScene);
 
+#if 0
 		// Material
 		auto material = CreateSharedPtr<Material>();
 		const auto albedo_texture = Texture2D::Create("assets/textures/container.jpg");
@@ -67,8 +68,19 @@ namespace Wuya
 			auto& transform_component = entity.GetComponent<TransformComponent>();
 			transform_component.Position = glm::vec3(0, 0, 0);
 		}
+#endif
 
-
+		auto model = LoadObjMeshFromFile("assets/models/dragon/dragon.obj");
+		{
+			{
+				Entity entity = m_pMainScene->CreateEntity("Dragon");
+				auto& mesh_component = entity.AddComponent<MeshComponent>();
+				mesh_component.MeshSegments.insert(mesh_component.MeshSegments.end(), model.begin(), model.end());
+				auto& transform_component = entity.GetComponent<TransformComponent>();
+				transform_component.Position = glm::vec3(0, 0, 0);
+				transform_component.Scale = glm::vec3(5, 5, 5);
+			}
+		}
 	}
 
 	void EditorLayer::OnDetached()

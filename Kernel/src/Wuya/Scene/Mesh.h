@@ -1,16 +1,19 @@
 #pragma once
+#include <glm/glm.hpp>
+
 namespace Wuya
 {
 	class Material;
 	class VertexArray;
 
-	enum class PrimitiveType : uint8_t
+	/* 包围盒 */
+	struct AABB
 	{
-		Cube,
-		Sphere,
-		Plane
+		glm::vec3 Min;
+		glm::vec3 Max;
 	};
 
+	/* 网格数据 */
 	class MeshSegment
 	{
 	public:
@@ -29,8 +32,23 @@ namespace Wuya
 		SharedPtr<VertexArray> m_pVertexArray{ nullptr };
 		/* 材质 */
 		SharedPtr<Material> m_pMaterial{ nullptr };
+
+		/* AABB */
+		AABB m_AABB{};
+	};
+
+
+	/* 图元类型 */
+	enum class PrimitiveType : uint8_t
+	{
+		Cube,
+		Sphere,
+		Plane
 	};
 
 	/* 根据类型创建一个常规网格 */
 	SharedPtr<MeshSegment> CreatePrimitive(PrimitiveType type, const SharedPtr<Material>& material);
+
+	/* 从文件加载一个Obj模型 */
+	std::vector<SharedPtr<MeshSegment>> LoadObjMeshFromFile(const std::string& filepath);
 }

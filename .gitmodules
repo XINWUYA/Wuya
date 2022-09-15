@@ -28,3 +28,6 @@
 [submodule "Kernel/third_party/xxHash"]
 	path = Kernel/third_party/xxHash
 	url = https://github.com/Cyan4973/xxHash
+[submodule "Kernel/third_party/tinyobjloader"]
+	path = Kernel/third_party/tinyobjloader
+	url = https://github.com/tinyobjloader/tinyobjloader

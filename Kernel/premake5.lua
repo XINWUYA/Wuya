@@ -30,6 +30,7 @@ project "Kernel"
 		"%{IncludeDirs.entt}",
 		"%{IncludeDirs.tinyxml2}",
 		"%{IncludeDirs.xxHash}",
+		"%{IncludeDirs.tinyobjloader}",
 	}
 	
 	defines
@@ -45,6 +46,7 @@ project "Kernel"
 		"Glad",
 		"ImGui",
 		"tinyxml2",
+		"tinyobjloader",
 		"xxHash",
 		"opengl32.lib",
 	}

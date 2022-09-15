@@ -157,20 +157,16 @@ namespace Wuya
 	{
 		PROFILE_FUNCTION();
 
-#ifdef WUYA_DEBUG
-	if (m_SupportedExtensions.KHR_debug)
-		glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, name);
-#endif
+		if (m_SupportedExtensions.KHR_debug)
+			glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, name);
 	}
 
 	void OpenGLRenderAPI::PopDebugGroup()
 	{
 		PROFILE_FUNCTION();
 
-#ifdef WUYA_DEBUG
-	if (m_SupportedExtensions.KHR_debug)
-		glPopDebugGroup();
-#endif
+		if (m_SupportedExtensions.KHR_debug)
+			glPopDebugGroup();
 	}
 
 	/* 获取OpenGL支持的扩展 */

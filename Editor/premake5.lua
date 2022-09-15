@@ -30,6 +30,7 @@ project "Editor"
 		"%{IncludeDirs.entt}",
 		"%{IncludeDirs.tinyxml2}",
 		"%{IncludeDirs.ImGuizmo}",
+		"%{IncludeDirs.tinyobjloader}",
 	}
 
 	links
