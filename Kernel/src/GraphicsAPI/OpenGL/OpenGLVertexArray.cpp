@@ -58,7 +58,7 @@ namespace Wuya
 	{
 		PROFILE_FUNCTION();
 
-		ASSERT(vertex_buffer->GetLayout().GetElements().size(), "Vertex buffer has no layout!");
+		ASSERT(vertex_buffer && !vertex_buffer->GetLayout().GetElements().empty(), "Vertex buffer has no layout!");
 
 		glBindVertexArray(m_VertexArrayId);
 		vertex_buffer->Bind();
