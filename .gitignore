@@ -80,7 +80,7 @@ StyleCopReport.xml
 *_h.h
 *.ilk
 *.meta
-*.obj
+#*.obj
 *.iobj
 *.pch
 *.pdb
@@ -372,3 +372,5 @@ FodyWeavers.xsd
 framegraph.txt
 TimeCostProfiler-Startup.json
 TimeCostProfiler-Runtime.json
+
+build/

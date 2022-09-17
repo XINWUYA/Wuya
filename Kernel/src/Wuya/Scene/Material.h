@@ -14,7 +14,6 @@ namespace Wuya
 	{
 	public:
 		Material() = default;
-		Material(const std::string& path);
 		~Material();
 
 		/* 获取材质路径 */
@@ -35,6 +34,15 @@ namespace Wuya
 		void Bind();
 		/* 解绑材质 */
 		void Unbind();
+
+		/* 默认材质 */
+		static SharedPtr<Material> Default();
+		/* 错误材质 */
+		static SharedPtr<Material> Error();
+
+		/* 序列化和反序列化材质 */
+		void Serializer();
+		bool Deserializer(const std::string& path);
 
 	private:
 		/* 材质路径 */

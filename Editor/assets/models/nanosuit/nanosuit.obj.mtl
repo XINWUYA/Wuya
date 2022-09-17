@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Materials Count="6">
+    <Material ID="0" Name="Arm" Shader="assets/shaders/default.glsl" AlbedoTex="assets/models/nanosuit/arm_dif.png" SpecularTex="assets/models/nanosuit/arm_showroom_spec.png" NormalTex="assets/models/nanosuit/arm_showroom_ddn.png" Diffuse="0.640000 0.640000 0.640000" Specular="0.500000 0.500000 0.500000"/>
+    <Material ID="1" Name="Body" Shader="assets/shaders/default.glsl" AlbedoTex="assets/models/nanosuit/body_dif.png" SpecularTex="assets/models/nanosuit/body_showroom_spec.png" NormalTex="assets/models/nanosuit/body_showroom_ddn.png" Diffuse="0.640000 0.640000 0.640000" Specular="0.500000 0.500000 0.500000"/>
+    <Material ID="2" Name="Glass" Shader="assets/shaders/default.glsl" AlbedoTex="assets/models/nanosuit/glass_dif.png" NormalTex="assets/models/nanosuit/glass_ddn.png" Diffuse="0.640000 0.640000 0.640000" Specular="0.500000 0.500000 0.500000"/>
+    <Material ID="3" Name="Hand" Shader="assets/shaders/default.glsl" AlbedoTex="assets/models/nanosuit/hand_dif.png" SpecularTex="assets/models/nanosuit/hand_showroom_spec.png" NormalTex="assets/models/nanosuit/hand_showroom_ddn.png" Diffuse="0.640000 0.640000 0.640000" Specular="0.500000 0.500000 0.500000"/>
+    <Material ID="4" Name="Helmet" Shader="assets/shaders/default.glsl" AlbedoTex="assets/models/nanosuit/helmet_diff.png" SpecularTex="assets/models/nanosuit/helmet_showroom_spec.png" NormalTex="assets/models/nanosuit/helmet_showroom_ddn.png" Diffuse="0.640000 0.640000 0.640000" Specular="0.500000 0.500000 0.500000"/>
+    <Material ID="5" Name="Leg" Shader="assets/shaders/default.glsl" AlbedoTex="assets/models/nanosuit/leg_dif.png" SpecularTex="assets/models/nanosuit/leg_showroom_spec.png" NormalTex="assets/models/nanosuit/leg_showroom_ddn.png" Diffuse="0.640000 0.640000 0.640000" Specular="0.500000 0.500000 0.500000"/>
+</Materials>

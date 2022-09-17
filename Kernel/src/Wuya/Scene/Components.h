@@ -4,7 +4,7 @@
 #include <glm/gtx/quaternion.hpp>
 #include "SceneCamera.h"
 #include "Wuya/Renderer/Texture.h"
-#include "Mesh.h"
+#include "Model.h"
 
 namespace Wuya
 {
@@ -67,11 +67,11 @@ namespace Wuya
 		{}
 	};
 
-	/* 模型网格组件 */
-	struct MeshComponent
+	/* 模型组件 */
+	struct ModelComponent
 	{
-		std::vector<SharedPtr<MeshSegment>> MeshSegments;
-		MeshComponent() = default;
-		MeshComponent(const MeshComponent&) = default;
+		SharedPtr<Model> Model;
+		ModelComponent() = default;
+		ModelComponent(const ModelComponent&) = default;
 	};
 }

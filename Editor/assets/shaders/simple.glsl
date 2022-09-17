@@ -47,9 +47,15 @@ struct SVextex2Frag
 
 layout (location = 0) in SVextex2Frag Input;
 
+uniform sampler2D u_AlbedoTexture;
+uniform sampler2D u_ColorTexture;
+
 void main()
 {
-	OutGBufferAlbedo = vec4(Input.Position, 1.0f);
+	vec4 albedo = texture(u_AlbedoTexture, Input.TexCoord);
+	vec4 color = texture(u_ColorTexture, Input.TexCoord);
+	
+	OutGBufferAlbedo = vec4(albedo.rgb, 1.0f);
 	OutGBufferNormal = vec4(Input.Normal, 1.0f);
 	OutGBufferRoughness = vec4(1.0f, 0.0f, 0.0f, 1.0f);
 }

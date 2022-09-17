@@ -72,12 +72,12 @@ namespace Wuya
 
 		/* 收集所有模型 */
 		const auto owner_scene = m_pOwnerScene.lock();
-		const auto mesh_entity_group = owner_scene->GetRegistry().group<TransformComponent>(entt::get<MeshComponent>);
-		for (auto& entity : mesh_entity_group)
+		const auto model_entity_group = owner_scene->GetRegistry().group<TransformComponent>(entt::get<ModelComponent>);
+		for (auto& entity : model_entity_group)
 		{
-			auto [transform_component, mesh_component] = mesh_entity_group.get<TransformComponent, MeshComponent>(entity);
+			auto [transform_component, model_component] = model_entity_group.get<TransformComponent, ModelComponent>(entity);
 
-			for (const auto& mesh_segment : mesh_component.MeshSegments)
+			for (const auto& mesh_segment : model_component.Model->GetMeshSegments())
 			{
 				const auto& world_position = transform_component.Position;
 				// todo: 执行剔除

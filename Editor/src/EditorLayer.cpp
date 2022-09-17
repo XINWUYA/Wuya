@@ -8,6 +8,7 @@
 #include "Wuya/Renderer/RenderView.h"
 #include "Wuya/Renderer/FrameGraph/FrameGraph.h"
 #include "Wuya/Scene/Material.h"
+#include "Wuya/Scene/Model.h"
 
 namespace Wuya
 {
@@ -27,59 +28,41 @@ namespace Wuya
 
 		// Camera
 		m_pEditorCamera = CreateSharedPtr<EditorCamera>(30.0f);
-		//m_pOrthographicCameraController = CreateSharedPtr<OrthographicCameraController>(m_pEditorCamera->GetAspectRatio());
-		//m_pEditorCamera->SetViewportSize(1280, 720);
-		//m_pEditorCamera->SetDistance(1);
-
-		// Frame buffer
-		/*FrameBufferDescription desc;
-		desc.Width = 1280;
-		desc.Height = 720;
-		desc.Attachments = { FrameBufferTargetFormat::RGBA8, FrameBufferTargetFormat::RedInteger, FrameBufferTargetFormat::Depth24Stencil8 };
-		m_pFrameBuffer = FrameBuffer::Create(desc);*/
 
 		m_pMainScene = CreateSharedPtr<Scene>();
 		m_SceneHierarchy.SetOwnerScene(m_pMainScene);
 
-#if 0
-		// Material
-		auto material = CreateSharedPtr<Material>();
-		const auto albedo_texture = Texture2D::Create("assets/textures/container.jpg");
-		material->SetTexture(albedo_texture, 0);
-		const auto shader = ShaderLibrary::Instance().GetOrLoad("assets/shaders/cube.glsl");
-		material->SetShader(shader);
-
-		// Create MeshSegment
-		auto mesh_segment = CreatePrimitive(PrimitiveType::Cube, material);
-
-		// Add to Scene
 		{
+			// Material
+			auto material = CreateSharedPtr<Material>();
+			const auto albedo_texture = Texture2D::Create("assets/textures/container.jpg");
+			material->SetTexture(albedo_texture, 0);
+			const auto shader = ShaderLibrary::Instance().GetOrLoad("assets/shaders/simple.glsl");
+			material->SetShader(shader);
+
 			Entity entity = m_pMainScene->CreateEntity("Cube");
-			auto& mesh_component = entity.AddComponent<MeshComponent>();
-			mesh_component.MeshSegments.emplace_back(mesh_segment);
+			auto& mesh_component = entity.AddComponent<ModelComponent>();
+			mesh_component.Model = Model::Create(BuiltinModelType::Cube, material);
 			auto& transform_component = entity.GetComponent<TransformComponent>();
 			transform_component.Position = glm::vec3(3, 0, 0);
 		}
 
 		{
-			Entity entity = m_pMainScene->CreateEntity("Cube2");
-			auto& mesh_component = entity.AddComponent<MeshComponent>();
-			mesh_component.MeshSegments.emplace_back(mesh_segment);
+			Entity entity = m_pMainScene->CreateEntity("Dragon");
+			auto& mesh_component = entity.AddComponent<ModelComponent>();
+			mesh_component.Model = Model::Create("assets/models/dragon/dragon.obj");
 			auto& transform_component = entity.GetComponent<TransformComponent>();
 			transform_component.Position = glm::vec3(0, 0, 0);
+			transform_component.Scale = glm::vec3(5, 5, 5);
 		}
-#endif
 
-		auto model = LoadObjMeshFromFile("assets/models/dragon/dragon.obj");
 		{
-			{
-				Entity entity = m_pMainScene->CreateEntity("Dragon");
-				auto& mesh_component = entity.AddComponent<MeshComponent>();
-				mesh_component.MeshSegments.insert(mesh_component.MeshSegments.end(), model.begin(), model.end());
-				auto& transform_component = entity.GetComponent<TransformComponent>();
-				transform_component.Position = glm::vec3(0, 0, 0);
-				transform_component.Scale = glm::vec3(5, 5, 5);
-			}
+			Entity entity = m_pMainScene->CreateEntity("Nanosuit");
+			auto& mesh_component = entity.AddComponent<ModelComponent>();
+			mesh_component.Model = Model::Create("assets/models/nanosuit/nanosuit.obj");
+			auto& transform_component = entity.GetComponent<TransformComponent>();
+			transform_component.Position = glm::vec3(-3, -1, 0);
+			transform_component.Scale = glm::vec3(0.2, 0.2, 0.2);
 		}
 	}
 

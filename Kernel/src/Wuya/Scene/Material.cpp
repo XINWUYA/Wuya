@@ -5,12 +5,6 @@
 
 namespace Wuya
 {
-	Material::Material(const std::string& path)
-		: m_Path(path)
-	{
-		// todo: Load from file
-	}
-
 	Material::~Material()
 	{
 		m_pShader.reset();
@@ -92,5 +86,41 @@ namespace Wuya
 	void Material::Unbind()
 	{
 		m_pShader->Unbind();
+	}
+
+	/* 默认材质 */
+	SharedPtr<Material> Material::Default()
+	{
+		/* todo: 改为从材质文件加载 */
+		auto material = CreateSharedPtr<Material>();
+
+		const auto shader = ShaderLibrary::Instance().GetOrLoad("assets/shaders/default.glsl");
+		material->SetShader(shader);
+
+		return material;
+	}
+
+	/* 错误材质 */
+	SharedPtr<Material> Material::Error()
+	{
+		/* todo: 改为从材质文件加载 */
+		auto material = CreateSharedPtr<Material>();
+
+		const auto shader = ShaderLibrary::Instance().GetOrLoad("assets/shaders/error.glsl");
+		material->SetShader(shader);
+
+		return material;
+	}
+
+	/* 序列化材质 */
+	void Material::Serializer()
+	{
+	}
+
+	/* 反序列化材质 */
+	bool Material::Deserializer(const std::string& path)
+	{
+		m_Path = path;
+		return true;
 	}
 }

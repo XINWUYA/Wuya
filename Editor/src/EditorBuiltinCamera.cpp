@@ -5,6 +5,7 @@
 #include <Wuya/Renderer/FrameGraph/FrameGraph.h>
 #include <Wuya/Renderer/RenderView.h>
 #include <Wuya/Scene/Material.h>
+#include "Wuya/Scene/Mesh.h"
 
 namespace Wuya
 {
@@ -129,8 +130,10 @@ namespace Wuya
 		struct GBufferPassData
 		{
 			FrameGraphResourceHandleTyped<FrameGraphTexture> GBufferAlbedo;
+			FrameGraphResourceHandleTyped<FrameGraphTexture> GBufferSpecular;
 			FrameGraphResourceHandleTyped<FrameGraphTexture> GBufferNormal;
-			FrameGraphResourceHandleTyped<FrameGraphTexture> GBufferRoughness;
+			FrameGraphResourceHandleTyped<FrameGraphTexture> GBufferRoughnessMetallic;
+			FrameGraphResourceHandleTyped<FrameGraphTexture> GBufferEmissive;
 			FrameGraphResourceHandleTyped<FrameGraphTexture> GBufferDepth;
 		};
 
@@ -138,18 +141,24 @@ namespace Wuya
 			[&](FrameGraphBuilder& builder, GBufferPassData& data)
 			{
 				data.GBufferAlbedo = builder.CreateTexture("GBufferAlbedo", color_target_desc);
+				data.GBufferSpecular = builder.CreateTexture("GBufferSpecular", color_target_desc);
 				data.GBufferNormal = builder.CreateTexture("GBufferNormal", color_target_desc);
-				data.GBufferRoughness = builder.CreateTexture("GBufferRoughness", color_target_desc);
+				data.GBufferRoughnessMetallic = builder.CreateTexture("GBufferRoughnessMetallic", color_target_desc);
+				data.GBufferEmissive = builder.CreateTexture("GBufferEmissive", color_target_desc);
 				data.GBufferDepth = builder.CreateTexture("GBufferDepth", depth_target_desc);
 				builder.BindOutputResource(data.GBufferAlbedo, FrameGraphTexture::Usage::ColorAttachment);
+				builder.BindOutputResource(data.GBufferSpecular, FrameGraphTexture::Usage::ColorAttachment);
 				builder.BindOutputResource(data.GBufferNormal, FrameGraphTexture::Usage::ColorAttachment);
-				builder.BindOutputResource(data.GBufferRoughness, FrameGraphTexture::Usage::ColorAttachment);
+				builder.BindOutputResource(data.GBufferRoughnessMetallic, FrameGraphTexture::Usage::ColorAttachment);
+				builder.BindOutputResource(data.GBufferEmissive, FrameGraphTexture::Usage::ColorAttachment);
 				builder.BindOutputResource(data.GBufferDepth, FrameGraphTexture::Usage::DepthAttachment);
 
 				FrameGraphPassInfo::Descriptor pass_desc;
 				pass_desc.Attachments.ColorAttachments[0] = data.GBufferAlbedo;
-				pass_desc.Attachments.ColorAttachments[1] = data.GBufferNormal;
-				pass_desc.Attachments.ColorAttachments[2] = data.GBufferRoughness;
+				pass_desc.Attachments.ColorAttachments[1] = data.GBufferSpecular;
+				pass_desc.Attachments.ColorAttachments[2] = data.GBufferNormal;
+				pass_desc.Attachments.ColorAttachments[3] = data.GBufferRoughnessMetallic;
+				pass_desc.Attachments.ColorAttachments[4] = data.GBufferEmissive;
 				pass_desc.Attachments.DepthAttachment = data.GBufferDepth;
 				pass_desc.ViewportRegion = m_ViewportRegion;
 				builder.CreateRenderPass("GBufferPassRenderTarget", pass_desc);
@@ -177,8 +186,10 @@ namespace Wuya
 			}
 		);
 		frame_graph->GetBlackboard()["GBufferAlbedo"] = gbuffer_pass->GetData().GBufferAlbedo;
+		frame_graph->GetBlackboard()["GBufferSpecular"] = gbuffer_pass->GetData().GBufferSpecular;
 		frame_graph->GetBlackboard()["GBufferNormal"] = gbuffer_pass->GetData().GBufferNormal;
-		frame_graph->GetBlackboard()["GBufferRoughness"] = gbuffer_pass->GetData().GBufferRoughness;
+		frame_graph->GetBlackboard()["GBufferRoughnessMetallic"] = gbuffer_pass->GetData().GBufferRoughnessMetallic;
+		frame_graph->GetBlackboard()["GBufferEmissive"] = gbuffer_pass->GetData().GBufferEmissive;
 
 		/* Side Pass */
 		struct SidePassData

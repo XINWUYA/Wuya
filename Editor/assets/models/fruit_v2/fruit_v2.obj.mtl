@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Materials Count="1">
+    <Material ID="0" Name="phongE2SG" Shader="assets/shaders/default.glsl" Diffuse="0.500000 0.500000 0.500000" Specular="0.500000 0.500000 0.500000"/>
+</Materials>

@@ -337,7 +337,7 @@ namespace Wuya
 	}
 
 	template<>
-	void Scene::OnComponentAdded<MeshComponent>(Entity& entity, MeshComponent& component)
+	void Scene::OnComponentAdded<ModelComponent>(Entity& entity, ModelComponent& component)
 	{
 
 	}
