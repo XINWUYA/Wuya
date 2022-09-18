@@ -46,11 +46,6 @@ namespace Wuya
 	{
 		PROFILE_FUNCTION();
 
-		m_VisibleMeshObjects.clear();
-
-		/* 收集当前RenderView可见的对象 */
-		PrepareVisibleObjects();
-
 		/* 生成当前FrameBuffer */
 		m_pFrameGraph->Build();
 	}
@@ -59,6 +54,11 @@ namespace Wuya
 	void RenderView::Execute()
 	{
 		PROFILE_FUNCTION();
+
+		m_VisibleMeshObjects.clear();
+
+		/* 收集当前RenderView可见的对象 */
+		PrepareVisibleObjects();
 
 		m_pFrameGraph->Execute();
 	}
@@ -72,6 +72,9 @@ namespace Wuya
 
 		/* 收集所有模型 */
 		const auto owner_scene = m_pOwnerScene.lock();
+		if (!owner_scene)
+			return;
+
 		const auto model_entity_group = owner_scene->GetRegistry().group<TransformComponent>(entt::get<ModelComponent>);
 		for (auto& entity : model_entity_group)
 		{

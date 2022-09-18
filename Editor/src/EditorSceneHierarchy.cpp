@@ -240,22 +240,21 @@ namespace Wuya
 				/* 相机 */
 				if (ImGui::MenuItem("Camera Component"))
 				{
-					if (m_SelectedEntity.HasComponent<CameraComponent>()) /* todo: 为什么不使用entity */
-						EDITOR_LOG_WARN("Another camera component has existed!");
-					else
-						m_SelectedEntity.AddComponent<CameraComponent>();
-
+					m_SelectedEntity.AddComponent<CameraComponent>();
 					ImGui::CloseCurrentPopup();
 				}
 
 				/* 图片精灵 */
 				if (ImGui::MenuItem("Sprite Component"))
 				{
-					if (m_SelectedEntity.HasComponent<SpriteComponent>())
-						EDITOR_LOG_WARN("Another sprite component has existed!");
-					else
-						m_SelectedEntity.AddComponent<SpriteComponent>();
+					m_SelectedEntity.AddComponent<SpriteComponent>();
+					ImGui::CloseCurrentPopup();
+				}
 
+				/* 模型 */
+				if (ImGui::MenuItem("Model Component"))
+				{
+					m_SelectedEntity.AddComponent<ModelComponent>();
 					ImGui::CloseCurrentPopup();
 				}
 
@@ -339,6 +338,44 @@ namespace Wuya
 					}
 					break;
 					}
+				});
+		}
+
+		/* 模型组件 */
+		{
+			PROFILE_SCOPE("Show ModelComponent");
+
+			ShowComponent<ModelComponent>("Model", entity,
+				[](auto& component)
+				{
+					auto& model = component.Model;
+
+					{
+						ImGui::PushID("ModelPath");
+						ImGui::Columns(2);
+
+						/* Label */
+						ImGui::SetColumnWidth(0, 100);
+						ImGui::Text("ModelPath");
+
+						/* Texture */
+						ImGui::NextColumn();
+						{
+							ImGui::TextWrapped(model->GetPath().c_str());
+						}
+
+						ImGui::Columns(1);
+						ImGui::PopID();
+					}
+
+					/*const auto& mesh_segments = model->GetMeshSegments();
+					for (auto& mesh_segment : mesh_segments)
+					{
+						auto* mesh_segment_root = model_root->InsertNewChildElement("MeshSegment");
+						mesh_segment_root->SetAttribute("Name", mesh_segment->GetName().c_str());
+						auto* mtl_root = mesh_segment_root->InsertNewChildElement("Material");
+						mtl_root->SetAttribute("ShaderPath", mesh_segment->GetMaterial()->GetShader()->GetPath().c_str());
+					}*/					
 				});
 		}
 	}

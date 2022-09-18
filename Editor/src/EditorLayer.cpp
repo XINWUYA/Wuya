@@ -32,22 +32,22 @@ namespace Wuya
 		m_pMainScene = CreateSharedPtr<Scene>();
 		m_SceneHierarchy.SetOwnerScene(m_pMainScene);
 
-		{
-			// Material
-			auto material = CreateSharedPtr<Material>();
-			const auto albedo_texture = Texture2D::Create("assets/textures/container.jpg");
-			material->SetTexture(albedo_texture, 0);
-			const auto shader = ShaderLibrary::Instance().GetOrLoad("assets/shaders/simple.glsl");
-			material->SetShader(shader);
+		//{
+		//	// Material
+		//	auto material = CreateSharedPtr<Material>();
+		//	const auto albedo_texture = Texture2D::Create("assets/textures/container.jpg");
+		//	material->SetTexture(albedo_texture, 0);
+		//	const auto shader = ShaderLibrary::Instance().GetOrLoad("assets/shaders/simple.glsl");
+		//	material->SetShader(shader);
 
-			Entity entity = m_pMainScene->CreateEntity("Cube");
-			auto& mesh_component = entity.AddComponent<ModelComponent>();
-			mesh_component.Model = Model::Create(BuiltinModelType::Cube, material);
-			auto& transform_component = entity.GetComponent<TransformComponent>();
-			transform_component.Position = glm::vec3(3, 0, 0);
-		}
+		//	Entity entity = m_pMainScene->CreateEntity("Cube");
+		//	auto& mesh_component = entity.AddComponent<ModelComponent>();
+		//	mesh_component.Model = Model::Create(BuiltinModelType::Cube, material);
+		//	auto& transform_component = entity.GetComponent<TransformComponent>();
+		//	transform_component.Position = glm::vec3(3, 0, 0);
+		//}
 
-		{
+		/*{
 			Entity entity = m_pMainScene->CreateEntity("Dragon");
 			auto& mesh_component = entity.AddComponent<ModelComponent>();
 			mesh_component.Model = Model::Create("assets/models/dragon/dragon.obj");
@@ -63,7 +63,7 @@ namespace Wuya
 			auto& transform_component = entity.GetComponent<TransformComponent>();
 			transform_component.Position = glm::vec3(-3, -1, 0);
 			transform_component.Scale = glm::vec3(0.2, 0.2, 0.2);
-		}
+		}*/
 	}
 
 	void EditorLayer::OnDetached()
@@ -222,7 +222,7 @@ namespace Wuya
 	{
 		PROFILE_FUNCTION();
 
-		m_pMainScene->Serializer("assets/scenes/test.scn");
+		m_pMainScene->Serializer("assets/scenes/test1.scn");
 	}
 
 	void EditorLayer::OpenScene(const std::filesystem::path& path)
@@ -240,6 +240,9 @@ namespace Wuya
 		{
 			m_pMainScene = new_scene;
 			m_SceneHierarchy.SetOwnerScene(m_pMainScene);
+
+			/* 切换场景时，需更新Editor RenderView的场景 */
+			m_pEditorCamera->GetRenderView()->SetOwnerScene(m_pMainScene);
 		}
 	}
 

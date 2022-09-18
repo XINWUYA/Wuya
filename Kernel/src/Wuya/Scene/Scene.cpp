@@ -226,8 +226,21 @@ namespace Wuya
 						}
 					}
 
-					/* Mesh */
-					/* todo */
+					/* Model */
+					if (auto* model_root = entity_root->FirstChildElement("Model"))
+					{
+						auto& model_component = entity.AddComponent<ModelComponent>();
+
+						const std::string model_path = model_root->Attribute("ModelPath");
+
+						if (!model_path.empty())
+							model_component.Model = Model::Create(model_path);
+						
+
+						/* todo: 内建模型处理 */
+
+					}
+
 				}
 			}	
 		}
@@ -304,6 +317,15 @@ namespace Wuya
 				break;
 			}
 			
+		}
+
+		/* Model */
+		if (entity.HasComponent<ModelComponent>())
+		{
+			auto* model_root = entity_root->InsertNewChildElement("Model");
+			const auto& component = entity.GetComponent<ModelComponent>();
+
+			model_root->SetAttribute("ModelPath", component.Model->GetPath().c_str());
 		}
 	}
 

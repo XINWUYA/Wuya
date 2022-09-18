@@ -1,5 +1,6 @@
 #include "Pch.h"
 #include "Material.h"
+#include <tinyxml2.h>
 #include "Wuya/Renderer/Shader.h"
 #include "Wuya/Renderer/Texture.h"
 
@@ -112,15 +113,74 @@ namespace Wuya
 		return material;
 	}
 
-	/* 序列化材质 */
-	void Material::Serializer()
+	MaterialGroup::MaterialGroup(std::string path)
+		: m_Path(std::move(path))
 	{
+		Deserializer();
 	}
 
-	/* 反序列化材质 */
-	bool Material::Deserializer(const std::string& path)
+	/* 添加一个Material */
+	void MaterialGroup::EmplaceMaterial(const SharedPtr<Material>& material)
 	{
-		m_Path = path;
+		m_Materials.emplace_back(material);
+	}
+
+	/* 根据索引获取Material */
+	const SharedPtr<Material>& MaterialGroup::GetMaterialByIndex(int idx)
+	{
+		if (idx < 0 || idx >= m_Materials.size())
+		{
+			CORE_LOG_ERROR("Unaccessable material idx.");
+			return nullptr;
+		}
+
+		return m_Materials[idx];
+	}
+
+	/* 反序列化 */
+	bool MaterialGroup::Deserializer()
+	{
+		ASSERT(!m_Path.empty());
+
+		auto* in_mtl_file = new tinyxml2::XMLDocument();
+		tinyxml2::XMLError error = in_mtl_file->LoadFile(m_Path.c_str());
+		if (error != tinyxml2::XML_SUCCESS)
+		{
+			CORE_LOG_ERROR("Failed to deserializer mtl file: {}.", m_Path);
+			return false;
+		}
+
+		tinyxml2::XMLElement* mtl_root = in_mtl_file->FirstChildElement("Materials");
+		auto* count = mtl_root->FindAttribute("Count");
+		m_Materials.resize(count->IntValue());
+
+		for (tinyxml2::XMLElement* mtl_inst = mtl_root->FirstChildElement(); mtl_inst; mtl_inst = mtl_inst->NextSiblingElement("Material"))
+		{
+			auto material = CreateSharedPtr<Material>();
+			auto* id_attr = mtl_inst->FindAttribute("ID");
+
+			if (auto* albedo_tex = mtl_inst->FindAttribute("AlbedoTex"))
+				material->SetTexture(Texture2D::Create(albedo_tex->Value()), 0);
+			if (auto* specular_tex = mtl_inst->FindAttribute("SpecularTex"))
+				material->SetTexture(Texture2D::Create(specular_tex->Value()), 1);
+			if (auto* normal_tex = mtl_inst->FindAttribute("NormalTex"))
+				material->SetTexture(Texture2D::Create(normal_tex->Value()), 2);
+			if (auto* roughness_tex = mtl_inst->FindAttribute("RoughnessTex"))
+				material->SetTexture(Texture2D::Create(roughness_tex->Value()), 3);
+			if (auto* metallic_tex = mtl_inst->FindAttribute("MetallicTex"))
+				material->SetTexture(Texture2D::Create(metallic_tex->Value()), 4);
+			if (auto* emissive_tex = mtl_inst->FindAttribute("EmissiveTex"))
+				material->SetTexture(Texture2D::Create(emissive_tex->Value()), 5);
+
+			material->SetParameters("Diffuse", ToVec3(mtl_inst->Attribute("Diffuse")));
+			material->SetParameters("Specular", ToVec3(mtl_inst->Attribute("Specular")));
+
+			material->SetShader(ShaderLibrary::Instance().GetOrLoad(mtl_inst->Attribute("Shader")));
+
+			m_Materials[id_attr->IntValue()] = material;
+		}
+
+		delete in_mtl_file;
 		return true;
 	}
 }

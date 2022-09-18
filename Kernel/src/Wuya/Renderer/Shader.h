@@ -8,8 +8,11 @@ namespace Wuya
 	class Shader
 	{
 	public:
-		Shader() = default;
+		Shader(std::string path);
 		virtual ~Shader() = default;
+
+		/* 路径 */
+		const std::string& GetPath() const { return m_Path; }
 
 		/* 绑定 */
 		virtual void Bind() = 0;
@@ -30,6 +33,10 @@ namespace Wuya
 		/* 创建Shader */
 		static SharedPtr<Shader> Create(const std::string& filepath);
 		static SharedPtr<Shader> Create(const std::string& name, const std::string& vertex_src, const std::string& pixel_src);
+
+	protected:
+		/* 文件路径 */
+		std::string m_Path{};
 	};
 
 	/* Shader库：

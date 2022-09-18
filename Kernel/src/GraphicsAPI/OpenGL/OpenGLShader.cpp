@@ -19,7 +19,7 @@ namespace Wuya
 	}
 
 	OpenGLShader::OpenGLShader(const std::string& filepath)
-		: m_FilePath(filepath)
+		: Shader(filepath)
 	{
 		PROFILE_FUNCTION();
 
@@ -40,7 +40,7 @@ namespace Wuya
 	}
 
 	OpenGLShader::OpenGLShader(std::string name, const std::string& vertex_src, const std::string& pixel_src)
-		: m_DebugName(std::move(name))
+		: Shader(""), m_DebugName(std::move(name))
 	{
 		PROFILE_FUNCTION();
 
@@ -253,7 +253,7 @@ namespace Wuya
 				glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &max_length);
 				std::vector<GLchar> info_log(max_length);
 				glGetShaderInfoLog(shader, max_length, &max_length, &info_log[0]);
-				CORE_LOG_ERROR("Shader compiled failed ({0}):\n{1}", m_FilePath, info_log.data());
+				CORE_LOG_ERROR("Shader compiled failed ({0}):\n{1}", m_Path, info_log.data());
 				ASSERT(false);
 
 				// Delete current shader
@@ -289,7 +289,7 @@ namespace Wuya
 
 			std::vector<GLchar> info_log(maxLength);
 			glGetProgramInfoLog(program, maxLength, &maxLength, info_log.data());
-			CORE_LOG_ERROR("Shader linking failed ({0}):\n{1}", m_FilePath, info_log.data());
+			CORE_LOG_ERROR("Shader linking failed ({0}):\n{1}", m_Path, info_log.data());
 			ASSERT(false);
 
 			// Delete program

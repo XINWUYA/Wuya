@@ -160,6 +160,9 @@ namespace Wuya
 	{
 		PROFILE_FUNCTION();
 
+		if (m_RenderPassNodes.empty())
+			return;
+
 		/* 仅执行有效的RenderPassNodes */
 		auto iter_current = m_RenderPassNodes.begin();
 		while (iter_current != m_LastValidRenderPassNodeIter)

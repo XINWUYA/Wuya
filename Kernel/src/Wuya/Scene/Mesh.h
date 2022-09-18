@@ -22,6 +22,9 @@ namespace Wuya
 		MeshSegment(std::string name, const SharedPtr<VertexArray>& vertex_array, const SharedPtr<Material>& material);
 		~MeshSegment() = default;
 
+		/* 名称 */
+		const std::string& GetName() const { return m_DebugName; }
+
 		/* 设置顶点数据 */
 		void SetVertexArray(const SharedPtr<VertexArray>& vertex_array) { m_pVertexArray = vertex_array; }
 		[[nodiscard]] const SharedPtr<VertexArray>& GetVertexArray() const { return m_pVertexArray; }

@@ -7,8 +7,8 @@ namespace Wuya
 	class Texture;
 	class Shader;
 
-	/**
-	 * \brief 材质类
+	/*
+	 * 材质类
 	 */
 	class Material
 	{
@@ -16,8 +16,6 @@ namespace Wuya
 		Material() = default;
 		~Material();
 
-		/* 获取材质路径 */
-		const std::string& GetPath() const { return m_Path; }
 		/* 设置Shader */
 		void SetShader(const SharedPtr<Shader>& shader) { m_pShader = shader; }
 		const SharedPtr<Shader>& GetShader() const { return m_pShader; }
@@ -40,13 +38,7 @@ namespace Wuya
 		/* 错误材质 */
 		static SharedPtr<Material> Error();
 
-		/* 序列化和反序列化材质 */
-		void Serializer();
-		bool Deserializer(const std::string& path);
-
 	private:
-		/* 材质路径 */
-		std::string m_Path{};
 		/* Shader */
 		SharedPtr<Shader> m_pShader{ nullptr };
 		/* 材质所需的各种参数<Name, Vale> */
@@ -55,5 +47,32 @@ namespace Wuya
 		std::unordered_map<SharedPtr<Texture>, uint32_t> m_Textures{};
 		/* 光栅化状态配置 */
 		RenderRasterState m_RasterState{};
+	};
+
+	/* 材质组类：
+	 * 每个模型对应一个MaterialGroup
+	 * 每个模型中的MeshSegment对应MaterialGroup中的一个Material
+	 */
+	class MaterialGroup final
+	{
+	public:
+		MaterialGroup(std::string path);
+		~MaterialGroup() = default;
+
+		/* 添加一个Material */
+		void EmplaceMaterial(const SharedPtr<Material>& material);
+		/* 根据索引获取Material */
+		const SharedPtr<Material>& GetMaterialByIndex(int idx);
+		/* 获取组中所有材质 */
+		const std::vector<SharedPtr<Material>>& GetAllMaterials() const { return m_Materials; }
+
+	private:
+		/* 反序列化 */
+		bool Deserializer();
+
+		/* 材质组路径 */
+		std::string m_Path{};
+		/* 材质列表 */
+		std::vector<SharedPtr<Material>> m_Materials;
 	};
 }

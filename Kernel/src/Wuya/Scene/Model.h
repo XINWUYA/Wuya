@@ -27,6 +27,13 @@ namespace Wuya
 		/* 标记是否为静态模型 */
 		[[nodiscard]] virtual bool IsStaticModel() const { return true; }
 
+		/* 模型路径 */
+		void SetPath(const std::string& path) { m_Path = path; }
+		const std::string& GetPath() const { return m_Path; }
+
+		/* 模型名 */
+		const std::string& GetName() const { return m_DebugName; }
+
 		/* 添加一个MeshSegment到模型 */
 		void AddMeshSegment(const SharedPtr<MeshSegment>& mesh_segment);
 		/* 获取所有MeshSegments */
@@ -40,6 +47,8 @@ namespace Wuya
 	private:
 		/* 标记名 */
 		std::string m_DebugName{ "Unnamed Model" };
+		/* 文件路径 */
+		std::string m_Path{};
 		/* 一个模型中包含的子模型 */
 		std::vector<SharedPtr<MeshSegment>> m_MeshSegments{};
 		/* AABB */

@@ -180,48 +180,11 @@ namespace Wuya
 		const std::string basename = filepath.substr(pos + 1); /* 模型名 */
 
 		SharedPtr<Model> model = CreateSharedPtr<Model>(basename);
+		model->SetPath(filepath);
 
-		std::vector<SharedPtr<Material>> valid_materials;
 		/* 先加载mtl文件 */
-		{
-			const std::string mtl_filepath = filepath + ".mtl";
-			auto* in_mtl_file = new tinyxml2::XMLDocument();
-			tinyxml2::XMLError error = in_mtl_file->LoadFile(mtl_filepath.c_str());
-			if (error != tinyxml2::XML_SUCCESS)
-			{
-				CORE_LOG_ERROR("Failed to deserializer mtl file: {}.", mtl_filepath);
-			}
-
-			tinyxml2::XMLElement* mtl_root = in_mtl_file->FirstChildElement("Materials");
-			auto* count = mtl_root->FindAttribute("Count");
-			valid_materials.resize(count->IntValue());
-
-			for (tinyxml2::XMLElement* mtl_inst = mtl_root->FirstChildElement(); mtl_inst; mtl_inst = mtl_inst->NextSiblingElement("Material"))
-			{
-				auto material = CreateSharedPtr<Material>();
-				auto* id_attr = mtl_inst->FindAttribute("ID");
-
-				if (auto* albedo_tex = mtl_inst->FindAttribute("AlbedoTex"))
-					material->SetTexture(Texture2D::Create(albedo_tex->Value()), 0);
-				if (auto* specular_tex = mtl_inst->FindAttribute("SpecularTex"))
-					material->SetTexture(Texture2D::Create(specular_tex->Value()), 1);
-				if (auto* normal_tex = mtl_inst->FindAttribute("NormalTex"))
-					material->SetTexture(Texture2D::Create(normal_tex->Value()), 2);
-				if (auto* roughness_tex = mtl_inst->FindAttribute("RoughnessTex"))
-					material->SetTexture(Texture2D::Create(roughness_tex->Value()), 3);
-				if (auto* metallic_tex = mtl_inst->FindAttribute("MetallicTex"))
-					material->SetTexture(Texture2D::Create(metallic_tex->Value()), 4);
-				if (auto* emissive_tex = mtl_inst->FindAttribute("EmissiveTex"))
-					material->SetTexture(Texture2D::Create(emissive_tex->Value()), 5);
-
-				material->SetParameters("Diffuse", ToVec3(mtl_inst->Attribute("Diffuse")));
-				material->SetParameters("Specular", ToVec3(mtl_inst->Attribute("Specular")));
-
-				material->SetShader(ShaderLibrary::Instance().GetOrLoad(mtl_inst->Attribute("Shader")));
-
-				valid_materials[id_attr->IntValue()] = material;
-			}
-		}
+		const std::string mtl_filepath = filepath + ".mtl";
+		MaterialGroup material_group(mtl_filepath);
 
 		/* 直接从mesh文件加载 */
 		std::ifstream in_mesh_file(mesh_filepath, std::ios::in | std::ios::binary);
@@ -265,8 +228,9 @@ namespace Wuya
 			/* Material */
 			int material_idx;
 			in_mesh_file.read((char*)&material_idx, sizeof(int));
-			bool valid_material_idx = !(material_idx < 0 || material_idx >= valid_materials.size());
-			auto material = valid_material_idx ? valid_materials[material_idx] : Material::Error();
+			auto material = material_group.GetMaterialByIndex(material_idx);
+			if (!material)
+				material = Material::Error();
 
 			/* AABB */
 			glm::vec3 aabb_min, aabb_max;

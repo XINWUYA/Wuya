@@ -5,6 +5,11 @@
 
 namespace Wuya
 {
+	Shader::Shader(std::string path)
+		: m_Path(std::move(path))
+	{
+	}
+
 	/* ´´½¨Shader */
 	SharedPtr<Shader> Shader::Create(const std::string& filepath)
 	{

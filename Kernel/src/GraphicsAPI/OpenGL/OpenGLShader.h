@@ -28,7 +28,6 @@ namespace Wuya
 		void CompileShaders();
 		void CreateShaderProgram();
 
-		std::string m_FilePath{};
 		std::string m_DebugName{};
 		uint32_t m_ProgramID{ 0 };
 
