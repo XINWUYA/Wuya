@@ -146,18 +146,28 @@ namespace Wuya
 		std::ifstream in(filepath, std::ios::in | std::ios::binary); // ifstream closes itself due to RAII
 		if (in)
 		{
-			in.seekg(0, std::ios::end);
-			size_t size = in.tellg();
-			if (size != -1)
+			/* 处理 #include
+			 * Ref: https://community.khronos.org/t/include-in-glsl/59203
+			 */
+			static const std::regex regex("^[ ]*#[ ]*include[ ]+[\"<](.*)[\">].*");
+			std::smatch matches;
+			std::string line_str;
+			while (std::getline(in, line_str))
 			{
-				result.resize(size);
-				in.seekg(0, std::ios::beg);
-				in.read(&result[0], size);
-			}
-			else
-			{
-				CORE_LOG_ERROR("Could not read from file '{0}'", filepath);
-				ASSERT(false);
+				/* 找到#include所在行 */
+				if (line_str.find("#include") != line_str.npos)
+				{
+					if (std::regex_search(line_str, matches, regex))
+					{
+						/* 获取include文件路径并读取 */
+						std::string base_dir = ExtractFileBaseDir(filepath);
+						result += ReadFile(base_dir + matches.str(1)) + '\n';
+					}
+				}
+				else
+				{
+					result += line_str;
+				}
 			}
 		}
 		else

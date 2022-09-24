@@ -37,6 +37,8 @@ void main()
 #type fragment
 #version 450 core
 
+#include "common.glsl"
+
 layout(location = 0) out vec4 OutGBufferAlbedo;
 layout(location = 1) out vec4 OutGBufferSpecular;
 layout(location = 2) out vec4 OutGBufferNormal;
@@ -70,7 +72,7 @@ void main()
 	float metallic = texture(u_MetallicTexture, Input.TexCoord).r;
 	vec3 emissive = texture(u_EmissiveTexture, Input.TexCoord).rgb;
 
-	OutGBufferAlbedo = vec4(albedo, 1.0f);
+	OutGBufferAlbedo = vec4(albedo * DefaultColor, 1.0f);
 	OutGBufferSpecular = vec4(specular, 1.0f);
 	OutGBufferNormal = vec4(normal, 1.0f);
 	OutGBufferRoughnessMetallic = vec4(roughness, metallic, 0.0f, 1.0f);
