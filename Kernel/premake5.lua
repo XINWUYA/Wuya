@@ -31,6 +31,7 @@ project "Kernel"
 		"%{IncludeDirs.tinyxml2}",
 		"%{IncludeDirs.xxHash}",
 		"%{IncludeDirs.tinyobjloader}",
+		"%{IncludeDirs.VulkanSDK}",
 	}
 	
 	defines
@@ -49,6 +50,7 @@ project "Kernel"
 		"tinyobjloader",
 		"xxHash",
 		"opengl32.lib",
+		"%{Librarys.shaderc}"
 	}
 	
 	disablewarnings 
@@ -71,7 +73,7 @@ project "Kernel"
 		runtime "Release"
 		optimize "on"
 
-	filter "configurations:Distribute"
-		defines "WUYA_DISTRIBUTE"
+	filter "configurations:Shipping"
+		defines "WUYA_SHIPPING"
 		runtime "Release"
 		optimize "on"

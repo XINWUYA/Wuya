@@ -6,6 +6,10 @@
 
 namespace Wuya
 {
+	/* 默认材质和错误材质 */
+	SharedPtr<Material> Material::m_pDefaultMaterial = CreateSharedPtr<Material>();// Material::Create();
+	SharedPtr<Material> Material::m_pErrorMaterial = CreateSharedPtr<Material>();
+
 	Material::~Material()
 	{
 		m_pShader.reset();
@@ -90,24 +94,31 @@ namespace Wuya
 	}
 
 	/* 默认材质 */
-	SharedPtr<Material> Material::Default()
+	SharedPtr<Material>& Material::Default()
 	{
-		/* todo: 改为从材质文件加载 */
-		auto material = CreateSharedPtr<Material>();
+		if (!m_pDefaultMaterial->GetShader())
+		{
+			/* 只能在获取时设置Shader，在静态编译期，OpenGL尚未初始化，无法正确创建ShaderProgram */
+			m_pDefaultMaterial->SetShader(ShaderLibrary::Instance().GetOrLoad("assets/shaders/default.glsl"));
+		}
 
-		const auto shader = ShaderLibrary::Instance().GetOrLoad("assets/shaders/default.glsl");
-		material->SetShader(shader);
-
-		return material;
+		return m_pDefaultMaterial;
 	}
 
 	/* 错误材质 */
-	SharedPtr<Material> Material::Error()
+	SharedPtr<Material>& Material::Error()
 	{
-		/* todo: 改为从材质文件加载 */
+		if (!m_pErrorMaterial->GetShader())
+		{
+			m_pErrorMaterial->SetShader(ShaderLibrary::Instance().GetOrLoad("assets/shaders/error.glsl"));
+		}
+		return m_pErrorMaterial;
+	}
+	
+	/* 创建材质 */
+	SharedPtr<Material> Material::Create(const SharedPtr<Shader>& shader)
+	{
 		auto material = CreateSharedPtr<Material>();
-
-		const auto shader = ShaderLibrary::Instance().GetOrLoad("assets/shaders/error.glsl");
 		material->SetShader(shader);
 
 		return material;
@@ -131,7 +142,7 @@ namespace Wuya
 		if (idx < 0 || idx >= m_Materials.size())
 		{
 			CORE_LOG_ERROR("Unaccessable material idx.");
-			return nullptr;
+			return Material::Error();
 		}
 
 		return m_Materials[idx];

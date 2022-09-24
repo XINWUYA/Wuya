@@ -1,4 +1,8 @@
--- Include dirs for projects
+-- Dependencies for projects
+
+-- IncludeDirs
+VulkanSDKDir = os.getenv("VULKAN_SDK")
+
 IncludeDirs = {}
 IncludeDirs["spdlog"] = "%{wks.location}/Kernel/third_party/spdlog/include"
 IncludeDirs["debugbreak"] = "%{wks.location}/Kernel/third_party/debugbreak"
@@ -12,6 +16,15 @@ IncludeDirs["tinyxml2"] = "%{wks.location}/Kernel/third_party/tinyxml2"
 IncludeDirs["ImGuizmo"] = "%{wks.location}/Kernel/third_party/ImGuizmo"
 IncludeDirs["xxHash"] = "%{wks.location}/Kernel/third_party/xxHash"
 IncludeDirs["tinyobjloader"] = "%{wks.location}/Kernel/third_party/tinyobjloader"
+IncludeDirs["VulkanSDK"] = "%{VulkanSDKDir}/Include"
+
+-- LibDirs
+LibraryDirs = {}
+LibraryDirs["VulkanSDK"] = "%{VulkanSDKDir}/Lib"
+
+-- Libs
+Librarys = {}
+Librarys["shaderc"] = "%{LibraryDirs.VulkanSDK}/shaderc_shared.lib"
 
 -- Solution configuration
 workspace "Wuya"
@@ -22,7 +35,7 @@ workspace "Wuya"
 	{
 		"Debug",
 		"Release",
-		"Distribute",
+		"Shipping",
 	}
 	
 	flags
@@ -45,10 +58,10 @@ group "App"
 	include "Editor"
 group ""
 
-group "Samples"
-	include "Samples/001_Triangle"
-	include "Samples/002_Texture"
-	include "Samples/003_Camera"
-	include "Samples/004_FrameBuffer"
-group ""
+--group "Samples"
+--	include "Samples/001_Triangle"
+--	include "Samples/002_Texture"
+--	include "Samples/003_Camera"
+--	include "Samples/004_FrameBuffer"
+--group ""
 

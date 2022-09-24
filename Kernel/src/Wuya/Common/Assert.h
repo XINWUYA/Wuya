@@ -4,7 +4,7 @@
 #include "Wuya/Core/Logger.h"
 #include "Common.h"
 
-#ifdef WUYA_DEBUG
+#ifndef WUYA_SHIPPING
 	#define Break() debug_break()
 #else
 #define Break() void(0)

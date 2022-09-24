@@ -5,6 +5,41 @@
 
 namespace Wuya
 {
+	/* Extract file base dir from path
+	 * Example: 
+	 * path: "assets/scenes/test.scn"
+	 * return: "assets/scenes/"
+	 */
+	std::string ExtractFileBaseDir(const std::string& path);
+
+	/* Extract file base name from path
+	 * Example:
+	 * path: "assets/scenes/test.scn"
+	 * return: "test.scn"
+	 */
+	std::string ExtractFileBaseName(const std::string& path);
+
+	/* Extract file base dir & base name from path
+	 * Example:
+	 * path: "assets/scenes/test.scn"
+	 * return: {"assets/scenes/", "test.scn"}
+	 */
+	std::pair<std::string, std::string> ExtractFileBaseDirAndBaseName(const std::string& path);
+
+	/* Extract filename from path
+	 * Examples:
+	 * path: "assets/scenes/test.scn"
+	 * return: "test"
+	 */
+	std::string ExtractFilename(const std::string& path);
+
+	/* Extract filename from path
+	 * Examples:
+	 * path: "assets/scenes/test.scn"
+	 * return: "scn"
+	 */
+	std::string ExtractFileSuffix(const std::string& path);
+
 	/* split string */
 	inline std::vector<std::string> Split(const std::string& value, const std::string& delimiter)
 	{

@@ -34,9 +34,12 @@ namespace Wuya
 		void Unbind();
 
 		/* 默认材质 */
-		static SharedPtr<Material> Default();
+		static SharedPtr<Material>& Default();
 		/* 错误材质 */
-		static SharedPtr<Material> Error();
+		static SharedPtr<Material>& Error();
+
+		/* 创建材质 */
+		static SharedPtr<Material> Create(const SharedPtr<Shader>& shader);
 
 	private:
 		/* Shader */
@@ -47,6 +50,10 @@ namespace Wuya
 		std::unordered_map<SharedPtr<Texture>, uint32_t> m_Textures{};
 		/* 光栅化状态配置 */
 		RenderRasterState m_RasterState{};
+
+		/* 默认材质和错误材质 */
+		static SharedPtr<Material> m_pDefaultMaterial;
+		static SharedPtr<Material> m_pErrorMaterial;
 	};
 
 	/* 材质组类：

@@ -3,6 +3,7 @@
 
 #include <fstream>
 #include <glm/gtc/type_ptr.hpp>
+#include <shaderc/shaderc.hpp>
 
 namespace Wuya
 {
@@ -18,6 +19,21 @@ namespace Wuya
 			std::filesystem::create_directories(shader_cache_dir);
 	}
 
+	static const char* GetOpenGLShaderCacheFileExtension(GLenum shader_type)
+	{
+		switch (shader_type)
+		{
+		case GL_VERTEX_SHADER:
+			return ".cached_opengl_vert.bin";
+		case GL_FRAGMENT_SHADER:
+			return ".cached_opengl_frag.bin";
+		default:
+			CORE_LOG_ERROR("Unsupported shader type to cache: {}.", STRINGIFY(shader_type));
+			ASSERT(false);
+			return "";
+		}
+	}
+
 	OpenGLShader::OpenGLShader(const std::string& filepath)
 		: Shader(filepath)
 	{
@@ -28,15 +44,9 @@ namespace Wuya
 		const std::string shader_src = ReadFile(filepath);
 		PreProcessShaderSrc(shader_src, m_OpenGLSourceCodes);
 
-		CompileShaders();
 		CreateShaderProgram();
-
-		// Extract name from filepath
-		auto last_slash = filepath.find_last_of("/\\");
-		last_slash = (last_slash == std::string::npos) ? 0 : last_slash + 1;
-		const auto last_dot = filepath.rfind('.');
-		const auto count = (last_dot == std::string::npos) ? filepath.size() - last_slash : last_dot - last_slash;
-		m_DebugName = filepath.substr(last_slash, count);
+		
+		m_DebugName = ExtractFilename(filepath);
 	}
 
 	OpenGLShader::OpenGLShader(std::string name, const std::string& vertex_src, const std::string& pixel_src)
@@ -47,8 +57,7 @@ namespace Wuya
 		// Preprocess shader src
 		m_OpenGLSourceCodes[GL_VERTEX_SHADER] = vertex_src;
 		m_OpenGLSourceCodes[GL_FRAGMENT_SHADER] = pixel_src;
-
-		CompileShaders();
+		
 		CreateShaderProgram();
 	}
 
@@ -194,8 +203,83 @@ namespace Wuya
 		}
 	}
 
-	void OpenGLShader::CompileShaders()
+	static shaderc_shader_kind ShaderTypeToOpenGLShaderCKind(GLenum shader_type)
 	{
+		switch (shader_type)
+		{
+		case GL_VERTEX_SHADER:
+			return shaderc_glsl_vertex_shader;
+		case GL_FRAGMENT_SHADER:
+			return shaderc_glsl_fragment_shader;
+		case GL_COMPUTE_SHADER:
+			return shaderc_glsl_compute_shader;
+		default:
+			CORE_LOG_ERROR("Unsupported shader type to shaderc kind: {}.", STRINGIFY(shader_type));
+			ASSERT(false);
+			return shaderc_glsl_default_vertex_shader;
+		}
+	}
+
+	void OpenGLShader::CompileShadersToOpenGL()
+	{
+		shaderc::Compiler compiler;
+		shaderc::CompileOptions options;
+		options.SetTargetEnvironment(shaderc_target_env_opengl, shaderc_env_version_opengl_4_5);
+		const bool optimize = false;
+		if (optimize)
+			options.SetOptimizationLevel(shaderc_optimization_level_performance);
+		// todo: macros
+
+		m_OpenGLSPIRVs.clear();
+
+		std::filesystem::path cache_dir = GetShaderCacheDirectory();
+		for (auto&& [shader_type, source] : m_OpenGLSourceCodes)
+		{
+			std::filesystem::path shader_path = m_Path;
+			std::filesystem::path cache_path = cache_dir / (shader_path.filename().string() + GetOpenGLShaderCacheFileExtension(shader_type));
+
+			std::ifstream in(cache_path, std::ios::in | std::ios::binary);
+			if (in.is_open())
+			{
+				// Cache existed
+				in.seekg(0, std::ios::end);
+				auto size = in.tellg();
+				in.seekg(0, std::ios::beg);
+
+				auto& data = m_OpenGLSPIRVs[shader_type];
+				data.resize(size / sizeof(uint32_t));
+				in.read((char*)data.data(), size);
+			}
+			else
+			{
+				// Compile cache
+				shaderc::SpvCompilationResult result = compiler.CompileGlslToSpv(source, ShaderTypeToOpenGLShaderCKind(shader_type), m_Path.c_str(), options);
+				if (result.GetCompilationStatus() != shaderc_compilation_status_success)
+				{
+					CORE_LOG_ERROR(result.GetErrorMessage());
+					ASSERT(false);
+				}
+
+				auto& data = m_OpenGLSPIRVs[shader_type];
+				data = std::vector<uint32_t>(result.cbegin(), result.cend());
+
+				// Write data to cache file
+				std::ofstream out(cache_path, std::ios::out | std::ios::binary);
+				if (out.is_open())
+				{
+					out.write((char*)data.data(), data.size() * sizeof(uint32_t));
+					out.flush();
+					out.close();
+				}
+			}
+		}
+
+		// Reflect
+		for (auto&& [shader_type, cached_data] : m_OpenGLSPIRVs)
+		{
+			//
+		}
+
 		//std::vector<GLuint> compiled_shaders;
 		//for (auto& source_code : m_OpenGLSourceCodes)
 		//{
@@ -233,8 +317,12 @@ namespace Wuya
 	{
 		PROFILE_FUNCTION();
 
+		// Create shader program
+		GLuint program = glCreateProgram();
+
 		// Compile shaders
 		std::vector<GLuint> compiled_shaders;
+#if 0
 		for (auto& source_code : m_OpenGLSourceCodes)
 		{
 			// Create shader
@@ -268,15 +356,24 @@ namespace Wuya
 			compiled_shaders.emplace_back(shader);
 		}
 
-		// Create shader program
-		GLuint program = glCreateProgram();
-
 		// Attach shaders to program
 		for (const auto shader : compiled_shaders)
 		{
 			glAttachShader(program, shader);
 		}
+#else
+		CompileShadersToOpenGL();
 
+		for (auto&& [shader_type, shader_data] : m_OpenGLSPIRVs)
+		{
+			GLuint shader = glCreateShader(shader_type);
+			glShaderBinary(1, &shader, GL_SHADER_BINARY_FORMAT_SPIR_V, shader_data.data(), shader_data.size() * sizeof(uint32_t));
+			glSpecializeShader(shader, "main", 0, nullptr, nullptr);
+			glAttachShader(program, shader);
+
+			compiled_shaders.emplace_back(shader);
+		}
+#endif
 		// Link program
 		glLinkProgram(program);
 

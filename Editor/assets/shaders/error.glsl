@@ -8,7 +8,7 @@ layout(std140, binding = 0) uniform CameraData
 	mat4 u_ViewProjectionMat;
 };
 
-uniform mat4 u_Local2WorldMat;
+layout (location = 0) uniform mat4 u_Local2WorldMat;
 
 void main()
 {

@@ -175,9 +175,7 @@ namespace Wuya
 			ImportObj(filepath);
 		}
 
-		const size_t pos = filepath.find_last_of("/\\");
-		const std::string basedir = pos != std::string::npos ? filepath.substr(0, pos + 1) : ""; /* 模型所在路径 */
-		const std::string basename = filepath.substr(pos + 1); /* 模型名 */
+		auto [basedir, basename] = ExtractFileBaseDirAndBaseName(filepath);
 
 		SharedPtr<Model> model = CreateSharedPtr<Model>(basename);
 		model->SetPath(filepath);
@@ -274,7 +272,7 @@ namespace Wuya
 	SharedPtr<Model> Model::Create(const std::string& path)
 	{
 		/* 获取文件后缀名 */
-		std::string suffix = path.substr(path.find_last_of('.') + 1);
+		std::string suffix = ExtractFileSuffix(path);
 		std::transform(suffix.begin(), suffix.end(), suffix.begin(), ::tolower);
 
 		/* 加载Obj模型 */
@@ -311,9 +309,7 @@ namespace Wuya
 	/* 从路径加载一个骨骼模型 */
 	SharedPtr<SkeletonModel> SkeletonModel::Create(const std::string& path)
 	{
-		const size_t pos = path.find_last_of("/\\");
-		const std::string basedir = pos != std::string::npos ? path.substr(0, pos + 1) : ""; /* 模型所在路径 */
-		const std::string basename = path.substr(pos + 1); /* 模型名 */
+		auto [basedir, basename] = ExtractFileBaseDirAndBaseName(path);
 
 		/* todo: */
 		return CreateSharedPtr<SkeletonModel>(basename);
