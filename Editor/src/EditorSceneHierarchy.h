@@ -41,7 +41,7 @@ namespace Wuya
 		Entity m_SelectedEntity;
 
 		/* Í¼±ê */
-		SharedPtr<Texture2D> m_pAddComponentIcon;
-		SharedPtr<Texture2D> m_pMenuIcon;
+		SharedPtr<Texture> m_pAddComponentIcon;
+		SharedPtr<Texture> m_pMenuIcon;
 	};
 }

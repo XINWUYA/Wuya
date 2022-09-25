@@ -58,6 +58,42 @@ namespace Wuya
 		return 0;
 	}
 
+	/* 翻译到OpenGL对应的像素格式 */
+	constexpr GLenum TranslateToOpenGLPixelFormat(PixelFormat format)
+	{
+		switch (format)
+		{
+		case PixelFormat::R:				return GL_RED;
+		case PixelFormat::R_Integer:		return GL_RED_INTEGER;
+		case PixelFormat::RG:				return GL_RG;
+		case PixelFormat::RG_Integer:		return GL_RG_INTEGER;
+		case PixelFormat::RGB:				return GL_RGB;
+		case PixelFormat::RGB_Integer:		return GL_RGB_INTEGER;
+		case PixelFormat::RGBA:				return GL_RGBA;
+		case PixelFormat::RGBA_Integer:		return GL_RGBA_INTEGER;
+		case PixelFormat::Depth:			return GL_DEPTH_COMPONENT;
+		case PixelFormat::Depth24_Stencil8: return GL_DEPTH_STENCIL;
+		case PixelFormat::Alpha:			return GL_ALPHA;
+		}
+		return 0;
+	}
+
+	/* 翻译到OpenGL对应的像素数据类型 */
+	constexpr GLenum TranslateToOpenGLPixelType(PixelType type)
+	{
+		switch (type) {
+		case PixelType::UnsignedByte:	return GL_UNSIGNED_BYTE;
+		case PixelType::Byte:			return GL_BYTE;
+		case PixelType::UnsignedShort:	return GL_UNSIGNED_SHORT;
+		case PixelType::Short:			return GL_SHORT;
+		case PixelType::UnsignedInt:	return GL_UNSIGNED_INT;
+		case PixelType::Int:			return GL_INT;
+		case PixelType::Half:			return GL_HALF_FLOAT;
+		case PixelType::Float:			return GL_FLOAT;
+		}
+		return 0;
+	}
+
 	/* 翻译到OpenGL对应的比较方式 */
 	constexpr GLenum TranslateToOpenGLCompareFunc(CompareFunc func)
 	{

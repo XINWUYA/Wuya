@@ -51,8 +51,7 @@ namespace Wuya
 		QuadVertexData* pQuadVertexBufferCurrent{ nullptr };
 		uint32_t TotalIndexCount{ 0 };
 
-		SharedPtr<Texture2D> pDefaultTexture;
-		std::array<SharedPtr<Texture2D>, MaxTextureSlotNum> TextureSlots;
+		std::array<SharedPtr<Texture>, MaxTextureSlotNum> TextureSlots;
 		uint32_t TextureSlotIndex = 1; // 0 : Default Texture
 
 		CameraData CameraData;
@@ -106,14 +105,10 @@ namespace Wuya
 		delete[] quad_indices;
 
 		// Shader
-		s_RenderData2D.pShader = Shader::Create("assets/shaders/texture.glsl");
+		s_RenderData2D.pShader = ShaderLibrary::Instance().GetOrLoad("assets/shaders/texture.glsl");
 
-		// Texture
-		s_RenderData2D.pDefaultTexture = Texture2D::Create(1, 1);
-		uint32_t default_texture_data = 0xffffffff; // White
-		s_RenderData2D.pDefaultTexture->SetData(&default_texture_data, sizeof(uint32_t));
-
-		s_RenderData2D.TextureSlots[0] = s_RenderData2D.pDefaultTexture;
+		// Default texture
+		s_RenderData2D.TextureSlots[0] = Texture::White();
 
 		// Uniform Buffer
 		s_RenderData2D.pCameraUniformBuffer = UniformBuffer::Create(sizeof(CameraData), 0);
@@ -214,7 +209,7 @@ namespace Wuya
 		DrawQuad(transform, color);
 	}
 
-	void Renderer2D::DrawQuad(const glm::vec3& position, const glm::vec2& size, const SharedPtr<Texture2D>& texture, const glm::vec4& color, float tiling_factor)
+	void Renderer2D::DrawQuad(const glm::vec3& position, const glm::vec2& size, const SharedPtr<Texture>& texture, const glm::vec4& color, float tiling_factor)
 	{
 		const glm::mat4 transform = glm::translate(glm::mat4(1.0f), position) * glm::scale(glm::mat4(1), glm::vec3(size.x, size.y, 1.0f));
 		DrawQuad(transform, texture, color, tiling_factor);
@@ -252,7 +247,7 @@ namespace Wuya
 		s_StatisticsInfo.QuadCount++;
 	}
 
-	void Renderer2D::DrawQuad(const glm::mat4& transform, const SharedPtr<Texture2D>& texture, const glm::vec4& color, float tiling_factor, int entity_id)
+	void Renderer2D::DrawQuad(const glm::mat4& transform, const SharedPtr<Texture>& texture, const glm::vec4& color, float tiling_factor, int entity_id)
 	{
 		PROFILE_FUNCTION();
 

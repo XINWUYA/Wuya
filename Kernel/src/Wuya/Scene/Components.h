@@ -56,7 +56,7 @@ namespace Wuya
 	/* 图片精灵组件 */
 	struct SpriteComponent
 	{
-		SharedPtr<Texture2D> Texture;
+		SharedPtr<Texture> Texture;
 		glm::vec4 BaseColor{ 1.0f, 1.0f, 1.0f, 1.0f };
 		float TilingFactor{ 1.0f };
 
@@ -73,5 +73,11 @@ namespace Wuya
 		SharedPtr<Model> Model;
 		ModelComponent() = default;
 		ModelComponent(const ModelComponent&) = default;
+	};
+
+	/* 光源组件 */
+	struct LightComponent
+	{
+		
 	};
 }

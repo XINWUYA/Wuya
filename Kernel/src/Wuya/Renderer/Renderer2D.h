@@ -4,7 +4,7 @@
 namespace Wuya
 {
 	class VertexArray;
-	class Texture2D;
+	class Texture;
 	class Shader;
 
 	class Renderer2D
@@ -20,9 +20,9 @@ namespace Wuya
 		/* Draw Quads */
 		static void DrawQuad(const glm::vec2& position, const glm::vec2& size, const glm::vec4& color);
 		static void DrawQuad(const glm::vec3& position, const glm::vec2& size, const glm::vec4& color);
-		static void DrawQuad(const glm::vec3& position, const glm::vec2& size, const SharedPtr<Texture2D>& texture, const glm::vec4& color = { 1.0f, 1.0f, 1.0f, 1.0f }, float tiling_factor = 1.0f);
+		static void DrawQuad(const glm::vec3& position, const glm::vec2& size, const SharedPtr<Texture>& texture, const glm::vec4& color = { 1.0f, 1.0f, 1.0f, 1.0f }, float tiling_factor = 1.0f);
 		static void DrawQuad(const glm::mat4& transform, const glm::vec4& color, int entity_id = -1);
-		static void DrawQuad(const glm::mat4& transform, const SharedPtr<Texture2D>& texture, const glm::vec4& color = {1.0f, 1.0f, 1.0f, 1.0f}, float tiling_factor = 1.0f, int entity_id = -1);
+		static void DrawQuad(const glm::mat4& transform, const SharedPtr<Texture>& texture, const glm::vec4& color = {1.0f, 1.0f, 1.0f, 1.0f}, float tiling_factor = 1.0f, int entity_id = -1);
 
 		/* »æÖÆÒ»¸ö2DÍ¼Æ¬ */
 		static void DrawSprite(const glm::mat4& transform, const struct SpriteComponent* component, int entity_id);

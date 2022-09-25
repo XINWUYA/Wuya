@@ -13,14 +13,30 @@ namespace Wuya
 		uint8_t Samples{ 0 };								/* 采样次数 */
 		TextureFormat Format{ TextureFormat::RGBA8 };		/* 像素格式：RxGxBxAx等 */
 		SamplerType SamplerType{ SamplerType::Sampler2D };	/* 采样方式： Sampler2D/2DArray/CubeMap/3D等 */
-		TextureUsage Usage;									/* 使用方式：ColorAttachment/DepthAttachment/StencilAttachment/Sampleable等 */
+		TextureUsage Usage{ TextureUsage::Sampleable };		/* 使用方式：ColorAttachment/DepthAttachment/StencilAttachment/Sampleable等 */
 	};
+
+	/* 像素数据描述 */
+	struct PixelDesc
+	{
+		PixelFormat Format{ PixelFormat::RGBA };
+		PixelType Type{ PixelType::UnsignedByte };
+	};
+
+	/* 纹理加载配置 */
+	struct TextureLoadConfig
+	{
+		bool IsFlipV = true;
+		bool IsGenMips = true;
+		SamplerType SamplerType{ SamplerType::Sampler2D }; /* 用于决定纹理加载的类型 */
+	};
+
 
 	/* 通用纹理类，根据描述和用途创建不同类型的纹理 */
 	class Texture
 	{
 	public:
-		Texture(const std::string& name, const TextureDesc& texture_desc);
+		Texture(std::string name, const TextureDesc& texture_desc);
 		virtual ~Texture() = default;
 
 		/* 绑定 */
@@ -28,7 +44,8 @@ namespace Wuya
 		virtual void Unbind() = 0;
 
 		/* 填充数据 */
-		virtual void SetData(void* data, uint32_t size) = 0;
+		virtual void SetData(void* data, const PixelDesc& pixel_desc, uint32_t level = 0, 
+			uint32_t offset_x = 0, uint32_t offset_y = 0, uint32_t offset_z = 0) = 0;
 
 		/* 获取纹理原始尺寸 */
 		uint32_t GetWidth() const	{ return m_TextureDesc.Width; }
@@ -47,7 +64,10 @@ namespace Wuya
 
 		/* 创建纹理 */
 		static SharedPtr<Texture> Create(const std::string& name, const TextureDesc& texture_desc);
-		static SharedPtr<Texture> Create(const std::string& path);
+		static SharedPtr<Texture> Create(const std::string& path, const TextureLoadConfig& load_config = {}); /* 目前仅支持加载二维纹理 */
+
+		/* 默认纹理 */
+		static SharedPtr<Texture>& White();
 
 	protected:
 		Texture() = default;
@@ -56,14 +76,6 @@ namespace Wuya
 		std::string m_DebugName{ "Unnamed Texture" };
 		/* 纹理描述 */
 		TextureDesc m_TextureDesc{};
-	};
-
-	/* 普通2D纹理，待取缔 */
-	class Texture2D : public Texture
-	{
-	public:
-		static SharedPtr<Texture2D> Create(uint32_t width, uint32_t height);
-		static SharedPtr<Texture2D> Create(const std::string& path);
 	};
 }
 

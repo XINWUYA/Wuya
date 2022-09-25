@@ -63,10 +63,10 @@ namespace Wuya
 		bool m_IsDirty{ true };
 
 		/* Í¼±ê */
-		SharedPtr<Texture2D> m_pFolderIcon;
-		SharedPtr<Texture2D> m_pFileIcon;
-		SharedPtr<Texture2D> m_pFilterIcon;
-		SharedPtr<Texture2D> m_pMenuIcon;
-		SharedPtr<Texture2D> m_pReturnIcon;
+		SharedPtr<Texture> m_pFolderIcon;
+		SharedPtr<Texture> m_pFileIcon;
+		SharedPtr<Texture> m_pFilterIcon;
+		SharedPtr<Texture> m_pMenuIcon;
+		SharedPtr<Texture> m_pReturnIcon;
 	};
 }

@@ -35,7 +35,7 @@ namespace Wuya
 		//{
 		//	// Material
 		//	auto material = CreateSharedPtr<Material>();
-		//	const auto albedo_texture = Texture2D::Create("assets/textures/container.jpg");
+		//	const auto albedo_texture = Texture::Create("assets/textures/container.jpg");
 		//	material->SetTexture(albedo_texture, 0);
 		//	const auto shader = ShaderLibrary::Instance().GetOrLoad("assets/shaders/simple.glsl");
 		//	material->SetShader(shader);
@@ -356,13 +356,13 @@ namespace Wuya
 	{
 		PROFILE_FUNCTION();
 
-		static SharedPtr<Texture2D> save_icon = EditorAssetManager::Instance().GetOrCreateTexture("editor_res/icons/save.png");
-		static SharedPtr<Texture2D> translate_icon = EditorAssetManager::Instance().GetOrCreateTexture("editor_res/icons/translate.png");
-		static SharedPtr<Texture2D> rotate_icon = EditorAssetManager::Instance().GetOrCreateTexture("editor_res/icons/rotate.png");
-		static SharedPtr<Texture2D> scale_icon = EditorAssetManager::Instance().GetOrCreateTexture("editor_res/icons/scale.png");
-		static SharedPtr<Texture2D> play_icon = EditorAssetManager::Instance().GetOrCreateTexture("editor_res/icons/play.png");
-		static SharedPtr<Texture2D> stop_icon = EditorAssetManager::Instance().GetOrCreateTexture("editor_res/icons/stop.png");
-		static SharedPtr<Texture2D> menu_icon = EditorAssetManager::Instance().GetOrCreateTexture("editor_res/icons/menu.png");
+		static auto save_icon = EditorAssetManager::Instance().GetOrCreateTexture("editor_res/icons/save.png");
+		static auto translate_icon = EditorAssetManager::Instance().GetOrCreateTexture("editor_res/icons/translate.png");
+		static auto rotate_icon = EditorAssetManager::Instance().GetOrCreateTexture("editor_res/icons/rotate.png");
+		static auto scale_icon = EditorAssetManager::Instance().GetOrCreateTexture("editor_res/icons/scale.png");
+		static auto play_icon = EditorAssetManager::Instance().GetOrCreateTexture("editor_res/icons/play.png");
+		static auto stop_icon = EditorAssetManager::Instance().GetOrCreateTexture("editor_res/icons/stop.png");
+		static auto menu_icon = EditorAssetManager::Instance().GetOrCreateTexture("editor_res/icons/menu.png");
 
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 2)); /* 指定间隔 */
 		ImGui::PushStyleVar(ImGuiStyleVar_ItemInnerSpacing, ImVec2(0, 2));
@@ -423,7 +423,7 @@ namespace Wuya
 			/* 切换执行模式 */
 			{
 				ImGui::SameLine();
-				const SharedPtr<Texture2D> icon = (m_PlayMode == PlayMode::Edit) ? play_icon : stop_icon;
+				const SharedPtr<Texture> icon = (m_PlayMode == PlayMode::Edit) ? play_icon : stop_icon;
 				ImGui::SetCursorPosX((panel_width - icon_size) * 0.5f);
 				if (ImGui::ImageButton((ImTextureID)icon->GetTextureID(), ImVec2(icon_size, icon_size), ImVec2(0, 1), ImVec2(1, 0), 0))
 				{

@@ -132,7 +132,7 @@ namespace Wuya
 		ImGui::PopID();
 	}
 
-	void EditorUIFunctions::DrawTextureUI(const std::string& label, SharedPtr<Texture2D>& texture, float& tiling_factor, float label_width)
+	void EditorUIFunctions::DrawTextureUI(const std::string& label, SharedPtr<Texture>& texture, float& tiling_factor, float label_width)
 	{
 		PROFILE_FUNCTION();
 
@@ -146,7 +146,7 @@ namespace Wuya
 		/* Texture */
 		ImGui::NextColumn();
 		{
-			const SharedPtr<Texture2D> show_texture = texture ? texture : EditorAssetManager::Instance().GetOrCreateTexture("editor_res/icons/default_texture.png");
+			const auto show_texture = texture ? texture : EditorAssetManager::Instance().GetOrCreateTexture("editor_res/icons/default_texture.png");
 
 			/* Image */
 			ImGui::ImageButton((ImTextureID)show_texture->GetTextureID(), ImVec2(80, 80), ImVec2(0, 1), ImVec2(1, 0), 0);
@@ -186,7 +186,7 @@ namespace Wuya
 
 	}
 
-	void EditorUIFunctions::DrawCheckedImageButtonUI(const std::string& label, const SharedPtr<Texture2D>& texture, const ImVec2& size, bool checked, const std::function<void()>& button_func)
+	void EditorUIFunctions::DrawCheckedImageButtonUI(const std::string& label, const SharedPtr<Texture>& texture, const ImVec2& size, bool checked, const std::function<void()>& button_func)
 	{
 		PROFILE_FUNCTION();
 

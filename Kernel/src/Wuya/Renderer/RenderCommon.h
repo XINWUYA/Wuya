@@ -28,8 +28,8 @@ namespace Wuya
 		CCW /* 逆时针为正面 */
 	};
 
-	/* 像素格式类型 */
-	enum class PixelFormatType : uint8_t
+	/* 像素格式 */
+	enum class PixelFormat : uint8_t
 	{
 		R,
 		R_Integer,
@@ -42,6 +42,19 @@ namespace Wuya
 		Depth,
 		Depth24_Stencil8, 
 		Alpha, /* 一个float */
+	};
+
+	/* 像素类型 */
+	enum class PixelType : uint8_t
+	{
+		UnsignedByte,
+		Byte,
+		UnsignedShort,
+		Short,
+		UnsignedInt,
+		Int,
+		Half,
+		Float
 	};
 
 	/* 纹理格式 */

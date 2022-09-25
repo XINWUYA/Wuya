@@ -25,9 +25,9 @@ namespace Wuya
 		/* 绘制一个Color UI */
 		static void DrawColorUI(const std::string& label, glm::vec4& color, float label_width = 100.0f);
 		/* 绘制一个图片UI */
-		static void DrawTextureUI(const std::string& label, SharedPtr<Texture2D>& texture, float& tiling_factor, float label_width = 100.0f);
+		static void DrawTextureUI(const std::string& label, SharedPtr<Texture>& texture, float& tiling_factor, float label_width = 100.0f);
 		/* 绘制带选中的图像按钮UI */
-		static void DrawCheckedImageButtonUI(const std::string& label, const SharedPtr<Texture2D>& texture, const ImVec2& size, bool checked = false, const std::function<void()>& button_func = []() {});
+		static void DrawCheckedImageButtonUI(const std::string& label, const SharedPtr<Texture>& texture, const ImVec2& size, bool checked = false, const std::function<void()>& button_func = []() {});
 		/* 绘制一个Checkbox */
 		static void DrawCheckboxUI(const std::string& label, bool& value, float label_width = 100.0f);
 		/* 绘制一个Combo */

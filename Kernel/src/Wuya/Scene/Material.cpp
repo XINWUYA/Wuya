@@ -165,23 +165,24 @@ namespace Wuya
 		auto* count = mtl_root->FindAttribute("Count");
 		m_Materials.resize(count->IntValue());
 
+		constexpr TextureLoadConfig texture_load_config = { false };
 		for (tinyxml2::XMLElement* mtl_inst = mtl_root->FirstChildElement(); mtl_inst; mtl_inst = mtl_inst->NextSiblingElement("Material"))
 		{
 			auto material = CreateSharedPtr<Material>();
 			auto* id_attr = mtl_inst->FindAttribute("ID");
 
 			if (auto* albedo_tex = mtl_inst->FindAttribute("AlbedoTex"))
-				material->SetTexture(Texture2D::Create(albedo_tex->Value()), 0);
+				material->SetTexture(Texture::Create(albedo_tex->Value(), texture_load_config), 0);
 			if (auto* specular_tex = mtl_inst->FindAttribute("SpecularTex"))
-				material->SetTexture(Texture2D::Create(specular_tex->Value()), 1);
+				material->SetTexture(Texture::Create(specular_tex->Value(), texture_load_config), 1);
 			if (auto* normal_tex = mtl_inst->FindAttribute("NormalTex"))
-				material->SetTexture(Texture2D::Create(normal_tex->Value()), 2);
+				material->SetTexture(Texture::Create(normal_tex->Value(), texture_load_config), 2);
 			if (auto* roughness_tex = mtl_inst->FindAttribute("RoughnessTex"))
-				material->SetTexture(Texture2D::Create(roughness_tex->Value()), 3);
+				material->SetTexture(Texture::Create(roughness_tex->Value(), texture_load_config), 3);
 			if (auto* metallic_tex = mtl_inst->FindAttribute("MetallicTex"))
-				material->SetTexture(Texture2D::Create(metallic_tex->Value()), 4);
+				material->SetTexture(Texture::Create(metallic_tex->Value(), texture_load_config), 4);
 			if (auto* emissive_tex = mtl_inst->FindAttribute("EmissiveTex"))
-				material->SetTexture(Texture2D::Create(emissive_tex->Value()), 5);
+				material->SetTexture(Texture::Create(emissive_tex->Value(), texture_load_config), 5);
 
 			material->SetParameters("Diffuse", ToVec3(mtl_inst->Attribute("Diffuse")));
 			material->SetParameters("Specular", ToVec3(mtl_inst->Attribute("Specular")));

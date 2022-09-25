@@ -13,7 +13,7 @@ namespace Wuya
 	{
 	public:
 		OpenGLTexture(const std::string& name, const TextureDesc& texture_desc);
-		OpenGLTexture(const std::string& path);
+		OpenGLTexture(const std::string& path, const TextureLoadConfig& load_config);
 		~OpenGLTexture() override;
 
 		/* 绑定当前纹理 */
@@ -21,7 +21,8 @@ namespace Wuya
 		/* 解除纹理绑定 */
 		void Unbind() override;
 		/* 填充纹理数据 */
-		void SetData(void* data, uint32_t size) override {}
+		void SetData(void* data, const PixelDesc& pixel_desc, uint32_t level = 0,
+			uint32_t offset_x = 0, uint32_t offset_y = 0, uint32_t offset_z = 0) override;
 		
 		/* 获取纹理所在路径 */
 		const std::string& GetPath() const override { return m_Path; }
@@ -50,40 +51,5 @@ namespace Wuya
 		bool m_IsLoaded{ false };
 
 		friend class OpenGLFrameBuffer;
-	};
-
-	/* Texture2D */
-	class OpenGLTexture2D : public Texture2D
-	{
-	public:
-		OpenGLTexture2D(uint32_t width, uint32_t height);
-		OpenGLTexture2D(const std::string& path);
-		~OpenGLTexture2D() override;
-
-		void Bind(uint32_t slot = 0) override;
-		void Unbind() override;
-		void SetData(void* data, uint32_t size) override;
-		
-		/* 获取纹理所在路径 */
-		const std::string& GetPath() const override { return m_Path; }
-
-		/* 纹理ID */
-		uint32_t GetTextureID() const override { return m_TextureId; }
-		/* 纹理成功加载 */
-		bool IsLoaded() const override { return m_IsLoaded; }
-
-		bool operator==(const Texture& other) const override
-		{
-			return ((OpenGLTexture2D&)other).GetTextureID() == m_TextureId;
-		}
-
-	private:
-		std::string m_Path{};
-		bool m_IsLoaded{ false };
-		uint32_t m_Width{ 0 }, m_Height{ 0 };
-		uint32_t m_Depth{ 0 };
-		uint8_t m_MipLevels{ 1 };
-		uint32_t m_TextureId{ 0 };
-		GLenum m_InternalFormat{}, m_DataFormat{};
 	};
 }

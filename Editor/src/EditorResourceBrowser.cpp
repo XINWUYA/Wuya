@@ -83,7 +83,7 @@ namespace Wuya
 				ImGui::SameLine(40, 20);
 				filter.Draw("##", 200);
 				ImGui::SameLine(236);
-				const SharedPtr<Texture2D> filter_icon = m_pFilterIcon;
+				const SharedPtr<Texture> filter_icon = m_pFilterIcon;
 
 				START_STYLE_ALPHA(0.5f);
 				ImGui::Image((ImTextureID)filter_icon->GetTextureID(), ImVec2(20, 20), ImVec2(0, 1), ImVec2(1, 0));
@@ -140,7 +140,7 @@ namespace Wuya
 							ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
 							{
 								/* Í¼±ê */
-								const SharedPtr<Texture2D> icon_texture = child_node->FileType == "Folder" ? m_pFolderIcon : m_pFileIcon;
+								const SharedPtr<Texture> icon_texture = child_node->FileType == "Folder" ? m_pFolderIcon : m_pFileIcon;
 								ImGui::ImageButton((ImTextureID)icon_texture->GetTextureID(), ImVec2(thumbnail_size, thumbnail_size), ImVec2(0, 1), ImVec2(1, 0));
 
 								/* ÍÏ¶¯ */

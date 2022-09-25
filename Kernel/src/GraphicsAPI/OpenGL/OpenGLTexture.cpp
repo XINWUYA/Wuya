@@ -81,8 +81,72 @@ namespace Wuya
 		}
 	}
 
-	OpenGLTexture::OpenGLTexture(const std::string& path)
+	OpenGLTexture::OpenGLTexture(const std::string& path, const TextureLoadConfig& load_config)
+		: m_Path(path)
 	{
+		PROFILE_FUNCTION();
+
+		stbi_set_flip_vertically_on_load(load_config.IsFlipV);
+
+		switch (load_config.SamplerType)
+		{
+		case SamplerType::Sampler2D:
+			m_TextureTarget = GL_TEXTURE_2D;
+			{
+				int width, height, channels;
+				stbi_uc* data = stbi_load(path.c_str(), &width, &height, &channels, 0);
+
+				if (data)
+				{
+					m_IsLoaded = true;
+					m_TextureDesc.Width = width;
+					m_TextureDesc.Height = height;
+
+					GLenum data_format = 0;
+					if (channels == 4)
+					{
+						m_InternalFormat = GL_RGBA8;
+						data_format = GL_RGBA;
+					}
+					else if (channels == 3)
+					{
+						m_InternalFormat = GL_RGB8;
+						data_format = GL_RGB;
+					}
+
+					ASSERT(m_InternalFormat & data_format, "Format not supported!");
+
+					glCreateTextures(m_TextureTarget, 1, &m_TextureId);
+					glTextureStorage2D(m_TextureId, 1, m_InternalFormat, width, height);
+
+					glTextureParameteri(m_TextureId, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+					glTextureParameteri(m_TextureId, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+					glTextureParameteri(m_TextureId, GL_TEXTURE_WRAP_S, GL_REPEAT);
+					glTextureParameteri(m_TextureId, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+					glTextureSubImage2D(m_TextureId, 0, 0, 0, width, height, data_format, GL_UNSIGNED_BYTE, data);
+
+					if (load_config.IsGenMips)
+						glGenerateMipmap(m_TextureTarget);
+
+					stbi_image_free(data);
+				}
+				else
+				{
+					CORE_LOG_ERROR("Failed to load texture: {}.", path);
+				}
+			}
+			break;
+		case SamplerType::Sampler2DArray: 
+			ASSERT(false, "Not implemented!")
+			break;
+		case SamplerType::SamplerCubeMap: 
+			ASSERT(false, "Not implemented!")
+			break;
+		case SamplerType::Sampler3D: 
+			ASSERT(false, "Not implemented!")
+			break;
+		}
 	}
 
 	OpenGLTexture::~OpenGLTexture()
@@ -116,94 +180,38 @@ namespace Wuya
 		glBindTexture(m_TextureTarget, 0);
 	}
 
-	OpenGLTexture2D::OpenGLTexture2D(uint32_t width, uint32_t height)
-		: m_Width(width), m_Height(height), m_InternalFormat(GL_RGBA8), m_DataFormat(GL_RGBA)
+	void OpenGLTexture::SetData(void* data, const PixelDesc& pixel_desc, uint32_t level, uint32_t offset_x, uint32_t offset_y, uint32_t offset_z)
 	{
 		PROFILE_FUNCTION();
 
-		glCreateTextures(GL_TEXTURE_2D, 1, &m_TextureId);
-		glTextureStorage2D(m_TextureId, 1, m_InternalFormat, m_Width, m_Height);
+		glBindTexture(m_TextureTarget, m_TextureId);
 
-		glTextureParameteri(m_TextureId, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTextureParameteri(m_TextureId, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTextureParameteri(m_TextureId, GL_TEXTURE_WRAP_S, GL_REPEAT);
-		glTextureParameteri(m_TextureId, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	}
-
-	OpenGLTexture2D::OpenGLTexture2D(const std::string& path)
-		: m_Path(path)
-	{
-		PROFILE_FUNCTION();
-
-		stbi_set_flip_vertically_on_load(1);
-
-		int width, height, channels;
-		stbi_uc* data = stbi_load(path.c_str(), &width, &height, &channels, 0);
-
-		if (data)
+		/* ÃÓ≥‰∏Ò Ω */
+		switch (m_TextureTarget)
 		{
-			m_IsLoaded = true;
-			m_Width = width;
-			m_Height = height;
-
-			GLenum internal_format = 0, data_format = 0;
-			if (channels == 4)
-			{
-				internal_format = GL_RGBA8;
-				data_format = GL_RGBA;
-			}
-			else if (channels == 3)
-			{
-				internal_format = GL_RGB8;
-				data_format = GL_RGB;
-			}
-			m_InternalFormat = internal_format;
-			m_DataFormat = data_format;
-
-			ASSERT(internal_format & data_format, "Format not supported!");
-
-			glCreateTextures(GL_TEXTURE_2D, 1, &m_TextureId);
-			glTextureStorage2D(m_TextureId, 1, internal_format, m_Width, m_Height);
-
-			glTextureParameteri(m_TextureId, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-			glTextureParameteri(m_TextureId, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-			glTextureParameteri(m_TextureId, GL_TEXTURE_WRAP_S, GL_REPEAT);
-			glTextureParameteri(m_TextureId, GL_TEXTURE_WRAP_T, GL_REPEAT);
-
-			glTextureSubImage2D(m_TextureId, 0, 0, 0, m_Width, m_Height, data_format, GL_UNSIGNED_BYTE, data);
-
-			stbi_image_free(data);
+		case GL_TEXTURE_2D:
+			glTextureSubImage2D(m_TextureId, (GLint)level, (GLint)offset_x, (GLint)offset_y, (GLsizei)m_TextureDesc.Width, (GLsizei)m_TextureDesc.Height,
+				TranslateToOpenGLPixelFormat(pixel_desc.Format), TranslateToOpenGLPixelType(pixel_desc.Type), data);
+			break;
+		case GL_TEXTURE_CUBE_MAP:
+			ASSERT(false, "Not implemented!")
+			// todo
+			//const auto face_data_size = m_TextureDesc.Width * m_TextureDesc.Height * sizeof(float) * 4/*ChannelNum*/;
+			//for (auto i = 0; i < 6; ++i)
+			//{
+			//	glTextureSubImage2D(m_TextureId, (GLint)level, 0, 0, (GLsizei)m_TextureDesc.Width, (GLsizei)m_TextureDesc.Height,
+			//		TranslateToOpenGLPixelFormat(pixel_desc.Format), TranslateToOpenGLPixelType(pixel_desc.Type), static_cast<uint8_t const*>(data) + face_data_size * i);
+			//}
+			break;
+		case GL_TEXTURE_3D:
+		case GL_TEXTURE_2D_ARRAY:
+			glTextureSubImage3D(m_TextureId, (GLint)level, (GLint)offset_x, (GLint)offset_y, (GLint)offset_z, (GLsizei)m_TextureDesc.Width, (GLsizei)m_TextureDesc.Height, (GLsizei)m_TextureDesc.Depth,
+				TranslateToOpenGLPixelFormat(pixel_desc.Format), TranslateToOpenGLPixelType(pixel_desc.Type), data);
+			break;
+		default:
+			break;
 		}
-	}
 
-	OpenGLTexture2D::~OpenGLTexture2D()
-	{
-		PROFILE_FUNCTION();
-
-		glDeleteTextures(1, &m_TextureId);
-	}
-
-	void OpenGLTexture2D::Bind(uint32_t slot)
-	{
-		PROFILE_FUNCTION();
-
-		glBindTextureUnit(slot, m_TextureId);
-	}
-
-	void OpenGLTexture2D::Unbind()
-	{
-		PROFILE_FUNCTION();
-
-		glBindTexture(GL_TEXTURE_2D, 0);
-	}
-
-	void OpenGLTexture2D::SetData(void* data, uint32_t size)
-	{
-		PROFILE_FUNCTION();
-
-		const uint32_t channel = (m_DataFormat == GL_RGBA) ? 4 : 3;
-		ASSERT((size == m_Width * m_Height * channel), "Texture data is not completed!");
-
-		glTextureSubImage2D(m_TextureId, 0, 0, 0, m_Width, m_Height, m_DataFormat, GL_UNSIGNED_BYTE, data);
+		CHECK_GL_ERROR;
 	}
 }

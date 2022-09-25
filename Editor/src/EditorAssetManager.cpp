@@ -16,7 +16,7 @@ namespace Wuya
 		return instance;
 	}
 
-	SharedPtr<Texture2D> EditorAssetManager::GetOrCreateTexture(const std::string& path)
+	SharedPtr<Texture> EditorAssetManager::GetOrCreateTexture(const std::string& path)
 	{
 		PROFILE_FUNCTION();
 
@@ -26,7 +26,7 @@ namespace Wuya
 			return it->second;
 
 		/* 找不到，则创建 */
-		auto texture = Texture2D::Create(path);
+		auto texture = Texture::Create(path);
 		m_TextureAssetMap.insert({ path, texture });
 		return texture;
 	}

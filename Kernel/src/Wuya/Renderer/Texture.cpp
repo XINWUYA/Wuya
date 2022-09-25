@@ -5,11 +5,12 @@
 
 namespace Wuya
 {
-	Texture::Texture(const std::string& name, const TextureDesc& texture_desc)
-		: m_DebugName(name), m_TextureDesc(texture_desc)
+	Texture::Texture(std::string name, const TextureDesc& texture_desc)
+		: m_DebugName(std::move(name)), m_TextureDesc(texture_desc)
 	{
 	}
 
+	/* 创建纹理 */
 	SharedPtr<Texture> Texture::Create(const std::string& name, const TextureDesc& texture_desc)
 	{
 		switch (Renderer::CurrentAPI())
@@ -25,7 +26,8 @@ namespace Wuya
 		}
 	}
 
-	SharedPtr<Texture> Texture::Create(const std::string& path)
+	/* 创建纹理 */
+	SharedPtr<Texture> Texture::Create(const std::string& path, const TextureLoadConfig& load_config)
 	{
 		switch (Renderer::CurrentAPI())
 		{
@@ -33,40 +35,27 @@ namespace Wuya
 			CORE_LOG_ERROR("RenderAPI can't be None!");
 			return nullptr;
 		case RenderAPI::OpenGL:
-			return CreateSharedPtr<OpenGLTexture>(path);
+			return CreateSharedPtr<OpenGLTexture>(path, load_config);
 		default:
 			CORE_LOG_ERROR("Unknown RenderAPI is unsupported!");
 			return nullptr;
 		}
 	}
 
-	SharedPtr<Texture2D> Texture2D::Create(uint32_t width, uint32_t height)
+	/* 默认纹理 */
+	SharedPtr<Texture>& Texture::White()
 	{
-		switch (Renderer::CurrentAPI())
-		{
-		case RenderAPI::None:
-			CORE_LOG_ERROR("RenderAPI can't be None!");
-			return nullptr;
-		case RenderAPI::OpenGL:
-			return CreateSharedPtr<OpenGLTexture2D>(width, height);
-		default:
-			CORE_LOG_ERROR("Unknown RenderAPI is unsupported!");
-			return nullptr;
-		}
-	}
+		static SharedPtr<Texture> texture;
 
-	SharedPtr<Texture2D> Texture2D::Create(const std::string& path)
-	{
-		switch (Renderer::CurrentAPI())
+		if (!texture)
 		{
-		case RenderAPI::None:
-			CORE_LOG_ERROR("RenderAPI can't be None!");
-			return nullptr;
-		case RenderAPI::OpenGL:
-			return CreateSharedPtr<OpenGLTexture2D>(path);
-		default:
-			CORE_LOG_ERROR("Unknown RenderAPI is unsupported!");
-			return nullptr;
+			// Texture
+			constexpr TextureDesc desc{ 2,2 };
+			texture = Texture::Create("White", desc);
+			uint32_t default_texture_data = 0xffffffff; // White
+			texture->SetData(&default_texture_data, {});
 		}
+
+		return texture;
 	}
 }
