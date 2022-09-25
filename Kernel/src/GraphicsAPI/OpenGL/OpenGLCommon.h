@@ -10,19 +10,32 @@ namespace Wuya
 		switch (format)
 		{
 		case TextureFormat::R8:				 return GL_R8;
+		case TextureFormat::R8I:			 return GL_R8I;
+		case TextureFormat::R8UI:			 return GL_R8UI;
 		case TextureFormat::R8_SNorm:		 return GL_R8_SNORM; 
+		case TextureFormat::Stencil8:		 return GL_STENCIL_INDEX8;
+		case TextureFormat::R16I:			 return GL_R16I;
+		case TextureFormat::R16UI:			 return GL_R16UI;
 		case TextureFormat::R16F:			 return GL_R16F;
 		case TextureFormat::RG8:			 return GL_RG8;
+		case TextureFormat::RG8I:			 return GL_RG8I;
+		case TextureFormat::RG8UI:			 return GL_RG8UI;
 		case TextureFormat::RG8_SNorm:		 return GL_RG8_SNORM;
 		case TextureFormat::RGB565:			 return GL_RGB565;
 		case TextureFormat::RGB9_E5:		 return GL_RGB9_E5;
 		case TextureFormat::RGBA4:			 return GL_RGBA4;
 		case TextureFormat::Depth16:		 return GL_DEPTH_COMPONENT16;
 		case TextureFormat::RGB8:			 return GL_RGB8;
+		case TextureFormat::RGB8I:			 return GL_RGB8I;
+		case TextureFormat::RGB8UI:			 return GL_RGB8UI;
 		case TextureFormat::s_RGB8:			 return GL_SRGB8;
 		case TextureFormat::RGB8_SNorm:		 return GL_RGB8_SNORM;
 		case TextureFormat::Depth24:		 return GL_DEPTH_COMPONENT24;
+		case TextureFormat::R32I:			 return GL_R32I;
+		case TextureFormat::R32UI:			 return GL_R32UI;
 		case TextureFormat::R32F:			 return GL_R32F;
+		case TextureFormat::RG16I:			 return GL_RG16I;
+		case TextureFormat::RG16UI:			 return GL_RG16UI;
 		case TextureFormat::RG16F:			 return GL_RG16F;
 		case TextureFormat::R11G11B10F:		 return GL_R11F_G11F_B10F;
 		case TextureFormat::RGBA8:			 return GL_RGBA8;

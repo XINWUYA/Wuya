@@ -95,17 +95,34 @@ namespace Wuya
 		m_FrameBufferDesc.ViewportRegion.Height = height;
 	}
 
-	int OpenGLFrameBuffer::ReadPixel(uint32_t attachment_index, int x, int y)
+	/* 读取指定纹理（x, y）像素位置的颜色值 */
+	void OpenGLFrameBuffer::ReadPixel(uint32_t attachment_index, int x, int y, const PixelDesc& pixel_desc, void* data)
 	{
 		PROFILE_FUNCTION();
 
 		ASSERT(attachment_index < m_FrameBufferDesc.ColorRenderBuffers.size());
 
+		glBindFramebuffer(GL_FRAMEBUFFER, m_FrameBufferId);
 		glReadBuffer(GL_COLOR_ATTACHMENT0 + attachment_index);
 
-		int pixel_data;
-		glReadPixels(x, y, 1, 1, GL_RED_INTEGER, GL_INT, &pixel_data);
-		return pixel_data;
+		glReadPixels(x, y, 1, 1, TranslateToOpenGLPixelFormat(pixel_desc.Format), TranslateToOpenGLPixelType(pixel_desc.Type), data);
+
+		CHECK_GL_ERROR;
+	}
+
+	/* 指定数据清理Attachment */
+	void OpenGLFrameBuffer::ClearAttachment(uint32_t attachment_index, int level, const PixelDesc& pixel_desc, void* data)
+	{
+		PROFILE_FUNCTION();
+
+		ASSERT(attachment_index < m_FrameBufferDesc.ColorRenderBuffers.size());
+
+		const auto& render_buffer_info = m_FrameBufferDesc.ColorRenderBuffers[attachment_index];
+		const auto& texture = std::dynamic_pointer_cast<OpenGLTexture>(render_buffer_info.RenderTarget);
+		
+		glClearTexImage(texture->GetTextureID(), level, TranslateToOpenGLPixelFormat(pixel_desc.Format), TranslateToOpenGLPixelType(pixel_desc.Type), data);
+
+		CHECK_GL_ERROR;
 	}
 
 	/* 附加一个RenderBuffer到FrameBuffer */

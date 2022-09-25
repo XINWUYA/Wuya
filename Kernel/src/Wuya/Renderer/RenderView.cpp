@@ -7,8 +7,8 @@
 
 namespace Wuya
 {
-	RenderView::RenderView(const std::string& name)
-		: m_DebugName(name)
+	RenderView::RenderView(std::string name)
+		: m_DebugName(std::move(name))
 	{
 		PROFILE_FUNCTION();
 
@@ -39,6 +39,20 @@ namespace Wuya
 			return nullptr;
 
 		return DynamicPtrCast<Resource<FrameGraphTexture>>(m_pFrameGraph->GetResource(m_RenderTargetHandle))->GetResource().Texture;
+	}
+
+	/* 存储各Pass的FrameBuffer */
+	void RenderView::EmplacePassFrameBuffer(const std::string& name, const SharedPtr<FrameBuffer>& frame_buffer)
+	{
+		m_PassFrameBuffers[name] = frame_buffer;
+	}
+
+	const SharedPtr<FrameBuffer>& RenderView::GetPassFrameBuffer(const std::string& name) const
+	{
+		const auto it = m_PassFrameBuffers.find(name);
+		if (it != m_PassFrameBuffers.end())
+			return it->second;
+		return {};
 	}
 
 	/* 准备一帧的RenderView数据 */
@@ -85,7 +99,7 @@ namespace Wuya
 				const auto& world_position = transform_component.Position;
 				// todo: 执行剔除
 				//if ()
-				m_VisibleMeshObjects.emplace_back(transform_component.GetTransform(), mesh_segment);
+				m_VisibleMeshObjects.emplace_back((int)entity, transform_component.GetTransform(), mesh_segment);
 			}
 		}
 

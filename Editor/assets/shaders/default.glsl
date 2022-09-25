@@ -37,12 +37,14 @@ void main()
 
 #include "common.glsl"
 #include "builtin/math.glsl"
+#include "builtin/uniforms.glsl"
 
 layout(location = 0) out vec4 OutGBufferAlbedo;
 layout(location = 1) out vec4 OutGBufferSpecular;
 layout(location = 2) out vec4 OutGBufferNormal;
 layout(location = 3) out vec4 OutGBufferRoughnessMetallic;
 layout(location = 4) out vec4 OutGBufferEmissive;
+layout(location = 5) out int  OutObjectId;
 
 struct SVextex2Frag
 {
@@ -76,4 +78,6 @@ void main()
 	OutGBufferNormal = vec4(normal, 1.0f);
 	OutGBufferRoughnessMetallic = vec4(roughness, metallic, 0.0f, 1.0f);
 	OutGBufferEmissive = vec4(emissive, 1.0f);
+
+	OutObjectId = u_ObjectId;
 }

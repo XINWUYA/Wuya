@@ -47,7 +47,7 @@ namespace Wuya
 		/* 根据描述创建RenderPassData */
 		uint32_t CreateRenderPassData(const std::string& name, const FrameGraphPassInfo::Descriptor& desc);
 		/* 获取RenderPassData */
-		[[nodiscard]] SharedPtr<RenderPassData> GetRenderPassData(uint32_t idx) const;
+		[[nodiscard]] SharedPtr<RenderPassData> GetRenderPassData(uint32_t idx = 0) const;
 
 		/* 构建阶段 */
 		void Build();

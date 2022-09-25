@@ -284,7 +284,7 @@ namespace Wuya
 	{
 		ObjectUniformData data;
 		data.LocalToWorldMat = mesh_object.Local2WorldMat;
-		data.ObjectId = 0;
+		data.ObjectId = mesh_object.ObjectId;
 		s_RenderData.pObjectUniformBuffer->SetData(&data, sizeof(ObjectUniformData));
 	}
 }

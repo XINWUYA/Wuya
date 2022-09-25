@@ -10,17 +10,19 @@ namespace Wuya
 	class Scene;
 	class MeshSegment;
 	class Texture;
+	class FrameBuffer;
 	class FrameGraph;
 
 	/* 对当前RenderView可见的模型 */
 	struct VisibleMeshObject
 	{
+		int ObjectId{ -1 };
 		glm::mat4 Local2WorldMat;
 		SharedPtr<MeshSegment> MeshSegment;
 
 		VisibleMeshObject() = default;
-		VisibleMeshObject(const glm::mat4& local_2_world, const SharedPtr<class MeshSegment>& mesh_segment)
-			: Local2WorldMat(local_2_world), MeshSegment(mesh_segment)
+		VisibleMeshObject(int object_id, const glm::mat4& local_2_world, const SharedPtr<class MeshSegment>& mesh_segment)
+			: ObjectId(object_id), Local2WorldMat(local_2_world), MeshSegment(mesh_segment)
 		{}
 	};
 
@@ -33,7 +35,7 @@ namespace Wuya
 	class RenderView
 	{
 	public:
-		RenderView(const std::string& name);
+		RenderView(std::string name);
 		~RenderView();
 
 		/* 设置名称 */
@@ -61,6 +63,10 @@ namespace Wuya
 
 		/* 获取FrameGraph */
 		const SharedPtr<FrameGraph>& GetFrameGraph() const { return m_pFrameGraph; }
+
+		/* 存储各Pass的FrameBuffer */
+		void EmplacePassFrameBuffer(const std::string& name, const SharedPtr<FrameBuffer>& frame_buffer);
+		const SharedPtr<FrameBuffer>& GetPassFrameBuffer(const std::string& name) const;
 
 		/* 准备一帧的RenderView数据 */
 		void Prepare();
@@ -91,5 +97,7 @@ namespace Wuya
 		FrameGraphResourceHandle m_RenderTargetHandle{};
 		/* FrameGraph */
 		SharedPtr<FrameGraph> m_pFrameGraph{ nullptr };
+		/* 收集当前RenderView对应的FrameGraph中各Pass阶段的FrameBuffer，用于ReadPixels<PassName, FrameBufferPtr> */
+		std::unordered_map<std::string, SharedPtr<FrameBuffer>> m_PassFrameBuffers{};
 	};
 }

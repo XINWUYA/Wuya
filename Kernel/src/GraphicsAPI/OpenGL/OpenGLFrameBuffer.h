@@ -18,7 +18,9 @@ namespace Wuya
 		void Resize(uint32_t width, uint32_t height) override;
 
 		/* 读取指定纹理（x, y）像素位置的颜色值 */
-		int ReadPixel(uint32_t attachment_index, int x, int y) override;
+		void ReadPixel(uint32_t attachment_index, int x, int y, const PixelDesc& pixel_desc, void* data) override;
+		/* 指定数据清理Attachment */
+		void ClearAttachment(uint32_t attachment_index, int level, const PixelDesc& pixel_desc, void* data) override;
 
 	private:
 		/* 附加一个RenderBuffer到FrameBuffer */

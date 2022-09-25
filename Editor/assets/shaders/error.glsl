@@ -15,8 +15,13 @@ void main()
 #version 450 core
 
 layout(location = 0) out vec4 OutColor;
+layout(location = 5) out int  OutObjectId;
+
+#include "builtin/uniforms.glsl"
 
 void main()
 {
 	OutColor = vec4(1.0f, 0.0f, 1.0f, 1.0f); /* 紫色 */
+
+	OutObjectId = u_ObjectId;
 }

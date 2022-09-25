@@ -147,6 +147,8 @@ namespace Wuya
 			ASSERT(false, "Not implemented!")
 			break;
 		}
+
+		m_DebugName = ExtractFileBaseName(path);
 	}
 
 	OpenGLTexture::~OpenGLTexture()

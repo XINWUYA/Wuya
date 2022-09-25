@@ -126,6 +126,11 @@ namespace Wuya
 		depth_target_desc.Height = m_ViewportRegion.Height;
 		depth_target_desc.TextureFormat = TextureFormat::Depth32;
 
+		FrameGraphTexture::Descriptor object_id_desc;
+		object_id_desc.Width = m_ViewportRegion.Width;
+		object_id_desc.Height = m_ViewportRegion.Height;
+		object_id_desc.TextureFormat = TextureFormat::R32I;
+
 		/* GBuffer Pass */
 		struct GBufferPassData
 		{
@@ -134,6 +139,7 @@ namespace Wuya
 			FrameGraphResourceHandleTyped<FrameGraphTexture> GBufferNormal;
 			FrameGraphResourceHandleTyped<FrameGraphTexture> GBufferRoughnessMetallic;
 			FrameGraphResourceHandleTyped<FrameGraphTexture> GBufferEmissive;
+			FrameGraphResourceHandleTyped<FrameGraphTexture> GBufferObjectId;
 			FrameGraphResourceHandleTyped<FrameGraphTexture> GBufferDepth;
 		};
 
@@ -145,12 +151,14 @@ namespace Wuya
 				data.GBufferNormal = builder.CreateTexture("GBufferNormal", color_target_desc);
 				data.GBufferRoughnessMetallic = builder.CreateTexture("GBufferRoughnessMetallic", color_target_desc);
 				data.GBufferEmissive = builder.CreateTexture("GBufferEmissive", color_target_desc);
+				data.GBufferObjectId = builder.CreateTexture("GBufferObjectId", object_id_desc);
 				data.GBufferDepth = builder.CreateTexture("GBufferDepth", depth_target_desc);
 				builder.BindOutputResource(data.GBufferAlbedo, FrameGraphTexture::Usage::ColorAttachment);
 				builder.BindOutputResource(data.GBufferSpecular, FrameGraphTexture::Usage::ColorAttachment);
 				builder.BindOutputResource(data.GBufferNormal, FrameGraphTexture::Usage::ColorAttachment);
 				builder.BindOutputResource(data.GBufferRoughnessMetallic, FrameGraphTexture::Usage::ColorAttachment);
 				builder.BindOutputResource(data.GBufferEmissive, FrameGraphTexture::Usage::ColorAttachment);
+				builder.BindOutputResource(data.GBufferObjectId, FrameGraphTexture::Usage::ColorAttachment);
 				builder.BindOutputResource(data.GBufferDepth, FrameGraphTexture::Usage::DepthAttachment);
 
 				FrameGraphPassInfo::Descriptor pass_desc;
@@ -159,6 +167,7 @@ namespace Wuya
 				pass_desc.Attachments.ColorAttachments[2] = data.GBufferNormal;
 				pass_desc.Attachments.ColorAttachments[3] = data.GBufferRoughnessMetallic;
 				pass_desc.Attachments.ColorAttachments[4] = data.GBufferEmissive;
+				pass_desc.Attachments.ColorAttachments[5] = data.GBufferObjectId;
 				pass_desc.Attachments.DepthAttachment = data.GBufferDepth;
 				pass_desc.ViewportRegion = m_ViewportRegion;
 				builder.CreateRenderPass("GBufferPassRenderTarget", pass_desc);
@@ -168,19 +177,27 @@ namespace Wuya
 				Renderer::GetRenderAPI()->PushDebugGroup("GBufferPass");
 
 				const auto render_pass_info = resources.GetPassRenderTarget();
-				render_pass_info->Bind();
-				Renderer::GetRenderAPI()->Clear();
-				for (const auto& mesh_object : m_pRenderView->GetVisibleMeshObjects())
-				{
-					/* Fill object uniform buffer */
-					Renderer::FillObjectUniformBuffer(mesh_object);
+				m_pRenderView->EmplacePassFrameBuffer("GBufferPass", render_pass_info);
 
-					auto& material = mesh_object.MeshSegment->GetMaterial();
-					auto& raster_state = material->GetRasterState();
-					raster_state.CullMode = CullMode::Cull_Front;
-					//material->SetParameters("u_Local2WorldMat", mesh_object.Local2WorldMat);
-					//material->SetParameters("u_ViewProjectionMat", GetViewProjectionMatrix());
-					Renderer::Submit(material, mesh_object.MeshSegment->GetVertexArray());
+				render_pass_info->Bind();
+				{
+					/*PixelDesc desc{ PixelFormat::R_Integer, PixelType::Int };
+					int32_t clear_data = -1;
+					render_pass_info->ClearAttachment(5, 0, desc, &clear_data);*/
+
+					Renderer::GetRenderAPI()->Clear();
+					for (const auto& mesh_object : m_pRenderView->GetVisibleMeshObjects())
+					{
+						/* Fill object uniform buffer */
+						Renderer::FillObjectUniformBuffer(mesh_object);
+
+						auto& material = mesh_object.MeshSegment->GetMaterial();
+						auto& raster_state = material->GetRasterState();
+						raster_state.CullMode = CullMode::Cull_Front;
+						//material->SetParameters("u_Local2WorldMat", mesh_object.Local2WorldMat);
+						//material->SetParameters("u_ViewProjectionMat", GetViewProjectionMatrix());
+						Renderer::Submit(material, mesh_object.MeshSegment->GetVertexArray());
+					}
 				}
 				render_pass_info->Unbind();
 				Renderer::GetRenderAPI()->Flush();
@@ -220,16 +237,21 @@ namespace Wuya
 			[&](const FrameGraphResources& resources, const SidePassData& data)
 			{
 				Renderer::GetRenderAPI()->PushDebugGroup("SidePass");
+
 				const auto render_pass_info = resources.GetPassRenderTarget();
+				m_pRenderView->EmplacePassFrameBuffer("SidePass", render_pass_info);
+
 				render_pass_info->Bind();
-				Renderer::GetRenderAPI()->Clear();
-				SharedPtr<Material> material = CreateSharedPtr<Material>();
-				auto& raster_state = material->GetRasterState();
-				raster_state.EnableDepthWrite = false;
-				const auto shader = ShaderLibrary::Instance().GetOrLoad("assets/shaders/side.glsl");
-				material->SetShader(shader);
-				material->SetTexture(resources.Get(data.InputTexture).Texture, 0);
-				Renderer::Submit(material, Renderer::GetFullScreenVertexArray());
+				{
+					Renderer::GetRenderAPI()->Clear();
+					SharedPtr<Material> material = CreateSharedPtr<Material>();
+					auto& raster_state = material->GetRasterState();
+					raster_state.EnableDepthWrite = false;
+					const auto shader = ShaderLibrary::Instance().GetOrLoad("assets/shaders/side.glsl");
+					material->SetShader(shader);
+					material->SetTexture(resources.Get(data.InputTexture).Texture, 0);
+					Renderer::Submit(material, Renderer::GetFullScreenVertexArray());
+				}
 				render_pass_info->Unbind();
 
 				Renderer::GetRenderAPI()->PopDebugGroup();
@@ -243,6 +265,18 @@ namespace Wuya
 		m_pRenderView->SetRenderTargetHandle(side_pass->GetData().OutputTexture);
 
 		m_IsFrameGraphDirty = false;
+	}
+
+	int32_t EditorCamera::PickingEntityByPixelPos(uint32_t x, uint32_t y) const
+	{
+		int32_t entity_id = -1;
+		const auto& gbuffer_framebuffer = m_pRenderView->GetPassFrameBuffer("GBufferPass");
+		if (gbuffer_framebuffer)
+		{
+			PixelDesc desc{ PixelFormat::R_Integer, PixelType::Int };
+			gbuffer_framebuffer->ReadPixel(5, x, y, desc, &entity_id);
+		}
+		return entity_id;
 	}
 
 	/*void EditorCamera::SetViewportSize(float width, float height)

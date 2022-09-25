@@ -79,8 +79,6 @@ namespace Wuya
 
 		/* 菜单 */
 		ShowMenuUI();
-		/* 主窗口 */
-		ShowSceneViewportUI();
 		/* 场景控制UI */
 		ShowSceneControllerUI();
 		/* 统计信息 */
@@ -89,6 +87,9 @@ namespace Wuya
 		m_SceneHierarchy.OnImGuiRender();
 		/* 资源管理窗口 */
 		m_ResourceBrowser.OnImGuiRenderer();
+
+		/* 主窗口，需要最后再画，以确保能够得到正确的窗口宽高 */
+		ShowSceneViewportUI();
 
 		//bool open = true;
 		//ImGui::ShowDemoWindow(&open);
@@ -181,6 +182,8 @@ namespace Wuya
 
 		if (event->GetMouseButton() == Mouse::ButtonLeft)
 		{
+			CheckMouseSelectEntity();
+
 			if (m_IsViewportHovered && !ImGuizmo::IsOver() && !Input::IsKeyPressed(Key::LeftAlt))
 				m_SceneHierarchy.SetSelectedEntity(m_HoveredEntity);
 		}
@@ -609,13 +612,12 @@ namespace Wuya
 		const glm::vec2 viewport_size = glm::vec2(m_ViewportRegion.Width, m_ViewportRegion.Height);
 		mouse_y = viewport_size.y - mouse_y;
 
-		//if (mouse_x > 0 && mouse_y > 0 && mouse_x < viewport_size.x && mouse_y < viewport_size.y)
-		//if (mouse_x > 0 && mouse_y > 0 && mouse_x < viewport_size.x && mouse_y < viewport_size.y)
-		//{
-		//	int pixel_data = m_pFrameBuffer->ReadPixel(1, (int)mouse_x, (int)mouse_y);
-		//	m_HoveredEntity = pixel_data == -1 ? Entity() : Entity((entt::entity)pixel_data, m_pMainScene.get());
-		//	//EDITOR_LOG_ERROR(pixel_data);
-		//}
+		if (mouse_x > 0 && mouse_y > 0 && mouse_x < viewport_size.x && mouse_y < viewport_size.y)
+		{
+			int pixel_data = m_pEditorCamera->PickingEntityByPixelPos((int)mouse_x, (int)mouse_y);
+			m_HoveredEntity = pixel_data == -1 ? Entity() : Entity((entt::entity)pixel_data, m_pMainScene);
+			EDITOR_LOG_ERROR(pixel_data);
+		}
 	}
 
 	void EditorLayer::OnUpdate(float delta_time)
@@ -627,9 +629,7 @@ namespace Wuya
 		if (m_ViewportRegion.Width <= 0 || m_ViewportRegion.Height <= 0)
 			return;
 
-		//m_pFrameBuffer->Bind();
-
-		Renderer::SetClearColor(glm::vec4(0.2f, 0.3f, 0.3f, 1.0f));
+		Renderer::SetClearColor(glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
 		Renderer::Clear();
 		Renderer::Update();
 
@@ -665,8 +665,6 @@ namespace Wuya
 		);*/
 
 
-		//m_pFrameBuffer->ClearColorAttachment(1, -1);
-
 		if (m_pMainScene)
 		{
 			switch (m_PlayMode)
@@ -675,7 +673,6 @@ namespace Wuya
 				/* 更新相机信息 */
 				if (m_IsViewportFocused)
 				{
-					//m_pOrthographicCameraController->OnUpdate(delta_time);
 					m_pEditorCamera->OnUpdate(delta_time);
 				}
 
@@ -691,10 +688,5 @@ namespace Wuya
 				break;
 			}
 		}
-
-		// todo: 鼠标点击选中物体
-		//CheckMouseSelectEntity();
-
-		//m_pFrameBuffer->Unbind();
 	}
 }

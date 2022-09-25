@@ -45,6 +45,9 @@ namespace Wuya
 		/* 构建内置的FrameGraph */
 		void ConstructRenderView() override;
 
+		/* 根据像素位置，获取EntityId */
+		int32_t PickingEntityByPixelPos(uint32_t x, uint32_t y) const;
+
 	private:
 		void UpdateProjectionMatrix();
 		void UpdateViewMatrix();

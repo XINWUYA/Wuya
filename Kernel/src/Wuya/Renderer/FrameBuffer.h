@@ -4,6 +4,7 @@
 namespace Wuya
 {
 	class Texture;
+	struct PixelDesc;
 
 	/* RenderBuffer信息 */
 	struct RenderBufferInfo
@@ -40,10 +41,12 @@ namespace Wuya
 		virtual void Resize(uint32_t width, uint32_t height) = 0;
 
 		/* 读取指定纹理（x, y）像素位置的颜色值 */
-		virtual int ReadPixel(uint32_t attachment_index, int x, int y) = 0;
+		virtual void ReadPixel(uint32_t attachment_index, int x, int y, const PixelDesc& pixel_desc, void* data) = 0;
+		/* 指定数据清理Attachment */
+		virtual void ClearAttachment(uint32_t attachment_index, int level, const PixelDesc & pixel_desc, void* data) = 0;
 
 		/* 获取FrameBuffer描述信息 */
-		const FrameBufferDesc& GetDescription() const { return m_FrameBufferDesc; }
+		[[nodiscard]] const FrameBufferDesc& GetDescription() const { return m_FrameBufferDesc; }
 
 		/* 创建FrameBuffer */
 		static SharedPtr<FrameBuffer> Create(const std::string& name, const FrameBufferDesc& desc);

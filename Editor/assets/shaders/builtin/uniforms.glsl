@@ -10,7 +10,7 @@ layout(std140, binding = 0) uniform ViewUniformBuffer
 layout(std140, binding = 1) uniform ObjectUniformBuffer
 {
 	mat4 u_Local2WorldMat;
-	uint u_ObjectId;
+	int  u_ObjectId;
 };
 
 #endif // UNIFORMS_GLSL
