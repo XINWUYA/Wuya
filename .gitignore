@@ -374,3 +374,4 @@ TimeCostProfiler-Startup.json
 TimeCostProfiler-Runtime.json
 
 build/
+Editor/assets/cache/

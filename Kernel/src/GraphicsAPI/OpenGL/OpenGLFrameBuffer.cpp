@@ -16,6 +16,7 @@ namespace Wuya
 
 		/* 1. 创建FrameBuffer */
 		glGenFramebuffers(1, &m_FrameBufferId);
+		glBindFramebuffer(GL_FRAMEBUFFER, m_FrameBufferId);
 
 		/* 2. 附加ColorAttachments */
 		if (!!(desc.Usage & RenderBufferUsage::ColorAll))
@@ -56,8 +57,7 @@ namespace Wuya
 		}
 
 		/* 先解绑 */
-		Unbind();
-
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		CHECK_GL_ERROR;
 	}
 
@@ -186,13 +186,7 @@ namespace Wuya
 		if (texture->m_TextureDesc.Samples <= 1)
 		{
 			PROFILE_SCOPE("Attach RenderBuffer");
-
-			/* 绑定当前FrameBuffer */
-			{
-				PROFILE_SCOPE("Bind FrameBuffer");
-
-				glBindFramebuffer(GL_FRAMEBUFFER, m_FrameBufferId);
-			}
+			
 			/* 附加 */
 			if (texture_target == GL_TEXTURE_2D_ARRAY)
 			{
@@ -220,7 +214,6 @@ namespace Wuya
 			/* todo: 支持MultiSample */
 			if (!!(texture->m_TextureDesc.Usage & TextureUsage::Sampleable)) /* RenderBuffer不是Sampleable，直接附加 */
 			{
-				glBindFramebuffer(GL_FRAMEBUFFER, m_FrameBufferId);
 				glFramebufferRenderbuffer(GL_FRAMEBUFFER, attachment, GL_RENDERBUFFER, texture->m_TextureId);
 				render_buffer_usage = RenderBufferUsage::None;
 
@@ -228,9 +221,6 @@ namespace Wuya
 			}
 			else /* rt需要MultiSample */
 			{
-				/* 绑定当前FrameBuffer */
-				glBindFramebuffer(GL_FRAMEBUFFER, m_FrameBufferId);
-
 				/* 需要额外创建一个RenderBuffer, todo: 不需要每次都创建 */
 				GLuint rbo = 0;
 				glGenRenderbuffers(1, &rbo);

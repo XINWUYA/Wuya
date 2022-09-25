@@ -74,12 +74,15 @@ namespace Wuya
 			glDisable(GL_CULL_FACE);
 			break;
 		case CullMode::Cull_Front:
+			glEnable(GL_CULL_FACE);
 			glCullFace(GL_FRONT);
 			break;
 		case CullMode::Cull_Back:
+			glEnable(GL_CULL_FACE);
 			glCullFace(GL_BACK);
 			break;
 		case CullMode::Cull_Front_And_Back:
+			glEnable(GL_CULL_FACE);
 			glCullFace(GL_FRONT_AND_BACK);
 			break;
 		}

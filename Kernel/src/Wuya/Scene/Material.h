@@ -25,7 +25,7 @@ namespace Wuya
 		void SetTexture(const SharedPtr<Texture>& texture, uint32_t slot);
 		/* 设置光栅化状态 */
 		void SetRasterState(RenderRasterState state) { m_RasterState = state; }
-		RenderRasterState GetRasterState() const { return m_RasterState; }
+		const RenderRasterState& GetRasterState() const { return m_RasterState; }
 		RenderRasterState& GetRasterState() { return m_RasterState; }
 
 		/* 绑定材质中的各参数 */

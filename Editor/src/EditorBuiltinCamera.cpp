@@ -158,7 +158,7 @@ namespace Wuya
 				builder.BindOutputResource(data.GBufferNormal, FrameGraphTexture::Usage::ColorAttachment);
 				builder.BindOutputResource(data.GBufferRoughnessMetallic, FrameGraphTexture::Usage::ColorAttachment);
 				builder.BindOutputResource(data.GBufferEmissive, FrameGraphTexture::Usage::ColorAttachment);
-				builder.BindOutputResource(data.GBufferObjectId, FrameGraphTexture::Usage::ColorAttachment);
+				builder.BindOutputResource(data.GBufferObjectId, FrameGraphTexture::Usage::ColorAttachment | FrameGraphTexture::Usage::Sampleable);
 				builder.BindOutputResource(data.GBufferDepth, FrameGraphTexture::Usage::DepthAttachment);
 
 				FrameGraphPassInfo::Descriptor pass_desc;
@@ -181,19 +181,17 @@ namespace Wuya
 
 				render_pass_info->Bind();
 				{
-					/*PixelDesc desc{ PixelFormat::R_Integer, PixelType::Int };
-					int32_t clear_data = -1;
-					render_pass_info->ClearAttachment(5, 0, desc, &clear_data);*/
-
 					Renderer::GetRenderAPI()->Clear();
+
+					int32_t clear_data = -1;
+					render_pass_info->ClearAttachment(5, 0, { PixelFormat::R_Integer, PixelType::Int }, &clear_data);
+
 					for (const auto& mesh_object : m_pRenderView->GetVisibleMeshObjects())
 					{
 						/* Fill object uniform buffer */
 						Renderer::FillObjectUniformBuffer(mesh_object);
 
 						auto& material = mesh_object.MeshSegment->GetMaterial();
-						auto& raster_state = material->GetRasterState();
-						raster_state.CullMode = CullMode::Cull_Front;
 						//material->SetParameters("u_Local2WorldMat", mesh_object.Local2WorldMat);
 						//material->SetParameters("u_ViewProjectionMat", GetViewProjectionMatrix());
 						Renderer::Submit(material, mesh_object.MeshSegment->GetVertexArray());
@@ -270,11 +268,9 @@ namespace Wuya
 	int32_t EditorCamera::PickingEntityByPixelPos(uint32_t x, uint32_t y) const
 	{
 		int32_t entity_id = -1;
-		const auto& gbuffer_framebuffer = m_pRenderView->GetPassFrameBuffer("GBufferPass");
-		if (gbuffer_framebuffer)
+		if (const auto& gbuffer_framebuffer = m_pRenderView->GetPassFrameBuffer("GBufferPass"))
 		{
-			PixelDesc desc{ PixelFormat::R_Integer, PixelType::Int };
-			gbuffer_framebuffer->ReadPixel(5, x, y, desc, &entity_id);
+			gbuffer_framebuffer->ReadPixel(5, x, y, { PixelFormat::R_Integer, PixelType::Int }, &entity_id);
 		}
 		return entity_id;
 	}
