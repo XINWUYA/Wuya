@@ -5,6 +5,8 @@ namespace Wuya
 {
 	class RenderView;
 	class Material;
+	class UniformBuffer;
+	struct VisibleMeshObject;
 
 	class Renderer
 	{
@@ -28,10 +30,9 @@ namespace Wuya
 
 		static SharedPtr<VertexArray> GetFullScreenVertexArray();
 
-	private:
+		static void FillObjectUniformBuffer(const VisibleMeshObject& mesh_object);
 
+	private:
 		static SharedPtr<RenderAPI> m_pRenderAPI;
-		/* 当前帧数计数 */
-		uint32_t m_FrameCounter{ 0 };
 	};
 }

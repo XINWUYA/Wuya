@@ -6,12 +6,47 @@
 #include "RenderView.h"
 #include "Texture.h"
 #include "Shader.h"
+#include "UniformBuffer.h"
 #include "FrameGraph/FrameGraph.h"
 #include "Wuya/Scene/Material.h"
 #include "Wuya/Scene/Mesh.h"
 
 namespace Wuya
 {
+	
+	/* GlobalUniformBuffer的绑定位置 */
+	namespace UniformBufferBindingPoint
+	{
+		constexpr uint8_t View			= 0;
+		constexpr uint8_t Object		= 1;
+		constexpr uint8_t Material		= 2;
+		constexpr uint8_t Light			= 3;
+	}
+
+	/* Per view uniform data */
+	struct ViewUniformData
+	{
+		glm::mat4 ViewProjectionMatrix{ 1 };
+		uint32_t m_FrameCounter{ 0 }; /* 当前帧数计数 */
+	};
+
+	/* Per object uniform data */
+	struct ObjectUniformData
+	{
+		glm::mat4 LocalToWorldMat{ 1 };	/* 模型矩阵 */
+		uint32_t ObjectId{ 0 };				/* 模型ID，用于Picking */
+	};
+
+	struct RenderData
+	{
+		/* 全局UniformBuffers */
+		ViewUniformData ViewUniformData;
+		SharedPtr<UniformBuffer> pViewUniformBuffer;
+		SharedPtr<UniformBuffer> pObjectUniformBuffer;
+	};
+
+	static RenderData s_RenderData;
+
 	SharedPtr<RenderAPI> Renderer::m_pRenderAPI = RenderAPI::Create();
 
 	void Renderer::Init()
@@ -20,11 +55,16 @@ namespace Wuya
 
 		m_pRenderAPI->Init();
 		Renderer2D::Init();
+
+		s_RenderData.pViewUniformBuffer = UniformBuffer::Create(sizeof(ViewUniformData), UniformBufferBindingPoint::View);
+		s_RenderData.pObjectUniformBuffer = UniformBuffer::Create(sizeof(ObjectUniformData), UniformBufferBindingPoint::Object);
 	}
 
 	void Renderer::Update()
 	{
 		PROFILE_FUNCTION();
+
+		s_RenderData.ViewUniformData.m_FrameCounter++;
 	}
 
 	void Renderer::Release()
@@ -59,6 +99,10 @@ namespace Wuya
 	void Renderer::RenderAView(const SharedPtr<RenderView>& view)
 	{
 		PROFILE_FUNCTION();
+
+		/* Fill view uniform buffer */
+		s_RenderData.ViewUniformData.ViewProjectionMatrix = view->GetCullingCamera()->GetViewProjectionMatrix();
+		s_RenderData.pViewUniformBuffer->SetData(&s_RenderData.ViewUniformData, sizeof(ViewUniformData));
 
 		view->Execute();
 		//const auto viewport_region = view->GetViewportRegion();
@@ -234,5 +278,13 @@ namespace Wuya
 		vertex_array->AddVertexBuffer(vertex_buffer);
 		vertex_array->SetIndexBuffer(index_buffer);
 		return vertex_array;
+	}
+
+	void Renderer::FillObjectUniformBuffer(const VisibleMeshObject& mesh_object)
+	{
+		ObjectUniformData data;
+		data.LocalToWorldMat = mesh_object.Local2WorldMat;
+		data.ObjectId = 0;
+		s_RenderData.pObjectUniformBuffer->SetData(&data, sizeof(ObjectUniformData));
 	}
 }

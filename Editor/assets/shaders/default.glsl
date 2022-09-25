@@ -6,12 +6,10 @@ layout(location = 1) in vec3 a_Normal;
 layout(location = 2) in vec3 a_Color;
 layout(location = 3) in vec2 a_TexCoord;
 
-layout(std140, binding = 0) uniform CameraData
-{
-	mat4 u_ViewProjectionMat;
-};
+#include "builtin/uniforms.glsl"
 
-layout (location = 0) uniform mat4 u_Local2WorldMat;
+// layout (location = 0) uniform mat4 u_ViewProjectionMat;
+// layout (location = 1) uniform mat4 u_Local2WorldMat;
 
 struct SVextex2Frag
 {
@@ -38,6 +36,7 @@ void main()
 #version 450 core
 
 #include "common.glsl"
+#include "builtin/math.glsl"
 
 layout(location = 0) out vec4 OutGBufferAlbedo;
 layout(location = 1) out vec4 OutGBufferSpecular;
@@ -72,7 +71,7 @@ void main()
 	float metallic = texture(u_MetallicTexture, Input.TexCoord).r;
 	vec3 emissive = texture(u_EmissiveTexture, Input.TexCoord).rgb;
 
-	OutGBufferAlbedo = vec4(albedo * DefaultColor, 1.0f);
+	OutGBufferAlbedo = vec4(albedo * DefaultColor * PI, 1.0f);
 	OutGBufferSpecular = vec4(specular, 1.0f);
 	OutGBufferNormal = vec4(normal, 1.0f);
 	OutGBufferRoughnessMetallic = vec4(roughness, metallic, 0.0f, 1.0f);

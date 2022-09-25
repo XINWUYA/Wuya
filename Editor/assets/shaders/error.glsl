@@ -3,12 +3,7 @@
 
 layout(location = 0) in vec3 a_Position;
 
-layout(std140, binding = 0) uniform CameraData
-{
-	mat4 u_ViewProjectionMat;
-};
-
-layout (location = 0) uniform mat4 u_Local2WorldMat;
+#include "builtin/uniforms.glsl"
 
 void main()
 {

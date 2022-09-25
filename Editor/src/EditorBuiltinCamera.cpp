@@ -172,11 +172,14 @@ namespace Wuya
 				Renderer::GetRenderAPI()->Clear();
 				for (const auto& mesh_object : m_pRenderView->GetVisibleMeshObjects())
 				{
+					/* Fill object uniform buffer */
+					Renderer::FillObjectUniformBuffer(mesh_object);
+
 					auto& material = mesh_object.MeshSegment->GetMaterial();
 					auto& raster_state = material->GetRasterState();
 					raster_state.CullMode = CullMode::Cull_Front;
-					material->SetParameters("u_Local2WorldMat", mesh_object.Local2WorldMat);
-					material->SetParameters("u_ViewProjectionMat", GetViewProjectionMatrix());
+					//material->SetParameters("u_Local2WorldMat", mesh_object.Local2WorldMat);
+					//material->SetParameters("u_ViewProjectionMat", GetViewProjectionMatrix());
 					Renderer::Submit(material, mesh_object.MeshSegment->GetVertexArray());
 				}
 				render_pass_info->Unbind();

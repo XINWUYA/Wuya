@@ -2,6 +2,7 @@
 
 namespace Wuya
 {
+	/* UniformBuffer */
 	class UniformBuffer
 	{
 	public:

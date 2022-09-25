@@ -42,6 +42,7 @@ namespace Wuya
 
 		/* 设置裁剪相机 */
 		void SetCullingCamera(const SharedPtr<Camera>& camera) { m_pCullingCamera = camera; }
+		const SharedPtr<Camera>& GetCullingCamera() const { return m_pCullingCamera.lock(); }
 
 		/* 设置启用视锥体剔除 */
 		void SetEnableFrustumCulling(bool enable) { m_IsEnableCulling = enable; }
