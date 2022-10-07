@@ -27,7 +27,7 @@ namespace Wuya
 	struct ViewUniformData
 	{
 		glm::mat4 ViewProjectionMatrix{ 1 };
-		uint32_t m_FrameCounter{ 0 }; /* 当前帧数计数 */
+		uint32_t FrameCounter{ 0 }; /* 当前帧数计数 */
 	};
 
 	/* Per object uniform data */
@@ -37,12 +37,22 @@ namespace Wuya
 		uint32_t ObjectId{ 0 };				/* 模型ID，用于Picking */
 	};
 
+	/* Per light uniform data */
+	struct LightUniformData
+	{
+		glm::vec4 ColorIntensity{ 1.0f, 1.0f, 1.0f, 1.0f }; /* rgb: color, a: intensity */
+		glm::vec3 LightDir{ 0.0f };
+		glm::vec3 LightPos{ 0.0f };
+		uint32_t LightType{ 0 };
+	};
+
 	struct RenderData
 	{
 		/* 全局UniformBuffers */
 		ViewUniformData ViewUniformData;
 		SharedPtr<UniformBuffer> pViewUniformBuffer;
 		SharedPtr<UniformBuffer> pObjectUniformBuffer;
+		SharedPtr<UniformBuffer> pLightUniformBuffer;
 	};
 
 	static RenderData s_RenderData;
@@ -58,13 +68,14 @@ namespace Wuya
 
 		s_RenderData.pViewUniformBuffer = UniformBuffer::Create(sizeof(ViewUniformData), UniformBufferBindingPoint::View);
 		s_RenderData.pObjectUniformBuffer = UniformBuffer::Create(sizeof(ObjectUniformData), UniformBufferBindingPoint::Object);
+		s_RenderData.pLightUniformBuffer = UniformBuffer::Create(sizeof(LightUniformData), UniformBufferBindingPoint::Light);
 	}
 
 	void Renderer::Update()
 	{
 		PROFILE_FUNCTION();
 
-		s_RenderData.ViewUniformData.m_FrameCounter++;
+		s_RenderData.ViewUniformData.FrameCounter++;
 	}
 
 	void Renderer::Release()
@@ -282,9 +293,19 @@ namespace Wuya
 
 	void Renderer::FillObjectUniformBuffer(const VisibleMeshObject& mesh_object)
 	{
-		ObjectUniformData data;
+		static ObjectUniformData data;
 		data.LocalToWorldMat = mesh_object.Local2WorldMat;
 		data.ObjectId = mesh_object.ObjectId;
 		s_RenderData.pObjectUniformBuffer->SetData(&data, sizeof(ObjectUniformData));
+	}
+
+	void Renderer::FillLightUniformBuffer(const ValidLight& valid_light)
+	{
+		static LightUniformData data;
+		data.ColorIntensity = valid_light.ColorIntensity;
+		data.LightDir = valid_light.LightDir;
+		data.LightPos = valid_light.LightPos;
+		data.LightType = valid_light.LightType;
+		s_RenderData.pLightUniformBuffer->SetData(&data, sizeof(LightUniformData));
 	}
 }

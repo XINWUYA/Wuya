@@ -1,6 +1,7 @@
 #pragma once
 #include <glm/glm.hpp>
 #include "Material.h"
+#include "SceneCommon.h"
 
 namespace Wuya
 {
@@ -21,6 +22,8 @@ namespace Wuya
 	class Model
 	{
 	public:
+		COMPONENT_CLASS(Model)
+
 		Model(std::string name);
 		virtual ~Model() = default;
 
@@ -30,9 +33,6 @@ namespace Wuya
 		/* 模型路径 */
 		void SetPath(const std::string& path) { m_Path = path; }
 		const std::string& GetPath() const { return m_Path; }
-
-		/* 模型名 */
-		const std::string& GetName() const { return m_DebugName; }
 
 		/* 添加一个MeshSegment到模型 */
 		void AddMeshSegment(const SharedPtr<MeshSegment>& mesh_segment);

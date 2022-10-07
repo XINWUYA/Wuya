@@ -5,6 +5,7 @@
 #include "SceneCamera.h"
 #include "Wuya/Renderer/Texture.h"
 #include "Model.h"
+#include "Light.h"
 
 namespace Wuya
 {
@@ -56,7 +57,7 @@ namespace Wuya
 	/* 图片精灵组件 */
 	struct SpriteComponent
 	{
-		SharedPtr<Texture> Texture;
+		SharedPtr<Texture> Texture{ nullptr };
 		glm::vec4 BaseColor{ 1.0f, 1.0f, 1.0f, 1.0f };
 		float TilingFactor{ 1.0f };
 
@@ -70,7 +71,8 @@ namespace Wuya
 	/* 模型组件 */
 	struct ModelComponent
 	{
-		SharedPtr<Model> Model;
+		SharedPtr<Model> Model{ nullptr };
+
 		ModelComponent() = default;
 		ModelComponent(const ModelComponent&) = default;
 	};
@@ -78,6 +80,18 @@ namespace Wuya
 	/* 光源组件 */
 	struct LightComponent
 	{
-		
+		SharedPtr<Light> Light{ nullptr };
+		LightType Type{ LightType::Point };
+		glm::vec4 Color{ 1.0f, 1.0f, 1.0f, 1.0f };
+		float Intensity{ 1.0f };
+		bool IsCastShadow{ false };
+
+		LightComponent() = default;
+		LightComponent(const LightComponent&) = default;
+		LightComponent(LightType type)
+			: Type(type)
+		{
+			Light = Light::Create(type);
+		}
 	};
 }

@@ -69,10 +69,10 @@ namespace Wuya
 	{
 		PROFILE_FUNCTION();
 
-		m_VisibleMeshObjects.clear();
-
 		/* 收集当前RenderView可见的对象 */
 		PrepareVisibleObjects();
+		/* 收集光源信息 */
+		PrepareLights();
 
 		m_pFrameGraph->Execute();
 	}
@@ -82,6 +82,8 @@ namespace Wuya
 	{
 		PROFILE_FUNCTION();
 
+		m_VisibleMeshObjects.clear();
+
 		// todo: 视锥体剔除
 
 		/* 收集所有模型 */
@@ -89,7 +91,7 @@ namespace Wuya
 		if (!owner_scene)
 			return;
 
-		const auto model_entity_group = owner_scene->GetRegistry().group<TransformComponent>(entt::get<ModelComponent>);
+		const auto model_entity_group = owner_scene->GetRegistry().view<TransformComponent, ModelComponent>();
 		for (auto& entity : model_entity_group)
 		{
 			auto [transform_component, model_component] = model_entity_group.get<TransformComponent, ModelComponent>(entity);
@@ -103,5 +105,27 @@ namespace Wuya
 			}
 		}
 
+	}
+
+	/* 准备光源信息 */
+	void RenderView::PrepareLights()
+	{
+		PROFILE_FUNCTION();
+
+		m_ValidLights.clear();
+
+		/* 收集所有光源 */
+		const auto owner_scene = m_pOwnerScene.lock();
+		if (!owner_scene)
+			return;
+
+		const auto light_entity_group = owner_scene->GetRegistry().view<TransformComponent, LightComponent>();
+		for (auto& entity : light_entity_group)
+		{
+			auto [transform_component,light_component] = light_entity_group.get<TransformComponent, LightComponent>(entity);
+
+			const glm::vec3 light_dir = transform_component.GetTransform() * glm::vec4(0.0f, 1.0f, 0.0f, 1.0f);
+			m_ValidLights.emplace_back(static_cast<uint32_t>(light_component.Type), glm::vec4(light_component.Color.r, light_component.Color.g, light_component.Color.b, light_component.Intensity), light_dir, transform_component.Position, light_component.IsCastShadow);
+		}
 	}
 }

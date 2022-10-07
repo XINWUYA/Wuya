@@ -33,7 +33,22 @@ namespace Wuya
 		/* 显示实体节点（SceneHierarchy中的节点）*/
 		void ShowEntityNode(Entity& entity);
 		/* 显示实体属性组件 */
-		void ShowEntityComponents(Entity& entity);
+		void ShowEntityComponents();
+
+		/* 实体名称组件 */
+		void ShowNameComponent();
+		/* 增加组件按钮 */
+		void ShowAddComponentButton();
+		/* 空间变换组件 */
+		void ShowTransformComponent();
+		/* 图片精灵组件 */
+		void ShowSpriteComponent();
+		/* 场景相机组件 */
+		void ShowCameraComponent();
+		/* 模型组件 */
+		void ShowModelComponent();
+		/* 光源组件 */
+		void ShowLightComponent();
 
 		/* 所属场景 */
 		SharedPtr<Scene> m_pOwnerScene;

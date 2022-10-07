@@ -209,15 +209,15 @@ namespace Wuya
 		frame_graph->GetBlackboard()["GBufferRoughnessMetallic"] = gbuffer_pass->GetData().GBufferRoughnessMetallic;
 		frame_graph->GetBlackboard()["GBufferEmissive"] = gbuffer_pass->GetData().GBufferEmissive;
 
-		/* Side Pass */
-		struct SidePassData
+		/* Lighting Pass */
+		struct LightingPassData
 		{
 			FrameGraphResourceHandleTyped<FrameGraphTexture> InputTexture;
 			FrameGraphResourceHandleTyped<FrameGraphTexture> OutputTexture;
 		};
 
-		auto side_pass = frame_graph->AddPass<SidePassData>("SidePass",
-			[&](FrameGraphBuilder& builder, SidePassData& data)
+		auto lighting_pass = frame_graph->AddPass<LightingPassData>("LightingPass",
+			[&](FrameGraphBuilder& builder, LightingPassData& data)
 			{
 				data.InputTexture = frame_graph->GetBlackboard().GetResourceHandle<FrameGraphTexture>("GBufferAlbedo");
 				data.OutputTexture = builder.CreateTexture("OutputTexture", color_target_desc);
@@ -228,39 +228,52 @@ namespace Wuya
 				FrameGraphPassInfo::Descriptor pass_desc;
 				pass_desc.Attachments.ColorAttachments[0] = data.OutputTexture;
 				pass_desc.ViewportRegion = m_ViewportRegion;
-				builder.CreateRenderPass("SidePassRenderTarget", pass_desc);
+				builder.CreateRenderPass("LightingPassRenderTarget", pass_desc);
 
 				builder.AsSideEffect();
 			},
-			[&](const FrameGraphResources& resources, const SidePassData& data)
+			[&](const FrameGraphResources& resources, const LightingPassData& data)
 			{
-				Renderer::GetRenderAPI()->PushDebugGroup("SidePass");
+				Renderer::GetRenderAPI()->PushDebugGroup("LightingPass");
 
 				const auto render_pass_info = resources.GetPassRenderTarget();
-				m_pRenderView->EmplacePassFrameBuffer("SidePass", render_pass_info);
+				m_pRenderView->EmplacePassFrameBuffer("LightingPass", render_pass_info);
 
 				render_pass_info->Bind();
 				{
 					Renderer::GetRenderAPI()->Clear();
-					SharedPtr<Material> material = CreateSharedPtr<Material>();
-					auto& raster_state = material->GetRasterState();
-					raster_state.EnableDepthWrite = false;
-					const auto shader = ShaderLibrary::Instance().GetOrLoad("assets/shaders/side.glsl");
-					material->SetShader(shader);
-					material->SetTexture(resources.Get(data.InputTexture).Texture, 0);
-					Renderer::Submit(material, Renderer::GetFullScreenVertexArray());
+					for (const auto& light : m_pRenderView->GetValidLights())
+					{
+						/* Fill light uniform buffer */
+						Renderer::FillLightUniformBuffer(light);
+
+						SharedPtr<Material> material = CreateSharedPtr<Material>();
+						auto& raster_state = material->GetRasterState();
+						raster_state.EnableDepthWrite = false;
+						raster_state.EnableBlend = true;
+						raster_state.BlendEquationRGB = BlendEquation::Add;
+						raster_state.BlendEquationA = BlendEquation::Add;
+						raster_state.BlendFuncSrcRGB = BlendFunc::One;
+						raster_state.BlendFuncSrcA = BlendFunc::One;
+						raster_state.BlendFuncDstRGB = BlendFunc::One;
+						raster_state.BlendFuncDstA = BlendFunc::One;
+						const auto shader = ShaderLibrary::Instance().GetOrLoad("assets/shaders/lighting.glsl");
+						material->SetShader(shader);
+						material->SetTexture(resources.Get(data.InputTexture).Texture, 0);
+						Renderer::Submit(material, Renderer::GetFullScreenVertexArray());
+					}
 				}
 				render_pass_info->Unbind();
 
 				Renderer::GetRenderAPI()->PopDebugGroup();
 			}
 		);
-		frame_graph->GetBlackboard()["SidePassOutput"] = side_pass->GetData().OutputTexture;
+		frame_graph->GetBlackboard()["LightingPassOutput"] = lighting_pass->GetData().OutputTexture;
 		//frame_graph->ExportGraphviz("framegraph.txt");
 		m_pRenderView->Prepare();
 
 		/* Êä³ö */
-		m_pRenderView->SetRenderTargetHandle(side_pass->GetData().OutputTexture);
+		m_pRenderView->SetRenderTargetHandle(lighting_pass->GetData().OutputTexture);
 
 		m_IsFrameGraphDirty = false;
 	}

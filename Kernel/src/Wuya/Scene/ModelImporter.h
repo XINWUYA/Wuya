@@ -4,7 +4,7 @@ namespace Wuya
 {
 	/* 导入Obj模型，在模型所在路径中生成对应的.mesh和.mtl文件
 	 * 其中mesh文件为二进制文件，包含：
-	 * MeshSegmentCount : size_t
+	 * MeshSegment count : size_t
 	 * each MeshSegment name size : size_t
 	 * each MeshSegment name : each MeshSegment name size
 	 * each MeshSegment VertexDataSize : size_t

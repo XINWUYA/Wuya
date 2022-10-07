@@ -15,7 +15,11 @@ namespace Wuya
 		template<typename T, typename ... Args>
 		T& AddComponent(Args&&... args)
 		{
-			ASSERT(!HasComponent<T>(), "Component already existed!");
+			if (HasComponent<T>())
+			{
+				CORE_LOG_ERROR("Component already existed!");
+				return GetComponent<T>();
+			}
 
 			T& component = m_OwnerScene.lock()->GetRegistry().emplace<T>(m_EntityHandle, std::forward<Args>(args)...);
 			m_OwnerScene.lock()->OnComponentAdded<T>(*this, component);
@@ -27,7 +31,11 @@ namespace Wuya
 		template<typename T>
 		void RemoveComponent()
 		{
-			ASSERT(HasComponent<T>(), "Entity doesn't have component!");
+			if (!HasComponent<T>())
+			{
+				CORE_LOG_ERROR("Entity doesn't have component!");
+				return;
+			}
 
 			m_OwnerScene.lock()->GetRegistry().remove<T>(m_EntityHandle);
 		}

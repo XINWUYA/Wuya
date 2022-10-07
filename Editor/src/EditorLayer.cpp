@@ -604,7 +604,6 @@ namespace Wuya
 	{
 		PROFILE_FUNCTION();
 
-		// todo: ´æÔÚbug
 		auto [mouse_x, mouse_y] = ImGui::GetMousePos();
 		mouse_x -= m_ViewportRegion.MinX;
 		mouse_y -= m_ViewportRegion.MinY;
@@ -616,7 +615,7 @@ namespace Wuya
 		{
 			int pixel_data = m_pEditorCamera->PickingEntityByPixelPos((int)mouse_x, (int)mouse_y);
 			m_HoveredEntity = pixel_data == -1 ? Entity() : Entity((entt::entity)pixel_data, m_pMainScene);
-			EDITOR_LOG_ERROR(pixel_data);
+			EDITOR_LOG_DEBUG(pixel_data);
 		}
 	}
 

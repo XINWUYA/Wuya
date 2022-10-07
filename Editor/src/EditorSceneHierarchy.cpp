@@ -79,6 +79,28 @@ namespace Wuya
 						entity.AddComponent<SpriteComponent>();
 						m_SelectedEntity = entity;
 					}
+
+					if (ImGui::MenuItem("Directional Light"))
+					{
+						auto entity = m_pOwnerScene->CreateEntity("New Directional Light");
+						entity.AddComponent<LightComponent>(LightType::Directional);
+						m_SelectedEntity = entity;
+					}
+
+					if (ImGui::MenuItem("Point Light"))
+					{
+						auto entity = m_pOwnerScene->CreateEntity("New Point Light");
+						entity.AddComponent<LightComponent>(LightType::Point);
+						m_SelectedEntity = entity;
+					}
+
+					if (ImGui::MenuItem("Spot Light"))
+					{
+						auto entity = m_pOwnerScene->CreateEntity("New Spot Light");
+						entity.AddComponent<LightComponent>(LightType::Spot);
+						m_SelectedEntity = entity;
+					}
+
 					ImGui::EndMenu();
 				}
 				ImGui::EndPopup();
@@ -94,7 +116,7 @@ namespace Wuya
 		ImGui::Begin("Properties");
 		{
 			if (m_SelectedEntity)
-				ShowEntityComponents(m_SelectedEntity);
+				ShowEntityComponents();
 		}
 		ImGui::End();
 	}
@@ -201,16 +223,44 @@ namespace Wuya
 		}
 	}
 
-	void EditorSceneHierarchy::ShowEntityComponents(Entity& entity)
+	void EditorSceneHierarchy::ShowEntityComponents()
 	{
 		PROFILE_FUNCTION();
 
 		/* 实体名称组件 */
-		if (entity.HasComponent<NameComponent>())
+		ShowNameComponent();
+
+		/* 增加组件按钮 */
+		const float panel_width = ImGui::GetContentRegionAvail().x; /* 窗口区域宽度 */
+		ImGui::SameLine(panel_width - 15); /* 放置在同行靠右的位置 */
+		ShowAddComponentButton();
+
+		/* 空间变换组件 */
+		ShowTransformComponent();
+
+		/* 图片精灵组件 */
+		ShowSpriteComponent();
+
+		/* 场景相机组件 */
+		ShowCameraComponent();
+
+		/* 模型组件 */
+		ShowModelComponent();
+
+		/* 光源组件 */
+		ShowLightComponent();
+	}
+
+	/* 实体名称组件 */
+	void EditorSceneHierarchy::ShowNameComponent()
+	{
+		PROFILE_FUNCTION();
+
+		if (m_SelectedEntity.HasComponent<NameComponent>())
 		{
 			PROFILE_SCOPE("Show NameComponent");
 
-			auto& name = entity.GetComponent<NameComponent>().Name;
+			auto& name = m_SelectedEntity.GetComponent<NameComponent>().Name;
 
 			char buffer[256] = {};
 			std::strncpy(buffer, name.c_str(), sizeof(buffer));
@@ -221,162 +271,204 @@ namespace Wuya
 				name = std::string(buffer);
 			}
 		}
+	}
 
-		/* 窗口区域宽度 */
-		const float panel_width = ImGui::GetContentRegionAvail().x;
+	/* 增加组件按钮 */
+	void EditorSceneHierarchy::ShowAddComponentButton()
+	{
+		PROFILE_FUNCTION();
 
-		/* 添加组件按钮 */
+		START_STYLE_ALPHA(0.5f);
+		if (ImGui::ImageButton((ImTextureID)m_pAddComponentIcon->GetTextureID(), ImVec2(20, 20), ImVec2(0, 1), ImVec2(1, 0)))
+			ImGui::OpenPopup("AddComponentPopup");
+		END_STYLE_ALPHA;
+
+		if (ImGui::BeginPopup("AddComponentPopup"))
 		{
-			PROFILE_SCOPE("Show AddComponent Button");
-
-			ImGui::SameLine(panel_width - 15);
-			START_STYLE_ALPHA(0.5f);
-			if (ImGui::ImageButton((ImTextureID)m_pAddComponentIcon->GetTextureID(), ImVec2(20, 20), ImVec2(0, 1), ImVec2(1, 0)))
-				ImGui::OpenPopup("AddComponentPopup");
-			END_STYLE_ALPHA;
-
-			if (ImGui::BeginPopup("AddComponentPopup"))
+			/* 相机 */
+			if (ImGui::MenuItem("Camera Component"))
 			{
-				/* 相机 */
-				if (ImGui::MenuItem("Camera Component"))
-				{
-					m_SelectedEntity.AddComponent<CameraComponent>();
-					ImGui::CloseCurrentPopup();
-				}
-
-				/* 图片精灵 */
-				if (ImGui::MenuItem("Sprite Component"))
-				{
-					m_SelectedEntity.AddComponent<SpriteComponent>();
-					ImGui::CloseCurrentPopup();
-				}
-
-				/* 模型 */
-				if (ImGui::MenuItem("Model Component"))
-				{
-					m_SelectedEntity.AddComponent<ModelComponent>();
-					ImGui::CloseCurrentPopup();
-				}
-
-				ImGui::EndPopup();
+				m_SelectedEntity.AddComponent<CameraComponent>();
+				ImGui::CloseCurrentPopup();
 			}
+
+			/* 图片精灵 */
+			if (ImGui::MenuItem("Sprite Component"))
+			{
+				m_SelectedEntity.AddComponent<SpriteComponent>();
+				ImGui::CloseCurrentPopup();
+			}
+
+			/* 模型 */
+			if (ImGui::MenuItem("Model Component"))
+			{
+				m_SelectedEntity.AddComponent<ModelComponent>();
+				ImGui::CloseCurrentPopup();
+			}
+
+			/* 光源 */
+			if (ImGui::MenuItem("Light Component"))
+			{
+				m_SelectedEntity.AddComponent<LightComponent>();
+				ImGui::CloseCurrentPopup();
+			}
+
+			ImGui::EndPopup();
 		}
+	}
 
-		/* 空间变换组件 */
-		{
-			PROFILE_SCOPE("Show TransformComponent");
+	/* 空间变换组件 */
+	void EditorSceneHierarchy::ShowTransformComponent()
+	{
+		PROFILE_FUNCTION();
 
-			ShowComponent<TransformComponent>("Transform", entity,
-				[](auto& component)
+		ShowComponent<TransformComponent>("Transform", m_SelectedEntity,
+			[](auto& component)
+			{
+				EditorUIFunctions::DrawVec3ControlUI("Position", component.Position, 0.0f);
+				glm::vec3 rotation = glm::degrees(component.Rotation);
+				EditorUIFunctions::DrawVec3ControlUI("Rotation", rotation, 0.0f);
+				component.Rotation = glm::radians(rotation);
+				EditorUIFunctions::DrawVec3ControlUI("Scale", component.Scale, 1.0f);
+
+			});
+	}
+
+	/* 图片精灵组件 */
+	void EditorSceneHierarchy::ShowSpriteComponent()
+	{
+		PROFILE_FUNCTION();
+
+		ShowComponent<SpriteComponent>("Sprite", m_SelectedEntity,
+			[](auto& component)
+			{
+				EditorUIFunctions::DrawColorUI("BaseColor", component.BaseColor);
+				EditorUIFunctions::DrawTextureUI("Texture", component.Texture, component.TilingFactor);
+			});
+	}
+
+	/* 场景相机组件 */
+	void EditorSceneHierarchy::ShowCameraComponent()
+	{
+		PROFILE_FUNCTION();
+
+		ShowComponent<CameraComponent>("Camera", m_SelectedEntity,
+			[](auto& component)
+			{
+				EditorUIFunctions::DrawCheckboxUI("IsPrimary", component.IsPrimary);
+				EditorUIFunctions::DrawCheckboxUI("IsFixedAspectRatio", component.IsFixedAspectRatio);
+				auto& scene_camera = component.Camera;
+				int projection_idx = static_cast<int>(scene_camera.GetProjectionType());
+				EditorUIFunctions::DrawComboUI("ProjectionType", { "Perspective", "Orthographic" }, projection_idx,
+					[&scene_camera](int selected_idx)
+					{
+						scene_camera.SetProjectionType(static_cast<SceneCamera::ProjectionType>(selected_idx));
+					});
+
+				switch (scene_camera.GetProjectionType())
 				{
-					EditorUIFunctions::DrawVec3ControlUI("Position", component.Position, 0.0f);
-					glm::vec3 rotation = glm::degrees(component.Rotation);
-					EditorUIFunctions::DrawVec3ControlUI("Rotation", rotation, 0.0f);
-					component.Rotation = glm::radians(rotation);
-					EditorUIFunctions::DrawVec3ControlUI("Scale", component.Scale, 1.0f);
-
-				});
-		}
-
-		/* 图片精灵组件 */
-		{
-			PROFILE_SCOPE("Show SpriteComonent");
-
-			ShowComponent<SpriteComponent>("Sprite", entity,
-				[](auto& component)
+				case SceneCamera::ProjectionType::Perspective:
 				{
-					EditorUIFunctions::DrawColorUI("BaseColor", component.BaseColor);
-					EditorUIFunctions::DrawTextureUI("Texture", component.Texture, component.TilingFactor);
-				});
-		}
+					const auto& camera_desc = scene_camera.GetPerspectiveCameraDesc();
 
-		/* 场景相机组件 */
-		{
-			PROFILE_SCOPE("Show CameraComponent");
+					float fov = camera_desc->Fov;
+					EditorUIFunctions::DrawDragFloatUI("Fov", fov);
+					float near_clip = camera_desc->Near;
+					EditorUIFunctions::DrawDragFloatUI("Near", near_clip);
+					float far_clip = camera_desc->Far;
+					EditorUIFunctions::DrawDragFloatUI("Far", far_clip);
 
-			ShowComponent<CameraComponent>("Camera", entity,
-				[](auto& component)
+					scene_camera.SetPerspectiveCameraDesc({ fov, near_clip, far_clip });
+				}
+				break;
+				case SceneCamera::ProjectionType::Orthographic:
 				{
-					EditorUIFunctions::DrawCheckboxUI("IsPrimary", component.IsPrimary);
-					EditorUIFunctions::DrawCheckboxUI("IsFixedAspectRatio", component.IsFixedAspectRatio);
-					auto& scene_camera = component.Camera;
-					int projection_idx = static_cast<int>(scene_camera.GetProjectionType());
-					EditorUIFunctions::DrawComboUI("ProjectionType", { "Perspective", "Orthographic" }, projection_idx,
-						[&scene_camera](int selected_idx)
-						{
-							scene_camera.SetProjectionType(static_cast<SceneCamera::ProjectionType>(selected_idx));
-						});
+					const auto& camera_desc = scene_camera.GetOrthographicCameraDesc();
 
-					switch (scene_camera.GetProjectionType())
-					{
-					case SceneCamera::ProjectionType::Perspective:
-					{
-						const auto& camera_desc = scene_camera.GetPerspectiveCameraDesc();
+					float height_size = camera_desc->HeightSize;
+					EditorUIFunctions::DrawDragFloatUI("HeightSize", height_size);
+					float near_clip = camera_desc->Near;
+					EditorUIFunctions::DrawDragFloatUI("Near", near_clip);
+					float far_clip = camera_desc->Far;
+					EditorUIFunctions::DrawDragFloatUI("Far", far_clip);
 
-						float fov = camera_desc->Fov;
-						EditorUIFunctions::DrawDragFloatUI("Fov", fov);
-						float near_clip = camera_desc->Near;
-						EditorUIFunctions::DrawDragFloatUI("Near", near_clip);
-						float far_clip = camera_desc->Far;
-						EditorUIFunctions::DrawDragFloatUI("Far", far_clip);
+					scene_camera.SetOrthographicCameraDesc({ height_size, near_clip, far_clip });
+				}
+				break;
+				}
+			});
+	}
 
-						scene_camera.SetPerspectiveCameraDesc({ fov, near_clip, far_clip });
-					}
-					break;
-					case SceneCamera::ProjectionType::Orthographic:
-					{
-						const auto& camera_desc = scene_camera.GetOrthographicCameraDesc();
+	/* 模型组件 */
+	void EditorSceneHierarchy::ShowModelComponent()
+	{
+		PROFILE_FUNCTION();
 
-						float height_size = camera_desc->HeightSize;
-						EditorUIFunctions::DrawDragFloatUI("HeightSize", height_size);
-						float near_clip = camera_desc->Near;
-						EditorUIFunctions::DrawDragFloatUI("Near", near_clip);
-						float far_clip = camera_desc->Far;
-						EditorUIFunctions::DrawDragFloatUI("Far", far_clip);
+		ShowComponent<ModelComponent>("Model", m_SelectedEntity,
+			[](auto& component)
+			{
+				auto& model = component.Model;
 
-						scene_camera.SetOrthographicCameraDesc({ height_size, near_clip, far_clip });
-					}
-					break;
-					}
-				});
-		}
-
-		/* 模型组件 */
-		{
-			PROFILE_SCOPE("Show ModelComponent");
-
-			ShowComponent<ModelComponent>("Model", entity,
-				[](auto& component)
 				{
-					auto& model = component.Model;
+					ImGui::PushID("ModelPath");
+					ImGui::Columns(2);
 
+					/* Label */
+					ImGui::SetColumnWidth(0, 100);
+					ImGui::Text("ModelPath");
+
+					/* Texture */
+					ImGui::NextColumn();
 					{
-						ImGui::PushID("ModelPath");
-						ImGui::Columns(2);
-
-						/* Label */
-						ImGui::SetColumnWidth(0, 100);
-						ImGui::Text("ModelPath");
-
-						/* Texture */
-						ImGui::NextColumn();
-						{
-							ImGui::TextWrapped(model->GetPath().c_str());
-						}
-
-						ImGui::Columns(1);
-						ImGui::PopID();
+						ImGui::TextWrapped(model->GetPath().c_str());
 					}
 
-					/*const auto& mesh_segments = model->GetMeshSegments();
-					for (auto& mesh_segment : mesh_segments)
+					ImGui::Columns(1);
+					ImGui::PopID();
+				}
+
+				/*const auto& mesh_segments = model->GetMeshSegments();
+				for (auto& mesh_segment : mesh_segments)
+				{
+					auto* mesh_segment_root = model_root->InsertNewChildElement("MeshSegment");
+					mesh_segment_root->SetAttribute("Name", mesh_segment->GetName().c_str());
+					auto* mtl_root = mesh_segment_root->InsertNewChildElement("Material");
+					mtl_root->SetAttribute("ShaderPath", mesh_segment->GetMaterial()->GetShader()->GetPath().c_str());
+				}*/
+			});
+	}
+
+	/* 光源组件 */
+	void EditorSceneHierarchy::ShowLightComponent()
+	{
+		PROFILE_FUNCTION();
+		ShowComponent<LightComponent>("Light", m_SelectedEntity,
+			[](auto& component)
+			{
+				SharedPtr<Light>& light = component.Light;
+				if (!light)
+					return;
+
+				/* 光源类型 */
+				int type_idx = static_cast<int>(light->GetLightType());
+				EditorUIFunctions::DrawComboUI("Type", { "Directional", "Point", "Spot", "Area", "Volume"}, type_idx,
+					[&light](int selected_idx)
 					{
-						auto* mesh_segment_root = model_root->InsertNewChildElement("MeshSegment");
-						mesh_segment_root->SetAttribute("Name", mesh_segment->GetName().c_str());
-						auto* mtl_root = mesh_segment_root->InsertNewChildElement("Material");
-						mtl_root->SetAttribute("ShaderPath", mesh_segment->GetMaterial()->GetShader()->GetPath().c_str());
-					}*/					
-				});
-		}
+						/* todo: 切换光源类型 */
+						//scene_camera.SetProjectionType(static_cast<SceneCamera::ProjectionType>(selected_idx));
+					});
+
+				/* 光源颜色 */
+				EditorUIFunctions::DrawColorUI("Color", component.Color);
+				light->SetColor(component.Color);
+
+				/* 光源强度 */
+				EditorUIFunctions::DrawDragFloatUI("Intensity", component.Intensity);
+				light->SetIntensity(component.Intensity);
+
+				/* 投影 */
+				EditorUIFunctions::DrawCheckboxUI("CastShadow", component.IsCastShadow);
+				light->SetIsCastShadow(component.IsCastShadow);
+			});
 	}
 }

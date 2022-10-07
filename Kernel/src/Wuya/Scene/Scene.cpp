@@ -166,7 +166,7 @@ namespace Wuya
 		{
 			if (auto* id_attr = entity_root->FindAttribute("ID"))
 			{
-				int entity_id = id_attr->IntValue();
+				uint32_t entity_id = id_attr->UnsignedValue();
 
 				/* Name */
 				std::string name;
@@ -241,6 +241,20 @@ namespace Wuya
 
 					}
 
+					/* Light */
+					if (auto* light_root = entity_root->FirstChildElement("Light"))
+					{
+						auto& component = entity.AddComponent<LightComponent>();
+						component.Type = static_cast<LightType>(light_root->IntAttribute("LightType"));
+						component.Color = ToVec4(light_root->Attribute("LightColor"));
+						component.Intensity = light_root->FloatAttribute("LightIntensity");
+						component.IsCastShadow = light_root->BoolAttribute("IsCastShadow");
+
+						component.Light = Light::Create(component.Type);
+						component.Light->SetColor(component.Color);
+						component.Light->SetIntensity(component.Intensity);
+						component.Light->SetIsCastShadow(component.IsCastShadow);
+					}
 				}
 			}	
 		}
@@ -256,7 +270,7 @@ namespace Wuya
 		tinyxml2::XMLElement* entity_root = root_node->InsertNewChildElement("Entity");
 
 		/* ID */
-		entity_root->SetAttribute("ID", (int)entity);
+		entity_root->SetAttribute("ID", (uint32_t)entity);
 
 		/* Name */
 		if (entity.HasComponent<NameComponent>())
@@ -327,6 +341,18 @@ namespace Wuya
 
 			model_root->SetAttribute("ModelPath", component.Model->GetPath().c_str());
 		}
+
+		/* Light */
+		if (entity.HasComponent<LightComponent>())
+		{
+			auto* model_root = entity_root->InsertNewChildElement("Light");
+			const auto& component = entity.GetComponent<LightComponent>();
+
+			model_root->SetAttribute("LightType", static_cast<int>(component.Type));
+			model_root->SetAttribute("LightColor", ToString(component.Color).c_str());
+			model_root->SetAttribute("LightIntensity", component.Intensity);
+			model_root->SetAttribute("IsCastShadow", component.IsCastShadow);
+		}
 	}
 
 	template <typename T>
@@ -360,6 +386,12 @@ namespace Wuya
 
 	template<>
 	void Scene::OnComponentAdded<ModelComponent>(Entity& entity, ModelComponent& component)
+	{
+
+	}
+
+	template<>
+	void Scene::OnComponentAdded<LightComponent>(Entity& entity, LightComponent& component)
 	{
 
 	}

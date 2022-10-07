@@ -7,6 +7,7 @@ namespace Wuya
 	class Material;
 	class UniformBuffer;
 	struct VisibleMeshObject;
+	struct ValidLight;
 
 	class Renderer
 	{
@@ -31,6 +32,8 @@ namespace Wuya
 		static SharedPtr<VertexArray> GetFullScreenVertexArray();
 
 		static void FillObjectUniformBuffer(const VisibleMeshObject& mesh_object);
+
+		static void FillLightUniformBuffer(const ValidLight& valid_light);
 
 	private:
 		static SharedPtr<RenderAPI> m_pRenderAPI;

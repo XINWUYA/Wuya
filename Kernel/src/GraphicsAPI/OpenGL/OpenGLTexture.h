@@ -2,7 +2,6 @@
 #include <string>
 #include <glad/glad.h>
 #include "Wuya/Renderer/Texture.h"
-#include "Wuya/Renderer/RenderCommon.h"
 
 namespace Wuya
 {

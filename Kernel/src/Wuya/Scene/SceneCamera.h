@@ -1,5 +1,6 @@
 #pragma once
 #include "Wuya/Renderer/Camera.h"
+#include "SceneCommon.h"
 
 namespace Wuya
 {
@@ -27,6 +28,8 @@ namespace Wuya
 	class SceneCamera : public Camera
 	{
 	public:
+		COMPONENT_CLASS(SceneCamera)
+
 		/* 投影类型 */
 		enum class ProjectionType : uint8_t
 		{
@@ -55,6 +58,8 @@ namespace Wuya
 		/* 更新相机投影矩阵 */
 		void UpdateProjectionMatrix();
 
+		/* 标记名 */
+		std::string m_DebugName{ "Unnamed Camera" };
 		/* 投影类型 */
 		ProjectionType m_ProjectionType{ ProjectionType::Perspective };
 		/* 相机类型描述 */

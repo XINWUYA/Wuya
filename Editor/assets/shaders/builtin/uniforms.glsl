@@ -13,4 +13,12 @@ layout(std140, binding = 1) uniform ObjectUniformBuffer
 	int  u_ObjectId;
 };
 
+layout(std140, binding = 3) uniform LightUniformBuffer
+{
+	vec4 u_ColorIntensity;
+	vec3 u_LightDir;
+	vec3 u_LightPos;
+	uint u_LightType;
+};
+
 #endif // UNIFORMS_GLSL
