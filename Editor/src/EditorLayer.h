@@ -27,15 +27,17 @@ namespace Wuya
 		bool OnMouseButtonPressed(class MouseButtonPressedEvent* event);
 		/* 切换运行模式 */
 		void OnPlayModeChanged();
+		/* 响应拖拽文件到主窗口 */
+		void OnDragItemToScene(const std::filesystem::path& path);
 
 		/* 新建场景 */
 		void NewScene();
-		/* 打开场景：通过弹窗找到指定场景文件并打开 */
-		void OpenScene();
+		/* 导入场景：通过弹窗找到指定场景文件并打开 */
+		void ImportScene();
 		/* 保存场景 */
 		void SaveScene();
-		/* 打开指定场景 */
-		void OpenScene(const std::filesystem::path& path);
+		/* 保存场景到指定路径 */
+		void SaveSceneAs();
 
 		/* 显示菜单栏UI */
 		void ShowMenuUI();
@@ -63,6 +65,8 @@ namespace Wuya
 
 		/* 主场景 */
 		SharedPtr<Scene> m_pMainScene;
+		/* 当前场景路径 */
+		std::string m_ActiveScenePath{};
 		/* 场景实体管理窗口 */
 		EditorSceneHierarchy m_SceneHierarchy;
 		/* 资源管理窗口 */

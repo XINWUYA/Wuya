@@ -9,6 +9,7 @@
 #include "Wuya/Renderer/FrameGraph/FrameGraph.h"
 #include "Wuya/Scene/Material.h"
 #include "Wuya/Scene/Model.h"
+#include <Wuya/Application/FileDialog.h>
 
 namespace Wuya
 {
@@ -131,46 +132,56 @@ namespace Wuya
 			return false;
 
 		bool is_ctrl_pressed = Input::IsKeyPressed(Key::LeftControl) || Input::IsKeyPressed(Key::RightControl);
+		bool is_shift_pressed = Input::IsKeyPressed(Key::LeftShift) || Input::IsKeyPressed(Key::RightShift);
 		bool is_button_right_pressed = Input::IsMouseButtonPressed(Mouse::ButtonRight);
 
 		switch (event->GetKeyCode())
 		{
 		case Key::N: /* Ctrl+N：新建一个场景 */
-		{
-			if (is_ctrl_pressed)
-				NewScene();
+			{
+				if (is_ctrl_pressed)
+					NewScene();
+			}
 			break;
-		}
-		case Key::S: /* Ctrl+S: 保存场景 */
-		{
+		case Key::S: /* Ctrl+S: 保存场景; Ctrl+Shift+S: 场景另存为 */
 			if (is_ctrl_pressed)
-				SaveScene();
+			{
+				if (is_shift_pressed)
+					SaveSceneAs();
+				else
+					SaveScene();
+			}
 			break;
-		}
+		case Key::I: /* Ctrl+I：导入一个场景 */
+			{
+				if (is_ctrl_pressed)
+					ImportScene();
+			}
+			break;
 		case Key::Q:
-		{
-			if (!ImGuizmo::IsUsing() && !is_button_right_pressed)
-				m_GizmoType = -1;
+			{
+				if (!ImGuizmo::IsUsing() && !is_button_right_pressed)
+					m_GizmoType = -1;
+			}
 			break;
-		}
 		case Key::W:
-		{
-			if (!ImGuizmo::IsUsing() && !is_button_right_pressed)
-				m_GizmoType = ImGuizmo::OPERATION::TRANSLATE;
+			{
+				if (!ImGuizmo::IsUsing() && !is_button_right_pressed)
+					m_GizmoType = ImGuizmo::OPERATION::TRANSLATE;
+			}
 			break;
-		}
 		case Key::E:
-		{
-			if (!ImGuizmo::IsUsing() && !is_button_right_pressed)
-				m_GizmoType = ImGuizmo::OPERATION::ROTATE;
+			{
+				if (!ImGuizmo::IsUsing() && !is_button_right_pressed)
+					m_GizmoType = ImGuizmo::OPERATION::ROTATE;
+			}
 			break;
-		}
 		case Key::R:
-		{
-			if (!ImGuizmo::IsUsing() && !is_button_right_pressed)
-				m_GizmoType = ImGuizmo::OPERATION::SCALE;
+			{
+				if (!ImGuizmo::IsUsing() && !is_button_right_pressed)
+					m_GizmoType = ImGuizmo::OPERATION::SCALE;
+			}
 			break;
-		}
 		}
 
 		return true;
@@ -205,6 +216,48 @@ namespace Wuya
 
 	}
 
+	/* 响应拖拽文件到主窗口 */
+	void EditorLayer::OnDragItemToScene(const std::filesystem::path& path)
+	{
+		PROFILE_FUNCTION();
+
+		const auto extension = path.extension().string();
+
+		/* 场景文件 */
+		if (extension == ".scn")
+		{
+			EDITOR_LOG_DEBUG("Import scene file: {}.", path.string());
+
+			SharedPtr<Scene> new_scene = CreateSharedPtr<Scene>();
+			if (new_scene->Deserializer(path.string()))
+			{
+				m_pMainScene = new_scene;
+				m_ActiveScenePath = path.string();
+
+				/* 设置对象层次结构面板对应的场景 */
+				m_SceneHierarchy.SetOwnerScene(m_pMainScene);
+
+				/* 切换场景时，需更新Editor RenderView的场景 */
+				m_pEditorCamera->GetRenderView()->SetOwnerScene(m_pMainScene);
+			}
+
+			return;
+		}
+
+		/* 模型文件 */
+		if (extension == ".obj")
+		{
+			EDITOR_LOG_DEBUG("Import model file: {}.", path.string());
+
+			Entity entity = m_pMainScene->CreateEntity(path.stem().string());
+			auto& model_component = entity.AddComponent<ModelComponent>();
+			model_component.Model = Model::Create(path.generic_string());
+
+			return;
+		}
+		
+	}
+
 	void EditorLayer::NewScene()
 	{
 		PROFILE_FUNCTION();
@@ -213,40 +266,46 @@ namespace Wuya
 		m_SceneHierarchy.SetOwnerScene(m_pMainScene);
 	}
 
-	void EditorLayer::OpenScene()
+	void EditorLayer::ImportScene()
 	{
 		PROFILE_FUNCTION();
 
-		//std::string file_path = FileDialog
-		//todo: 打开一个序列化的场景
+		const auto file_path = FileDialog::OpenFile("scene(*.scn)\0*.scn\0");
+		if (!file_path.empty())
+		{
+			m_pMainScene->Deserializer(file_path);
+			m_ActiveScenePath = file_path;
+
+			/* 设置对象层次结构面板对应的场景 */
+			m_SceneHierarchy.SetOwnerScene(m_pMainScene);
+
+			/* 切换场景时，需更新Editor RenderView的场景 */
+			m_pEditorCamera->GetRenderView()->SetOwnerScene(m_pMainScene);
+		}
 	}
 
 	void EditorLayer::SaveScene()
 	{
 		PROFILE_FUNCTION();
 
-		m_pMainScene->Serializer("assets/scenes/test1.scn");
+		/* 若当前场景从未保存过，需要先确定一个保存路径 */
+		if (m_ActiveScenePath.empty())
+			m_ActiveScenePath = FileDialog::SaveFile("scene(*.scn)\0*.scn\0");
+
+		m_pMainScene->Serializer(m_ActiveScenePath);
 	}
 
-	void EditorLayer::OpenScene(const std::filesystem::path& path)
+	/* 保存场景到指定路径 */
+	void EditorLayer::SaveSceneAs()
 	{
 		PROFILE_FUNCTION();
 
-		if (path.extension().string() != ".scn")
-		{
-			EDITOR_LOG_ERROR("File is not a scene file: {}.", path.filename().string());
-			return;
-		}
+		std::string file_path = FileDialog::SaveFile("scene(*.scn)\0*.scn\0");
+		if (!file_path.empty())
+			m_pMainScene->Serializer(file_path);
 
-		SharedPtr<Scene> new_scene = CreateSharedPtr<Scene>();
-		if (new_scene->Deserializer(path.string()))
-		{
-			m_pMainScene = new_scene;
-			m_SceneHierarchy.SetOwnerScene(m_pMainScene);
-
-			/* 切换场景时，需更新Editor RenderView的场景 */
-			m_pEditorCamera->GetRenderView()->SetOwnerScene(m_pMainScene);
-		}
+		/* 在保存之后，将当前场景路径切换为新创建的路径 */
+		m_ActiveScenePath = file_path;
 	}
 
 	void EditorLayer::ShowMenuUI()
@@ -320,7 +379,17 @@ namespace Wuya
 
 					if (ImGui::MenuItem("Open Scene", "Ctrl+O"))
 					{
-						OpenScene();
+						ImportScene();
+					}
+
+					if (ImGui::MenuItem("Save Scene", "Ctrl+S"))
+					{
+						SaveScene();
+					}
+
+					if (ImGui::MenuItem("Save Scene As", "Ctrl+Shift+S"))
+					{
+						SaveSceneAs();
 					}
 
 					if (ImGui::MenuItem("Exit"))
@@ -381,16 +450,7 @@ namespace Wuya
 			/* 保存场景按钮 */
 			ImGui::SetCursorPosX(cursor_offset);
 			if (ImGui::ImageButton((ImTextureID)save_icon->GetTextureID(), ImVec2(icon_size, icon_size), ImVec2(0, 1), ImVec2(1, 0), 0))
-			{
-				/*ImGui::OpenPopup("Save Scene");
-				EditorUIFunctions::RegisterPopupFunc("Save Scene", [&]()
-				{
-					bool never;
-					EditorUIFunctions::DrawModalUI("Save Scene", "Whether to save the current scene", never);
-				});*/
 				SaveScene();
-			}
-			//EditorUIFunctions::DrawPopups();
 
 			/* 移动/旋转/平移操作 */
 			{
@@ -501,7 +561,7 @@ namespace Wuya
 				if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("RESOURCE_BROWSER_ITEM"))
 				{
 					const wchar_t* path = (const wchar_t*)payload->Data;
-					OpenScene(g_AssetPath / path);
+					OnDragItemToScene(g_AssetPath / path);
 				}
 				ImGui::EndDragDropTarget();
 			}
@@ -635,33 +695,6 @@ namespace Wuya
 		auto& editor_render_view = m_pEditorCamera->GetRenderView();
 		editor_render_view->SetOwnerScene(m_pMainScene);
 		m_pEditorCamera->ConstructRenderView();
-		/*auto& editor_frame_graph = editor_render_view->GetFrameGraph();
-		struct ImGuiPassData
-		{
-			FrameGraphResourceHandleTyped<FrameGraphTexture> ColorResult;
-		};
-		editor_frame_graph->AddPass<ImGuiPassData>("ImGuiPass",
-			[&](FrameGraphBuilder& builder, ImGuiPassData& data)
-			{
-				data.ColorResult = editor_frame_graph->GetBlackboard().GetResourceHandle<FrameGraphTexture>("SidePassOutput");
-				builder.BindInputResource(data.ColorResult, FrameGraphTexture::Usage::Sampleable);
-				builder.AsSideEffect();
-			},
-			[&](const FrameGraphResources& resources, const ImGuiPassData& data)
-			{
-				Renderer::GetRenderAPI()->PushDebugGroup("ImGuiPass");
-
-				auto& texture = resources.Get(data.ColorResult).Texture;
-				ImGui::Begin("Scene");
-				{
-					const auto viewport_panel_size = ImGui::GetContentRegionAvail();
-					ImGui::Image((ImTextureID)texture->GetTextureID(), viewport_panel_size, ImVec2{ 0, 1 }, ImVec2{ 1, 0 });
-				}
-				ImGui::End();
-
-				Renderer::GetRenderAPI()->PopDebugGroup();
-			}
-		);*/
 
 
 		if (m_pMainScene)

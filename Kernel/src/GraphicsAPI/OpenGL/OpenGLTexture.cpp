@@ -113,6 +113,11 @@ namespace Wuya
 						m_InternalFormat = GL_RGB8;
 						data_format = GL_RGB;
 					}
+					else if (channels == 1)
+					{
+						m_InternalFormat = GL_R8;
+						data_format = GL_RED;
+					}
 
 					ASSERT(m_InternalFormat & data_format, "Format not supported!");
 
