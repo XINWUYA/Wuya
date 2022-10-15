@@ -56,6 +56,7 @@ group ""
 
 group "App"
 	include "Editor"
+	include "ModelEditor"
 group ""
 
 --group "Samples"
