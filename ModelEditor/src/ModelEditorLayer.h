@@ -1,5 +1,5 @@
 #pragma once
-#include <Kernel.h>
+#include "EditorBuiltinCamera.h"
 
 namespace Wuya
 {
@@ -22,16 +22,22 @@ namespace Wuya
 	private:
 		/* 显示菜单栏UI */
 		void ShowMenuUI();
+		/* 显示主场景视口 */
+		void ShowSceneViewportUI();
 
 		/* 导入模型 */
 		void ImportModel();
 		/* 导出模型 */
 		void ExportModel();
 
+		/* 编辑器相机 */
+		UniquePtr<EditorCamera> m_pEditorCamera{ nullptr };
+
 		/* 默认场景 */
 		SharedPtr<Scene> m_pDefaultScene{ nullptr };
 		/* 当前模型所在路径 */
 		std::string m_ModelPath{};
-
+		/* 视口范围: x: width_min; y: height_min; z: width_max; w: height_max */
+		ViewportRegion m_ViewportRegion{};
 	};
 }

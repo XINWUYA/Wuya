@@ -5,11 +5,6 @@
 #include "EditorBuiltinCamera.h"
 #include "EditorUIFunctions.h"
 #include "ImGuizmo.h"
-#include "Wuya/Renderer/RenderView.h"
-#include "Wuya/Renderer/FrameGraph/FrameGraph.h"
-#include "Wuya/Scene/Material.h"
-#include "Wuya/Scene/Model.h"
-#include <Wuya/Application/FileDialog.h>
 
 namespace Wuya
 {
@@ -25,8 +20,6 @@ namespace Wuya
 	{
 		PROFILE_FUNCTION();
 		
-		Renderer::Init();
-
 		// Camera
 		m_pEditorCamera = CreateUniquePtr<EditorCamera>("EditorBuiltinCamera", 30.0f);
 
@@ -103,7 +96,6 @@ namespace Wuya
 		if (!event)
 			return;
 
-		//m_pOrthographicCameraController->OnEvent(event);
 		m_pEditorCamera->OnEvent(event);
 
 		EventDispatcher dispatcher(event);

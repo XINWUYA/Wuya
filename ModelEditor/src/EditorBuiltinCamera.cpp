@@ -96,6 +96,9 @@ namespace Wuya
 
 		m_AspectRatio = static_cast<float>(m_ViewportRegion.Width) / static_cast<float>(m_ViewportRegion.Height);
 		UpdateProjectionMatrix();
+
+		/* 更新视口区域时，需重新构建FrameGraph, 保证RenderTarget的size是正确的 */
+		m_IsFrameGraphDirty = true;
 	}
 
 	/* 构建内置的FrameGraph */

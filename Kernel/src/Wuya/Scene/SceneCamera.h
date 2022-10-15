@@ -1,5 +1,5 @@
 #pragma once
-#include "Wuya/Renderer/Camera.h"
+#include "Camera.h"
 #include "SceneCommon.h"
 
 namespace Wuya

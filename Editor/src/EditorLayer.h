@@ -1,5 +1,4 @@
 #pragma once
-#include <Kernel.h>
 #include "EditorSceneHierarchy.h"
 #include "EditorResourceBrowser.h"
 #include "EditorBuiltinCamera.h"

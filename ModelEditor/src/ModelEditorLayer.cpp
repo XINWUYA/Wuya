@@ -1,21 +1,25 @@
 #include "Pch.h"
 #include "ModelEditorLayer.h"
-#include <Wuya/Application/FileDialog.h>
 
 namespace Wuya
 {
 	ModelEditorLayer::ModelEditorLayer()
 		: ILayer("ModelEditorLayer")
 	{
+		PROFILE_FUNCTION();
 	}
 
 	void ModelEditorLayer::OnAttached()
 	{
 		PROFILE_FUNCTION();
 
-		//Renderer::Init();
-
+		m_pEditorCamera = CreateUniquePtr<EditorCamera>();
 		m_pDefaultScene = CreateSharedPtr<Scene>();
+
+		/* 默认增加一盏方向光 */
+		Entity entity = m_pDefaultScene->CreateEntity("Light");
+		auto& light_component = entity.AddComponent<LightComponent>(LightType::Directional);
+		light_component.Light->SetColor(glm::vec4(1, 0, 0, 1));
 	}
 
 	void ModelEditorLayer::OnDetached()
@@ -29,13 +33,17 @@ namespace Wuya
 	{
 		PROFILE_FUNCTION();
 		
-		Renderer::SetClearColor(glm::vec4(0.2f, 0.3f, 0.3f, 1.0f));
+		Renderer::SetClearColor(glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
 		Renderer::Clear();
 
-		if (m_pDefaultScene)
+		if (m_ViewportRegion.Width > 0 && m_ViewportRegion.Height > 0/* && (desc.Width != m_ViewportRegion.Width() || desc.Height != m_ViewportRegion.Height())*/)
 		{
-			//m_pDefaultScene->OnUpdateEditor();
+			//m_pFrameBuffer->Resize(m_ViewportRegion.Width(), m_ViewportRegion.Height());
+			m_pEditorCamera->SetViewportRegion({ 0,0,m_ViewportRegion.Width, m_ViewportRegion.Height });
+			//m_pOrthographicCameraController->OnResize(static_cast<float>(m_ViewportRegion.Width()), static_cast<float>(m_ViewportRegion.Height()));
 		}
+		m_pEditorCamera->OnUpdate(delta_time);
+		m_pDefaultScene->OnUpdateEditor(m_pEditorCamera.get(), delta_time);
 	}
 
 	void ModelEditorLayer::OnImGuiRender()
@@ -44,13 +52,18 @@ namespace Wuya
 
 		/* 显示菜单栏UI */
 		ShowMenuUI();
+		/* 显示主场景视口 */
+		ShowSceneViewportUI();
 	}
 
 	void ModelEditorLayer::OnEvent(IEvent* event)
 	{
 		PROFILE_FUNCTION();
 
-		ILayer::OnEvent(event);
+		if (!event)
+			return;
+
+		m_pEditorCamera->OnEvent(event);
 	}
 
 	/* 显示菜单栏UI */
@@ -168,6 +181,57 @@ namespace Wuya
 			}
 		}
 		ImGui::End();
+	}
+
+	/* 显示主场景视口 */
+	void ModelEditorLayer::ShowSceneViewportUI()
+	{
+		PROFILE_FUNCTION();
+
+		//m_ViewportRegion = { 268, 2188, 317, 1371 };
+
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+		ImGui::Begin("Scene");
+		{
+			/* 获取窗口范围 */
+			const auto viewport_region_min = ImGui::GetWindowContentRegionMin();
+			const auto viewport_region_max = ImGui::GetWindowContentRegionMax();
+			const auto viewport_offset = ImGui::GetWindowPos();
+			m_ViewportRegion.MinX = viewport_region_min.x + viewport_offset.x;
+			m_ViewportRegion.Width = viewport_region_max.x - viewport_region_min.x;
+			m_ViewportRegion.MinY = viewport_region_min.y + viewport_offset.y;
+			m_ViewportRegion.Height = viewport_region_max.y - viewport_region_min.x;
+
+			///* 若当前ImGui窗口不是主窗口，应阻塞事件传递 */
+			//m_IsViewportFocused = ImGui::IsWindowFocused();
+			//m_IsViewportHovered = ImGui::IsWindowHovered();
+			//Application::Instance()->GetImGuiLayer()->BlockEvents(!m_IsViewportFocused && !m_IsViewportHovered);
+
+			/* 绘制场景 */
+			auto output_rt = m_pEditorCamera->GetRenderView()->GetRenderTarget();
+			if (output_rt)
+			{
+				const uint64_t texture_id = output_rt->GetTextureID();
+				const auto viewport_panel_size = ImGui::GetContentRegionAvail();
+				ImGui::Image((ImTextureID)texture_id, viewport_panel_size, ImVec2{ 0, 1 }, ImVec2{ 1, 0 });
+			}
+
+			///* 拖动资源到主窗口 */
+			//if (ImGui::BeginDragDropTarget())
+			//{
+			//	if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("RESOURCE_BROWSER_ITEM"))
+			//	{
+			//		const wchar_t* path = (const wchar_t*)payload->Data;
+			//		OnDragItemToScene(g_AssetPath / path);
+			//	}
+			//	ImGui::EndDragDropTarget();
+			//}
+
+			///* Gizmos */
+			//ShowOperationGizmoUI();
+		}
+		ImGui::End();
+		ImGui::PopStyleVar();
 	}
 
 	/* 导入模型 */

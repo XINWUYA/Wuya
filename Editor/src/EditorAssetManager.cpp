@@ -1,6 +1,5 @@
 #include "Pch.h"
 #include "EditorAssetManager.h"
-#include <Kernel.h>
 
 namespace Wuya
 {

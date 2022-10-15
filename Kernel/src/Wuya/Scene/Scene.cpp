@@ -5,13 +5,18 @@
 #include "Entity.h"
 #include "Material.h"
 #include "Wuya/Common/Utils.h"
-#include "Wuya/Renderer/Camera.h"
+#include "Camera.h"
 #include "Wuya/Renderer/Renderer.h"
 #include "Wuya/Renderer/Renderer2D.h"
 #include "Wuya/Renderer/RenderView.h"
 
 namespace Wuya
 {
+	Scene::Scene()
+	{
+		Renderer::Init();
+	}
+
 	Scene::~Scene()
 	{
 		m_RenderViews.clear();
@@ -110,15 +115,6 @@ namespace Wuya
 				return Entity{ entity, shared_from_this() };
 		}
 		return {};
-	}
-
-	/* 获取主相机的RenderTarget Texture */
-	const SharedPtr<Texture>& Scene::GetPrimaryCameraRenderTargetTexture() const
-	{
-		PROFILE_FUNCTION();
-
-		auto& render_view = m_RenderViews.back();
-		return render_view->GetRenderTarget();
 	}
 
 	void Scene::Serializer(const std::string& path)

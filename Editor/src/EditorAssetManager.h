@@ -1,7 +1,6 @@
 #pragma once
 #include <string>
 #include <unordered_map>
-#include <Wuya/Common/Common.h>
 
 namespace Wuya
 {

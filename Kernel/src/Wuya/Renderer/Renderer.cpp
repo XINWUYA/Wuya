@@ -1,6 +1,5 @@
 #include "Pch.h"
 #include "Renderer.h"
-#include "Camera.h"
 #include "FrameBuffer.h"
 #include "Renderer2D.h"
 #include "RenderView.h"
@@ -8,6 +7,7 @@
 #include "Shader.h"
 #include "UniformBuffer.h"
 #include "FrameGraph/FrameGraph.h"
+#include "Wuya/Scene/Camera.h"
 #include "Wuya/Scene/Material.h"
 #include "Wuya/Scene/Mesh.h"
 

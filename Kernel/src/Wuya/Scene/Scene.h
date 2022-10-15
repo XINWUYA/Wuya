@@ -17,7 +17,7 @@ namespace Wuya
 	class Scene final : public std::enable_shared_from_this<Scene>
 	{
 	public:
-		Scene() = default;
+		Scene();
 		~Scene();
 
 		/* 创建一个实体 */
@@ -42,8 +42,6 @@ namespace Wuya
 
 		/* 获取主相机实体 */
 		Entity GetPrimaryCameraEntity();
-		/* 获取主相机的RenderTarget Texture */
-		const SharedPtr<Texture>& GetPrimaryCameraRenderTargetTexture() const;
 
 		/* 序列化场景 */
 		void Serializer(const std::string& path);
