@@ -21,7 +21,7 @@ namespace Wuya
 		static void Clear();
 
 		/* 绘制一个视图 */
-		static void RenderAView(const SharedPtr<RenderView>& view);
+		static void RenderAView(RenderView* view);
 
 		static void Submit(const SharedPtr<Material>& material, const SharedPtr<VertexArray>& vertex_array, uint32_t index_count = 0);
 

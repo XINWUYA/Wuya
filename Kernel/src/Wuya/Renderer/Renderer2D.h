@@ -6,6 +6,7 @@ namespace Wuya
 	class VertexArray;
 	class Texture;
 	class Shader;
+	class Camera;
 
 	class Renderer2D
 	{
@@ -14,7 +15,7 @@ namespace Wuya
 		static void Update();
 		static void Release();
 
-		static void BeginFrame(const SharedPtr<class Camera>& camera);
+		static void BeginFrame(Camera* camera);
 		static void EndFrame();
 
 		/* Draw Quads */

@@ -28,7 +28,7 @@ namespace Wuya
 		Renderer::Init();
 
 		// Camera
-		m_pEditorCamera = CreateSharedPtr<EditorCamera>(30.0f);
+		m_pEditorCamera = CreateUniquePtr<EditorCamera>("EditorBuiltinCamera", 30.0f);
 
 		m_pMainScene = CreateSharedPtr<Scene>();
 		m_SceneHierarchy.SetOwnerScene(m_pMainScene);
@@ -226,13 +226,13 @@ namespace Wuya
 		/* 场景文件 */
 		if (extension == ".scn")
 		{
-			EDITOR_LOG_DEBUG("Import scene file: {}.", path.string());
+			EDITOR_LOG_DEBUG("Import scene file: {}.", path.generic_string());
 
 			SharedPtr<Scene> new_scene = CreateSharedPtr<Scene>();
-			if (new_scene->Deserializer(path.string()))
+			if (new_scene->Deserializer(path.generic_string()))
 			{
 				m_pMainScene = new_scene;
-				m_ActiveScenePath = path.string();
+				m_ActiveScenePath = path.generic_string();
 
 				/* 设置对象层次结构面板对应的场景 */
 				m_SceneHierarchy.SetOwnerScene(m_pMainScene);
@@ -247,7 +247,7 @@ namespace Wuya
 		/* 模型文件 */
 		if (extension == ".obj")
 		{
-			EDITOR_LOG_DEBUG("Import model file: {}.", path.string());
+			EDITOR_LOG_DEBUG("Import model file: {}.", path.generic_string());
 
 			Entity entity = m_pMainScene->CreateEntity(path.stem().string());
 			auto& model_component = entity.AddComponent<ModelComponent>();
@@ -690,12 +690,6 @@ namespace Wuya
 
 		Renderer::SetClearColor(glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
 		Renderer::Clear();
-		Renderer::Update();
-
-		auto& editor_render_view = m_pEditorCamera->GetRenderView();
-		editor_render_view->SetOwnerScene(m_pMainScene);
-		m_pEditorCamera->ConstructRenderView();
-
 
 		if (m_pMainScene)
 		{
@@ -709,14 +703,11 @@ namespace Wuya
 				}
 
 				/* 更新场景中的实体 */
-				m_pMainScene->OnUpdateEditor(m_pEditorCamera, delta_time);
+				m_pMainScene->OnUpdateEditor(m_pEditorCamera.get(), delta_time);
 				break;
 			case PlayMode::Runtime:
 				/* 更新场景 */
 				m_pMainScene->OnUpdateRuntime(delta_time);
-				break;
-			default:
-				ASSERT(false);
 				break;
 			}
 		}

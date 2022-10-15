@@ -107,7 +107,7 @@ namespace Wuya
 	}
 
 	/* 绘制一个视图 */
-	void Renderer::RenderAView(const SharedPtr<RenderView>& view)
+	void Renderer::RenderAView(RenderView* view)
 	{
 		PROFILE_FUNCTION();
 

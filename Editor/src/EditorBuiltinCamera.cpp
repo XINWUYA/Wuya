@@ -9,8 +9,8 @@
 
 namespace Wuya
 {
-	EditorCamera::EditorCamera(float fov, float aspect_ratio, float near_clip, float far_clip)
-		: m_Fov(fov), m_AspectRatio(aspect_ratio), m_NearClip(near_clip), m_FarClip(far_clip)
+	EditorCamera::EditorCamera(const std::string& name, float fov, float aspect_ratio, float near_clip, float far_clip)
+		: Camera(name), m_Fov(fov), m_AspectRatio(aspect_ratio), m_NearClip(near_clip), m_FarClip(far_clip)
 	{
 		PROFILE_FUNCTION();
 
@@ -18,8 +18,6 @@ namespace Wuya
 
 		UpdateProjectionMatrix();
 		UpdateViewMatrix();
-
-		m_pRenderView = CreateSharedPtr<RenderView>("EditorBuiltinCamera_RenderView");
 	}
 
 	EditorCamera::~EditorCamera()
@@ -29,6 +27,8 @@ namespace Wuya
 	void EditorCamera::OnUpdate(float delta_time)
 	{
 		PROFILE_FUNCTION();
+
+		Camera::OnUpdate(delta_time);
 
 		if (m_IsFocus)
 		{
@@ -110,8 +110,6 @@ namespace Wuya
 
 		if (!m_IsFrameGraphDirty)
 			return;
-
-		m_pRenderView->SetCullingCamera(shared_from_this());
 
 		auto& frame_graph = m_pRenderView->GetFrameGraph();
 		frame_graph->Reset();

@@ -2,6 +2,7 @@
 #include <Kernel.h>
 #include "EditorSceneHierarchy.h"
 #include "EditorResourceBrowser.h"
+#include "EditorBuiltinCamera.h"
 
 namespace Wuya
 {
@@ -60,8 +61,8 @@ namespace Wuya
 			Runtime		/* 运行模式 */
 		};
 
-		SharedPtr<class EditorCamera> m_pEditorCamera;
-		SharedPtr<OrthographicCameraController> m_pOrthographicCameraController;
+		/* 编辑器相机 */
+		UniquePtr<EditorCamera> m_pEditorCamera{ nullptr };
 
 		/* 主场景 */
 		SharedPtr<Scene> m_pMainScene;

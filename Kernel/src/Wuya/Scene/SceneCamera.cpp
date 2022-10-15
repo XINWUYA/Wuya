@@ -4,8 +4,8 @@
 
 namespace Wuya
 {
-	SceneCamera::SceneCamera(float aspect_ratio)
-		: m_AspectRatio(aspect_ratio)
+	SceneCamera::SceneCamera(const std::string& name, float aspect_ratio)
+		: Camera(name), m_AspectRatio(aspect_ratio)
 	{
 		PROFILE_FUNCTION();
 

@@ -10,7 +10,7 @@ namespace Wuya
 	OrthographicCameraController::OrthographicCameraController(float aspect_ratio, bool rotatable)
 		: m_AspectRatio(aspect_ratio), m_Rotatable(rotatable)
 	{
-		m_pCamera = CreateSharedPtr<OrthographicCamera>(-m_AspectRatio * m_ZoomLevel, m_AspectRatio * m_ZoomLevel, -m_ZoomLevel, m_ZoomLevel);
+		m_pCamera = CreateSharedPtr<OrthographicCamera>("OrthographicCameraController", - m_AspectRatio * m_ZoomLevel, m_AspectRatio * m_ZoomLevel, -m_ZoomLevel, m_ZoomLevel);
 	}
 
 	void OrthographicCameraController::OnUpdate(float delta_time)

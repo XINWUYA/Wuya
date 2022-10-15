@@ -11,6 +11,7 @@ namespace Wuya
 	class Entity;
 	class RenderView;
 	class Texture;
+	class Camera;
 
 	/* 场景类 */
 	class Scene final : public std::enable_shared_from_this<Scene>
@@ -23,6 +24,11 @@ namespace Wuya
 		Entity CreateEntity(const std::string& name = std::string());
 		/* 销毁实体 */
 		void DestroyEntity(Entity& entity);
+		/* 清空所有实体 */
+		void ClearAllEntities() { m_Registry.clear(); }
+		/* 销毁指定类型的实体 */
+		template <typename T>
+		void DestroyTargetEntities() { m_Registry.clear<T>(); }
 
 		/* 获取场景的Registry */
 		entt::registry& GetRegistry() { return m_Registry; }
@@ -32,7 +38,7 @@ namespace Wuya
 		void OnUpdateRuntime(float delta_time);
 
 		/* 编辑模式更新场景 */
-		void OnUpdateEditor(const SharedPtr<class Camera>& camera, float delta_time);
+		void OnUpdateEditor(Camera* camera, float delta_time);
 
 		/* 获取主相机实体 */
 		Entity GetPrimaryCameraEntity();
@@ -54,6 +60,6 @@ namespace Wuya
 		entt::registry m_Registry;
 
 		/* RenderView列表 */
-		std::vector<SharedPtr<RenderView>> m_RenderViews;
+		std::vector<RenderView*> m_RenderViews;
 	};
 }

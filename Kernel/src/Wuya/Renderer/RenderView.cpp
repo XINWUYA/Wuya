@@ -7,8 +7,8 @@
 
 namespace Wuya
 {
-	RenderView::RenderView(std::string name)
-		: m_DebugName(std::move(name))
+	RenderView::RenderView(std::string name, Camera* owner_camera)
+		: m_DebugName(std::move(name)), m_pOwnerCamera(owner_camera)
 	{
 		PROFILE_FUNCTION();
 
@@ -44,11 +44,15 @@ namespace Wuya
 	/* ´æ´¢¸÷PassµÄFrameBuffer */
 	void RenderView::EmplacePassFrameBuffer(const std::string& name, const SharedPtr<FrameBuffer>& frame_buffer)
 	{
+		PROFILE_FUNCTION();
+
 		m_PassFrameBuffers[name] = frame_buffer;
 	}
 
 	const SharedPtr<FrameBuffer>& RenderView::GetPassFrameBuffer(const std::string& name) const
 	{
+		PROFILE_FUNCTION();
+
 		const auto it = m_PassFrameBuffers.find(name);
 		if (it != m_PassFrameBuffers.end())
 			return it->second;
@@ -91,10 +95,10 @@ namespace Wuya
 		if (!owner_scene)
 			return;
 
-		const auto model_entity_group = owner_scene->GetRegistry().view<TransformComponent, ModelComponent>();
-		for (auto& entity : model_entity_group)
+		const auto model_entity_view = owner_scene->GetRegistry().view<TransformComponent, ModelComponent>();
+		for (auto& entity : model_entity_view)
 		{
-			auto [transform_component, model_component] = model_entity_group.get<TransformComponent, ModelComponent>(entity);
+			auto [transform_component, model_component] = model_entity_view.get<TransformComponent, ModelComponent>(entity);
 
 			for (const auto& mesh_segment : model_component.Model->GetMeshSegments())
 			{
@@ -119,10 +123,10 @@ namespace Wuya
 		if (!owner_scene)
 			return;
 
-		const auto light_entity_group = owner_scene->GetRegistry().view<TransformComponent, LightComponent>();
-		for (auto& entity : light_entity_group)
+		const auto light_entity_view = owner_scene->GetRegistry().view<TransformComponent, LightComponent>();
+		for (auto& entity : light_entity_view)
 		{
-			auto [transform_component,light_component] = light_entity_group.get<TransformComponent, LightComponent>(entity);
+			auto [transform_component,light_component] = light_entity_view.get<TransformComponent, LightComponent>(entity);
 
 			const glm::vec3 light_dir = transform_component.GetTransform() * glm::vec4(0.0f, 1.0f, 0.0f, 1.0f);
 			m_ValidLights.emplace_back(static_cast<uint32_t>(light_component.Type), glm::vec4(light_component.Color.r, light_component.Color.g, light_component.Color.b, light_component.Intensity), light_dir, transform_component.Position, light_component.IsCastShadow);

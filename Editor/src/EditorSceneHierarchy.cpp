@@ -80,6 +80,13 @@ namespace Wuya
 						m_SelectedEntity = entity;
 					}
 
+					if (ImGui::MenuItem("Camera"))
+					{
+						auto entity = m_pOwnerScene->CreateEntity("New Camera");
+						entity.AddComponent<CameraComponent>();
+						m_SelectedEntity = entity;
+					}
+
 					if (ImGui::MenuItem("Directional Light"))
 					{
 						auto entity = m_pOwnerScene->CreateEntity("New Directional Light");
@@ -358,18 +365,18 @@ namespace Wuya
 				EditorUIFunctions::DrawCheckboxUI("IsPrimary", component.IsPrimary);
 				EditorUIFunctions::DrawCheckboxUI("IsFixedAspectRatio", component.IsFixedAspectRatio);
 				auto& scene_camera = component.Camera;
-				int projection_idx = static_cast<int>(scene_camera.GetProjectionType());
+				int projection_idx = static_cast<int>(scene_camera->GetProjectionType());
 				EditorUIFunctions::DrawComboUI("ProjectionType", { "Perspective", "Orthographic" }, projection_idx,
 					[&scene_camera](int selected_idx)
 					{
-						scene_camera.SetProjectionType(static_cast<SceneCamera::ProjectionType>(selected_idx));
+						scene_camera->SetProjectionType(static_cast<SceneCamera::ProjectionType>(selected_idx));
 					});
 
-				switch (scene_camera.GetProjectionType())
+				switch (scene_camera->GetProjectionType())
 				{
 				case SceneCamera::ProjectionType::Perspective:
 				{
-					const auto& camera_desc = scene_camera.GetPerspectiveCameraDesc();
+					const auto& camera_desc = scene_camera->GetPerspectiveCameraDesc();
 
 					float fov = camera_desc->Fov;
 					EditorUIFunctions::DrawDragFloatUI("Fov", fov);
@@ -378,12 +385,12 @@ namespace Wuya
 					float far_clip = camera_desc->Far;
 					EditorUIFunctions::DrawDragFloatUI("Far", far_clip);
 
-					scene_camera.SetPerspectiveCameraDesc({ fov, near_clip, far_clip });
+					scene_camera->SetPerspectiveCameraDesc({ fov, near_clip, far_clip });
 				}
 				break;
 				case SceneCamera::ProjectionType::Orthographic:
 				{
-					const auto& camera_desc = scene_camera.GetOrthographicCameraDesc();
+					const auto& camera_desc = scene_camera->GetOrthographicCameraDesc();
 
 					float height_size = camera_desc->HeightSize;
 					EditorUIFunctions::DrawDragFloatUI("HeightSize", height_size);
@@ -392,7 +399,7 @@ namespace Wuya
 					float far_clip = camera_desc->Far;
 					EditorUIFunctions::DrawDragFloatUI("Far", far_clip);
 
-					scene_camera.SetOrthographicCameraDesc({ height_size, near_clip, far_clip });
+					scene_camera->SetOrthographicCameraDesc({ height_size, near_clip, far_clip });
 				}
 				break;
 				}

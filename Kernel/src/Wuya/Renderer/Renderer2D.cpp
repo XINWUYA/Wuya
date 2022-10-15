@@ -178,7 +178,7 @@ namespace Wuya
 		s_StatisticsInfo.DrawCalls++;
 	}
 
-	void Renderer2D::BeginFrame(const SharedPtr<Camera>& camera)
+	void Renderer2D::BeginFrame(Camera* camera)
 	{
 		PROFILE_FUNCTION();
 

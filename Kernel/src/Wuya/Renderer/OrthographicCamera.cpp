@@ -4,7 +4,8 @@
 
 namespace Wuya
 {
-	OrthographicCamera::OrthographicCamera(float left, float right, float top, float bottom)
+	OrthographicCamera::OrthographicCamera(const std::string& name, float left, float right, float top, float bottom)
+		: Camera(name)
 	{
 		SetProjection(left, right, top, bottom);
 	}

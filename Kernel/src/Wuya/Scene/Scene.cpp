@@ -15,8 +15,10 @@ namespace Wuya
 	Scene::~Scene()
 	{
 		m_RenderViews.clear();
+		ClearAllEntities();
 	}
 
+	/* 创建一个实体 */
 	Entity Scene::CreateEntity(const std::string& name)
 	{
 		PROFILE_FUNCTION();
@@ -32,6 +34,7 @@ namespace Wuya
 		return entity;
 	}
 
+	/* 销毁实体 */
 	void Scene::DestroyEntity(Entity& entity)
 	{
 		PROFILE_FUNCTION();
@@ -47,28 +50,28 @@ namespace Wuya
 		// auto entity_group = m_Registry.group<TransformComponent>(entt::get<>)
 	}
 
-	void Scene::OnUpdateEditor(const SharedPtr<Camera>& camera, float delta_time)
+	void Scene::OnUpdateEditor(Camera* camera, float delta_time)
 	{
 		PROFILE_FUNCTION();
 
+		Renderer::Update();
+
 		/* todo: 收集RenderView */
 		m_RenderViews.clear();
-		const auto& entity_view = GetRegistry().group<CameraComponent>(entt::get<NameComponent>);
-		for (auto& entity : entity_view)
+		const auto& camera_entities = m_Registry.view<CameraComponent>();
+		for (auto& entity : camera_entities)
 		{
-			const auto [name_component, camera_component] = entity_view.get<NameComponent, CameraComponent>(entity);
-			SharedPtr<RenderView> render_view = CreateSharedPtr<RenderView>(name_component.Name + "_RenderView");
-			//render_view->SetName(name_component.Name);
-			render_view->SetCullingCamera(camera);// todo: 替换为组件对应的相机
+			const auto& camera_component = camera_entities.get<CameraComponent>(entity);
+			auto* render_view = camera_component.Camera->GetRenderView();
+			render_view->SetOwnerScene(shared_from_this());
 			m_RenderViews.emplace_back(render_view);
 		}
 
 		/* Editor Camera's RenderView, 最后一个是编辑器RenderView */
 		if (camera)
 		{
-			auto& render_view = camera->GetRenderView();
+			auto* render_view = camera->GetRenderView();
 			render_view->SetOwnerScene(shared_from_this());
-			//render_view->SetViewportRegion(camera->)
 			m_RenderViews.emplace_back(render_view);
 		}
 
@@ -83,12 +86,12 @@ namespace Wuya
 		Renderer2D::BeginFrame(camera);
 
 		/* 更新所有图片实体 */
-		/*const auto& sprite_entity_group = GetRegistry().group<TransformComponent>(entt::get<SpriteComponent>);
-		for (auto& entity : sprite_entity_group)
+		const auto& sprite_entity_view = m_Registry.view<TransformComponent, SpriteComponent>();
+		for (auto& entity : sprite_entity_view)
 		{
-			auto [transform_component, sprite_component] = sprite_entity_group.get<TransformComponent, SpriteComponent>(entity);
+			auto [transform_component, sprite_component] = sprite_entity_view.get<TransformComponent, SpriteComponent>(entity);
 			Renderer2D::DrawSprite(transform_component.GetTransform(), &sprite_component, static_cast<int>(entity));
-		}*/
+		}
 
 		/* 提交绘制数据 */
 		Renderer2D::EndFrame();
@@ -204,7 +207,7 @@ namespace Wuya
 						camera_component.IsFixedAspectRatio = camera_root->BoolAttribute("IsFixedAspectRatio");
 
 						const auto projection_type = static_cast<SceneCamera::ProjectionType>(camera_root->IntAttribute("ProjectionType"));
-						camera_component.Camera.SetProjectionType(projection_type);
+						camera_component.Camera->SetProjectionType(projection_type);
 						switch (projection_type)
 						{
 						case SceneCamera::ProjectionType::Perspective:
@@ -212,7 +215,7 @@ namespace Wuya
 								const float fov = camera_root->FloatAttribute("Fov");
 								const float near_clip = camera_root->FloatAttribute("Near");
 								const float far_clip = camera_root->FloatAttribute("Far");
-								camera_component.Camera.SetPerspectiveCameraDesc({ fov, near_clip, far_clip });
+								camera_component.Camera->SetPerspectiveCameraDesc({ fov, near_clip, far_clip });
 							}
 							break;
 						case SceneCamera::ProjectionType::Orthographic:
@@ -220,7 +223,7 @@ namespace Wuya
 								const float height_size = camera_root->FloatAttribute("HeightSize");
 								const float near_clip = camera_root->FloatAttribute("Near");
 								const float far_clip = camera_root->FloatAttribute("Far");
-								camera_component.Camera.SetOrthographicCameraDesc({ height_size, near_clip, far_clip });
+								camera_component.Camera->SetOrthographicCameraDesc({ height_size, near_clip, far_clip });
 							}
 							break;
 						}
@@ -308,14 +311,14 @@ namespace Wuya
 			camera_root->SetAttribute("IsPrimary", component.IsPrimary);
 			camera_root->SetAttribute("IsFixedAspectRatio", component.IsFixedAspectRatio);
 
-			const auto projection_type = component.Camera.GetProjectionType();
+			const auto projection_type = component.Camera->GetProjectionType();
 			camera_root->SetAttribute("ProjectionType", static_cast<int>(projection_type));
 
 			switch (projection_type)
 			{
 			case SceneCamera::ProjectionType::Perspective:
 				{
-					const auto& camera_desc = component.Camera.GetPerspectiveCameraDesc();
+					const auto& camera_desc = component.Camera->GetPerspectiveCameraDesc();
 					camera_root->SetAttribute("Fov", camera_desc->Fov);
 					camera_root->SetAttribute("Near", camera_desc->Near);
 					camera_root->SetAttribute("Far", camera_desc->Far);
@@ -323,7 +326,7 @@ namespace Wuya
 				break;
 			case SceneCamera::ProjectionType::Orthographic:
 				{
-				const auto& camera_desc = component.Camera.GetOrthographicCameraDesc();
+				const auto& camera_desc = component.Camera->GetOrthographicCameraDesc();
 				camera_root->SetAttribute("HeightSize", camera_desc->HeightSize);
 				camera_root->SetAttribute("Near", camera_desc->Near);
 				camera_root->SetAttribute("Far", camera_desc->Far);

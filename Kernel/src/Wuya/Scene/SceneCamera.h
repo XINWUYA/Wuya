@@ -37,7 +37,7 @@ namespace Wuya
 			Orthographic = 1
 		};
 
-		SceneCamera(float aspect_ratio = 1.778f);
+		SceneCamera(const std::string& name = "SceneCamera", float aspect_ratio = 1.778f);
 		~SceneCamera() override = default;
 
 		/* 投影类型 */
@@ -57,9 +57,7 @@ namespace Wuya
 	private:
 		/* 更新相机投影矩阵 */
 		void UpdateProjectionMatrix();
-
-		/* 标记名 */
-		std::string m_DebugName{ "Unnamed Camera" };
+		
 		/* 投影类型 */
 		ProjectionType m_ProjectionType{ ProjectionType::Perspective };
 		/* 相机类型描述 */

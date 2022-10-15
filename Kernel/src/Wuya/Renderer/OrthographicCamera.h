@@ -7,7 +7,7 @@ namespace Wuya
 	class OrthographicCamera : public Camera
 	{
 	public:
-		OrthographicCamera(float left, float right, float top, float bottom);
+		OrthographicCamera(const std::string& name, float left, float right, float top, float bottom);
 		~OrthographicCamera() override;
 
 		void SetProjection(float left, float right, float top, float bottom);

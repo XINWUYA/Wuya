@@ -50,16 +50,15 @@ namespace Wuya
 	class RenderView
 	{
 	public:
-		RenderView(std::string name);
+		RenderView(std::string name, Camera* owner_camera);
 		~RenderView();
 
 		/* 设置名称 */
 		void SetDebugName(const std::string& name) { m_DebugName = name; }
 		[[nodiscard]] const std::string& GetDebugName() const { return m_DebugName; }
 
-		/* 设置裁剪相机 */
-		void SetCullingCamera(const SharedPtr<Camera>& camera) { m_pCullingCamera = camera; }
-		[[nodiscard]] SharedPtr<Camera> GetCullingCamera() const { return m_pCullingCamera.lock(); }
+		/* 获取裁剪相机 */
+		[[nodiscard]] const Camera* GetCullingCamera() const { return m_pOwnerCamera; }
 
 		/* 设置启用视锥体剔除 */
 		void SetEnableFrustumCulling(bool enable) { m_IsEnableCulling = enable; }
@@ -108,7 +107,7 @@ namespace Wuya
 		/* 是否启用视锥体剔除 */
 		bool m_IsEnableCulling{ true };
 		/* 相机 */
-		WeakPtr<Camera> m_pCullingCamera;
+		Camera* m_pOwnerCamera{ nullptr };
 		/* 所属的Scene */
 		WeakPtr<Scene> m_pOwnerScene;
 		/* 视锥体剔除之后，对当前可见MeshSegment */

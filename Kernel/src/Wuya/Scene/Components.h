@@ -46,12 +46,16 @@ namespace Wuya
 	/* 场景相机组件 */
 	struct CameraComponent
 	{
-		SceneCamera Camera{};
+		SharedPtr<SceneCamera> Camera{ nullptr };
 		bool IsPrimary{ true };
 		bool IsFixedAspectRatio{ false };
 
-		CameraComponent() = default;
 		CameraComponent(const CameraComponent&) = default;
+		CameraComponent()
+		{
+			Camera = CreateSharedPtr<SceneCamera>();
+		}
+
 	};
 
 	/* 图片精灵组件 */
