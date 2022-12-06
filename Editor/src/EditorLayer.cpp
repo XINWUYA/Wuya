@@ -1,7 +1,6 @@
 #include "Pch.h"
 #include "EditorLayer.h"
 #include <glm/gtc/type_ptr.inl>
-#include "EditorAssetManager.h"
 #include "EditorBuiltinCamera.h"
 #include "EditorUIFunctions.h"
 #include "ImGuizmo.h"
@@ -420,13 +419,14 @@ namespace Wuya
 	{
 		PROFILE_FUNCTION();
 
-		static auto save_icon = EditorAssetManager::Instance().GetOrCreateTexture("editor_res/icons/save.png");
-		static auto translate_icon = EditorAssetManager::Instance().GetOrCreateTexture("editor_res/icons/translate.png");
-		static auto rotate_icon = EditorAssetManager::Instance().GetOrCreateTexture("editor_res/icons/rotate.png");
-		static auto scale_icon = EditorAssetManager::Instance().GetOrCreateTexture("editor_res/icons/scale.png");
-		static auto play_icon = EditorAssetManager::Instance().GetOrCreateTexture("editor_res/icons/play.png");
-		static auto stop_icon = EditorAssetManager::Instance().GetOrCreateTexture("editor_res/icons/stop.png");
-		static auto menu_icon = EditorAssetManager::Instance().GetOrCreateTexture("editor_res/icons/menu.png");
+		const TextureLoadConfig load_config;
+		static auto save_icon = TextureAssetManager::Instance().GetOrCreateTexture("editor_res/icons/save.png", load_config);
+		static auto translate_icon = TextureAssetManager::Instance().GetOrCreateTexture("editor_res/icons/translate.png", load_config);
+		static auto rotate_icon = TextureAssetManager::Instance().GetOrCreateTexture("editor_res/icons/rotate.png", load_config);
+		static auto scale_icon = TextureAssetManager::Instance().GetOrCreateTexture("editor_res/icons/scale.png", load_config);
+		static auto play_icon = TextureAssetManager::Instance().GetOrCreateTexture("editor_res/icons/play.png", load_config);
+		static auto stop_icon = TextureAssetManager::Instance().GetOrCreateTexture("editor_res/icons/stop.png", load_config);
+		static auto menu_icon = TextureAssetManager::Instance().GetOrCreateTexture("editor_res/icons/menu.png", load_config);
 
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 2)); /* Ö¸¶¨¼ä¸ô */
 		ImGui::PushStyleVar(ImGuiStyleVar_ItemInnerSpacing, ImVec2(0, 2));

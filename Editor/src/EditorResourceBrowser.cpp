@@ -1,6 +1,5 @@
 #include "Pch.h"
 #include "EditorResourceBrowser.h"
-#include "EditorAssetManager.h"
 #include "EditorUIFunctions.h"
 
 namespace Wuya
@@ -10,11 +9,12 @@ namespace Wuya
 	{
 		PROFILE_FUNCTION();
 
-		m_pFolderIcon = EditorAssetManager::Instance().GetOrCreateTexture("editor_res/icons/directory.png");
-		m_pFileIcon = EditorAssetManager::Instance().GetOrCreateTexture("editor_res/icons/file.png");
-		m_pFilterIcon = EditorAssetManager::Instance().GetOrCreateTexture("editor_res/icons/filter.png");
-		m_pMenuIcon = EditorAssetManager::Instance().GetOrCreateTexture("editor_res/icons/menu.png");
-		m_pReturnIcon = EditorAssetManager::Instance().GetOrCreateTexture("editor_res/icons/return.png");
+		const TextureLoadConfig load_config;
+		m_pFolderIcon = TextureAssetManager::Instance().GetOrCreateTexture("editor_res/icons/directory.png", load_config);
+		m_pFileIcon = TextureAssetManager::Instance().GetOrCreateTexture("editor_res/icons/file.png", load_config);
+		m_pFilterIcon = TextureAssetManager::Instance().GetOrCreateTexture("editor_res/icons/filter.png", load_config);
+		m_pMenuIcon = TextureAssetManager::Instance().GetOrCreateTexture("editor_res/icons/menu.png", load_config);
+		m_pReturnIcon = TextureAssetManager::Instance().GetOrCreateTexture("editor_res/icons/return.png", load_config);
 	}
 
 	void EditorResourceBrowser::OnImGuiRenderer()

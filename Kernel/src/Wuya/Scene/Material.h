@@ -7,25 +7,58 @@ namespace Wuya
 	class Texture;
 	class Shader;
 
+	/* PBR材质纹理贴图Slot */
+	namespace TextureSlot
+	{
+		constexpr uint8_t Albedo = 0;
+		constexpr uint8_t Specular = 1;
+		constexpr uint8_t Normal = 2;
+		constexpr uint8_t Roughness = 3;
+		constexpr uint8_t Metallic = 4;
+		constexpr uint8_t Emissive = 5;
+		constexpr uint8_t Ambient = 6;
+		constexpr uint8_t ValidSlotCnt = 7;
+
+		inline std::string GetSlotName(uint8_t slot)
+		{
+			switch (slot)
+			{
+			case Albedo:	return "Albedo";
+			case Specular:	return "Specular";
+			case Normal:	return "Normal";
+			case Roughness: return "Roughness";
+			case Metallic:	return "Metallic";
+			case Emissive:	return "Emissive";
+			case Ambient:	return "Ambient";
+			default:		return "Unknown";
+			}
+		}
+	}
+
 	/*
 	 * 材质类
 	 */
 	class Material
 	{
+		using ParameterMap = std::unordered_map<std::string, std::any>;
+		using TextureMap = std::unordered_map<SharedPtr<Texture>, uint32_t>;
+
 	public:
 		Material() = default;
 		~Material();
 
 		/* 设置Shader */
 		void SetShader(const SharedPtr<Shader>& shader) { m_pShader = shader; }
-		const SharedPtr<Shader>& GetShader() const { return m_pShader; }
+		[[nodiscard]] const SharedPtr<Shader>& GetShader() const { return m_pShader; }
 		/* 设置参数 */
 		void SetParameters(const std::string& name, const std::any& param);
+		[[nodiscard]] const ParameterMap& GetAllParameters() const { return m_Parameters; }
 		/* 设置纹理 */
 		void SetTexture(const SharedPtr<Texture>& texture, uint32_t slot);
+		[[nodiscard]] const SharedPtr<Texture>& GetTextureBySlot(uint32_t slot) const;
 		/* 设置光栅化状态 */
 		void SetRasterState(RenderRasterState state) { m_RasterState = state; }
-		const RenderRasterState& GetRasterState() const { return m_RasterState; }
+		[[nodiscard]] const RenderRasterState& GetRasterState() const { return m_RasterState; }
 		RenderRasterState& GetRasterState() { return m_RasterState; }
 
 		/* 绑定材质中的各参数 */
@@ -45,9 +78,9 @@ namespace Wuya
 		/* Shader */
 		SharedPtr<Shader> m_pShader{ nullptr };
 		/* 材质所需的各种参数<Name, Vale> */
-		std::unordered_map<std::string, std::any> m_Parameters{};
+		ParameterMap m_Parameters{};
 		/* 材质所需的各种纹理<Texture，Slot> */
-		std::unordered_map<SharedPtr<Texture>, uint32_t> m_Textures{};
+		TextureMap m_Textures{};
 		/* 光栅化状态配置 */
 		RenderRasterState m_RasterState{};
 

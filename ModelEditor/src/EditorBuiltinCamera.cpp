@@ -109,6 +109,9 @@ namespace Wuya
 		if (!m_IsFrameGraphDirty)
 			return;
 
+		if (m_ViewportRegion.Width <= 0 || m_ViewportRegion.Height <= 0)
+			return;
+
 		auto& frame_graph = m_pRenderView->GetFrameGraph();
 		frame_graph->Reset();
 

@@ -5,7 +5,6 @@
 #include "Shader.h"
 #include "Texture.h"
 #include "VertexArray.h"
-#include "Camera.h"
 #include "UniformBuffer.h"
 #include "Wuya/Scene/Components.h"
 #include "Wuya/Scene/Material.h"

@@ -1,5 +1,6 @@
 #pragma once
 #include "EditorBuiltinCamera.h"
+#include "ModelInfo.h"
 
 namespace Wuya
 {
@@ -24,19 +25,27 @@ namespace Wuya
 		void ShowMenuUI();
 		/* 显示主场景视口 */
 		void ShowSceneViewportUI();
+		/* 显示模型编辑UI */
+		void ShowModelParamsUI();
 
 		/* 导入模型 */
 		void ImportModel();
-		/* 导出模型 */
-		void ExportModel();
+		/* 导出模型(.mesh & .mtl) */
+		void ExportMeshAndMtl();
+
+		/* 更新模型 */
+		void UpdateModel();
+		/* 更新材质：根据材质参数设置材质 */
+		void UpdateMaterial(const SharedPtr<Material>& material, const MaterialParams& material_params);
 
 		/* 编辑器相机 */
 		UniquePtr<EditorCamera> m_pEditorCamera{ nullptr };
-
+		/* 当前模型信息 */
+		UniquePtr<ModelInfo> m_pModelInfo{ nullptr };
+		/* 当前材质信息，这里每个子模型对应一个Material */
+		std::vector<SharedPtr<Material>> m_Materials{};
 		/* 默认场景 */
 		SharedPtr<Scene> m_pDefaultScene{ nullptr };
-		/* 当前模型所在路径 */
-		std::string m_ModelPath{};
 		/* 视口范围: x: width_min; y: height_min; z: width_max; w: height_max */
 		ViewportRegion m_ViewportRegion{};
 	};

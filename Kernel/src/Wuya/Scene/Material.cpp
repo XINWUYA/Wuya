@@ -24,7 +24,32 @@ namespace Wuya
 
 	void Material::SetTexture(const SharedPtr<Texture>& texture, uint32_t slot)
 	{
+		if (!texture)
+			return;
+
+		/* 若当前slot，已存在纹理， 则删除前一个纹理 */
+		auto iter = m_Textures.begin();
+		for (; iter != m_Textures.end(); ++iter)
+		{
+			if (iter->second == slot)
+			{
+				m_Textures.erase(iter);
+				break;
+			}
+		}
+
 		m_Textures.emplace(texture, slot);
+	}
+
+	/* 获取指定Slot上的Texture */
+	const SharedPtr<Texture>& Material::GetTextureBySlot(uint32_t slot) const
+	{
+		for (const auto& item : m_Textures)
+		{
+			if (item.second == slot)
+				return item.first;
+		}
+		return {};
 	}
 
 	/* 绑定材质中的各参数 */
@@ -83,7 +108,7 @@ namespace Wuya
 		for(auto& texture_info: m_Textures)
 		{
 			const auto& texture = texture_info.first;
-			texture->Bind(texture_info.second);
+			texture->Bind((uint32_t)texture_info.second);
 		}
 	}
 
@@ -172,17 +197,17 @@ namespace Wuya
 			auto* id_attr = mtl_inst->FindAttribute("ID");
 
 			if (auto* albedo_tex = mtl_inst->FindAttribute("AlbedoTex"))
-				material->SetTexture(Texture::Create(albedo_tex->Value(), texture_load_config), 0);
+				material->SetTexture(Texture::Create(albedo_tex->Value(), texture_load_config), TextureSlot::Albedo);
 			if (auto* specular_tex = mtl_inst->FindAttribute("SpecularTex"))
-				material->SetTexture(Texture::Create(specular_tex->Value(), texture_load_config), 1);
+				material->SetTexture(Texture::Create(specular_tex->Value(), texture_load_config), TextureSlot::Specular);
 			if (auto* normal_tex = mtl_inst->FindAttribute("NormalTex"))
-				material->SetTexture(Texture::Create(normal_tex->Value(), texture_load_config), 2);
+				material->SetTexture(Texture::Create(normal_tex->Value(), texture_load_config), TextureSlot::Normal);
 			if (auto* roughness_tex = mtl_inst->FindAttribute("RoughnessTex"))
-				material->SetTexture(Texture::Create(roughness_tex->Value(), texture_load_config), 3);
+				material->SetTexture(Texture::Create(roughness_tex->Value(), texture_load_config), TextureSlot::Roughness);
 			if (auto* metallic_tex = mtl_inst->FindAttribute("MetallicTex"))
-				material->SetTexture(Texture::Create(metallic_tex->Value(), texture_load_config), 4);
+				material->SetTexture(Texture::Create(metallic_tex->Value(), texture_load_config), TextureSlot::Metallic);
 			if (auto* emissive_tex = mtl_inst->FindAttribute("EmissiveTex"))
-				material->SetTexture(Texture::Create(emissive_tex->Value(), texture_load_config), 5);
+				material->SetTexture(Texture::Create(emissive_tex->Value(), texture_load_config), TextureSlot::Emissive);
 
 			material->SetParameters("Diffuse", ToVec3(mtl_inst->Attribute("Diffuse")));
 			material->SetParameters("Specular", ToVec3(mtl_inst->Attribute("Specular")));

@@ -24,20 +24,22 @@ namespace Wuya
 	public:
 		COMPONENT_CLASS(Model)
 
-		Model(std::string name);
+		Model(std::string path);
 		virtual ~Model() = default;
 
 		/* 标记是否为静态模型 */
 		[[nodiscard]] virtual bool IsStaticModel() const { return true; }
 
 		/* 模型路径 */
-		void SetPath(const std::string& path) { m_Path = path; }
-		const std::string& GetPath() const { return m_Path; }
+		[[nodiscard]] const std::string& GetPath() const { return m_Path; }
+		/* 模型的AABB */
+		[[nodiscard]] const glm::vec3& GetAABBMin() const { return m_AABBMin; }
+		[[nodiscard]] const glm::vec3& GetAABBMax() const { return m_AABBMax; }
 
 		/* 添加一个MeshSegment到模型 */
 		void AddMeshSegment(const SharedPtr<MeshSegment>& mesh_segment);
 		/* 获取所有MeshSegments */
-		const std::vector<SharedPtr<MeshSegment>>& GetMeshSegments() const { return m_MeshSegments; }
+		[[nodiscard]] const std::vector<SharedPtr<MeshSegment>>& GetMeshSegments() const { return m_MeshSegments; }
 
 		/* 从路径加载一个模型 */
 		static SharedPtr<Model> Create(const std::string& path);
@@ -62,7 +64,7 @@ namespace Wuya
 	class SkeletonModel final : public Model
 	{
 	public:
-		explicit SkeletonModel(const std::string& name);
+		explicit SkeletonModel(const std::string& path);
 		~SkeletonModel() override = default;
 
 		/* 标记是否为静态模型 */

@@ -175,10 +175,7 @@ namespace Wuya
 			ImportObj(filepath);
 		}
 
-		auto [basedir, basename] = ExtractFileBaseDirAndBaseName(filepath);
-
-		SharedPtr<Model> model = CreateSharedPtr<Model>(basename);
-		model->SetPath(filepath);
+		SharedPtr<Model> model = CreateSharedPtr<Model>(filepath);
 
 		/* 先加载mtl文件 */
 		const std::string mtl_filepath = filepath + ".mtl";
@@ -247,8 +244,9 @@ namespace Wuya
 		return model;
 	}
 
-	Model::Model(std::string name)
-		: m_DebugName(std::move(name))
+	Model::Model(std::string path)
+		: m_DebugName(ExtractFilename(path))
+		, m_Path(std::move(path))
 		, m_AABBMin(glm::vec3(std::numeric_limits<float>::max()))
 		, m_AABBMax(glm::vec3(-std::numeric_limits<float>::max()))
 	{
@@ -301,8 +299,8 @@ namespace Wuya
 		return nullptr;
 	}
 
-	SkeletonModel::SkeletonModel(const std::string& name)
-		: Model(name)
+	SkeletonModel::SkeletonModel(const std::string& path)
+		: Model(path)
 	{
 	}
 
