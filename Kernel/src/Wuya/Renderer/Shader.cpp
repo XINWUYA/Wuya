@@ -41,28 +41,4 @@ namespace Wuya
 			return nullptr;
 		}
 	}
-
-	/* 单例 */
-	ShaderLibrary& ShaderLibrary::Instance()
-	{
-		static ShaderLibrary instance;
-		return instance;
-	}
-
-	/* 从文件中加载Shader */
-	SharedPtr<Shader> ShaderLibrary::GetOrLoad(const std::string& filepath)
-	{
-		const auto key = ToID(filepath);
-		const auto iter = m_Shaders.find(key);
-
-		/* 不存在则从路径中加载 */
-		if (iter == m_Shaders.end())
-		{
-			auto shader = Shader::Create(filepath);
-			m_Shaders[key] = shader;
-			return shader;
-		}
-
-		return iter->second;
-	}
 }

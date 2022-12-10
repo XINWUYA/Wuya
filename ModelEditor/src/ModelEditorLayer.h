@@ -35,18 +35,22 @@ namespace Wuya
 
 		/* 更新模型 */
 		void UpdateModel();
-		/* 更新材质：根据材质参数设置材质 */
+		/* 更新材质：当用户修改时根据材质参数设置材质 */
 		void UpdateMaterial(const SharedPtr<Material>& material, const MaterialParams& material_params);
 
-		/* 编辑器相机 */
-		UniquePtr<EditorCamera> m_pEditorCamera{ nullptr };
-		/* 当前模型信息 */
-		UniquePtr<ModelInfo> m_pModelInfo{ nullptr };
-		/* 当前材质信息，这里每个子模型对应一个Material */
-		std::vector<SharedPtr<Material>> m_Materials{};
 		/* 默认场景 */
 		SharedPtr<Scene> m_pDefaultScene{ nullptr };
+		/* 编辑器相机 */
+		UniquePtr<EditorCamera> m_pEditorCamera{ nullptr };
 		/* 视口范围: x: width_min; y: height_min; z: width_max; w: height_max */
 		ViewportRegion m_ViewportRegion{};
+
+		/* 从文件中加载模型信息 */
+		UniquePtr<ModelInfo> m_pModelInfo{ nullptr };
+
+		/* 当前模型 */
+		SharedPtr<Model> m_pModel{ nullptr };
+		/* 当前模型对应的材质组，其中每个Material对应一个子模型 */
+		SharedPtr<MaterialGroup> m_pMaterialGroup{ nullptr };
 	};
 }

@@ -38,23 +38,5 @@ namespace Wuya
 		/* 文件路径 */
 		std::string m_Path{};
 	};
-
-	/* Shader库：
-	 * 单例类；
-	 * 用于管理Shader
-	 */
-	class ShaderLibrary
-	{
-	public:
-		/* 单例 */
-		static ShaderLibrary& Instance();
-
-		/* 从文件中加载Shader */
-		SharedPtr<Shader> GetOrLoad(const std::string& filepath);
-
-	private:
-		/* Shader名Hash到Shader的映射<NameHash, SharedPtr<Shader>> */
-		std::unordered_map<uint32_t, SharedPtr<Shader>> m_Shaders;
-	};
 }
 

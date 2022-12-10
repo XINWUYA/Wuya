@@ -35,13 +35,35 @@ namespace Wuya
 		}
 	}
 
+	enum class ParamType : uint8_t
+	{
+		Texture = 0,
+		Int,
+		Float,
+		Vec2,
+		Vec3,
+		Vec4,
+	};
+
+	/* 材质参数信息 */
+	struct MaterialParamInfo
+	{
+		ParamType	Type{}; /* 参数类型 */
+		std::string Name;   /* 参数名 */
+		std::any	Value;  /* 参数值, 对于Texture需特殊处理，其Value类型为std::pair<SharedPtr<Texture>, uint32_t> */
+
+		MaterialParamInfo() = default;
+		MaterialParamInfo(ParamType type, std::string name, std::any value)
+			: Type(type), Name(std::move(name)), Value(std::move(value))
+		{}
+	};
+
 	/*
 	 * 材质类
 	 */
 	class Material
 	{
-		using ParameterMap = std::unordered_map<std::string, std::any>;
-		using TextureMap = std::unordered_map<SharedPtr<Texture>, uint32_t>;
+		using ParameterMap = std::unordered_map<uint32_t, MaterialParamInfo>;
 
 	public:
 		Material() = default;
@@ -51,11 +73,10 @@ namespace Wuya
 		void SetShader(const SharedPtr<Shader>& shader) { m_pShader = shader; }
 		[[nodiscard]] const SharedPtr<Shader>& GetShader() const { return m_pShader; }
 		/* 设置参数 */
-		void SetParameters(const std::string& name, const std::any& param);
+		void SetParameters(ParamType type, const std::string& name, const std::any& param);
 		[[nodiscard]] const ParameterMap& GetAllParameters() const { return m_Parameters; }
 		/* 设置纹理 */
-		void SetTexture(const SharedPtr<Texture>& texture, uint32_t slot);
-		[[nodiscard]] const SharedPtr<Texture>& GetTextureBySlot(uint32_t slot) const;
+		void SetTexture(const std::string& name, const SharedPtr<Texture>& texture, uint32_t slot);
 		/* 设置光栅化状态 */
 		void SetRasterState(RenderRasterState state) { m_RasterState = state; }
 		[[nodiscard]] const RenderRasterState& GetRasterState() const { return m_RasterState; }
@@ -77,10 +98,8 @@ namespace Wuya
 	private:
 		/* Shader */
 		SharedPtr<Shader> m_pShader{ nullptr };
-		/* 材质所需的各种参数<Name, Vale> */
+		/* 材质所需的各种参数<ToID(Name), MaterialParamInfo> */
 		ParameterMap m_Parameters{};
-		/* 材质所需的各种纹理<Texture，Slot> */
-		TextureMap m_Textures{};
 		/* 光栅化状态配置 */
 		RenderRasterState m_RasterState{};
 
@@ -96,7 +115,7 @@ namespace Wuya
 	class MaterialGroup final
 	{
 	public:
-		MaterialGroup(std::string path);
+		MaterialGroup() = default;
 		~MaterialGroup() = default;
 
 		/* 添加一个Material */
@@ -104,12 +123,17 @@ namespace Wuya
 		/* 根据索引获取Material */
 		const SharedPtr<Material>& GetMaterialByIndex(int idx);
 		/* 获取组中所有材质 */
-		const std::vector<SharedPtr<Material>>& GetAllMaterials() const { return m_Materials; }
+		[[nodiscard]] const std::vector<SharedPtr<Material>>& GetAllMaterials() const { return m_Materials; }
+		/* 清空材质 */
+		void ClearAllMaterials() { m_Materials.clear(); }
+
+		/* 序列化 */
+		void Serializer(const std::string& path);
+		/* 反序列化 */
+		bool Deserializer(const std::string& path);
 
 	private:
-		/* 反序列化 */
-		bool Deserializer();
-
+		
 		/* 材质组路径 */
 		std::string m_Path{};
 		/* 材质列表 */

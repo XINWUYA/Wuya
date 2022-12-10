@@ -250,15 +250,15 @@ namespace Wuya
 		int32_t Height;	/* 高度值 */
 
 		/* 区域水平最大值和竖直最大值 */
-		uint32_t MaxX() const { return MinX + Width; }
-		uint32_t MaxY() const { return MinY + Height; }
+		[[nodiscard]] uint32_t MaxX() const { return MinX + Width; }
+		[[nodiscard]] uint32_t MaxY() const { return MinY + Height; }
 
 		/* 判等操作 */
-		bool operator==(const ViewportRegion& other) noexcept
+		bool operator==(const ViewportRegion& other) const noexcept
 		{
 			return MinX == other.MinX && MinY == other.MinY && Width == other.Width && Height == other.Height;
 		}
-		bool operator!=(const ViewportRegion& other) noexcept
+		bool operator!=(const ViewportRegion& other) const noexcept
 		{
 			return !(*this == other);
 		}

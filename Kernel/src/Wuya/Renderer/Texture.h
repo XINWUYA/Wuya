@@ -47,17 +47,20 @@ namespace Wuya
 		virtual void SetData(void* data, const PixelDesc& pixel_desc, uint32_t level = 0, 
 			uint32_t offset_x = 0, uint32_t offset_y = 0, uint32_t offset_z = 0) = 0;
 
+		/* 获取名称 */
+		[[nodiscard]] const std::string& GetDebugName() const { return m_DebugName; }
 		/* 获取纹理原始尺寸 */
-		uint32_t GetWidth() const	{ return m_TextureDesc.Width; }
-		uint32_t GetHeight() const	{ return m_TextureDesc.Height; }
+		[[nodiscard]] uint32_t GetWidth() const	{ return m_TextureDesc.Width; }
+		[[nodiscard]] uint32_t GetHeight() const	{ return m_TextureDesc.Height; }
+		/* 获取纹理加载配置 */
+		[[nodiscard]] const TextureLoadConfig& GetTextureLoadConfig() const { return m_TextureLoadConfig; }
 
 		/* 获取纹理所在路径 */
-		virtual const std::string& GetPath() const = 0;
-
+		[[nodiscard]] virtual const std::string& GetPath() const = 0;
 		/* 纹理ID */
-		virtual uint32_t GetTextureID() const = 0;
+		[[nodiscard]] virtual uint32_t GetTextureID() const = 0;
 		/* 纹理成功加载 */
-		virtual bool IsLoaded() const = 0;
+		[[nodiscard]] virtual bool IsLoaded() const = 0;
 
 		/* 重载operators */
 		virtual bool operator==(const Texture & other) const = 0;
@@ -76,6 +79,8 @@ namespace Wuya
 		std::string m_DebugName{ "Unnamed Texture" };
 		/* 纹理描述 */
 		TextureDesc m_TextureDesc{};
+		/* 加载配置 */
+		TextureLoadConfig m_TextureLoadConfig{};
 	};
 }
 

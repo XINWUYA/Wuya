@@ -64,6 +64,20 @@ namespace Wuya
 		return path.substr(last_dot + 1);
 	}
 
+	/* Replace file suffix
+	 * Examples:
+	 * path: "assets/scenes/test.scn", suffix: "bin"
+	 * return: "assets/scenes/test.bin"
+	 */
+	std::string ReplaceFileSuffix(const std::string& path, const std::string& suffix)
+	{
+		const auto last_dot = path.rfind('.');
+		return path.substr(0, last_dot) + suffix;
+	}
+
+	/* string to Id
+	 * use xxHash
+	 */
 	uint32_t ToID(const std::string& value)
 	{
 		return XXH32(value.c_str(), value.size(), 0);

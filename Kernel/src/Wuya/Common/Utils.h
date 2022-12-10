@@ -40,12 +40,25 @@ namespace Wuya
 	 */
 	std::string ExtractFileSuffix(const std::string& path);
 
+	/* Replace file suffix
+	 * Examples:
+	 * path: "assets/scenes/test.scn", suffix: "bin"
+	 * return: "assets/scenes/test.bin"
+	 */
+	std::string ReplaceFileSuffix(const std::string& path, const std::string& suffix);
+
 	/* split string */
 	inline std::vector<std::string> Split(const std::string& value, const std::string& delimiter)
 	{
 		const std::regex regex(delimiter);
 		std::vector<std::string> result(std::sregex_token_iterator(value.begin(), value.end(), regex, -1), std::sregex_token_iterator());
 		return result;
+	}
+
+	/* vec2 to string */
+	inline std::string ToString(const glm::vec2& value)
+	{
+		return std::to_string(value.x) + " " + std::to_string(value.y);
 	}
 
 	/* vec3 to string */
@@ -58,6 +71,18 @@ namespace Wuya
 	inline std::string ToString(const glm::vec4& value)
 	{
 		return std::to_string(value.x) + " " + std::to_string(value.y) + " " + std::to_string(value.z) + " " + std::to_string(value.w);
+	}
+
+	/* string to vec2
+	 * not very safe, need make sure the value is valid
+	 */
+	inline glm::vec2 ToVec2(const std::string& value)
+	{
+		if (value.empty())
+			return { 0.0f, 0.0f };
+
+		const std::vector<std::string> split_result = Split(value, " ");
+		return { std::stof(split_result[0]), std::stof(split_result[1]) };
 	}
 
 	/* string to vec3

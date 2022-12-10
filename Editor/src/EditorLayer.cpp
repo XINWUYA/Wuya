@@ -30,7 +30,7 @@ namespace Wuya
 		//	auto material = CreateSharedPtr<Material>();
 		//	const auto albedo_texture = Texture::Create("assets/textures/container.jpg");
 		//	material->SetTexture(albedo_texture, 0);
-		//	const auto shader = ShaderLibrary::Instance().GetOrLoad("assets/shaders/simple.glsl");
+		//	const auto shader = ShaderAssetManager::Instance().GetOrLoad("assets/shaders/simple.glsl");
 		//	material->SetShader(shader);
 
 		//	Entity entity = m_pMainScene->CreateEntity("Cube");

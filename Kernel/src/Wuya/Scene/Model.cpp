@@ -179,7 +179,8 @@ namespace Wuya
 
 		/* 先加载mtl文件 */
 		const std::string mtl_filepath = filepath + ".mtl";
-		MaterialGroup material_group(mtl_filepath);
+		MaterialGroup material_group;
+		material_group.Deserializer(mtl_filepath);
 
 		/* 直接从mesh文件加载 */
 		std::ifstream in_mesh_file(mesh_filepath, std::ios::in | std::ios::binary);

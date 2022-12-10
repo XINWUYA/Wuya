@@ -8,7 +8,7 @@ namespace Wuya
 	{
 		if (filepath.empty())
 		{
-			CORE_LOG_ERROR("Model filepath is empty.");
+			EDITOR_LOG_ERROR("Model filepath is empty.");
 		}
 
 		m_Path = filepath;
@@ -19,19 +19,19 @@ namespace Wuya
 		bool ret = tinyobj::LoadObj(&m_Attributes, &m_Shapes, &m_Materials, &warn, &err, filepath.c_str(), basedir.c_str());
 
 		if (!warn.empty())
-			CORE_LOG_WARN("Load Obj Warning: {}.", warn);
+			EDITOR_LOG_WARN("Load Obj Warning: {}.", warn);
 
 		if (!err.empty())
-			CORE_LOG_ERROR("Load Obj Error: {}.", err);
+			EDITOR_LOG_ERROR("Load Obj Error: {}.", err);
 
 #if WUYA_DEBUG
 		/* 打印模型信息 */
-		CORE_LOG_DEBUG("Loading Obj: {}", filepath);
-		CORE_LOG_DEBUG("Vertices  : {}", m_Attributes.vertices.size() / 3);
-		CORE_LOG_DEBUG("Normals   : {}", m_Attributes.normals.size() / 3);
-		CORE_LOG_DEBUG("Texcoords : {}", m_Attributes.texcoords.size() / 2);
-		CORE_LOG_DEBUG("Shapes    : {}", m_Shapes.size());
-		CORE_LOG_DEBUG("Materials : {}", m_Materials.size());
+		EDITOR_LOG_DEBUG("Loading Obj: {}", filepath);
+		EDITOR_LOG_DEBUG("Vertices  : {}", m_Attributes.vertices.size() / 3);
+		EDITOR_LOG_DEBUG("Normals   : {}", m_Attributes.normals.size() / 3);
+		EDITOR_LOG_DEBUG("Texcoords : {}", m_Attributes.texcoords.size() / 2);
+		EDITOR_LOG_DEBUG("Shapes    : {}", m_Shapes.size());
+		EDITOR_LOG_DEBUG("Materials : {}", m_Materials.size());
 #endif
 
 		/* 每个Shape对应一个MeshSegment */
@@ -171,8 +171,8 @@ namespace Wuya
 				params.AmbientTexPath = material_data.ambient_texname.empty() ? "" : basedir + material_data.ambient_texname;
 				params.Ambient = glm::vec3(material_data.ambient[0], material_data.ambient[1], material_data.ambient[2]);
 				/* Diffuse/Albedo */
-				params.DiffuseTexPath = material_data.diffuse_texname.empty() ? "" : basedir + material_data.diffuse_texname,
-				params.Diffuse = glm::vec3(material_data.diffuse[0], material_data.diffuse[1], material_data.diffuse[2]),
+				params.DiffuseTexPath = material_data.diffuse_texname.empty() ? "" : basedir + material_data.diffuse_texname;
+				params.Diffuse = glm::vec3(material_data.diffuse[0], material_data.diffuse[1], material_data.diffuse[2]);
 				/* Specular */
 				params.SpecularTexPath = material_data.specular_texname.empty() ? "" : basedir + material_data.specular_texname;
 				params.Specular = glm::vec3(material_data.specular[0], material_data.specular[1], material_data.specular[2]);
@@ -205,80 +205,6 @@ namespace Wuya
 			m_AABB.second.x = std::max(m_AABB.second.x, aabb_max.x);
 			m_AABB.second.y = std::max(m_AABB.second.y, aabb_max.y);
 			m_AABB.second.z = std::max(m_AABB.second.z, aabb_max.z);
-
-			/* Material */
-			/*SharedPtr<Material> material = CreateSharedPtr<Material>();
-			material->SetShader(ShaderLibrary::Instance().GetOrLoad("assets/shaders/default.glsl"));*/
-
-			//int shape_material_id = shape_data.mesh.material_ids[0];
-			//if (shape_material_id >= 0 && shape_material_id < m_Materials.size())
-			//{
-			//	const auto& material_data = m_Materials[shape_material_id];
-			//	
-			//	{
-			//		/* Ambient */
-			//		material_data.ambient_texname.empty()	? "" : basedir + material_data.ambient_texname,
-			//		glm::vec3(material_data.ambient[0], material_data.ambient[1], material_data.ambient[2]),
-			//		/* Diffuse/Albedo */
-			//		material_data.diffuse_texname.empty()	? "" : basedir + material_data.diffuse_texname,
-			//		glm::vec3(material_data.diffuse[0], material_data.diffuse[1], material_data.diffuse[2]),
-
-			//		/* Specular */
-			//		material_data.specular_texname.empty()	? "" : basedir + material_data.specular_texname,
-			//		glm::vec3(material_data.specular[0], material_data.specular[1], material_data.specular[2]),
-
-			//		/* NormalTex */
-			//		material_data.bump_texname.empty()		? "" : basedir + material_data.bump_texname,
-
-			//		/* Roughness */
-			//		material_data.roughness_texname.empty() ? "" : basedir + material_data.roughness_texname,	
-			//		material_data.roughness,
-
-			//		/* Metallic */
-			//		material_data.metallic_texname.empty()	? "" : basedir + material_data.metallic_texname,	
-			//		material_data.metallic,
-
-			//		/* Emission */
-			//		material_data.emissive_texname.empty()	? "" : basedir + material_data.emissive_texname,
-			//		glm::vec3(material_data.emission[0], material_data.emission[1], material_data.emission[2]),
-
-			//		/* ClearCoat */
-			//		material_data.clearcoat_roughness,
-			//		material_data.clearcoat_thickness,
-
-			//		/* Others */
-			//		glm::vec3(material_data.transmittance[0], material_data.transmittance[1], material_data.transmittance[2]),
-			//		material_data.ior,
-			//	};
-			//	m_MaterialParams.emplace_back(param);
-			//	
-			//	//constexpr TextureLoadConfig texture_load_config = { false };
-			//	//if (!param.DiffuseTexPath.empty()) /* AlbedoTex */
-			//	//	material->SetTexture(Texture::Create(param.DiffuseTexPath, texture_load_config), TextureSlot::Albedo);
-			//	//if (!param.SpecularTexPath.empty()) /* SpecularTex */
-			//	//	material->SetTexture(Texture::Create(param.SpecularTexPath, texture_load_config), TextureSlot::Specular);
-			//	//if (!param.NormalTexPath.empty()) /* NormalTex */
-			//	//	material->SetTexture(Texture::Create(param.NormalTexPath, texture_load_config), TextureSlot::Normal);
-			//	//if (!param.RoughnessTexPath.empty()) /* RoughnessTex */
-			//	//	material->SetTexture(Texture::Create(param.RoughnessTexPath, texture_load_config), TextureSlot::Roughness);
-			//	//if (!param.MetallicTexPath.empty()) /* MetallicTex */
-			//	//	material->SetTexture(Texture::Create(param.MetallicTexPath, texture_load_config), TextureSlot::Metallic);
-			//	//if (!param.EmissiveTexPath.empty()) /* EmissiveTex */
-			//	//	material->SetTexture(Texture::Create(param.EmissiveTexPath, texture_load_config), TextureSlot::Emissive);
-
-			//	//material->SetParameters("Ambient", param.Ambient);
-			//	//material->SetParameters("Diffuse", param.Diffuse);
-			//	//material->SetParameters("Specular", param.Specular);
-			//	//material->SetParameters("Emission", param.Emission);
-			//	//material->SetParameters("Metallic", param.Metallic);
-			//	//material->SetParameters("Roughness", param.Roughness);
-			//}
-
-			///* 创建MeshSegment */
-			//auto mesh_segment = CreateSharedPtr<MeshSegment>(shape_data.name, vertex_array, material);
-			//mesh_segment->SetAABB(aabb_min, aabb_max);
-			//m_MeshSegments.emplace_back(mesh_segment);
-
 		}
 	}
 

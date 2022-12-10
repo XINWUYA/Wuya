@@ -16,9 +16,10 @@ namespace Wuya
 		m_pEditorCamera = CreateUniquePtr<EditorCamera>();
 		m_pDefaultScene = CreateSharedPtr<Scene>();
 		m_pModelInfo = CreateUniquePtr<ModelInfo>();
+		m_pMaterialGroup = CreateSharedPtr<MaterialGroup>();
 
-		/* 默认在场景中增加一盏方向光 */
-		Entity entity = m_pDefaultScene->CreateEntity("Light");
+		/* 默认在场景中增加一盏方向光，光源颜色为白色 */
+		Entity entity = m_pDefaultScene->CreateEntity("DirectionalLight");
 		auto& light_component = entity.AddComponent<LightComponent>(LightType::Directional);
 		light_component.Light->SetColor(glm::vec4(1, 1, 1, 1));
 	}
@@ -37,10 +38,6 @@ namespace Wuya
 		Renderer::SetClearColor(glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
 		Renderer::Clear();
 
-		if (m_ViewportRegion.Width > 0 && m_ViewportRegion.Height > 0/* && (desc.Width != m_ViewportRegion.Width() || desc.Height != m_ViewportRegion.Height())*/)
-		{
-			m_pEditorCamera->SetViewportRegion({ 0,0,m_ViewportRegion.Width, m_ViewportRegion.Height });
-		}
 		m_pEditorCamera->OnUpdate(delta_time);
 		m_pDefaultScene->OnUpdateEditor(m_pEditorCamera.get(), delta_time);
 	}
@@ -56,8 +53,8 @@ namespace Wuya
 		/* 显示主场景视口 */
 		ShowSceneViewportUI();
 
-		bool open = true;
-		ImGui::ShowDemoWindow(&open);
+		/*bool open = true;
+		ImGui::ShowDemoWindow(&open);*/
 	}
 
 	void ModelEditorLayer::OnEvent(IEvent* event)
@@ -194,6 +191,8 @@ namespace Wuya
 			m_ViewportRegion.MinY = viewport_region_min.y + viewport_offset.y;
 			m_ViewportRegion.Height = viewport_region_max.y - viewport_region_min.x;
 
+			m_pEditorCamera->SetViewportRegion({ 0,0,m_ViewportRegion.Width, m_ViewportRegion.Height });
+
 			///* 若当前ImGui窗口不是主窗口，应阻塞事件传递 */
 			//m_IsViewportFocused = ImGui::IsWindowFocused();
 			//m_IsViewportHovered = ImGui::IsWindowHovered();
@@ -267,7 +266,7 @@ namespace Wuya
 					for (size_t i = 0; i < m_pModelInfo->m_SubModelInfos.size(); ++i)
 					{
 						auto& sub_model_info = m_pModelInfo->m_SubModelInfos[i];
-						auto& material = m_Materials[i];
+						auto& material = m_pMaterialGroup->GetMaterialByIndex(i);
 						ImGui::Separator();
 
 						if (ImGui::TreeNode(sub_model_info.Name.empty() ? "Unnamed" : sub_model_info.Name.c_str()))
@@ -320,7 +319,7 @@ namespace Wuya
 											const wchar_t* path = (const wchar_t*)payload->Data;
 											const std::filesystem::path texture_path = path;
 
-											material->SetTexture(TextureAssetManager::Instance().GetOrCreateTexture(texture_path.string(), load_config), TextureSlot::Ambient);
+											material->SetTexture("", TextureAssetManager::Instance().GetOrCreateTexture(texture_path.string(), load_config), TextureSlot::Ambient);
 											sub_model_info.MaterialParams.AmbientTexPath = texture_path.string();
 										}
 										ImGui::EndDragDropTarget();
@@ -379,7 +378,7 @@ namespace Wuya
 											const wchar_t* path = (const wchar_t*)payload->Data;
 											const std::filesystem::path texture_path = path;
 
-											material->SetTexture(TextureAssetManager::Instance().GetOrCreateTexture(texture_path.string(), load_config), TextureSlot::Albedo);
+											material->SetTexture("u_AlbedoTexture", TextureAssetManager::Instance().GetOrCreateTexture(texture_path.string(), load_config), TextureSlot::Albedo);
 											sub_model_info.MaterialParams.DiffuseTexPath = texture_path.string();
 										}
 										ImGui::EndDragDropTarget();
@@ -454,10 +453,9 @@ namespace Wuya
 			m_pModelInfo->LoadFromObj(file_path);
 
 			/* 初始化材质 */
-			m_Materials.clear();
-			m_Materials.resize(m_pModelInfo->m_SubModelInfos.size());
+			m_pMaterialGroup->ClearAllMaterials();
 			for (size_t i = 0; i < m_pModelInfo->m_SubModelInfos.size(); ++i)
-				m_Materials[i] = Material::Create(ShaderLibrary::Instance().GetOrLoad("assets/shaders/default.glsl"));
+				m_pMaterialGroup->EmplaceMaterial(Material::Create(ShaderAssetManager::Instance().GetOrLoad("assets/shaders/default.glsl")));
 
 			/* 更新场景模型信息 */
 			UpdateModel();
@@ -467,7 +465,16 @@ namespace Wuya
 	/* 导出模型 */
 	void ModelEditorLayer::ExportMeshAndMtl()
 	{
+		if (!m_pModelInfo || !m_pModel)
+			return;
 
+		const auto& model_path = m_pModelInfo->m_Path;
+		const auto& mesh_path = model_path + ".mesh";
+		//m_pModel->
+
+		const auto& material_path = model_path + ".mtl";
+		m_pMaterialGroup->Serializer(material_path);
+		m_pMaterialGroup->Deserializer(material_path);
 	}
 
 	/* 更新模型 */
@@ -477,11 +484,11 @@ namespace Wuya
 		m_pDefaultScene->DestroyTargetEntities<ModelComponent>();
 
 		/* 新建模型 */
-		auto model = CreateSharedPtr<Model>(m_pModelInfo->m_Path);
+		m_pModel = CreateSharedPtr<Model>(m_pModelInfo->m_Path);
 		for (size_t i = 0; i < m_pModelInfo->m_SubModelInfos.size(); ++i)
 		{
 			auto& sub_model_info = m_pModelInfo->m_SubModelInfos[i];
-			auto& material = m_Materials[i];
+			auto& material = m_pMaterialGroup->GetMaterialByIndex(i);
 
 			/* 更新材质 */
 			UpdateMaterial(material, sub_model_info.MaterialParams);
@@ -489,15 +496,16 @@ namespace Wuya
 			SharedPtr<MeshSegment> mesh_segment = CreateSharedPtr<MeshSegment>(sub_model_info.Name, sub_model_info.VertexArray, material);
 			mesh_segment->SetAABB(sub_model_info.AABB.first, sub_model_info.AABB.second);
 
-			model->AddMeshSegment(mesh_segment);
+			m_pModel->AddMeshSegment(mesh_segment);
 		}
 
 		/* 将模型添加到场景中 */
-		Entity entity = m_pDefaultScene->CreateEntity(model->GetDebugName());
+		Entity entity = m_pDefaultScene->CreateEntity(m_pModel->GetDebugName());
 		auto& mesh_component = entity.AddComponent<ModelComponent>();
-		mesh_component.Model = model;
+		mesh_component.Model = m_pModel;
+
 		/* todo: 根据模型大小自适应相机距离 */
-		const glm::vec3 center = (model->GetAABBMin() + model->GetAABBMax()) * 0.5f;
+		const glm::vec3 center = (m_pModel->GetAABBMin() + m_pModel->GetAABBMax()) * 0.5f;
 		auto& transform_component = entity.GetComponent<TransformComponent>();
 		transform_component.Position = -center;
 		transform_component.Scale = glm::vec3(0.5f);
@@ -511,53 +519,53 @@ namespace Wuya
 		{
 			/* Ambient */
 			if (!material_params.AmbientTexPath.empty())
-				material->SetTexture(TextureAssetManager::Instance().GetOrCreateTexture(material_params.AmbientTexPath, load_config), TextureSlot::Ambient);
+				material->SetTexture("u_AmbientTexture", TextureAssetManager::Instance().GetOrCreateTexture(material_params.AmbientTexPath, load_config), TextureSlot::Ambient);
 			else
-				material->SetParameters("Ambient", material_params.Ambient);
+				material->SetParameters(ParamType::Vec3, "Ambient", material_params.Ambient);
 
 			/* Diffuse/Albedo */
 			if (!material_params.DiffuseTexPath.empty())
-				material->SetTexture(TextureAssetManager::Instance().GetOrCreateTexture(material_params.DiffuseTexPath, load_config), TextureSlot::Albedo);
+				material->SetTexture("u_AlbedoTexture", TextureAssetManager::Instance().GetOrCreateTexture(material_params.DiffuseTexPath, load_config), TextureSlot::Albedo);
 			else
-				material->SetParameters("Diffuse", material_params.Diffuse);
+				material->SetParameters(ParamType::Vec3, "Diffuse", material_params.Diffuse);
 
 			/* Specular */
 			if (!material_params.SpecularTexPath.empty())
-				material->SetTexture(TextureAssetManager::Instance().GetOrCreateTexture(material_params.SpecularTexPath, load_config), TextureSlot::Specular);
+				material->SetTexture("u_SpecularTexture", TextureAssetManager::Instance().GetOrCreateTexture(material_params.SpecularTexPath, load_config), TextureSlot::Specular);
 			else
-				material->SetParameters("Specular", material_params.Specular);
+				material->SetParameters(ParamType::Vec3, "Specular", material_params.Specular);
 
 			/* Normal, todo: 处理Bump和Displacement */
 			if (!material_params.BumpTexPath.empty())
-				material->SetTexture(TextureAssetManager::Instance().GetOrCreateTexture(material_params.BumpTexPath, load_config), TextureSlot::Normal);
+				material->SetTexture("u_NormalTexture", TextureAssetManager::Instance().GetOrCreateTexture(material_params.BumpTexPath, load_config), TextureSlot::Normal);
 			if (!material_params.DisplacementTexPath.empty())
-				material->SetTexture(TextureAssetManager::Instance().GetOrCreateTexture(material_params.DisplacementTexPath, load_config), TextureSlot::Normal);			
+				material->SetTexture("u_NormalTexture", TextureAssetManager::Instance().GetOrCreateTexture(material_params.DisplacementTexPath, load_config), TextureSlot::Normal);
 
 			/* Roughness */
 			if (!material_params.RoughnessTexPath.empty())
-				material->SetTexture(TextureAssetManager::Instance().GetOrCreateTexture(material_params.RoughnessTexPath, load_config), TextureSlot::Roughness);
+				material->SetTexture("u_RoughnessTexture", TextureAssetManager::Instance().GetOrCreateTexture(material_params.RoughnessTexPath, load_config), TextureSlot::Roughness);
 			else
-				material->SetParameters("Roughness", material_params.Roughness);
+				material->SetParameters(ParamType::Float, "Roughness", material_params.Roughness);
 
 			/* Metallic */
 			if (!material_params.MetallicTexPath.empty())
-				material->SetTexture(TextureAssetManager::Instance().GetOrCreateTexture(material_params.MetallicTexPath, load_config), TextureSlot::Metallic);
+				material->SetTexture("u_MetallicTexture", TextureAssetManager::Instance().GetOrCreateTexture(material_params.MetallicTexPath, load_config), TextureSlot::Metallic);
 			else
-				material->SetParameters("Metallic", material_params.Metallic);
+				material->SetParameters(ParamType::Float, "Metallic", material_params.Metallic);
 
 			/* Emission */
 			if (!material_params.EmissionTexPath.empty())
-				material->SetTexture(TextureAssetManager::Instance().GetOrCreateTexture(material_params.EmissionTexPath, load_config), TextureSlot::Emissive);
+				material->SetTexture("u_EmissiveTexture", TextureAssetManager::Instance().GetOrCreateTexture(material_params.EmissionTexPath, load_config), TextureSlot::Emissive);
 			else
-				material->SetParameters("Emission", material_params.Emission);
+				material->SetParameters(ParamType::Vec3, "Emission", material_params.Emission);
 
 			/* ClearCoat */
-			material->SetParameters("ClearCoatRoughness", material_params.ClearCoatRoughness);
-			material->SetParameters("ClearCoatThickness", material_params.ClearCoatThickness);
+			material->SetParameters(ParamType::Float, "ClearCoatRoughness", material_params.ClearCoatRoughness);
+			material->SetParameters(ParamType::Float, "ClearCoatThickness", material_params.ClearCoatThickness);
 
 			/* Others */
-			material->SetParameters("Transmittance", material_params.Transmittance);
-			material->SetParameters("IOR", material_params.IOR);
+			material->SetParameters(ParamType::Vec3, "Transmittance", material_params.Transmittance);
+			material->SetParameters(ParamType::Float, "IOR", material_params.IOR);
 		}
 	}
 }

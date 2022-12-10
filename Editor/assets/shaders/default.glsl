@@ -62,6 +62,7 @@ layout(binding = 2) uniform sampler2D u_NormalTexture;
 layout(binding = 3) uniform sampler2D u_RoughnessTexture;
 layout(binding = 4) uniform sampler2D u_MetallicTexture;
 layout(binding = 5) uniform sampler2D u_EmissiveTexture;
+layout(binding = 6) uniform sampler2D u_AmbientTexture;
 
 
 void main()

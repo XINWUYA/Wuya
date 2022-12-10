@@ -6,6 +6,7 @@
 #include "Texture.h"
 #include "VertexArray.h"
 #include "UniformBuffer.h"
+#include "Wuya/Application/AssetManager.h"
 #include "Wuya/Scene/Components.h"
 #include "Wuya/Scene/Material.h"
 
@@ -104,7 +105,7 @@ namespace Wuya
 		delete[] quad_indices;
 
 		// Shader
-		s_RenderData2D.pShader = ShaderLibrary::Instance().GetOrLoad("assets/shaders/texture.glsl");
+		s_RenderData2D.pShader = ShaderAssetManager::Instance().GetOrLoad("assets/shaders/texture.glsl");
 
 		// Default texture
 		s_RenderData2D.TextureSlots[0] = Texture::White();
