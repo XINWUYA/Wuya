@@ -10,16 +10,6 @@ namespace Wuya
 	{
 	}
 
-	/* 设置纹理加载配置 */
-	void Texture::SetTextureLoadConfig(const TextureLoadConfig& load_config)
-	{
-		if (load_config == m_TextureLoadConfig)
-			return;
-
-		m_TextureLoadConfig = load_config;
-		m_IsDirty = true;
-	}
-
 	/* 创建纹理 */
 	SharedPtr<Texture> Texture::Create(const std::string& name, const TextureDesc& texture_desc)
 	{

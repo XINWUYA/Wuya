@@ -155,7 +155,6 @@ namespace Wuya
 
 		m_DebugName = ExtractFileBaseName(path);
 		m_TextureLoadConfig = load_config;
-		m_IsDirty = false;
 	}
 
 	OpenGLTexture::~OpenGLTexture()

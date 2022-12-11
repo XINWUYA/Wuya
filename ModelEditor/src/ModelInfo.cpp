@@ -3,6 +3,8 @@
 
 namespace Wuya
 {
+	extern const std::filesystem::path g_AssetPath;
+
 	/* 加载Obj模型信息 */
 	void ModelInfo::LoadFromObj(const std::string& filepath)
 	{
@@ -162,6 +164,7 @@ namespace Wuya
 			sub_model_info->VertexArray->AddVertexBuffer(vertex_buffer);
 
 			/* MaterialParams */
+			std::filesystem::path relative_dir = std::filesystem::relative(basedir, g_AssetPath);
 			auto& params = sub_model_info->MaterialParams;
 			int shape_material_id = shape_data.mesh.material_ids[0];
 			if (shape_material_id >= 0 && shape_material_id < m_Materials.size())
@@ -169,25 +172,25 @@ namespace Wuya
 				const auto& material_data = m_Materials[shape_material_id];
 
 				/* Ambient */
-				params.AmbientTexPath = material_data.ambient_texname.empty() ? "" : basedir + material_data.ambient_texname;
+				params.AmbientTexPath = material_data.ambient_texname.empty() ? "" : (relative_dir / material_data.ambient_texname).generic_string();
 				params.Ambient = glm::vec3(material_data.ambient[0], material_data.ambient[1], material_data.ambient[2]);
 				/* Diffuse/Albedo */
-				params.DiffuseTexPath = material_data.diffuse_texname.empty() ? "" : basedir + material_data.diffuse_texname;
+				params.DiffuseTexPath = material_data.diffuse_texname.empty() ? "" : (relative_dir / material_data.diffuse_texname).generic_string();
 				params.Diffuse = glm::vec3(material_data.diffuse[0], material_data.diffuse[1], material_data.diffuse[2]);
 				/* Specular */
-				params.SpecularTexPath = material_data.specular_texname.empty() ? "" : basedir + material_data.specular_texname;
+				params.SpecularTexPath = material_data.specular_texname.empty() ? "" : (relative_dir / material_data.specular_texname).generic_string();
 				params.Specular = glm::vec3(material_data.specular[0], material_data.specular[1], material_data.specular[2]);
 				/* NormalTex */
-				params.BumpTexPath = material_data.bump_texname.empty() ? "" : basedir + material_data.bump_texname;
-				params.DisplacementTexPath = material_data.displacement_texname.empty() ? "" : basedir + material_data.displacement_texname;
+				params.BumpTexPath = material_data.bump_texname.empty() ? "" : (relative_dir / material_data.bump_texname).generic_string();
+				params.DisplacementTexPath = material_data.displacement_texname.empty() ? "" : (relative_dir / material_data.displacement_texname).generic_string();
 				/* Roughness */
-				params.RoughnessTexPath = material_data.roughness_texname.empty() ? "" : basedir + material_data.roughness_texname;
+				params.RoughnessTexPath = material_data.roughness_texname.empty() ? "" : (relative_dir / material_data.roughness_texname).generic_string();
 				params.Roughness = material_data.roughness;
 				/* Metallic */
-				params.MetallicTexPath = material_data.metallic_texname.empty() ? "" : basedir + material_data.metallic_texname;
+				params.MetallicTexPath = material_data.metallic_texname.empty() ? "" : (relative_dir / material_data.metallic_texname).generic_string();
 				params.Metallic = material_data.metallic;
 				/* Emission */
-				params.EmissionTexPath = material_data.emissive_texname.empty() ? "" : basedir + material_data.emissive_texname;
+				params.EmissionTexPath = material_data.emissive_texname.empty() ? "" : (relative_dir / material_data.emissive_texname).generic_string();
 				params.Emission = glm::vec3(material_data.emission[0], material_data.emission[1], material_data.emission[2]);
 				/* ClearCoat */
 				params.ClearCoatRoughness = material_data.clearcoat_roughness;

@@ -34,6 +34,11 @@ namespace Wuya
 		{
 			return IsFlipV == load_config.IsFlipV && IsGenMips == load_config.IsGenMips && SamplerType == load_config.SamplerType;
 		}
+
+		bool operator!=(const TextureLoadConfig& load_config) const
+		{
+			return !(*this == load_config);
+		}
 	};
 
 
@@ -57,11 +62,8 @@ namespace Wuya
 		/* 获取纹理原始尺寸 */
 		[[nodiscard]] uint32_t GetWidth() const	{ return m_TextureDesc.Width; }
 		[[nodiscard]] uint32_t GetHeight() const	{ return m_TextureDesc.Height; }
-		/* 设置纹理加载配置 */
-		void SetTextureLoadConfig(const TextureLoadConfig& load_config);
+		/* 获取纹理加载配置 */
 		[[nodiscard]] const TextureLoadConfig& GetTextureLoadConfig() const { return m_TextureLoadConfig; }
-		/* 是否需要重新加载 */
-		[[nodiscard]] bool IsDirty() const { return m_IsDirty; }
 
 		/* 获取纹理所在路径 */
 		[[nodiscard]] virtual const std::string& GetPath() const = 0;
@@ -89,8 +91,6 @@ namespace Wuya
 		TextureDesc m_TextureDesc{};
 		/* 加载配置 */
 		TextureLoadConfig m_TextureLoadConfig{};
-		/* 需要重新加载 */
-		bool m_IsDirty{ false };
 	};
 }
 

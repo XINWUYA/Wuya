@@ -139,10 +139,7 @@ namespace Wuya
 		m_Path = path;
 
 		ASSERT(!m_Path.empty());
-
-		/* 材质文件所在路径 */
-		std::filesystem::path out_mtl_path(m_Path);
-
+		
 		/* 写入材质信息 */
 		auto* out_mtl_file = new tinyxml2::XMLDocument();
 		out_mtl_file->InsertEndChild(out_mtl_file->NewDeclaration());
@@ -177,12 +174,8 @@ namespace Wuya
 						auto texture_doc = param_doc->InsertNewChildElement("Texture");
 						const auto texture_info = std::any_cast<std::pair<SharedPtr<Texture>, uint32_t>>(param_info.Value);
 						auto& texture = texture_info.first;
-
-						std::filesystem::path texture_path(texture->GetPath()), mtl_path(out_mtl_path);
-						texture_path = std::filesystem::absolute(texture_path);
-						mtl_path = std::filesystem::absolute(mtl_path);
-						std::filesystem::path relative_path = std::filesystem::relative(texture_path, mtl_path.parent_path()); /* 相对材质的路径 */
-						texture_doc->SetAttribute("Path", relative_path.generic_string().c_str());
+						
+						texture_doc->SetAttribute("Path", texture->GetPath().c_str());
 						texture_doc->SetAttribute("Slot", texture_info.second);
 
 						auto load_config_doc = texture_doc->InsertNewChildElement("LoadConfig");
@@ -238,11 +231,7 @@ namespace Wuya
 		PROFILE_FUNCTION();
 
 		m_Path = path;
-
 		ASSERT(!m_Path.empty());
-
-		/* 材质文件所在路径 */
-		std::filesystem::path in_mtl_path(m_Path);
 
 		/* 读取材质信息 */
 		auto* in_mtl_file = new tinyxml2::XMLDocument();
@@ -286,9 +275,8 @@ namespace Wuya
 						load_config.IsFlipV = load_config_doc->BoolAttribute("IsFlipV");
 						load_config.IsGenMips = load_config_doc->BoolAttribute("IsGenMips");
 						load_config.SamplerType = static_cast<SamplerType>(load_config_doc->IntAttribute("SamplerType"));
-
-						auto texture_absolute_path = in_mtl_path.parent_path() / texture_path;
-						auto texture = TextureAssetManager::Instance().GetOrCreateTexture(texture_absolute_path.generic_string(), load_config);
+						
+						auto texture = TextureAssetManager::Instance().GetOrCreateTexture(texture_path, load_config);
 						material->SetTexture(param_name, texture, slot);
 					}
 					break;

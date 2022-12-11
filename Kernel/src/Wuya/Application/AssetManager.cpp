@@ -52,7 +52,7 @@ namespace Wuya
 		if (iter != m_TextureAssetMap.end())
 		{
 			/* ÅÐ¶ÏLoadConfigÊÇ·ñ±»ÐÞ¸Ä */
-			if (!iter->second->IsDirty())
+			if (load_config == iter->second->GetTextureLoadConfig())
 				return iter->second;
 		}
 

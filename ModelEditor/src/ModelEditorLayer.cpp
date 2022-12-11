@@ -367,15 +367,15 @@ namespace Wuya
 									case ParamType::Texture:
 										{
 											auto texture_info = std::any_cast<std::pair<SharedPtr<Texture>, uint32_t>>(param_info.Value);
-											auto load_config = texture_info.first->GetTextureLoadConfig();
+											auto& texture = texture_info.first;
+											auto load_config = texture->GetTextureLoadConfig();
 
 											/* Show texture image */
 											ImGui::PushID(param_info.Name.c_str());
 											ImGui::Columns(2);
 
 											ImGui::SetColumnWidth(0, 100);
-											const auto& show_texture = TextureAssetManager::Instance().GetOrCreateTexture(texture_info.first ? texture_info.first->GetPath() : "assets/textures/default_texture.png", load_config);
-											ImGui::ImageButton((ImTextureID)show_texture->GetTextureID(), ImVec2(80, 80), ImVec2(0, 1), ImVec2(1, 0), 0);
+											ImGui::ImageButton((ImTextureID)texture->GetTextureID(), ImVec2(80, 80), ImVec2(0, 1), ImVec2(1, 0), 0);
 											if (ImGui::BeginDragDropTarget())
 											{
 												if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("RESOURCE_BROWSER_ITEM"))
@@ -383,7 +383,7 @@ namespace Wuya
 													const wchar_t* path = (const wchar_t*)payload->Data;
 													const std::filesystem::path texture_path = path;
 
-													material->SetTexture(param_info.Name, TextureAssetManager::Instance().GetOrCreateTexture(texture_path.string(), load_config), texture_info.second);
+													material->SetTexture(param_info.Name, TextureAssetManager::Instance().GetOrCreateTexture((g_AssetPath / texture_path).generic_string(), load_config), texture_info.second);
 													sub_model_info->MaterialParams.AmbientTexPath = texture_path.string();
 												}
 												ImGui::EndDragDropTarget();
@@ -393,18 +393,24 @@ namespace Wuya
 											if (ImGui::IsItemHovered())
 											{
 												ImGui::BeginTooltip();
-												ImGui::Image((ImTextureID)show_texture->GetTextureID(), ImVec2(240, 240), ImVec2(0, 1), ImVec2(1, 0));
+												ImGui::Image((ImTextureID)texture->GetTextureID(), ImVec2(240, 240), ImVec2(0, 1), ImVec2(1, 0));
 												ImGui::EndTooltip();
 											}
 
 											ImGui::NextColumn();
 
 											/* Show texture path */
-											ImGui::TextWrapped(show_texture->GetPath().c_str());
+											ImGui::TextWrapped(texture->GetPath().c_str());
 											/* Show texture load config */
 											ImGui::Checkbox("IsFlipV", &load_config.IsFlipV);
 											ImGui::Checkbox("IsGenMips", &load_config.IsGenMips);
-											texture_info.first->SetTextureLoadConfig(load_config);
+
+											/* 加载选项发生改动时，立即重新加载贴图 */
+											if (load_config != texture->GetTextureLoadConfig())
+											{
+												auto new_texture = TextureAssetManager::Instance().GetOrCreateTexture(texture->GetPath(), load_config);
+												material->SetTexture(param_info.Name, new_texture, texture_info.second);
+											}
 
 											ImGui::Columns(1);
 											ImGui::PopID();
@@ -585,10 +591,10 @@ namespace Wuya
 			m_pMaterialGroup->Serializer(material_path);
 
 			/* 拷贝贴图文件 */
-			/*std::filesystem::path current_model_path(m_pModelInfo->m_Path);
+			std::filesystem::path current_model_path(m_pModelInfo->m_Path);
 			std::filesystem::path target_path(file_path);
 			const std::regex pattern("^[\s\S]*\.(pdf|png|jpeg|jpg|tga|bmp|dds)$");
-			CopyFileFromTo(current_model_path.parent_path(), target_path.parent_path(), pattern);*/
+			CopyFileFromTo(current_model_path.parent_path(), target_path.parent_path(), pattern);
 		}
 	}
 
@@ -713,45 +719,45 @@ namespace Wuya
 		{
 			/* Ambient */
 			if (!material_params.AmbientTexPath.empty())
-				material->SetTexture("Ambient", TextureAssetManager::Instance().GetOrCreateTexture(material_params.AmbientTexPath, load_config), TextureSlot::Ambient);
+				material->SetTexture("Ambient", TextureAssetManager::Instance().GetOrCreateTexture((g_AssetPath / material_params.AmbientTexPath).generic_string(), load_config), TextureSlot::Ambient);
 			else
 				material->SetParameters(ParamType::Vec3, "Ambient", material_params.Ambient);
 
 			/* Diffuse/Albedo */
 			if (!material_params.DiffuseTexPath.empty())
-				material->SetTexture("Albedo", TextureAssetManager::Instance().GetOrCreateTexture(material_params.DiffuseTexPath, load_config), TextureSlot::Albedo);
+				material->SetTexture("Albedo", TextureAssetManager::Instance().GetOrCreateTexture((g_AssetPath / material_params.DiffuseTexPath).generic_string(), load_config), TextureSlot::Albedo);
 			else
 				material->SetParameters(ParamType::Vec3, "Albedo", material_params.Diffuse);
 
 			/* Specular */
 			if (!material_params.SpecularTexPath.empty())
-				material->SetTexture("Specular", TextureAssetManager::Instance().GetOrCreateTexture(material_params.SpecularTexPath, load_config), TextureSlot::Specular);
+				material->SetTexture("Specular", TextureAssetManager::Instance().GetOrCreateTexture((g_AssetPath / material_params.SpecularTexPath).generic_string(), load_config), TextureSlot::Specular);
 			else
 				material->SetParameters(ParamType::Vec3, "Specular", material_params.Specular);
 
 			/* Normal, todo: 处理Bump和Displacement */
 			if (!material_params.BumpTexPath.empty())
-				material->SetTexture("Normal", TextureAssetManager::Instance().GetOrCreateTexture(material_params.BumpTexPath, load_config), TextureSlot::Normal);
+				material->SetTexture("Normal", TextureAssetManager::Instance().GetOrCreateTexture((g_AssetPath / material_params.BumpTexPath).generic_string(), load_config), TextureSlot::Normal);
 			else if (!material_params.DisplacementTexPath.empty())
-				material->SetTexture("Normal", TextureAssetManager::Instance().GetOrCreateTexture(material_params.DisplacementTexPath, load_config), TextureSlot::Normal);
+				material->SetTexture("Normal", TextureAssetManager::Instance().GetOrCreateTexture((g_AssetPath / material_params.DisplacementTexPath).generic_string(), load_config), TextureSlot::Normal);
 			else
 				material->SetParameters(ParamType::Vec3, "Normal", glm::vec3(0.0f, 0.0f, 1.0f));
 
 			/* Roughness */
 			if (!material_params.RoughnessTexPath.empty())
-				material->SetTexture("Roughness", TextureAssetManager::Instance().GetOrCreateTexture(material_params.RoughnessTexPath, load_config), TextureSlot::Roughness);
+				material->SetTexture("Roughness", TextureAssetManager::Instance().GetOrCreateTexture((g_AssetPath / material_params.RoughnessTexPath).generic_string(), load_config), TextureSlot::Roughness);
 			else
 				material->SetParameters(ParamType::Float, "Roughness", material_params.Roughness);
 
 			/* Metallic */
 			if (!material_params.MetallicTexPath.empty())
-				material->SetTexture("Metallic", TextureAssetManager::Instance().GetOrCreateTexture(material_params.MetallicTexPath, load_config), TextureSlot::Metallic);
+				material->SetTexture("Metallic", TextureAssetManager::Instance().GetOrCreateTexture((g_AssetPath / material_params.MetallicTexPath).generic_string(), load_config), TextureSlot::Metallic);
 			else
 				material->SetParameters(ParamType::Float, "Metallic", material_params.Metallic);
 
 			/* Emission */
 			if (!material_params.EmissionTexPath.empty())
-				material->SetTexture("Emissive", TextureAssetManager::Instance().GetOrCreateTexture(material_params.EmissionTexPath, load_config), TextureSlot::Emissive);
+				material->SetTexture("Emissive", TextureAssetManager::Instance().GetOrCreateTexture((g_AssetPath / material_params.EmissionTexPath).generic_string(), load_config), TextureSlot::Emissive);
 			else
 				material->SetParameters(ParamType::Vec3, "Emissive", material_params.Emission);
 

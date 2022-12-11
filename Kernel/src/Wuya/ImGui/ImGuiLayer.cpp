@@ -32,7 +32,7 @@ namespace Wuya
 		io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;			// Enable Multi-Viewport / Platform Windows
 		//io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
 
-		const float fontSize = 20.0f;// *2.0f;
+		const float fontSize = 18.0f;// *2.0f;
 		io.Fonts->AddFontFromFileTTF("editor_res/fonts/msyh.ttf", fontSize);
 		//io.Fonts->AddFontFromFileTTF("editor_res/fonts/opensans/OpenSans-Bold.ttf", fontSize, nullptr, io.Fonts->GetGlyphRangesChineseSimplifiedCommon());
 		//io.FontDefault = io.Fonts->AddFontFromFileTTF("editor_res/fonts/opensans/OpenSans-Regular.ttf", fontSize, nullptr, io.Fonts->GetGlyphRangesChineseSimplifiedCommon());
