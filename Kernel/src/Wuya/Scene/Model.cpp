@@ -159,92 +159,6 @@ namespace Wuya
 		return model;
 	}
 
-	/* 从文件加载一个Obj模型 */
-	static SharedPtr<Model> LoadObjModelFromFile(const std::string& filepath)
-	{
-		if (filepath.empty())
-		{
-			CORE_LOG_ERROR("Model filepath is empty.");
-			return nullptr;
-		}
-
-		const std::string mesh_filepath = filepath + ".mesh";
-		if (!std::filesystem::exists(mesh_filepath))
-		{
-			/* 导入模型 */
-			ImportObj(filepath);
-		}
-
-		SharedPtr<Model> model = CreateSharedPtr<Model>(filepath);
-
-		/* 先加载mtl文件 */
-		const std::string mtl_filepath = filepath + ".mtl";
-		MaterialGroup material_group;
-		material_group.Deserializer(mtl_filepath);
-
-		/* 直接从mesh文件加载 */
-		std::ifstream in_mesh_file(mesh_filepath, std::ios::in | std::ios::binary);
-		if (!in_mesh_file)
-		{
-			CORE_LOG_ERROR("Failed to load file: {}.", mesh_filepath);
-			return nullptr;
-		}
-
-		size_t mesh_segment_cnt;
-		in_mesh_file.read((char*)&mesh_segment_cnt, sizeof(size_t));
-
-		for (size_t mesh_segment_idx = 0; mesh_segment_idx < mesh_segment_cnt; ++mesh_segment_idx)
-		{
-			size_t name_size;
-			in_mesh_file.read((char*)&name_size, sizeof(size_t));
-			std::string name;
-			in_mesh_file.read(name.data(), name_size);
-
-			size_t vertex_data_size;
-			in_mesh_file.read((char*)&vertex_data_size, sizeof(size_t));
-
-			float* vertex_data = new float[vertex_data_size];
-			in_mesh_file.read((char*)vertex_data, vertex_data_size * sizeof(float));
-
-			/* Vertex Buffer */
-			auto vertex_buffer = VertexBuffer::Create(vertex_data, vertex_data_size * sizeof(float));
-			VertexBufferLayout vertex_buffer_layout = {
-				{ "a_Position", BufferDataType::Float3 },
-				{ "a_Normal", BufferDataType::Float3 },
-				{ "a_Color", BufferDataType::Float3 },
-				{ "a_TexCoord", BufferDataType::Float2 },
-			};
-			vertex_buffer->SetLayout(vertex_buffer_layout);
-
-			/* Vertex Array */
-			auto vertex_array = VertexArray::Create();
-			vertex_array->Bind();
-			vertex_array->AddVertexBuffer(vertex_buffer);
-
-			/* Material */
-			int material_idx;
-			in_mesh_file.read((char*)&material_idx, sizeof(int));
-			auto material = material_group.GetMaterialByIndex(material_idx);
-			if (!material)
-				material = Material::Error();
-
-			/* AABB */
-			glm::vec3 aabb_min, aabb_max;
-			in_mesh_file.read((char*)&aabb_min, sizeof(glm::vec3));
-			in_mesh_file.read((char*)&aabb_max, sizeof(glm::vec3));
-
-			/* 创建MeshSegment */
-			auto mesh_segment = CreateSharedPtr<MeshSegment>(name, vertex_array, material);
-			mesh_segment->SetAABB(aabb_min, aabb_max);
-
-			model->AddMeshSegment(mesh_segment);
-			delete[] vertex_data;
-		}
-		in_mesh_file.close();
-		
-		return model;
-	}
-
 	Model::Model(std::string path)
 		: m_DebugName(ExtractFilename(path))
 		, m_Path(std::move(path))
@@ -274,10 +188,102 @@ namespace Wuya
 		std::string suffix = ExtractFileSuffix(path);
 		std::transform(suffix.begin(), suffix.end(), suffix.begin(), ::tolower);
 
-		/* 加载Obj模型 */
-		if (suffix == "obj")
+		/* 加载Mesh模型数据 */
+		if (suffix == "mesh")
 		{
-			return LoadObjModelFromFile(path);
+			SharedPtr<Model> model = CreateSharedPtr<Model>(path);
+
+			/* 加载mtl文件 */
+			const std::string mtl_filepath = ReplaceFileSuffix(path, ".mtl");
+			model->LoadMaterial(mtl_filepath);
+			const auto& material_group = model->GetMaterialGroup();
+
+			/* 直接从mesh文件加载 */
+			std::ifstream in_mesh_file(path, std::ios::in | std::ios::binary);
+			if (!in_mesh_file)
+			{
+				CORE_LOG_ERROR("Failed to load file: {}.", path);
+				return nullptr;
+			}
+
+			/* 读取子模型数量 */
+			size_t mesh_segment_cnt;
+			in_mesh_file.read((char*)&mesh_segment_cnt, sizeof(size_t));
+
+			for (size_t mesh_segment_idx = 0; mesh_segment_idx < mesh_segment_cnt; ++mesh_segment_idx)
+			{
+				/* 子模型Name */
+				size_t name_size;
+				in_mesh_file.read((char*)&name_size, sizeof(size_t));
+				std::string name;
+				in_mesh_file.read(name.data(), name_size);
+
+				/* 子模型顶点数据 */
+				size_t vertex_data_size;
+				in_mesh_file.read((char*)&vertex_data_size, sizeof(size_t));
+				float* vertex_data = new float[vertex_data_size];
+				in_mesh_file.read((char*)vertex_data, vertex_data_size * sizeof(float));
+
+				/* 子模型Layout */
+				VertexBufferLayout vertex_buffer_layout;
+				size_t element_cnt;
+				in_mesh_file.read((char*)&element_cnt, sizeof(size_t));
+				for (size_t element_idx = 0; element_idx < element_cnt; ++element_idx)
+				{
+					/* Name */
+					size_t element_name_size;
+					in_mesh_file.read((char*)&element_name_size, sizeof(size_t));
+					std::string element_name;
+					in_mesh_file.read(element_name.data(), element_name_size);
+
+					/* Type */
+					uint8_t element_type;
+					in_mesh_file.read((char*)&element_type, sizeof(uint8_t));
+
+					/* Offset */
+					size_t element_offset;
+					in_mesh_file.read((char*)&element_offset, sizeof(size_t));
+
+					/* Normalized */
+					bool element_normalized;
+					in_mesh_file.read((char*)&element_normalized, sizeof(bool));
+
+					vertex_buffer_layout.EmplaceElement({ element_name, static_cast<BufferDataType>(element_type), element_normalized });
+				}
+
+				/* Vertex Buffer */
+				auto vertex_buffer = VertexBuffer::Create(vertex_data, vertex_data_size * sizeof(float));
+				vertex_buffer->SetLayout(vertex_buffer_layout);
+
+				/* Vertex Array */
+				auto vertex_array = VertexArray::Create();
+				vertex_array->Bind();
+				vertex_array->AddVertexBuffer(vertex_buffer);
+
+				/* Material */
+				int material_idx;
+				in_mesh_file.read((char*)&material_idx, sizeof(int));
+				auto material = material_group->GetMaterialByIndex(material_idx);
+				if (!material)
+					material = Material::Error();
+
+				/* AABB */
+				glm::vec3 aabb_min, aabb_max;
+				in_mesh_file.read((char*)&aabb_min, sizeof(glm::vec3));
+				in_mesh_file.read((char*)&aabb_max, sizeof(glm::vec3));
+
+				/* 创建MeshSegment */
+				auto mesh_segment = CreateSharedPtr<MeshSegment>(name, vertex_array, material);
+				mesh_segment->SetAABB(aabb_min, aabb_max);
+
+				model->AddMeshSegment(mesh_segment);
+				delete[] vertex_data;
+			}
+
+			/* 关闭文件 */
+			in_mesh_file.close();
+
+			return model;
 		}
 		else
 		{
@@ -298,6 +304,13 @@ namespace Wuya
 		case BuiltinModelType::Plane:  return CreatePlane(material);
 		}
 		return nullptr;
+	}
+
+	/* 加载模型时，加载材质 */
+	void Model::LoadMaterial(const std::string& path)
+	{
+		m_pMaterialGroup = CreateSharedPtr<MaterialGroup>();
+		m_pMaterialGroup->Deserializer(path);
 	}
 
 	SkeletonModel::SkeletonModel(const std::string& path)

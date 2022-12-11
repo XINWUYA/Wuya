@@ -57,6 +57,12 @@ namespace Wuya
 		CalculateOffsetsAndStride();
 	}
 
+	void VertexBufferLayout::EmplaceElement(const BufferElement& element)
+	{
+		m_Elements.emplace_back(element);
+		CalculateOffsetsAndStride();
+	}
+
 	void VertexBufferLayout::CalculateOffsetsAndStride()
 	{
 		m_Stride = 0;

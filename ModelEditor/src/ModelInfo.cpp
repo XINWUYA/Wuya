@@ -37,14 +37,15 @@ namespace Wuya
 		/* 每个Shape对应一个MeshSegment */
 		for (size_t shape_idx = 0; shape_idx < m_Shapes.size(); ++shape_idx)
 		{
-			/* 填充VertexData */
-			std::vector<float> data;
+			const auto& shape_data = m_Shapes[shape_idx];
+
+			SharedPtr<SubModelInfo> sub_model_info = CreateSharedPtr<SubModelInfo>();
+			sub_model_info->Name = shape_data.name;
 
 			/* 记录AABB信息 */
 			glm::vec3 aabb_min = glm::vec3(std::numeric_limits<float>::max());
 			glm::vec3 aabb_max = glm::vec3(-std::numeric_limits<float>::max());
 
-			const auto& shape_data = m_Shapes[shape_idx];
 			const uint32_t face_count = shape_data.mesh.indices.size() / 3;
 			for (size_t face_idx = 0; face_idx < face_count; ++face_idx)
 			{
@@ -131,22 +132,22 @@ namespace Wuya
 				/* Combine */
 				for (int v = 0; v < 3; ++v)
 				{
-					data.emplace_back(vertex[v][0]);
-					data.emplace_back(vertex[v][1]);
-					data.emplace_back(vertex[v][2]);
-					data.emplace_back(normal[v][0]);
-					data.emplace_back(normal[v][1]);
-					data.emplace_back(normal[v][2]);
-					data.emplace_back(color[v][0]);
-					data.emplace_back(color[v][1]);
-					data.emplace_back(color[v][2]);
-					data.emplace_back(uv[v][0]);
-					data.emplace_back(uv[v][1]);
+					sub_model_info->VertexData.emplace_back(vertex[v][0]);
+					sub_model_info->VertexData.emplace_back(vertex[v][1]);
+					sub_model_info->VertexData.emplace_back(vertex[v][2]);
+					sub_model_info->VertexData.emplace_back(normal[v][0]);
+					sub_model_info->VertexData.emplace_back(normal[v][1]);
+					sub_model_info->VertexData.emplace_back(normal[v][2]);
+					sub_model_info->VertexData.emplace_back(color[v][0]);
+					sub_model_info->VertexData.emplace_back(color[v][1]);
+					sub_model_info->VertexData.emplace_back(color[v][2]);
+					sub_model_info->VertexData.emplace_back(uv[v][0]);
+					sub_model_info->VertexData.emplace_back(uv[v][1]);
 				}
 			}
 
 			/* Vertex Buffer */
-			auto vertex_buffer = VertexBuffer::Create(data.data(), data.size() * sizeof(float));
+			auto vertex_buffer = VertexBuffer::Create(sub_model_info->VertexData.data(), sub_model_info->VertexData.size() * sizeof(float));
 			VertexBufferLayout vertex_buffer_layout = {
 				{ "a_Position", BufferDataType::Float3 },
 				{ "a_Normal", BufferDataType::Float3 },
@@ -156,12 +157,12 @@ namespace Wuya
 			vertex_buffer->SetLayout(vertex_buffer_layout);
 
 			/* Vertex Array */
-			auto vertex_array = VertexArray::Create();
-			vertex_array->Bind();
-			vertex_array->AddVertexBuffer(vertex_buffer);
+			sub_model_info->VertexArray = VertexArray::Create();
+			sub_model_info->VertexArray->Bind();
+			sub_model_info->VertexArray->AddVertexBuffer(vertex_buffer);
 
 			/* MaterialParams */
-			MaterialParams params{};
+			auto& params = sub_model_info->MaterialParams;
 			int shape_material_id = shape_data.mesh.material_ids[0];
 			if (shape_material_id >= 0 && shape_material_id < m_Materials.size())
 			{
@@ -196,7 +197,9 @@ namespace Wuya
 				params.IOR = material_data.ior;
 			}
 
-			m_SubModelInfos.emplace_back(shape_data.name, vertex_array, params, std::make_pair(aabb_min, aabb_max));
+			sub_model_info->AABB = std::make_pair(aabb_min, aabb_max);
+
+			m_SubModelInfos.emplace_back(sub_model_info);
 
 			/* 更新模型整体的AABB */
 			m_AABB.first.x = std::min(m_AABB.first.x, aabb_min.x);
@@ -208,10 +211,10 @@ namespace Wuya
 		}
 	}
 
-	/* 保存模型 */
-	void ModelInfo::Save(const std::string& filepath)
+	/* 导出成Mesh */
+	void ModelInfo::ExportMesh(const std::string& filepath)
 	{
-		/* todo */
+		
 	}
 
 	/* 重置数据 */

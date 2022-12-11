@@ -31,6 +31,7 @@ namespace Wuya
 		glDeleteBuffers(1, &m_VertexBufferId);
 	}
 
+	/* 绑定顶点数据 */
 	void OpenGLVertexBuffer::Bind() const
 	{
 		PROFILE_FUNCTION();
@@ -38,6 +39,7 @@ namespace Wuya
 		glBindBuffer(GL_ARRAY_BUFFER, m_VertexBufferId);
 	}
 
+	/* 解绑顶点数据 */
 	void OpenGLVertexBuffer::Unbind() const
 	{
 		PROFILE_FUNCTION();
@@ -45,6 +47,7 @@ namespace Wuya
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 	}
 
+	/* 设置顶点数据 */
 	void OpenGLVertexBuffer::SetData(const void* data, uint32_t size)
 	{
 		PROFILE_FUNCTION();
@@ -55,8 +58,11 @@ namespace Wuya
 		m_DataSize = size;
 	}
 
-	uint32_t OpenGLVertexBuffer::GetCount() const
+	/* 获取顶点数量 */
+	uint32_t OpenGLVertexBuffer::GetVertexCount() const
 	{
+		PROFILE_FUNCTION();
+
 		ASSERT(!(m_DataSize % m_Layout.GetStride()), "VertexBuffer data is not complete!");
 		return m_DataSize / m_Layout.GetStride();
 	}
@@ -81,6 +87,7 @@ namespace Wuya
 		glDeleteBuffers(1, &m_IndexBufferId);
 	}
 
+	/* 绑定索引数据 */
 	void OpenGLIndexBuffer::Bind() const
 	{
 		PROFILE_FUNCTION();
@@ -88,6 +95,7 @@ namespace Wuya
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_IndexBufferId);
 	}
 
+	/* 解绑索引数据 */
 	void OpenGLIndexBuffer::Unbind() const
 	{
 		PROFILE_FUNCTION();

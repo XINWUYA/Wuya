@@ -18,6 +18,7 @@ namespace Wuya
 
 	/* 模型类
 	 * 默认为静态模型
+	 * 仅支持.mesh格式文件，通过ModelEditor导出
 	 */
 	class Model
 	{
@@ -41,18 +42,25 @@ namespace Wuya
 		/* 获取所有MeshSegments */
 		[[nodiscard]] const std::vector<SharedPtr<MeshSegment>>& GetMeshSegments() const { return m_MeshSegments; }
 
-		/* 从路径加载一个模型 */
+		[[nodiscard]] const SharedPtr<MaterialGroup>& GetMaterialGroup() const { return m_pMaterialGroup; }
+
+		/* 从路径加载一个模型， 仅支持.mesh文件 */
 		static SharedPtr<Model> Create(const std::string& path);
 		/* 创建内建模型 */
 		static SharedPtr<Model> Create(BuiltinModelType type, const SharedPtr<Material>& material = Material::Default());
 
 	private:
+		/* 加载模型时，加载材质 */
+		void LoadMaterial(const std::string& path);
+
 		/* 标记名 */
 		std::string m_DebugName{ "Unnamed Model" };
 		/* 文件路径 */
 		std::string m_Path{};
 		/* 一个模型中包含的子模型 */
 		std::vector<SharedPtr<MeshSegment>> m_MeshSegments{};
+		/* 模型对应的材质 */
+		SharedPtr<MaterialGroup> m_pMaterialGroup{ nullptr };
 		/* AABB */
 		glm::vec3 m_AABBMin;
 		glm::vec3 m_AABBMax;

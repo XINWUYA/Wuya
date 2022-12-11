@@ -127,7 +127,7 @@ namespace Wuya
 			}
 		}
 
-		m_VertexCount += vertex_buffer->GetCount();
+		m_VertexCount += vertex_buffer->GetVertexCount();
 		m_VertexBuffers.push_back(vertex_buffer);
 	}
 

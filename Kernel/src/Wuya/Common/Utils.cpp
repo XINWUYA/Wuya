@@ -66,7 +66,7 @@ namespace Wuya
 
 	/* Replace file suffix
 	 * Examples:
-	 * path: "assets/scenes/test.scn", suffix: "bin"
+	 * path: "assets/scenes/test.scn", suffix: ".bin"
 	 * return: "assets/scenes/test.bin"
 	 */
 	std::string ReplaceFileSuffix(const std::string& path, const std::string& suffix)

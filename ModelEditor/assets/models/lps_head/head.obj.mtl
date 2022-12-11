@@ -1,4 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<Materials Count="1">
-	<Material ID="0" Name="Head" Shader="assets/shaders/default.glsl" AlbedoTex="assets/models/lps_head/lambertian.jpg" NormalTex="assets/models/lps_head/normal.bmp" Diffuse="0.640000 0.640000 0.640000" Specular="0.500000 0.500000 0.500000"/>
-</Materials>

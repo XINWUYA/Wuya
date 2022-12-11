@@ -3,7 +3,7 @@
 
 namespace Wuya
 {
-	enum class BufferDataType
+	enum class BufferDataType : uint8_t
 	{
 		None = 0,
 		Int,
@@ -43,7 +43,7 @@ namespace Wuya
 		const std::vector<BufferElement>& GetElements() const { return m_Elements; }
 
 		/* 增加Element */
-		void EmplaceElement(const BufferElement& element) { m_Elements.emplace_back(element); }
+		void EmplaceElement(const BufferElement& element);
 
 		std::vector<BufferElement>::iterator begin() { return m_Elements.begin(); }
 		std::vector<BufferElement>::iterator end() { return m_Elements.end(); }
@@ -67,12 +67,16 @@ namespace Wuya
 		virtual void Bind() const = 0;
 		virtual void Unbind() const = 0;
 
+		/* 设置顶点数据 */
 		virtual void SetData(const void* data, uint32_t size) = 0;
+		[[nodiscard]] virtual uint32_t GetDataSize() const = 0;
 
-		virtual const VertexBufferLayout& GetLayout() const = 0;
+		/* 设置顶点布局 */
 		virtual void SetLayout(const VertexBufferLayout& layout) = 0;
+		[[nodiscard]] virtual const VertexBufferLayout& GetLayout() const = 0;
 
-		virtual uint32_t GetCount() const = 0;
+		/* 获取顶点数量 */
+		[[nodiscard]] virtual uint32_t GetVertexCount() const = 0;
 
 		static SharedPtr<VertexBuffer> Create(uint32_t size);
 		static SharedPtr<VertexBuffer> Create(const float* vertices, uint32_t size);

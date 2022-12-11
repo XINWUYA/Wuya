@@ -48,12 +48,9 @@ namespace Wuya
 	{
 		std::string Name;
 		SharedPtr<VertexArray> VertexArray;
+		std::vector<float> VertexData; /* 顶点数据的原始信息，保存模型时需要 */
 		MaterialParams MaterialParams;
 		std::pair<glm::vec3, glm::vec3> AABB;
-
-		SubModelInfo(std::string name, const SharedPtr<class VertexArray>& vertex_array, struct MaterialParams params, std::pair<glm::vec3, glm::vec3> aabb)
-			: Name(std::move(name)), VertexArray(vertex_array), MaterialParams(std::move(params)), AABB(std::move(aabb))
-		{}
 	};
 
 	/* 加载模型原始文件（Obj） */
@@ -65,8 +62,8 @@ namespace Wuya
 		/* 加载Obj模型信息 */
 		void LoadFromObj(const std::string& filepath);
 
-		/* 保存模型 */
-		void Save(const std::string& filepath);
+		/* 导出成Mesh */
+		void ExportMesh(const std::string& filepath);
 
 		/* 重置数据 */
 		void Reset();
@@ -81,7 +78,7 @@ namespace Wuya
 		/* 包含各种textures，如diffuse, specular, normal等 */
 		std::vector<tinyobj::material_t> m_Materials;
 		/* 模型包含的子模型数据 */
-		std::vector<SubModelInfo> m_SubModelInfos;
+		std::vector<SharedPtr<SubModelInfo>> m_SubModelInfos;
 		/* 整体的AABB */
 		std::pair<glm::vec3, glm::vec3> m_AABB;
 

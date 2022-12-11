@@ -269,16 +269,16 @@ namespace Wuya
 						auto& material = m_pMaterialGroup->GetMaterialByIndex(i);
 						ImGui::Separator();
 
-						if (ImGui::TreeNode(sub_model_info.Name.empty() ? "Unnamed" : sub_model_info.Name.c_str()))
+						if (ImGui::TreeNode(sub_model_info->Name.empty() ? "Unnamed" : sub_model_info->Name.c_str()))
 						{
 							/* 基本信息 */
 							ImGui::Text("Base Info:");
 							{
-								const auto& aabb_min = sub_model_info.AABB.first;
-								const auto& aabb_max = sub_model_info.AABB.second;
+								const auto& aabb_min = sub_model_info->AABB.first;
+								const auto& aabb_max = sub_model_info->AABB.second;
 								ImGui::BulletText("AABB Min: (%f, %f, %f)", aabb_min.x, aabb_min.y, aabb_min.z);
 								ImGui::BulletText("AABB Max: (%f, %f, %f)", aabb_max.x, aabb_max.y, aabb_max.z);
-								ImGui::BulletText("Vertex Cnt: %d", sub_model_info.VertexArray->GetVertexCount());
+								ImGui::BulletText("Vertex Cnt: %d", sub_model_info->VertexArray->GetVertexCount());
 							}
 
 							/* 材质信息 */
@@ -308,7 +308,8 @@ namespace Wuya
 								{
 									TextureLoadConfig load_config;
 									load_config.IsFlipV = false;
-									const auto& show_texture = sub_model_info.MaterialParams.AmbientTexPath.empty() ? TextureAssetManager::Instance().GetOrCreateTexture("assets/textures/default_texture.png", {}) : TextureAssetManager::Instance().GetOrCreateTexture(sub_model_info.MaterialParams.AmbientTexPath, load_config);
+									const auto& show_texture = sub_model_info->MaterialParams.AmbientTexPath.empty() ? TextureAssetManager::Instance().GetOrCreateTexture("assets/textures/default_texture.png", {})
+																													: TextureAssetManager::Instance().GetOrCreateTexture(sub_model_info->MaterialParams.AmbientTexPath, load_config);
 
 									/* Image */
 									ImGui::ImageButton((ImTextureID)show_texture->GetTextureID(), ImVec2(80, 80), ImVec2(0, 1), ImVec2(1, 0), 0);
@@ -320,7 +321,7 @@ namespace Wuya
 											const std::filesystem::path texture_path = path;
 
 											material->SetTexture("", TextureAssetManager::Instance().GetOrCreateTexture(texture_path.string(), load_config), TextureSlot::Ambient);
-											sub_model_info.MaterialParams.AmbientTexPath = texture_path.string();
+											sub_model_info->MaterialParams.AmbientTexPath = texture_path.string();
 										}
 										ImGui::EndDragDropTarget();
 									}
@@ -367,7 +368,8 @@ namespace Wuya
 								{
 									TextureLoadConfig load_config;
 									load_config.IsFlipV = false;
-									const auto& show_texture = sub_model_info.MaterialParams.DiffuseTexPath.empty() ? TextureAssetManager::Instance().GetOrCreateTexture("assets/textures/default_texture.png", {}) : TextureAssetManager::Instance().GetOrCreateTexture(sub_model_info.MaterialParams.DiffuseTexPath, load_config);
+									const auto& show_texture = sub_model_info->MaterialParams.DiffuseTexPath.empty() ? TextureAssetManager::Instance().GetOrCreateTexture("assets/textures/default_texture.png", {})
+																													: TextureAssetManager::Instance().GetOrCreateTexture(sub_model_info->MaterialParams.DiffuseTexPath, load_config);
 
 									/* Image */
 									ImGui::ImageButton((ImTextureID)show_texture->GetTextureID(), ImVec2(80, 80), ImVec2(0, 1), ImVec2(1, 0), 0);
@@ -379,7 +381,7 @@ namespace Wuya
 											const std::filesystem::path texture_path = path;
 
 											material->SetTexture("u_AlbedoTexture", TextureAssetManager::Instance().GetOrCreateTexture(texture_path.string(), load_config), TextureSlot::Albedo);
-											sub_model_info.MaterialParams.DiffuseTexPath = texture_path.string();
+											sub_model_info->MaterialParams.DiffuseTexPath = texture_path.string();
 										}
 										ImGui::EndDragDropTarget();
 									}
@@ -465,16 +467,102 @@ namespace Wuya
 	/* 导出模型 */
 	void ModelEditorLayer::ExportMeshAndMtl()
 	{
+		PROFILE_FUNCTION();
+
 		if (!m_pModelInfo || !m_pModel)
 			return;
 
-		const auto& model_path = m_pModelInfo->m_Path;
-		const auto& mesh_path = model_path + ".mesh";
-		//m_pModel->
+		const auto file_path = FileDialog::SaveFile("Mesh(*.mesh)\0*.mesh\0");
+		if (!file_path.empty())
+		{
+			/* 导出模型 */
+			ExportMesh(file_path);
 
-		const auto& material_path = model_path + ".mtl";
-		m_pMaterialGroup->Serializer(material_path);
-		m_pMaterialGroup->Deserializer(material_path);
+			/* 导出材质 */
+			const auto& material_path = ReplaceFileSuffix(file_path, ".mtl");
+			m_pMaterialGroup->Serializer(material_path);
+
+			/* 拷贝贴图文件 */
+			/*std::filesystem::path current_model_path(m_pModelInfo->m_Path);
+			std::filesystem::path target_path(file_path);
+			const std::regex pattern("^[\s\S]*\.(pdf|png|jpeg|jpg|tga|bmp|dds)$");
+			CopyFileFromTo(current_model_path.parent_path(), target_path.parent_path(), pattern);*/
+		}
+	}
+
+	void ModelEditorLayer::ExportMesh(const std::string& path)
+	{
+		PROFILE_FUNCTION();
+		
+		std::ofstream out_mesh_file(path, std::ios::out | std::ios::binary);
+
+		/* 写入子模型数量: size_t * 1 */
+		size_t sub_model_count = m_pModelInfo->m_SubModelInfos.size();
+		out_mesh_file.write((char*)&sub_model_count, sizeof(size_t));
+
+		/* 逐个写入子模型信息 */
+		for (int i = 0; i < m_pModelInfo->m_SubModelInfos.size(); ++i)
+		{
+			const auto& sub_model_info = m_pModelInfo->m_SubModelInfos[i];
+
+			/* 写入Name的size: size_t * 1 */
+			size_t name_size = sub_model_info->Name.size();
+			out_mesh_file.write((char*)&name_size, sizeof(size_t));
+
+			/* 写入Name内容：name_size */
+			out_mesh_file.write(sub_model_info->Name.c_str(), name_size);
+
+			/* 写入VertexData的大小: size_t * 1 */
+			size_t data_size = sub_model_info->VertexData.size();
+			out_mesh_file.write((char*)&data_size, sizeof(size_t));
+
+			/* 写入VertexData内容: data_size */
+			out_mesh_file.write((char*)(sub_model_info->VertexData.data()), data_size * sizeof(float));
+
+			/* 写入VertexLayout */
+			auto& vertex_layout = sub_model_info->VertexArray->GetVertexBuffers()[0]->GetLayout();
+			auto& elements = vertex_layout.GetElements();
+
+			/* 写入 VertexLayout的Element数量: size_t * 1 */
+			size_t element_count = elements.size();
+			out_mesh_file.write((char*)&element_count, sizeof(size_t));
+			/* 逐个写入Element信息 */
+			for (auto& element : elements)
+			{
+				/* 写入Name的size: size_t * 1 */
+				size_t element_name_size = element.Name.size();
+				out_mesh_file.write((char*)&element_name_size, sizeof(size_t));
+				/* 写入Name内容：element_name_size */
+				out_mesh_file.write(element.Name.c_str(), element_name_size);
+				/* 写入Element的类型: uint8_t * 1 */
+				out_mesh_file.write((char*)&element.Type, sizeof(uint8_t));
+				/* 写入Element的偏移：size_t * 1 */
+				out_mesh_file.write((char*)&element.Offset, sizeof(size_t));
+				/* 写入Element的Normalized: bool * 1 */
+				out_mesh_file.write((char*)&element.Normalized, sizeof(bool));
+			}
+
+			/* 写入材质索引：int * 1 */
+			auto material = m_pMaterialGroup->GetMaterialByIndex(i);
+			int material_id = -1;
+			for (int i = 0; i < m_pMaterialGroup->GetAllMaterials().size(); ++i)
+			{
+				const auto& mtl = m_pMaterialGroup->GetMaterialByIndex(i);
+				if (mtl == material)
+				{
+					material_id = i;
+					break;
+				}
+			}
+			out_mesh_file.write((char*)&material_id, sizeof(int));
+
+			/* 写入aabb: sizeof(glm::vec3) * 2 */
+			out_mesh_file.write((char*)&sub_model_info->AABB.first, sizeof(glm::vec3));
+			out_mesh_file.write((char*)&sub_model_info->AABB.second, sizeof(glm::vec3));
+		}
+
+		/* 保存Mesh文件 */
+		out_mesh_file.close();
 	}
 
 	/* 更新模型 */
@@ -491,10 +579,10 @@ namespace Wuya
 			auto& material = m_pMaterialGroup->GetMaterialByIndex(i);
 
 			/* 更新材质 */
-			UpdateMaterial(material, sub_model_info.MaterialParams);
+			UpdateMaterial(material, sub_model_info->MaterialParams);
 			
-			SharedPtr<MeshSegment> mesh_segment = CreateSharedPtr<MeshSegment>(sub_model_info.Name, sub_model_info.VertexArray, material);
-			mesh_segment->SetAABB(sub_model_info.AABB.first, sub_model_info.AABB.second);
+			SharedPtr<MeshSegment> mesh_segment = CreateSharedPtr<MeshSegment>(sub_model_info->Name, sub_model_info->VertexArray, material);
+			mesh_segment->SetAABB(sub_model_info->AABB.first, sub_model_info->AABB.second);
 
 			m_pModel->AddMeshSegment(mesh_segment);
 		}
@@ -566,6 +654,32 @@ namespace Wuya
 			/* Others */
 			material->SetParameters(ParamType::Vec3, "Transmittance", material_params.Transmittance);
 			material->SetParameters(ParamType::Float, "IOR", material_params.IOR);
+		}
+	}
+
+	bool ModelEditorLayer::CopyFileFromTo(const std::filesystem::path& src_path, const std::filesystem::path& dst_path, const std::regex& suffix)
+	{
+		if (src_path.empty() || src_path.empty())
+			return false;
+		
+		if (!std::filesystem::exists(src_path))
+			return false;
+
+		for (auto& item : std::filesystem::directory_iterator(src_path))
+		{
+			std::filesystem::path dst_item_path = dst_path / item.path().filename();
+			if (std::filesystem::is_directory(item.status()))
+			{
+				_mkdir(dst_item_path.string().c_str());
+				CopyFileFromTo(item.path(), dst_item_path, suffix);
+			}
+			else
+			{
+				if (std::regex_match(item.path().extension().string(), suffix))
+				{
+					std::filesystem::copy_file(item.path(), dst_item_path, std::filesystem::copy_options::skip_existing);
+				}
+			}
 		}
 	}
 }

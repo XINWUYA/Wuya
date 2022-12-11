@@ -1,79 +1,191 @@
-# Blender MTL File: 'nanosuit.blend'
-# Material Count: 6
-newmtl Arm
-Ns 96.078431
-Ka 0.000000 0.000000 0.000000
-Kd 0.640000 0.640000 0.640000
-Ks 0.500000 0.500000 0.500000
-Ni 1.000000
-d 1.000000
-illum 2
-map_Kd arm_dif.png
-map_Bump arm_showroom_ddn.png
-map_Ks arm_showroom_spec.png
-
-
-newmtl Body
-Ns 96.078431
-Ka 0.000000 0.000000 0.000000
-Kd 0.640000 0.640000 0.640000
-Ks 0.500000 0.500000 0.500000
-Ni 1.000000
-d 1.000000
-illum 2
-map_Kd body_dif.png
-map_Bump body_showroom_ddn.png
-map_Ks body_showroom_spec.png
-
-
-newmtl Glass
-Ns 96.078431
-Ka 0.000000 0.000000 0.000000
-Kd 0.640000 0.640000 0.640000
-Ks 0.500000 0.500000 0.500000
-Ni 1.000000
-d 1.000000
-illum 2
-map_Kd glass_dif.png
-map_Bump glass_ddn.png
-
-
-newmtl Hand
-Ns 96.078431
-Ka 0.000000 0.000000 0.000000
-Kd 0.640000 0.640000 0.640000
-Ks 0.500000 0.500000 0.500000
-Ni 1.000000
-d 1.000000
-illum 2
-map_Kd hand_dif.png
-map_Bump hand_showroom_ddn.png
-map_Ks hand_showroom_spec.png
-
-
-newmtl Helmet
-Ns 96.078431
-Ka 0.000000 0.000000 0.000000
-Kd 0.640000 0.640000 0.640000
-Ks 0.500000 0.500000 0.500000
-Ni 1.000000
-d 1.000000
-illum 2
-map_Kd helmet_diff.png
-map_Bump helmet_showroom_ddn.png
-map_Ks helmet_showroom_spec.png
-
-
-newmtl Leg
-Ns 96.078431
-Ka 0.000000 0.000000 0.000000
-Kd 0.640000 0.640000 0.640000
-Ks 0.500000 0.500000 0.500000
-Ni 1.000000
-d 1.000000
-illum 2
-map_Kd leg_dif.png
-map_Bump leg_showroom_ddn.png
-map_Ks leg_showroom_spec.png
-
-
+<?xml version="1.0" encoding="UTF-8"?>
+<Materials Count="7">
+    <Material ID="0" ShaderPath="assets/shaders/default.glsl">
+        <Parameters>
+            <ParamInfo Type="4" Name="Ambient" Value="0.000000 0.000000 0.000000"/>
+            <ParamInfo Type="0" Name="u_AlbedoTexture">
+                <Texture Path="../../../../ModelEditor/assets/models/nanosuit/glass_dif.png" Slot="0">
+                    <LoadConfig IsFlipV="false" IsGenMips="true" SamplerType="0"/>
+                </Texture>
+            </ParamInfo>
+            <ParamInfo Type="4" Name="Emission" Value="0.000000 0.000000 0.000000"/>
+            <ParamInfo Type="2" Name="Metallic" Value="0"/>
+            <ParamInfo Type="2" Name="ClearCoatRoughness" Value="0"/>
+            <ParamInfo Type="4" Name="Specular" Value="0.500000 0.500000 0.500000"/>
+            <ParamInfo Type="2" Name="Roughness" Value="0"/>
+            <ParamInfo Type="0" Name="u_NormalTexture">
+                <Texture Path="../../../../ModelEditor/assets/models/nanosuit/glass_ddn.png" Slot="2">
+                    <LoadConfig IsFlipV="false" IsGenMips="true" SamplerType="0"/>
+                </Texture>
+            </ParamInfo>
+            <ParamInfo Type="2" Name="ClearCoatThickness" Value="0"/>
+            <ParamInfo Type="4" Name="Transmittance" Value="0.000000 0.000000 0.000000"/>
+            <ParamInfo Type="2" Name="IOR" Value="1"/>
+        </Parameters>
+        <RasterState CullMode="2" FrontFaceType="1" EnableBlend="true" BlendEquationRGB="0" BlendEquationA="0" BlendFuncSrcRGB="1" BlendFuncSrcA="1" BlendFuncDstRGB="0" BlendFuncDstA="0" EnableDepthWrite="true" DepthCompareFunc="0" EnableColorWrite="true"/>
+    </Material>
+    <Material ID="1" ShaderPath="assets/shaders/default.glsl">
+        <Parameters>
+            <ParamInfo Type="4" Name="Ambient" Value="0.000000 0.000000 0.000000"/>
+            <ParamInfo Type="0" Name="u_AlbedoTexture">
+                <Texture Path="../../../../ModelEditor/assets/models/nanosuit/leg_dif.png" Slot="0">
+                    <LoadConfig IsFlipV="false" IsGenMips="true" SamplerType="0"/>
+                </Texture>
+            </ParamInfo>
+            <ParamInfo Type="4" Name="Emission" Value="0.000000 0.000000 0.000000"/>
+            <ParamInfo Type="2" Name="Metallic" Value="0"/>
+            <ParamInfo Type="0" Name="u_SpecularTexture">
+                <Texture Path="../../../../ModelEditor/assets/models/nanosuit/leg_showroom_spec.png" Slot="1">
+                    <LoadConfig IsFlipV="false" IsGenMips="true" SamplerType="0"/>
+                </Texture>
+            </ParamInfo>
+            <ParamInfo Type="2" Name="Roughness" Value="0"/>
+            <ParamInfo Type="0" Name="u_NormalTexture">
+                <Texture Path="../../../../ModelEditor/assets/models/nanosuit/leg_showroom_ddn.png" Slot="2">
+                    <LoadConfig IsFlipV="false" IsGenMips="true" SamplerType="0"/>
+                </Texture>
+            </ParamInfo>
+            <ParamInfo Type="2" Name="ClearCoatRoughness" Value="0"/>
+            <ParamInfo Type="2" Name="ClearCoatThickness" Value="0"/>
+            <ParamInfo Type="4" Name="Transmittance" Value="0.000000 0.000000 0.000000"/>
+            <ParamInfo Type="2" Name="IOR" Value="1"/>
+        </Parameters>
+        <RasterState CullMode="2" FrontFaceType="1" EnableBlend="true" BlendEquationRGB="0" BlendEquationA="0" BlendFuncSrcRGB="1" BlendFuncSrcA="1" BlendFuncDstRGB="0" BlendFuncDstA="0" EnableDepthWrite="true" DepthCompareFunc="0" EnableColorWrite="true"/>
+    </Material>
+    <Material ID="2" ShaderPath="assets/shaders/default.glsl">
+        <Parameters>
+            <ParamInfo Type="4" Name="Ambient" Value="0.000000 0.000000 0.000000"/>
+            <ParamInfo Type="0" Name="u_AlbedoTexture">
+                <Texture Path="../../../../ModelEditor/assets/models/nanosuit/hand_dif.png" Slot="0">
+                    <LoadConfig IsFlipV="false" IsGenMips="true" SamplerType="0"/>
+                </Texture>
+            </ParamInfo>
+            <ParamInfo Type="4" Name="Emission" Value="0.000000 0.000000 0.000000"/>
+            <ParamInfo Type="2" Name="Metallic" Value="0"/>
+            <ParamInfo Type="0" Name="u_SpecularTexture">
+                <Texture Path="../../../../ModelEditor/assets/models/nanosuit/hand_showroom_spec.png" Slot="1">
+                    <LoadConfig IsFlipV="false" IsGenMips="true" SamplerType="0"/>
+                </Texture>
+            </ParamInfo>
+            <ParamInfo Type="2" Name="Roughness" Value="0"/>
+            <ParamInfo Type="0" Name="u_NormalTexture">
+                <Texture Path="../../../../ModelEditor/assets/models/nanosuit/hand_showroom_ddn.png" Slot="2">
+                    <LoadConfig IsFlipV="false" IsGenMips="true" SamplerType="0"/>
+                </Texture>
+            </ParamInfo>
+            <ParamInfo Type="2" Name="ClearCoatRoughness" Value="0"/>
+            <ParamInfo Type="2" Name="ClearCoatThickness" Value="0"/>
+            <ParamInfo Type="4" Name="Transmittance" Value="0.000000 0.000000 0.000000"/>
+            <ParamInfo Type="2" Name="IOR" Value="1"/>
+        </Parameters>
+        <RasterState CullMode="2" FrontFaceType="1" EnableBlend="true" BlendEquationRGB="0" BlendEquationA="0" BlendFuncSrcRGB="1" BlendFuncSrcA="1" BlendFuncDstRGB="0" BlendFuncDstA="0" EnableDepthWrite="true" DepthCompareFunc="0" EnableColorWrite="true"/>
+    </Material>
+    <Material ID="3" ShaderPath="assets/shaders/default.glsl">
+        <Parameters>
+            <ParamInfo Type="4" Name="Ambient" Value="0.000000 0.000000 0.000000"/>
+            <ParamInfo Type="0" Name="u_AlbedoTexture">
+                <Texture Path="../../../../ModelEditor/assets/models/nanosuit/glass_dif.png" Slot="0">
+                    <LoadConfig IsFlipV="false" IsGenMips="true" SamplerType="0"/>
+                </Texture>
+            </ParamInfo>
+            <ParamInfo Type="4" Name="Emission" Value="0.000000 0.000000 0.000000"/>
+            <ParamInfo Type="2" Name="Metallic" Value="0"/>
+            <ParamInfo Type="2" Name="ClearCoatRoughness" Value="0"/>
+            <ParamInfo Type="4" Name="Specular" Value="0.500000 0.500000 0.500000"/>
+            <ParamInfo Type="2" Name="Roughness" Value="0"/>
+            <ParamInfo Type="0" Name="u_NormalTexture">
+                <Texture Path="../../../../ModelEditor/assets/models/nanosuit/glass_ddn.png" Slot="2">
+                    <LoadConfig IsFlipV="false" IsGenMips="true" SamplerType="0"/>
+                </Texture>
+            </ParamInfo>
+            <ParamInfo Type="2" Name="ClearCoatThickness" Value="0"/>
+            <ParamInfo Type="4" Name="Transmittance" Value="0.000000 0.000000 0.000000"/>
+            <ParamInfo Type="2" Name="IOR" Value="1"/>
+        </Parameters>
+        <RasterState CullMode="2" FrontFaceType="1" EnableBlend="true" BlendEquationRGB="0" BlendEquationA="0" BlendFuncSrcRGB="1" BlendFuncSrcA="1" BlendFuncDstRGB="0" BlendFuncDstA="0" EnableDepthWrite="true" DepthCompareFunc="0" EnableColorWrite="true"/>
+    </Material>
+    <Material ID="4" ShaderPath="assets/shaders/default.glsl">
+        <Parameters>
+            <ParamInfo Type="4" Name="Ambient" Value="0.000000 0.000000 0.000000"/>
+            <ParamInfo Type="0" Name="u_AlbedoTexture">
+                <Texture Path="../../../../ModelEditor/assets/models/nanosuit/arm_dif.png" Slot="0">
+                    <LoadConfig IsFlipV="false" IsGenMips="true" SamplerType="0"/>
+                </Texture>
+            </ParamInfo>
+            <ParamInfo Type="4" Name="Emission" Value="0.000000 0.000000 0.000000"/>
+            <ParamInfo Type="2" Name="Metallic" Value="0"/>
+            <ParamInfo Type="0" Name="u_SpecularTexture">
+                <Texture Path="../../../../ModelEditor/assets/models/nanosuit/arm_showroom_spec.png" Slot="1">
+                    <LoadConfig IsFlipV="false" IsGenMips="true" SamplerType="0"/>
+                </Texture>
+            </ParamInfo>
+            <ParamInfo Type="2" Name="Roughness" Value="0"/>
+            <ParamInfo Type="0" Name="u_NormalTexture">
+                <Texture Path="../../../../ModelEditor/assets/models/nanosuit/arm_showroom_ddn.png" Slot="2">
+                    <LoadConfig IsFlipV="false" IsGenMips="true" SamplerType="0"/>
+                </Texture>
+            </ParamInfo>
+            <ParamInfo Type="2" Name="ClearCoatRoughness" Value="0"/>
+            <ParamInfo Type="2" Name="ClearCoatThickness" Value="0"/>
+            <ParamInfo Type="4" Name="Transmittance" Value="0.000000 0.000000 0.000000"/>
+            <ParamInfo Type="2" Name="IOR" Value="1"/>
+        </Parameters>
+        <RasterState CullMode="2" FrontFaceType="1" EnableBlend="true" BlendEquationRGB="0" BlendEquationA="0" BlendFuncSrcRGB="1" BlendFuncSrcA="1" BlendFuncDstRGB="0" BlendFuncDstA="0" EnableDepthWrite="true" DepthCompareFunc="0" EnableColorWrite="true"/>
+    </Material>
+    <Material ID="5" ShaderPath="assets/shaders/default.glsl">
+        <Parameters>
+            <ParamInfo Type="4" Name="Ambient" Value="0.000000 0.000000 0.000000"/>
+            <ParamInfo Type="0" Name="u_AlbedoTexture">
+                <Texture Path="../../../../ModelEditor/assets/models/nanosuit/helmet_diff.png" Slot="0">
+                    <LoadConfig IsFlipV="false" IsGenMips="true" SamplerType="0"/>
+                </Texture>
+            </ParamInfo>
+            <ParamInfo Type="4" Name="Emission" Value="0.000000 0.000000 0.000000"/>
+            <ParamInfo Type="2" Name="Metallic" Value="0"/>
+            <ParamInfo Type="0" Name="u_SpecularTexture">
+                <Texture Path="../../../../ModelEditor/assets/models/nanosuit/helmet_showroom_spec.png" Slot="1">
+                    <LoadConfig IsFlipV="false" IsGenMips="true" SamplerType="0"/>
+                </Texture>
+            </ParamInfo>
+            <ParamInfo Type="2" Name="Roughness" Value="0"/>
+            <ParamInfo Type="0" Name="u_NormalTexture">
+                <Texture Path="../../../../ModelEditor/assets/models/nanosuit/helmet_showroom_ddn.png" Slot="2">
+                    <LoadConfig IsFlipV="false" IsGenMips="true" SamplerType="0"/>
+                </Texture>
+            </ParamInfo>
+            <ParamInfo Type="2" Name="ClearCoatRoughness" Value="0"/>
+            <ParamInfo Type="2" Name="ClearCoatThickness" Value="0"/>
+            <ParamInfo Type="4" Name="Transmittance" Value="0.000000 0.000000 0.000000"/>
+            <ParamInfo Type="2" Name="IOR" Value="1"/>
+        </Parameters>
+        <RasterState CullMode="2" FrontFaceType="1" EnableBlend="true" BlendEquationRGB="0" BlendEquationA="0" BlendFuncSrcRGB="1" BlendFuncSrcA="1" BlendFuncDstRGB="0" BlendFuncDstA="0" EnableDepthWrite="true" DepthCompareFunc="0" EnableColorWrite="true"/>
+    </Material>
+    <Material ID="6" ShaderPath="assets/shaders/default.glsl">
+        <Parameters>
+            <ParamInfo Type="4" Name="Ambient" Value="0.000000 0.000000 0.000000"/>
+            <ParamInfo Type="0" Name="u_AlbedoTexture">
+                <Texture Path="../../../../ModelEditor/assets/models/nanosuit/body_dif.png" Slot="0">
+                    <LoadConfig IsFlipV="false" IsGenMips="true" SamplerType="0"/>
+                </Texture>
+            </ParamInfo>
+            <ParamInfo Type="4" Name="Emission" Value="0.000000 0.000000 0.000000"/>
+            <ParamInfo Type="2" Name="Metallic" Value="0"/>
+            <ParamInfo Type="0" Name="u_SpecularTexture">
+                <Texture Path="../../../../ModelEditor/assets/models/nanosuit/body_showroom_spec.png" Slot="1">
+                    <LoadConfig IsFlipV="false" IsGenMips="true" SamplerType="0"/>
+                </Texture>
+            </ParamInfo>
+            <ParamInfo Type="2" Name="Roughness" Value="0"/>
+            <ParamInfo Type="0" Name="u_NormalTexture">
+                <Texture Path="../../../../ModelEditor/assets/models/nanosuit/body_showroom_ddn.png" Slot="2">
+                    <LoadConfig IsFlipV="false" IsGenMips="true" SamplerType="0"/>
+                </Texture>
+            </ParamInfo>
+            <ParamInfo Type="2" Name="ClearCoatRoughness" Value="0"/>
+            <ParamInfo Type="2" Name="ClearCoatThickness" Value="0"/>
+            <ParamInfo Type="4" Name="Transmittance" Value="0.000000 0.000000 0.000000"/>
+            <ParamInfo Type="2" Name="IOR" Value="1"/>
+        </Parameters>
+        <RasterState CullMode="2" FrontFaceType="1" EnableBlend="true" BlendEquationRGB="0" BlendEquationA="0" BlendFuncSrcRGB="1" BlendFuncSrcA="1" BlendFuncDstRGB="0" BlendFuncDstA="0" EnableDepthWrite="true" DepthCompareFunc="0" EnableColorWrite="true"/>
+    </Material>
+</Materials>

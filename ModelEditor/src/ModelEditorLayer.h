@@ -32,11 +32,15 @@ namespace Wuya
 		void ImportModel();
 		/* 导出模型(.mesh & .mtl) */
 		void ExportMeshAndMtl();
+		/* 导出Mesh */
+		void ExportMesh(const std::string& path);
 
 		/* 更新模型 */
 		void UpdateModel();
 		/* 更新材质：当用户修改时根据材质参数设置材质 */
 		void UpdateMaterial(const SharedPtr<Material>& material, const MaterialParams& material_params);
+		/* 拷贝指定格式的文件到目标路径 */
+		bool CopyFileFromTo(const std::filesystem::path& src_path, const std::filesystem::path& dst_path, const std::regex& suffix);
 
 		/* 默认场景 */
 		SharedPtr<Scene> m_pDefaultScene{ nullptr };
