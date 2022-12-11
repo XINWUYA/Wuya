@@ -1,8 +1,11 @@
 #include "Pch.h"
 #include "ModelEditorLayer.h"
+#include <glm/gtc/type_ptr.hpp>
 
 namespace Wuya
 {
+	extern const std::filesystem::path g_AssetPath;
+
 	ModelEditorLayer::ModelEditorLayer()
 		: ILayer("ModelEditorLayer")
 	{
@@ -50,9 +53,10 @@ namespace Wuya
 		ShowMenuUI();
 		/* 显示模型编辑UI */
 		ShowModelParamsUI();
+		/* 资源管理窗口 */
+		m_ResourceBrowser.OnImGuiRenderer();
 		/* 显示主场景视口 */
 		ShowSceneViewportUI();
-
 		/*bool open = true;
 		ImGui::ShowDemoWindow(&open);*/
 	}
@@ -207,16 +211,17 @@ namespace Wuya
 				ImGui::Image((ImTextureID)texture_id, viewport_panel_size, ImVec2{ 0, 1 }, ImVec2{ 1, 0 });
 			}
 
-			///* 拖动资源到主窗口 */
-			//if (ImGui::BeginDragDropTarget())
-			//{
-			//	if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("RESOURCE_BROWSER_ITEM"))
-			//	{
-			//		const wchar_t* path = (const wchar_t*)payload->Data;
-			//		OnDragItemToScene(g_AssetPath / path);
-			//	}
-			//	ImGui::EndDragDropTarget();
-			//}
+			/* 拖动资源到主窗口 */
+			if (ImGui::BeginDragDropTarget())
+			{
+				if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("RESOURCE_BROWSER_ITEM"))
+				{
+					const wchar_t* path = (const wchar_t*)payload->Data;
+					std::filesystem::path absolute_path = absolute(g_AssetPath);
+					OnDragItemToScene(g_AssetPath / path);
+				}
+				ImGui::EndDragDropTarget();
+			}
 
 			///* Gizmos */
 			//ShowOperationGizmoUI();
@@ -267,6 +272,7 @@ namespace Wuya
 					{
 						auto& sub_model_info = m_pModelInfo->m_SubModelInfos[i];
 						auto& material = m_pMaterialGroup->GetMaterialByIndex(i);
+
 						ImGui::Separator();
 
 						if (ImGui::TreeNode(sub_model_info->Name.empty() ? "Unnamed" : sub_model_info->Name.c_str()))
@@ -281,125 +287,193 @@ namespace Wuya
 								ImGui::BulletText("Vertex Cnt: %d", sub_model_info->VertexArray->GetVertexCount());
 							}
 
-							/* 材质信息 */
-							if (ImGui::TreeNode("Ambient"))
+							/* 材质参数信息 */
+							auto& parameters = material->GetAllParameters();
+							for (auto& param : parameters)
 							{
-								/* 数据类型 */
-								const char* data_types[] = { "Texture", "Float", "Int", "Vec2", "Vec3", "Vec4" };
-								static int current_type_idx = 0;
-								const char* preview_value = data_types[current_type_idx];
-								if (ImGui::BeginCombo("DataType", preview_value))
+								auto& param_info = param.second;
+
+								if (ImGui::TreeNode(param_info.Name.c_str()))
 								{
-									for (int n = 0; n < IM_ARRAYSIZE(data_types); n++)
+									/* 参数类型 */
+									const char* data_types[] = { "Texture", "Int", "Float", "Vec2", "Vec3", "Vec4" };
+									int current_type_idx = static_cast<int>(param_info.Type);
+									const char* preview_value = data_types[current_type_idx];
+									if (ImGui::BeginCombo("DataType", preview_value))
 									{
-										const bool is_selected = (current_type_idx == n);
-										if (ImGui::Selectable(data_types[n], is_selected))
-											current_type_idx = n;
-
-										// Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
-										if (is_selected)
-											ImGui::SetItemDefaultFocus();
-									}
-									ImGui::EndCombo();
-								}
-
-								/* 若数据类型为纹理 */
-								if (current_type_idx == 0)
-								{
-									TextureLoadConfig load_config;
-									load_config.IsFlipV = false;
-									const auto& show_texture = sub_model_info->MaterialParams.AmbientTexPath.empty() ? TextureAssetManager::Instance().GetOrCreateTexture("assets/textures/default_texture.png", {})
-																													: TextureAssetManager::Instance().GetOrCreateTexture(sub_model_info->MaterialParams.AmbientTexPath, load_config);
-
-									/* Image */
-									ImGui::ImageButton((ImTextureID)show_texture->GetTextureID(), ImVec2(80, 80), ImVec2(0, 1), ImVec2(1, 0), 0);
-									if (ImGui::BeginDragDropTarget())
-									{
-										if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("RESOURCE_BROWSER_ITEM"))
+										for (int selected_idx = 0; selected_idx < IM_ARRAYSIZE(data_types); ++selected_idx)
 										{
-											const wchar_t* path = (const wchar_t*)payload->Data;
-											const std::filesystem::path texture_path = path;
+											/* 切换数据类型时，设置新类型的默认值 */
+											const bool is_selected = (current_type_idx == selected_idx);
+											if (ImGui::Selectable(data_types[selected_idx], is_selected))
+											{
+												current_type_idx = selected_idx;
+												auto param_type = static_cast<ParamType>(selected_idx);
+												switch (param_type)
+												{
+												case ParamType::Texture:
+													{
+														auto GetSlot = [](const std::string& name)
+														{
+															if (strcmp(name.c_str(), "Ambient") == 0)
+																return TextureSlot::Ambient;
+															if (strcmp(name.c_str(), "Albedo") == 0)
+																return TextureSlot::Albedo;
+															if (strcmp(name.c_str(), "Specular") == 0)
+																return TextureSlot::Specular;
+															if (strcmp(name.c_str(), "Metallic") == 0)
+																return TextureSlot::Metallic;
+															if (strcmp(name.c_str(), "Roughness") == 0)
+																return TextureSlot::Roughness;
+															if (strcmp(name.c_str(), "Emissive") == 0)
+																return TextureSlot::Emissive;
+															if (strcmp(name.c_str(), "Normal") == 0)
+																return TextureSlot::Normal;
+															return TextureSlot::Invalid;
+														};
+														/* 填入默认值 */
+														const auto& default_texture = TextureAssetManager::Instance().GetOrCreateTexture("assets/textures/default_texture.png", {});
+														material->SetTexture(param_info.Name, default_texture, GetSlot(param_info.Name));
+													}
+													break;
+												case ParamType::Int:
+													material->SetParameters(ParamType::Int, param_info.Name, 0);
+													break;
+												case ParamType::Float: 
+													material->SetParameters(ParamType::Float, param_info.Name, 0.0f);
+													break;
+												case ParamType::Vec2: 
+													material->SetParameters(ParamType::Vec2, param_info.Name, glm::vec2(0.0f));
+													break;
+												case ParamType::Vec3: 
+													material->SetParameters(ParamType::Vec3, param_info.Name, glm::vec3(0.0f));
+													break;
+												case ParamType::Vec4: 
+													material->SetParameters(ParamType::Vec4, param_info.Name, glm::vec4(0.0f));
+													break;
+												}
+											}
 
-											material->SetTexture("", TextureAssetManager::Instance().GetOrCreateTexture(texture_path.string(), load_config), TextureSlot::Ambient);
-											sub_model_info->MaterialParams.AmbientTexPath = texture_path.string();
+											// Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
+											if (is_selected)
+												ImGui::SetItemDefaultFocus();
 										}
-										ImGui::EndDragDropTarget();
+										ImGui::EndCombo();
 									}
 
-									/* Hovered */
-									if (ImGui::IsItemHovered())
+									/* 显示当前参数 */
+									switch (param_info.Type)
 									{
-										ImGui::BeginTooltip();
-										ImGui::Image((ImTextureID)show_texture->GetTextureID(), ImVec2(240, 240), ImVec2(0, 1), ImVec2(1, 0));
-										ImGui::EndTooltip();
-									}
-
-									/* Path */
-									ImGui::SameLine();
-									ImGui::TextWrapped(show_texture->GetPath().c_str());
-								}
-
-								ImGui::TreePop();
-							}
-
-							if (ImGui::TreeNode("Diffuse"))
-							{
-								/* 数据类型 */
-								const char* data_types[] = { "Texture", "Float", "Int", "Vec2", "Vec3", "Vec4" };
-								static int current_type_idx = 0;
-								const char* preview_value = data_types[current_type_idx];
-								if (ImGui::BeginCombo("DataType", preview_value))
-								{
-									for (int n = 0; n < IM_ARRAYSIZE(data_types); n++)
-									{
-										const bool is_selected = (current_type_idx == n);
-										if (ImGui::Selectable(data_types[n], is_selected))
-											current_type_idx = n;
-
-										// Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
-										if (is_selected)
-											ImGui::SetItemDefaultFocus();
-									}
-									ImGui::EndCombo();
-								}
-
-								/* 若数据类型为纹理 */
-								if (current_type_idx == 0)
-								{
-									TextureLoadConfig load_config;
-									load_config.IsFlipV = false;
-									const auto& show_texture = sub_model_info->MaterialParams.DiffuseTexPath.empty() ? TextureAssetManager::Instance().GetOrCreateTexture("assets/textures/default_texture.png", {})
-																													: TextureAssetManager::Instance().GetOrCreateTexture(sub_model_info->MaterialParams.DiffuseTexPath, load_config);
-
-									/* Image */
-									ImGui::ImageButton((ImTextureID)show_texture->GetTextureID(), ImVec2(80, 80), ImVec2(0, 1), ImVec2(1, 0), 0);
-									if (ImGui::BeginDragDropTarget())
-									{
-										if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("RESOURCE_BROWSER_ITEM"))
+									case ParamType::Texture:
 										{
-											const wchar_t* path = (const wchar_t*)payload->Data;
-											const std::filesystem::path texture_path = path;
+											auto texture_info = std::any_cast<std::pair<SharedPtr<Texture>, uint32_t>>(param_info.Value);
+											auto load_config = texture_info.first->GetTextureLoadConfig();
 
-											material->SetTexture("u_AlbedoTexture", TextureAssetManager::Instance().GetOrCreateTexture(texture_path.string(), load_config), TextureSlot::Albedo);
-											sub_model_info->MaterialParams.DiffuseTexPath = texture_path.string();
+											/* Show texture image */
+											ImGui::PushID(param_info.Name.c_str());
+											ImGui::Columns(2);
+
+											ImGui::SetColumnWidth(0, 100);
+											const auto& show_texture = TextureAssetManager::Instance().GetOrCreateTexture(texture_info.first ? texture_info.first->GetPath() : "assets/textures/default_texture.png", load_config);
+											ImGui::ImageButton((ImTextureID)show_texture->GetTextureID(), ImVec2(80, 80), ImVec2(0, 1), ImVec2(1, 0), 0);
+											if (ImGui::BeginDragDropTarget())
+											{
+												if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("RESOURCE_BROWSER_ITEM"))
+												{
+													const wchar_t* path = (const wchar_t*)payload->Data;
+													const std::filesystem::path texture_path = path;
+
+													material->SetTexture(param_info.Name, TextureAssetManager::Instance().GetOrCreateTexture(texture_path.string(), load_config), texture_info.second);
+													sub_model_info->MaterialParams.AmbientTexPath = texture_path.string();
+												}
+												ImGui::EndDragDropTarget();
+											}
+
+											/* Hovered */
+											if (ImGui::IsItemHovered())
+											{
+												ImGui::BeginTooltip();
+												ImGui::Image((ImTextureID)show_texture->GetTextureID(), ImVec2(240, 240), ImVec2(0, 1), ImVec2(1, 0));
+												ImGui::EndTooltip();
+											}
+
+											ImGui::NextColumn();
+
+											/* Show texture path */
+											ImGui::TextWrapped(show_texture->GetPath().c_str());
+											/* Show texture load config */
+											ImGui::Checkbox("IsFlipV", &load_config.IsFlipV);
+											ImGui::Checkbox("IsGenMips", &load_config.IsGenMips);
+											texture_info.first->SetTextureLoadConfig(load_config);
+
+											ImGui::Columns(1);
+											ImGui::PopID();
 										}
-										ImGui::EndDragDropTarget();
+										break;
+									case ParamType::Int:
+										{
+											ImGui::PushID(param_info.Name.c_str());
+
+											/* Show int controller */
+											int value = std::any_cast<int>(param.second.Value);
+											ImGui::DragInt(param_info.Name.c_str(), &value);
+											material->SetParameters(ParamType::Int, param_info.Name, value);
+
+											ImGui::PopID();
+										}
+										break;
+									case ParamType::Float:
+										{
+											ImGui::PushID(param_info.Name.c_str());
+
+											/* Show float controller */
+											float value = std::any_cast<float>(param.second.Value);
+											ImGui::DragFloat(param_info.Name.c_str(), &value);
+											material->SetParameters(ParamType::Float, param_info.Name, value);
+
+											ImGui::PopID();
+										}
+										break;
+									case ParamType::Vec2:
+										{
+											ImGui::PushID(param_info.Name.c_str());
+
+											/* Show glm::vec2 controller */
+											glm::vec2 value = std::any_cast<glm::vec2>(param.second.Value);
+											ImGui::DragFloat2(param_info.Name.c_str(), glm::value_ptr(value));
+											material->SetParameters(ParamType::Vec2, param_info.Name, value);
+
+											ImGui::PopID();
+										}
+										break;
+									case ParamType::Vec3:
+										{
+											ImGui::PushID(param_info.Name.c_str());
+
+											/* Show glm::vec3 controller */
+											glm::vec3 value = std::any_cast<glm::vec3>(param.second.Value);
+											ImGui::DragFloat3(param_info.Name.c_str(), glm::value_ptr(value));
+											material->SetParameters(ParamType::Vec3, param_info.Name, value);
+
+											ImGui::PopID();
+										}
+										break;
+									case ParamType::Vec4:
+										{
+											ImGui::PushID(param_info.Name.c_str());
+
+											/* Show glm::vec4 controller */
+											glm::vec4 value = std::any_cast<glm::vec4>(param.second.Value);
+											ImGui::DragFloat4(param_info.Name.c_str(), glm::value_ptr(value));
+											material->SetParameters(ParamType::Vec4, param_info.Name, value);
+
+											ImGui::PopID();
+										}
+										break;
 									}
 
-									/* Hovered */
-									if (ImGui::IsItemHovered())
-									{
-										ImGui::BeginTooltip();
-										ImGui::Image((ImTextureID)show_texture->GetTextureID(), ImVec2(240, 240), ImVec2(0, 1), ImVec2(1, 0));
-										ImGui::EndTooltip();
-									}
-
-									/* Path */
-									ImGui::SameLine();
-									ImGui::TextWrapped(show_texture->GetPath().c_str());
+									ImGui::TreePop();
 								}
-
-								ImGui::TreePop();
 							}
 
 							ImGui::TreePop();
@@ -440,6 +514,34 @@ namespace Wuya
 		}
 		ImGui::End();
 		ImGui::PopStyleVar();
+	}
+
+	/* 响应拖拽文件到主窗口 */
+	void ModelEditorLayer::OnDragItemToScene(const std::filesystem::path& path)
+	{
+		PROFILE_FUNCTION();
+
+		const auto extension = path.extension().string();
+
+		/* 模型文件 */
+		if (extension == ".obj")
+		{
+			EDITOR_LOG_DEBUG("Import model file: {}.", path.generic_string());
+
+			/* 读取模型 */
+			m_pModelInfo->Reset();
+			m_pModelInfo->LoadFromObj(path.generic_string());
+
+			/* 初始化材质 */
+			m_pMaterialGroup->ClearAllMaterials();
+			for (size_t i = 0; i < m_pModelInfo->m_SubModelInfos.size(); ++i)
+				m_pMaterialGroup->EmplaceMaterial(Material::Create(ShaderAssetManager::Instance().GetOrLoad("assets/shaders/default.glsl")));
+
+			/* 更新场景模型信息 */
+			UpdateModel();
+
+			return;
+		}
 	}
 
 	/* 导入模型 */
@@ -568,6 +670,8 @@ namespace Wuya
 	/* 更新模型 */
 	void ModelEditorLayer::UpdateModel()
 	{
+		PROFILE_FUNCTION();
+
 		/* 先移除场景中的其他模型 */
 		m_pDefaultScene->DestroyTargetEntities<ModelComponent>();
 
@@ -602,50 +706,54 @@ namespace Wuya
 	/* 更新材质：根据材质参数设置材质 */
 	void ModelEditorLayer::UpdateMaterial(const SharedPtr<Material>& material, const MaterialParams& material_params)
 	{
+		PROFILE_FUNCTION();
+
 		TextureLoadConfig load_config;
 		load_config.IsFlipV = false;
 		{
 			/* Ambient */
 			if (!material_params.AmbientTexPath.empty())
-				material->SetTexture("u_AmbientTexture", TextureAssetManager::Instance().GetOrCreateTexture(material_params.AmbientTexPath, load_config), TextureSlot::Ambient);
+				material->SetTexture("Ambient", TextureAssetManager::Instance().GetOrCreateTexture(material_params.AmbientTexPath, load_config), TextureSlot::Ambient);
 			else
 				material->SetParameters(ParamType::Vec3, "Ambient", material_params.Ambient);
 
 			/* Diffuse/Albedo */
 			if (!material_params.DiffuseTexPath.empty())
-				material->SetTexture("u_AlbedoTexture", TextureAssetManager::Instance().GetOrCreateTexture(material_params.DiffuseTexPath, load_config), TextureSlot::Albedo);
+				material->SetTexture("Albedo", TextureAssetManager::Instance().GetOrCreateTexture(material_params.DiffuseTexPath, load_config), TextureSlot::Albedo);
 			else
-				material->SetParameters(ParamType::Vec3, "Diffuse", material_params.Diffuse);
+				material->SetParameters(ParamType::Vec3, "Albedo", material_params.Diffuse);
 
 			/* Specular */
 			if (!material_params.SpecularTexPath.empty())
-				material->SetTexture("u_SpecularTexture", TextureAssetManager::Instance().GetOrCreateTexture(material_params.SpecularTexPath, load_config), TextureSlot::Specular);
+				material->SetTexture("Specular", TextureAssetManager::Instance().GetOrCreateTexture(material_params.SpecularTexPath, load_config), TextureSlot::Specular);
 			else
 				material->SetParameters(ParamType::Vec3, "Specular", material_params.Specular);
 
 			/* Normal, todo: 处理Bump和Displacement */
 			if (!material_params.BumpTexPath.empty())
-				material->SetTexture("u_NormalTexture", TextureAssetManager::Instance().GetOrCreateTexture(material_params.BumpTexPath, load_config), TextureSlot::Normal);
-			if (!material_params.DisplacementTexPath.empty())
-				material->SetTexture("u_NormalTexture", TextureAssetManager::Instance().GetOrCreateTexture(material_params.DisplacementTexPath, load_config), TextureSlot::Normal);
+				material->SetTexture("Normal", TextureAssetManager::Instance().GetOrCreateTexture(material_params.BumpTexPath, load_config), TextureSlot::Normal);
+			else if (!material_params.DisplacementTexPath.empty())
+				material->SetTexture("Normal", TextureAssetManager::Instance().GetOrCreateTexture(material_params.DisplacementTexPath, load_config), TextureSlot::Normal);
+			else
+				material->SetParameters(ParamType::Vec3, "Normal", glm::vec3(0.0f, 0.0f, 1.0f));
 
 			/* Roughness */
 			if (!material_params.RoughnessTexPath.empty())
-				material->SetTexture("u_RoughnessTexture", TextureAssetManager::Instance().GetOrCreateTexture(material_params.RoughnessTexPath, load_config), TextureSlot::Roughness);
+				material->SetTexture("Roughness", TextureAssetManager::Instance().GetOrCreateTexture(material_params.RoughnessTexPath, load_config), TextureSlot::Roughness);
 			else
 				material->SetParameters(ParamType::Float, "Roughness", material_params.Roughness);
 
 			/* Metallic */
 			if (!material_params.MetallicTexPath.empty())
-				material->SetTexture("u_MetallicTexture", TextureAssetManager::Instance().GetOrCreateTexture(material_params.MetallicTexPath, load_config), TextureSlot::Metallic);
+				material->SetTexture("Metallic", TextureAssetManager::Instance().GetOrCreateTexture(material_params.MetallicTexPath, load_config), TextureSlot::Metallic);
 			else
 				material->SetParameters(ParamType::Float, "Metallic", material_params.Metallic);
 
 			/* Emission */
 			if (!material_params.EmissionTexPath.empty())
-				material->SetTexture("u_EmissiveTexture", TextureAssetManager::Instance().GetOrCreateTexture(material_params.EmissionTexPath, load_config), TextureSlot::Emissive);
+				material->SetTexture("Emissive", TextureAssetManager::Instance().GetOrCreateTexture(material_params.EmissionTexPath, load_config), TextureSlot::Emissive);
 			else
-				material->SetParameters(ParamType::Vec3, "Emission", material_params.Emission);
+				material->SetParameters(ParamType::Vec3, "Emissive", material_params.Emission);
 
 			/* ClearCoat */
 			material->SetParameters(ParamType::Float, "ClearCoatRoughness", material_params.ClearCoatRoughness);
@@ -659,6 +767,8 @@ namespace Wuya
 
 	bool ModelEditorLayer::CopyFileFromTo(const std::filesystem::path& src_path, const std::filesystem::path& dst_path, const std::regex& suffix)
 	{
+		PROFILE_FUNCTION();
+
 		if (src_path.empty() || src_path.empty())
 			return false;
 		

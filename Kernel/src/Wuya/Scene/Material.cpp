@@ -53,7 +53,8 @@ namespace Wuya
 				{
 					/* 绑定纹理 */
 					const auto texture_info = std::any_cast<std::pair<SharedPtr<Texture>, uint32_t>>(value);
-					texture_info.first->Bind(texture_info.second);
+					if (texture_info.second != TextureSlot::Invalid)
+						texture_info.first->Bind(texture_info.second);
 				}
 				break;
 			case ParamType::Int:
@@ -177,7 +178,10 @@ namespace Wuya
 						const auto texture_info = std::any_cast<std::pair<SharedPtr<Texture>, uint32_t>>(param_info.Value);
 						auto& texture = texture_info.first;
 
-						std::filesystem::path relative_path = std::filesystem::relative(texture->GetPath(), out_mtl_path.parent_path()); /* 相对材质的路径 */
+						std::filesystem::path texture_path(texture->GetPath()), mtl_path(out_mtl_path);
+						texture_path = std::filesystem::absolute(texture_path);
+						mtl_path = std::filesystem::absolute(mtl_path);
+						std::filesystem::path relative_path = std::filesystem::relative(texture_path, mtl_path.parent_path()); /* 相对材质的路径 */
 						texture_doc->SetAttribute("Path", relative_path.generic_string().c_str());
 						texture_doc->SetAttribute("Slot", texture_info.second);
 

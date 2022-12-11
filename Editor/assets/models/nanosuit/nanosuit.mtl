@@ -2,7 +2,7 @@
 <Materials Count="7">
     <Material ID="0" ShaderPath="assets/shaders/default.glsl">
         <Parameters>
-            <ParamInfo Type="4" Name="Ambient" Value="0.000000 0.000000 0.000000"/>
+            <ParamInfo Type="5" Name="Ambient" Value="0.000000 0.000000 0.000000 0.000000"/>
             <ParamInfo Type="0" Name="u_AlbedoTexture">
                 <Texture Path="../../../../ModelEditor/assets/models/nanosuit/glass_dif.png" Slot="0">
                     <LoadConfig IsFlipV="false" IsGenMips="true" SamplerType="0"/>

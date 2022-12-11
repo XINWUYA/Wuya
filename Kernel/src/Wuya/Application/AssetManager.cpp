@@ -50,7 +50,11 @@ namespace Wuya
 		const auto key = ToID(path);
 		const auto iter = m_TextureAssetMap.find(key);
 		if (iter != m_TextureAssetMap.end())
-			return iter->second;
+		{
+			/* 判断LoadConfig是否被修改 */
+			if (!iter->second->IsDirty())
+				return iter->second;
+		}
 
 		/* 找不到，则创建 */
 		auto texture = Texture::Create(path, load_config);

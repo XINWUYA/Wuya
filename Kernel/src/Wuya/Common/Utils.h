@@ -55,6 +55,18 @@ namespace Wuya
 		return result;
 	}
 
+	/* float to string */
+	inline std::string ToString(float value, int precision = 10)
+	{
+		if (precision < 0)
+			return std::to_string(value);
+
+		std::ostringstream oss;
+		oss.precision(precision);
+		oss << std::fixed << value;
+		return oss.str();
+	}
+
 	/* vec2 to string */
 	inline std::string ToString(const glm::vec2& value)
 	{

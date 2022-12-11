@@ -19,6 +19,8 @@ namespace Wuya
 		constexpr uint8_t Ambient = 6;
 		constexpr uint8_t ValidSlotCnt = 7;
 
+		constexpr uint8_t Invalid = 255;
+
 		inline std::string GetSlotName(uint8_t slot)
 		{
 			switch (slot)
@@ -30,7 +32,7 @@ namespace Wuya
 			case Metallic:	return "Metallic";
 			case Emissive:	return "Emissive";
 			case Ambient:	return "Ambient";
-			default:		return "Unknown";
+			default:		return "Invalid";
 			}
 		}
 	}

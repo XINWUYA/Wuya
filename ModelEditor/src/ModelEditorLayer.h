@@ -1,5 +1,6 @@
 #pragma once
 #include "EditorBuiltinCamera.h"
+#include "EditorResourceBrowser.h"
 #include "ModelInfo.h"
 
 namespace Wuya
@@ -27,6 +28,8 @@ namespace Wuya
 		void ShowSceneViewportUI();
 		/* 显示模型编辑UI */
 		void ShowModelParamsUI();
+		/* 响应拖拽文件到主窗口 */
+		void OnDragItemToScene(const std::filesystem::path& path);
 
 		/* 导入模型 */
 		void ImportModel();
@@ -42,6 +45,8 @@ namespace Wuya
 		/* 拷贝指定格式的文件到目标路径 */
 		bool CopyFileFromTo(const std::filesystem::path& src_path, const std::filesystem::path& dst_path, const std::regex& suffix);
 
+		/* 资源管理窗口 */
+		EditorResourceBrowser m_ResourceBrowser;
 		/* 默认场景 */
 		SharedPtr<Scene> m_pDefaultScene{ nullptr };
 		/* 编辑器相机 */
