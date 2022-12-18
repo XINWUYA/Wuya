@@ -9,7 +9,7 @@ namespace Wuya
 	class Application 
 	{
 	public:
-		Application(const std::string& window_title = "Unnamed App");
+		Application(const std::string& window_title = "Unnamed App", uint32_t width = 1920, uint32_t height = 1080);
 		virtual ~Application();
 
 		static Application* Instance();

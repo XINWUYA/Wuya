@@ -170,7 +170,8 @@ namespace Wuya
 			if (shape_material_id >= 0 && shape_material_id < m_Materials.size())
 			{
 				const auto& material_data = m_Materials[shape_material_id];
-
+				/* Name */
+				params.Name = material_data.name;
 				/* Ambient */
 				params.AmbientTexPath = material_data.ambient_texname.empty() ? "" : (relative_dir / material_data.ambient_texname).generic_string();
 				params.Ambient = glm::vec3(material_data.ambient[0], material_data.ambient[1], material_data.ambient[2]);

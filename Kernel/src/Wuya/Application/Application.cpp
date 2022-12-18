@@ -9,14 +9,14 @@ namespace Wuya
 {
 	Application* Application::s_pInstance = nullptr;
 
-	Application::Application(const std::string& window_title)
+	Application::Application(const std::string& window_title, uint32_t width, uint32_t height)
 	{
 		PROFILE_FUNCTION();
 
 		ASSERT(!s_pInstance, "Application already exist!");
 		s_pInstance = this;
 
-		m_pWindow = IWindow::Create({ window_title, 1920, 1080 }); /* todo: 由配置文件反序列化 */
+		m_pWindow = IWindow::Create({ window_title, width, height });
 		m_pWindow->SetEventCallback(BIND_EVENT_FUNC(Application::OnEvent));
 
 		m_pImGuiLayer = CreateSharedPtr<ImGuiLayer>();

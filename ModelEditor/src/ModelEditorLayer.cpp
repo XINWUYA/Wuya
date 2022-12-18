@@ -57,6 +57,9 @@ namespace Wuya
 		m_ResourceBrowser.OnImGuiRenderer();
 		/* 显示主场景视口 */
 		ShowSceneViewportUI();
+		/* 材质图编辑器 */
+		m_MaterialGraphEditor.OnImGuiRenderer();
+
 		/*bool open = true;
 		ImGui::ShowDemoWindow(&open);*/
 	}
@@ -169,6 +172,16 @@ namespace Wuya
 
 					if (ImGui::MenuItem("Close", NULL, false))
 						p_open = false;
+					ImGui::EndMenu();
+				}
+
+				if (ImGui::BeginMenu("MaterialGraph"))
+				{
+					if (ImGui::MenuItem("Material Graph Editor", "Ctrl+M"))
+					{
+						m_MaterialGraphEditor.ShowOrHide();
+					}
+
 					ImGui::EndMenu();
 				}
 
@@ -572,6 +585,35 @@ namespace Wuya
 		}
 	}
 
+	/* 拷贝指定格式的文件到目标路径 */
+	static bool CopyFileFromTo(const std::filesystem::path& src_path, const std::filesystem::path& dst_path, const std::regex& suffix)
+	{
+		PROFILE_FUNCTION();
+
+		if (src_path.empty() || src_path.empty())
+			return false;
+
+		if (!std::filesystem::exists(src_path))
+			return false;
+
+		for (auto& item : std::filesystem::directory_iterator(src_path))
+		{
+			std::filesystem::path dst_item_path = dst_path / item.path().filename();
+			if (std::filesystem::is_directory(item.status()))
+			{
+				_mkdir(dst_item_path.string().c_str());
+				CopyFileFromTo(item.path(), dst_item_path, suffix);
+			}
+			else
+			{
+				if (std::regex_match(item.path().extension().string(), suffix))
+				{
+					std::filesystem::copy_file(item.path(), dst_item_path, std::filesystem::copy_options::skip_existing);
+				}
+			}
+		}
+	}
+
 	/* 导出模型 */
 	void ModelEditorLayer::ExportMeshAndMtl()
 	{
@@ -598,6 +640,7 @@ namespace Wuya
 		}
 	}
 
+	/* 导出Mesh */
 	void ModelEditorLayer::ExportMesh(const std::string& path)
 	{
 		PROFILE_FUNCTION();
@@ -768,34 +811,6 @@ namespace Wuya
 			/* Others */
 			material->SetParameters(ParamType::Vec3, "Transmittance", material_params.Transmittance);
 			material->SetParameters(ParamType::Float, "IOR", material_params.IOR);
-		}
-	}
-
-	bool ModelEditorLayer::CopyFileFromTo(const std::filesystem::path& src_path, const std::filesystem::path& dst_path, const std::regex& suffix)
-	{
-		PROFILE_FUNCTION();
-
-		if (src_path.empty() || src_path.empty())
-			return false;
-		
-		if (!std::filesystem::exists(src_path))
-			return false;
-
-		for (auto& item : std::filesystem::directory_iterator(src_path))
-		{
-			std::filesystem::path dst_item_path = dst_path / item.path().filename();
-			if (std::filesystem::is_directory(item.status()))
-			{
-				_mkdir(dst_item_path.string().c_str());
-				CopyFileFromTo(item.path(), dst_item_path, suffix);
-			}
-			else
-			{
-				if (std::regex_match(item.path().extension().string(), suffix))
-				{
-					std::filesystem::copy_file(item.path(), dst_item_path, std::filesystem::copy_options::skip_existing);
-				}
-			}
 		}
 	}
 }

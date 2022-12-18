@@ -6,6 +6,9 @@ namespace Wuya
 	/* 模型材质参数，包括纹理和颜色等 */
 	struct MaterialParams
 	{
+		/* Name */
+		std::string Name;
+
 		/* Ambient */
 		std::string AmbientTexPath;
 		glm::vec3 Ambient;
