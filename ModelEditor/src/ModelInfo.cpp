@@ -45,10 +45,10 @@ namespace Wuya
 			sub_model_info->Name = shape_data.name;
 
 			/* 记录AABB信息 */
-			glm::vec3 aabb_min = glm::vec3(std::numeric_limits<float>::max());
-			glm::vec3 aabb_max = glm::vec3(-std::numeric_limits<float>::max());
+			auto aabb_min = glm::vec3(std::numeric_limits<float>::max());
+			auto aabb_max = glm::vec3(-std::numeric_limits<float>::max());
 
-			const uint32_t face_count = shape_data.mesh.indices.size() / 3;
+			const auto face_count = shape_data.mesh.indices.size() / 3;
 			for (size_t face_idx = 0; face_idx < face_count; ++face_idx)
 			{
 				/* 三角形面片的3个顶点索引 */

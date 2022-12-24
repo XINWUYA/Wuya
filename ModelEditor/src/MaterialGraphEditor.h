@@ -1,4 +1,5 @@
 #include "GraphEditor.h"
+#include "MaterialGraphNodes.h"
 
 namespace Wuya
 {
@@ -8,7 +9,7 @@ namespace Wuya
 	class MaterialGraphEditor
 	{
 	public:
-		MaterialGraphEditor() = default;
+		MaterialGraphEditor();
 		~MaterialGraphEditor() = default;
 
 		/* 显示/隐藏编辑器 */
@@ -24,6 +25,8 @@ namespace Wuya
 		/* 继承ImGuizmo中的GraphEditor::Delegate, 用于自定义节点的行为 */
 		struct MaterialGraphEditorDelegate : public GraphEditor::Delegate
 		{
+			/* 构造时执行 */
+			MaterialGraphEditorDelegate();
 			/* 支持连线 */
 			bool AllowedLink(GraphEditor::NodeIndex from, GraphEditor::NodeIndex to) override;
 			/* 选中节点 */
@@ -50,26 +53,19 @@ namespace Wuya
 			const size_t GetLinkCount() override;
 			/* 获取指定连线 */
 			const GraphEditor::Link GetLink(GraphEditor::LinkIndex index) override;
+			/* 创建一个指定类型的Node */
+			void CreateNode(MaterialGraphNodeType node_type, const ImVec2& ScreenPos = ImVec2(0,0));
 			/* 清楚所有节点和连线 */
 			void ClearAll();
 
-			/* 节点属性 */
-			struct Node
-			{
-				std::string Name;
-				GraphEditor::TemplateIndex TemplateIndex;
-				float X, Y;
-				float SizeX = 200.0f, SizeY = 200.0f;
-				bool IsSelected;
-			};
-			/* 响应右键 */
-			bool m_IsRightClick{ false };
+			/* 右键空白处 */
+			bool m_IsRightClickEmpty{ false };
 			/* 节点列表 */
-			std::vector<Node> NodeArray{};
+			std::vector<MaterialGraphNode> NodeArray{};
 			/* 连线列表 */
 			std::vector<GraphEditor::Link> LinkArray{};
-			/* 节点模板 */
-			static std::vector<GraphEditor::Template> Templates;
+			/* Registry */
+			entt::registry Registry{};
 		};
 
 		/* 是否显示 */
@@ -77,7 +73,7 @@ namespace Wuya
 		/* 显示选项 */
 		GraphEditor::Options m_Options{};
 		GraphEditor::ViewState m_ViewState{};
-		GraphEditor::FitOnScreen m_FitMode{ GraphEditor::Fit_None };
+		GraphEditor::FitOnScreen m_FitMode{ GraphEditor::Fit_SelectedNodes };
 		/* 自定义的委托 */
 		MaterialGraphEditorDelegate m_Delegate{};
 	};

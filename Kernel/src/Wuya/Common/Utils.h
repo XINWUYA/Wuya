@@ -56,7 +56,7 @@ namespace Wuya
 	}
 
 	/* float to string */
-	inline std::string ToString(float value, int precision = 10)
+	inline std::string ToString(float value, int precision = 6)
 	{
 		if (precision < 0)
 			return std::to_string(value);
@@ -68,21 +68,21 @@ namespace Wuya
 	}
 
 	/* vec2 to string */
-	inline std::string ToString(const glm::vec2& value)
+	inline std::string ToString(const glm::vec2& value, int precision = 6)
 	{
-		return std::to_string(value.x) + " " + std::to_string(value.y);
+		return ToString(value.x, precision) + " " + ToString(value.y, precision);
 	}
 
 	/* vec3 to string */
-	inline std::string ToString(const glm::vec3& value)
+	inline std::string ToString(const glm::vec3& value, int precision = 6)
 	{
-		return std::to_string(value.x) + " " + std::to_string(value.y) + " " + std::to_string(value.z);
+		return ToString(value.x, precision) + " " + ToString(value.y, precision) + " " + ToString(value.z, precision);
 	}
 
 	/* vec4 to string */
-	inline std::string ToString(const glm::vec4& value)
+	inline std::string ToString(const glm::vec4& value, int precision = 6)
 	{
-		return std::to_string(value.x) + " " + std::to_string(value.y) + " " + std::to_string(value.z) + " " + std::to_string(value.w);
+		return ToString(value.x, precision) + " " + ToString(value.y, precision) + " " + ToString(value.z, precision) + " " + ToString(value.w, precision);
 	}
 
 	/* string to vec2
