@@ -65,9 +65,6 @@ namespace Wuya
 		/* 加载Obj模型信息 */
 		void LoadFromObj(const std::string& filepath);
 
-		/* 导出成Mesh */
-		void ExportMesh(const std::string& filepath);
-
 		/* 重置数据 */
 		void Reset();
 

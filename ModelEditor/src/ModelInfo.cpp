@@ -215,12 +215,6 @@ namespace Wuya
 		}
 	}
 
-	/* 导出成Mesh */
-	void ModelInfo::ExportMesh(const std::string& filepath)
-	{
-		
-	}
-
 	/* 重置数据 */
 	void ModelInfo::Reset()
 	{

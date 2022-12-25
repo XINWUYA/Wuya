@@ -18,6 +18,11 @@ namespace Wuya
 		/* 绘制相关UI */
 		void OnImGuiRenderer();
 
+		/* 序列化 */
+		void Serializer(const std::string& path);
+		/* 反序列化*/
+		void Deserializer(const std::string& path);
+
 	private:
 		/* 保存材质 */
 		void SaveMaterial();
@@ -54,9 +59,13 @@ namespace Wuya
 			/* 获取指定连线 */
 			const GraphEditor::Link GetLink(GraphEditor::LinkIndex index) override;
 			/* 创建一个指定类型的Node */
-			void CreateNode(MaterialGraphNodeType node_type, const ImVec2& ScreenPos = ImVec2(0,0));
+			MaterialGraphNode CreateNode(MaterialGraphNodeType node_type, const ImVec2& ScreenPos = ImVec2(0,0));
 			/* 清楚所有节点和连线 */
 			void ClearAll();
+			/* 全选节点 */
+			void SelectAllNodes();
+			/* 删除选中节点 */
+			void DeleteSelectedNodes();
 
 			/* 右键空白处 */
 			bool m_IsRightClickEmpty{ false };
@@ -70,10 +79,12 @@ namespace Wuya
 
 		/* 是否显示 */
 		bool m_IsShow{ false };
+		/* 路径 */
+		std::string m_Path{};
 		/* 显示选项 */
 		GraphEditor::Options m_Options{};
 		GraphEditor::ViewState m_ViewState{};
-		GraphEditor::FitOnScreen m_FitMode{ GraphEditor::Fit_SelectedNodes };
+		GraphEditor::FitOnScreen m_FitMode{ GraphEditor::Fit_AllNodes };
 		/* 自定义的委托 */
 		MaterialGraphEditorDelegate m_Delegate{};
 	};

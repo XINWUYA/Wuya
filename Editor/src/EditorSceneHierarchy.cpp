@@ -366,7 +366,7 @@ namespace Wuya
 				EditorUIFunctions::DrawCheckboxUI("IsFixedAspectRatio", component.IsFixedAspectRatio);
 				auto& scene_camera = component.Camera;
 				int projection_idx = static_cast<int>(scene_camera->GetProjectionType());
-				EditorUIFunctions::DrawComboUI("ProjectionType", { "Perspective", "Orthographic" }, projection_idx,
+				EditorUIFunctions::DrawComboUI("ProjectionType", GetEnumNames<SceneCamera::ProjectionType>(), projection_idx,
 					[&scene_camera](int selected_idx)
 					{
 						scene_camera->SetProjectionType(static_cast<SceneCamera::ProjectionType>(selected_idx));
@@ -458,7 +458,7 @@ namespace Wuya
 
 				/* 光源类型 */
 				int type_idx = static_cast<int>(light->GetLightType());
-				EditorUIFunctions::DrawComboUI("Type", { "Directional", "Point", "Spot", "Area", "Volume"}, type_idx,
+				EditorUIFunctions::DrawComboUI("Type", GetEnumNames<LightType>(), type_idx,
 					[&light](int selected_idx)
 					{
 						/* todo: 切换光源类型 */

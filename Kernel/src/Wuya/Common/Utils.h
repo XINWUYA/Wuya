@@ -2,6 +2,7 @@
 #include <regex>
 #include <string>
 #include <glm/glm.hpp>
+#include <magic_enum.hpp>
 
 namespace Wuya
 {
@@ -182,5 +183,26 @@ namespace Wuya
 	inline constexpr Enum operator^=(Enum& lt, Enum rt) noexcept
 	{
 		return lt = lt ^ rt;
+	}
+
+	/* 获取Enum的所有名称 */
+	template <typename Enum>
+	inline std::vector<std::string> GetEnumNames()
+	{
+		constexpr auto& enum_names = magic_enum::enum_names<Enum>();
+
+		std::vector<std::string> result;
+		result.reserve(enum_names.size());
+		for (auto& mode : enum_names)
+			result.emplace_back(mode);
+
+		return result;
+	}
+
+	/* 获取单个Enum的名称 */
+	template <typename Enum>
+	inline const char* GetEnumName(Enum enum_idx)
+	{
+		return magic_enum::enum_name(enum_idx).data();
 	}
 }

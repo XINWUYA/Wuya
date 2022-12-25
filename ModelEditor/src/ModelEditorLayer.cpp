@@ -561,6 +561,13 @@ namespace Wuya
 
 			return;
 		}
+
+		if (extension == ".mtlgraph")
+		{
+			EDITOR_LOG_DEBUG("Import material graph file: {}.", path.generic_string());
+
+			m_MaterialGraphEditor.Deserializer(path.generic_string());
+		}
 	}
 
 	/* 导入模型 */

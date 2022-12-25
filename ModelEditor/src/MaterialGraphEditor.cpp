@@ -1,7 +1,7 @@
 #include "Pch.h"
 #include "MaterialGraphEditor.h"
-
 #include "PackedUIFuncs.h"
+#include <tinyxml2.h>
 
 namespace Wuya
 {
@@ -29,6 +29,8 @@ namespace Wuya
 		if (!m_IsShow)
 			return;
 
+		ImGuiIO& io = ImGui::GetIO();
+
 		ImGui::Begin("Material Graph Editor");
 		{
 			ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
@@ -39,7 +41,11 @@ namespace Wuya
 			static auto save_icon = TextureAssetManager::Instance().GetOrCreateTexture("editor_res/icons/save.png", {});
 			if (ImGui::ImageButton((ImTextureID)save_icon->GetTextureID(), ImVec2(icon_size, icon_size), ImVec2(0, 1), ImVec2(1, 0), 0))
 			{
-				SaveMaterial();
+				if (m_Path.empty())
+				{
+					m_Path = FileDialog::SaveFile("MtlGraph(*.mtlgraph)\0*.mtlgraph\0");
+				}
+				Serializer(m_Path);
 			}
 			ImGui::PopStyleColor();
 
@@ -74,8 +80,8 @@ namespace Wuya
 				ImGui::PushItemWidth(160);
 				if (ImGui::Button(label, ImVec2(160, 24)))
 				{
-					const auto& mouse_pos = Input::GetMousePos();
-					m_Delegate.CreateNode(node_type, ImVec2(mouse_pos.x, mouse_pos.y));
+					const auto& mouse_pos = io.MousePos;
+					m_Delegate.NodeArray.emplace_back(m_Delegate.CreateNode(node_type, ImVec2(mouse_pos.x, mouse_pos.y)));
 					m_Delegate.m_IsRightClickEmpty = false;
 					ImGui::CloseCurrentPopup();
 				}
@@ -135,15 +141,15 @@ namespace Wuya
 						auto& component = m_Delegate.Registry.get_or_emplace<MGSamplerStateComponent>(node.EntityHandle);
 
 						int warp_mode_idx = static_cast<int>(component.WrapMode);
-						PackedUIFuncs::DrawComboUI("WrapType", { "ClampToEdge", "Repeat", "MirroredRepeat"}, warp_mode_idx);
+						PackedUIFuncs::DrawComboUI("WrapType", GetEnumNames<SamplerWrapMode>(), warp_mode_idx);
 						component.WrapMode = static_cast<SamplerWrapMode>(warp_mode_idx);
 
 						int min_filter_index = static_cast<int>(component.MinFilter);
-						PackedUIFuncs::DrawComboUI("MinFilter", { "Nearest", "Linear", "NearestMipmapNearest", "LinearMipmapNearest", "NearestMipmapLinear", "LinearMipmapLinear"}, min_filter_index);
+						PackedUIFuncs::DrawComboUI("MinFilter", GetEnumNames<SamplerMinFilter>(), min_filter_index);
 						component.MinFilter = static_cast<SamplerMinFilter>(min_filter_index);
 
 						int mag_filter_index = static_cast<int>(component.MagFilter);
-						PackedUIFuncs::DrawComboUI("MagFilter", { "Nearest", "Linear"}, mag_filter_index);
+						PackedUIFuncs::DrawComboUI("MagFilter", GetEnumNames<SamplerMagFilter>(), mag_filter_index);
 						component.MagFilter = static_cast<SamplerMagFilter>(mag_filter_index);
 					}
 					break;
@@ -181,7 +187,7 @@ namespace Wuya
 					{
 						auto& component = m_Delegate.Registry.get_or_emplace<MGOperatorComponent>(node.EntityHandle);
 						int operator_type_idx = static_cast<int>(component.OperatorType);
-						PackedUIFuncs::DrawComboUI("OperatorType", { "Add", "Subtract", "Multiply", "Divide" }, operator_type_idx);
+						PackedUIFuncs::DrawComboUI("OperatorType", GetEnumNames<MGNodeOperatorType>(), operator_type_idx);
 						component.OperatorType = static_cast<MGNodeOperatorType>(operator_type_idx);
 
 						/* 暂不支持多元操作符，麻烦太多 */
@@ -200,6 +206,242 @@ namespace Wuya
 			}
 		}
 		ImGui::End();
+
+		/* ImGui事件响应 */
+		if (io.KeysDown[Key::Delete])
+			m_Delegate.DeleteSelectedNodes();
+
+		if (io.KeyCtrl)
+		{
+			if (io.KeysDown[Key::A]) /* Ctrl + A: 全选所有节点 */
+				m_Delegate.SelectAllNodes();
+		}
+	}
+
+	/* 序列化 */
+	void MaterialGraphEditor::Serializer(const std::string& path)
+	{
+		m_Path = path;
+
+		ASSERT(!m_Path.empty());
+
+		/* 写入材质图信息 */
+		auto* out_mtl_graph_file = new tinyxml2::XMLDocument();
+		out_mtl_graph_file->InsertEndChild(out_mtl_graph_file->NewDeclaration());
+		auto* mtl_graph_root = out_mtl_graph_file->NewElement("MaterialGraph");
+		out_mtl_graph_file->InsertEndChild(mtl_graph_root);
+		mtl_graph_root->SetAttribute("NodeCount", m_Delegate.GetNodeCount());
+		mtl_graph_root->SetAttribute("LinkCount", m_Delegate.GetLinkCount());
+
+		/* 所有节点 */
+		auto* all_nodes_root = mtl_graph_root->InsertNewChildElement("Nodes");
+		for (size_t i = 0; i < m_Delegate.GetNodeCount(); ++i)
+		{
+			const auto& node = m_Delegate.NodeArray[i];
+			auto* node_doc = all_nodes_root->InsertNewChildElement("Node");
+			node_doc->SetAttribute("NodeIndex", i);
+			node_doc->SetAttribute("NodeType", static_cast<int>(node.NodeType)); // 已知NodeType的情况下，Name、TemplateIndex、Width、Height、IsSelected初始值都是固定的，因此不必保存
+			node_doc->SetAttribute("ScreenPosX", node.ScreenPosX);
+			node_doc->SetAttribute("ScreenPosY", node.ScreenPosY);
+
+			/* 各类型节点独有的属性 */
+			switch (node.NodeType)
+			{
+			case MaterialGraphNodeType::PBRMaterial:break;
+			case MaterialGraphNodeType::Texture2D:
+				{
+					auto* texture_doc = node_doc->InsertNewChildElement("Texture");
+					auto& component = m_Delegate.Registry.get_or_emplace<MGTexture2DComponent>(node.EntityHandle);
+					texture_doc->SetAttribute("TexturePath", component.Texture->GetPath().c_str());
+					texture_doc->SetAttribute("IsGenMipmap", component.IsGenMipmap);
+					texture_doc->SetAttribute("TilingFactor", component.TilingFactor);
+				}
+				break;
+			case MaterialGraphNodeType::SamplerState:
+				{
+					auto* sampler_state_doc = node_doc->InsertNewChildElement("SamplerState");
+					auto& component = m_Delegate.Registry.get_or_emplace<MGSamplerStateComponent>(node.EntityHandle);
+					sampler_state_doc->SetAttribute("WrapMode", static_cast<int>(component.WrapMode));
+					sampler_state_doc->SetAttribute("MinFilter", static_cast<int>(component.MinFilter));
+					sampler_state_doc->SetAttribute("MagFilter", static_cast<int>(component.MagFilter));
+				}
+				break;
+			case MaterialGraphNodeType::Float:
+				{
+					auto* float_doc = node_doc->InsertNewChildElement("Float");
+					auto& component = m_Delegate.Registry.get_or_emplace<MGFloatComponent>(node.EntityHandle);
+					float_doc->SetAttribute("Value", component.Value);
+				}
+				break;
+			case MaterialGraphNodeType::Float2:
+				{
+					auto* float2_doc = node_doc->InsertNewChildElement("Float2");
+					auto& component = m_Delegate.Registry.get_or_emplace<MGFloat2Component>(node.EntityHandle);
+					float2_doc->SetAttribute("Value", ToString(component.Value).c_str());
+				}
+				break;
+			case MaterialGraphNodeType::Float3:
+				{
+					auto* float3_doc = node_doc->InsertNewChildElement("Float3");
+					auto& component = m_Delegate.Registry.get_or_emplace<MGFloat3Component>(node.EntityHandle);
+					float3_doc->SetAttribute("Value", ToString(component.Value).c_str());
+				}
+				break;
+			case MaterialGraphNodeType::Float4:
+				{
+					auto* float4_doc = node_doc->InsertNewChildElement("Float4");
+					auto& component = m_Delegate.Registry.get_or_emplace<MGFloat4Component>(node.EntityHandle);
+					float4_doc->SetAttribute("Value", ToString(component.Value).c_str());
+				}
+				break;
+			case MaterialGraphNodeType::Color:
+				{
+					auto* color_doc = node_doc->InsertNewChildElement("Color");
+					auto& component = m_Delegate.Registry.get_or_emplace<MGColorComponent>(node.EntityHandle);
+					color_doc->SetAttribute("Value", ToString(component.Color).c_str());
+				}
+				break;
+			case MaterialGraphNodeType::Operator:
+				{
+					auto* operator_doc = node_doc->InsertNewChildElement("Operator");
+					auto& component = m_Delegate.Registry.get_or_emplace<MGOperatorComponent>(node.EntityHandle);
+					operator_doc->SetAttribute("OperatorType", static_cast<int>(component.OperatorType));
+				}
+				break;
+			}
+		}
+
+		/* 所有连线 */
+		auto* all_links_root = mtl_graph_root->InsertNewChildElement("Links");
+		for (const auto& link : m_Delegate.LinkArray)
+		{
+			auto* link_doc = all_links_root->InsertNewChildElement("Link");
+			link_doc->SetAttribute("InputNodeIndex", link.mInputNodeIndex);
+			link_doc->SetAttribute("InputSlotIndex", link.mInputSlotIndex);
+			link_doc->SetAttribute("OutputNodeIndex", link.mOutputNodeIndex); // OutputNode表示当前连线的输出端，如连线a->b，则该OutputNodeIndex为b
+			link_doc->SetAttribute("OutputSlotIndex", link.mOutputSlotIndex);
+		}
+
+		/* 保存到文本 */
+		out_mtl_graph_file->SaveFile(path.c_str());
+		delete out_mtl_graph_file;
+	}
+
+	/* 反序列化 */
+	void MaterialGraphEditor::Deserializer(const std::string& path)
+	{
+		PROFILE_FUNCTION();
+
+		m_Path = path;
+		ASSERT(!m_Path.empty());
+
+		/* 读取材质信息 */
+		auto* in_mtl_graph_file = new tinyxml2::XMLDocument();
+		tinyxml2::XMLError error = in_mtl_graph_file->LoadFile(m_Path.c_str());
+		if (error != tinyxml2::XML_SUCCESS)
+		{
+			CORE_LOG_ERROR("Failed to deserializer mtl file: {}.", m_Path);
+			return;
+		}
+
+		auto* mtl_graph_root = in_mtl_graph_file->FirstChildElement("MaterialGraph");
+		m_Delegate.NodeArray.resize(mtl_graph_root->IntAttribute("NodeCount"));
+
+		/* Nodes */
+		auto* all_nodes_root = mtl_graph_root->FirstChildElement("Nodes");
+		for (auto* node_doc = all_nodes_root->FirstChildElement("Node"); node_doc; node_doc = node_doc->NextSiblingElement("Node"))
+		{
+			auto node_index = node_doc->IntAttribute("NodeIndex", -1);
+			if (node_index >= 0)
+			{
+				auto& node = m_Delegate.NodeArray[node_index];
+				const auto node_type = static_cast<MaterialGraphNodeType>(node_doc->IntAttribute("NodeType"));
+				const auto screen_pos_x = node_doc->FloatAttribute("ScreenPosX");
+				const auto screen_pos_y = node_doc->FloatAttribute("ScreenPosY");
+				node = m_Delegate.CreateNode(node_type, ImVec2(screen_pos_x, screen_pos_y));
+
+				/* 各类型节点独有的属性 */
+				switch (node.NodeType)
+				{
+				case MaterialGraphNodeType::PBRMaterial:break;
+				case MaterialGraphNodeType::Texture2D:
+				{
+					const auto* texture_doc = node_doc->FirstChildElement("Texture");
+					auto& component = m_Delegate.Registry.get_or_emplace<MGTexture2DComponent>(node.EntityHandle);
+					component.Texture = TextureAssetManager::Instance().GetOrCreateTexture(texture_doc->Attribute("TexturePath"), {}); // todo: loadConfig
+					component.IsGenMipmap = texture_doc->BoolAttribute("IsGenMipmap");
+					component.TilingFactor = texture_doc->FloatAttribute("TilingFactor");
+				}
+				break;
+				case MaterialGraphNodeType::SamplerState:
+				{
+					const auto* sampler_state_doc = node_doc->FirstChildElement("SamplerState");
+					auto& component = m_Delegate.Registry.get_or_emplace<MGSamplerStateComponent>(node.EntityHandle);
+					component.WrapMode = static_cast<SamplerWrapMode>(sampler_state_doc->IntAttribute("WrapMode"));
+					component.MinFilter = static_cast<SamplerMinFilter>(sampler_state_doc->IntAttribute("MinFilter"));
+					component.MagFilter = static_cast<SamplerMagFilter>(sampler_state_doc->IntAttribute("MagFilter"));
+				}
+				break;
+				case MaterialGraphNodeType::Float:
+				{
+					const auto* float_doc = node_doc->FirstChildElement("Float");
+					auto& component = m_Delegate.Registry.get_or_emplace<MGFloatComponent>(node.EntityHandle);
+					component.Value = float_doc->FloatAttribute("Value");
+				}
+				break;
+				case MaterialGraphNodeType::Float2:
+				{
+					const auto* float2_doc = node_doc->FirstChildElement("Float2");
+					auto& component = m_Delegate.Registry.get_or_emplace<MGFloat2Component>(node.EntityHandle);
+					component.Value = ToVec2(float2_doc->Attribute("Value"));
+				}
+				break;
+				case MaterialGraphNodeType::Float3:
+				{
+					const auto* float3_doc = node_doc->FirstChildElement("Float3");
+					auto& component = m_Delegate.Registry.get_or_emplace<MGFloat3Component>(node.EntityHandle);
+					component.Value = ToVec3(float3_doc->Attribute("Value"));
+				}
+				break;
+				case MaterialGraphNodeType::Float4:
+				{
+					const auto* float4_doc = node_doc->FirstChildElement("Float4");
+					auto& component = m_Delegate.Registry.get_or_emplace<MGFloat4Component>(node.EntityHandle);
+					component.Value = ToVec4(float4_doc->Attribute("Value"));
+				}
+				break;
+				case MaterialGraphNodeType::Color:
+				{
+					const auto* color_doc = node_doc->FirstChildElement("Color");
+					auto& component = m_Delegate.Registry.get_or_emplace<MGColorComponent>(node.EntityHandle);
+					component.Color = ToVec4(color_doc->Attribute("Color"));
+				}
+				break;
+				case MaterialGraphNodeType::Operator:
+				{
+					const auto* operator_doc = node_doc->FirstChildElement("Operator");
+					auto& component = m_Delegate.Registry.get_or_emplace<MGOperatorComponent>(node.EntityHandle);
+					component.OperatorType = static_cast<MGNodeOperatorType>(operator_doc->IntAttribute("OperatorType"));
+				}
+				break;
+				}
+			}
+		}
+
+		/* Links */
+		auto* all_links_root = mtl_graph_root->FirstChildElement("Links");
+		for (auto* link_doc = all_links_root->FirstChildElement("Link"); link_doc; link_doc = link_doc->NextSiblingElement("Link"))
+		{
+			m_Delegate.LinkArray.push_back({ 
+				static_cast<GraphEditor::NodeIndex>(link_doc->IntAttribute("InputNodeIndex")), 
+				static_cast<GraphEditor::NodeIndex>(link_doc->IntAttribute("InputSlotIndex")), 
+				static_cast<GraphEditor::NodeIndex>(link_doc->IntAttribute("OutputNodeIndex")), 
+				static_cast<GraphEditor::NodeIndex>(link_doc->IntAttribute("OutputSlotIndex"))
+			});
+		}
+
+		delete in_mtl_graph_file;
+		m_IsShow = true;
 	}
 
 	/* 保存材质 */
@@ -211,7 +453,7 @@ namespace Wuya
 	/* 构造时，默认增加一个PBR节点 */
 	MaterialGraphEditor::MaterialGraphEditorDelegate::MaterialGraphEditorDelegate()
 	{
-		CreateNode(MaterialGraphNodeType::PBRMaterial);
+		NodeArray.emplace_back(CreateNode(MaterialGraphNodeType::PBRMaterial));
 	}
 
 	/* 支持连线 */
@@ -284,7 +526,9 @@ namespace Wuya
 		case MaterialGraphNodeType::SamplerState:
 			{
 				const auto& component = Registry.get_or_emplace<MGSamplerStateComponent>(node.EntityHandle);
-
+				draw_list->AddText(rectangle.Min, IM_COL32(255, 128, 64, 255), GetEnumName(component.WrapMode));
+				draw_list->AddText(ImVec2(rectangle.Min.x, rectangle.Min.y + 20), IM_COL32(255, 128, 64, 255), GetEnumName(component.MinFilter));
+				draw_list->AddText(ImVec2(rectangle.Min.x, rectangle.Min.y + 40), IM_COL32(255, 128, 64, 255), GetEnumName(component.MagFilter));
 			}
 			break;
 		case MaterialGraphNodeType::Float:
@@ -321,23 +565,7 @@ namespace Wuya
 		case MaterialGraphNodeType::Operator:
 			{
 				const auto& component = Registry.get_or_emplace<MGOperatorComponent>(node.EntityHandle);
-				std::string type;
-				switch (component.OperatorType)
-				{
-				case MGNodeOperatorType::Add:
-					type = "Add";
-					break;
-				case MGNodeOperatorType::Subtract: 
-					type = "Subtract";
-					break;
-				case MGNodeOperatorType::Multiply: 
-					type = "Multiply";
-					break;
-				case MGNodeOperatorType::Divide: 
-					type = "Divide";
-					break;
-				}
-				draw_list->AddText(rectangle.Min, IM_COL32(255, 128, 64, 255), type.c_str());
+				draw_list->AddText(rectangle.Min, IM_COL32(255, 128, 64, 255), GetEnumName(component.OperatorType));
 			}
 			break;
 		}
@@ -405,7 +633,7 @@ namespace Wuya
 	}
 
 	/* 创建一个指定类型的Node */
-	void MaterialGraphEditor::MaterialGraphEditorDelegate::CreateNode(MaterialGraphNodeType node_type, const ImVec2& ScreenPos)
+	MaterialGraphNode MaterialGraphEditor::MaterialGraphEditorDelegate::CreateNode(MaterialGraphNodeType node_type, const ImVec2& ScreenPos)
 	{
 		PROFILE_FUNCTION();
 
@@ -422,7 +650,7 @@ namespace Wuya
 				node_inst.TemplateIndex = TemplateIndex_PBRMaterial;
 				node_inst.Width = 160;
 				node_inst.Height = 800;
-				node_inst.IsSelected = true; // 默认被选中，用于首次显示时适应到屏幕
+				node_inst.IsSelected = false;
 			}
 			break;
 		case MaterialGraphNodeType::Texture2D:
@@ -531,8 +759,7 @@ namespace Wuya
 			}
 			break;
 		}
-
-		NodeArray.emplace_back(node_inst);
+		return node_inst;
 	}
 
 	/* 清楚所有节点和连线 */
@@ -540,5 +767,67 @@ namespace Wuya
 	{
 		NodeArray.clear();
 		LinkArray.clear();
+	}
+
+	/* 全选节点 */
+	void MaterialGraphEditor::MaterialGraphEditorDelegate::SelectAllNodes()
+	{
+		for (auto& node : NodeArray)
+			node.IsSelected = true;
+	}
+
+	/* 删除选中节点 */
+	void MaterialGraphEditor::MaterialGraphEditorDelegate::DeleteSelectedNodes()
+	{
+		/* 在删除选中节点的同时，记录这些节点的索引 */
+		std::vector<size_t> selected_node_indices;
+		size_t node_index = 0;
+		for (auto node_itr = NodeArray.begin(); node_itr != NodeArray.end(); ++node_index)
+		{
+			if (node_itr->IsSelected)
+			{
+				node_itr = NodeArray.erase(node_itr);
+				selected_node_indices.emplace_back(node_index);
+			}
+			else
+				++node_itr;
+		}
+
+		/* 删除与选中节点直接关联的连线 */
+		for (const auto selected_node_index : selected_node_indices)
+		{
+			for (auto link_itr = LinkArray.begin(); link_itr != LinkArray.end();)
+			{
+				/* 若连线包含选中节点， 则删除该连线 */
+				if (link_itr->mInputNodeIndex == selected_node_index || link_itr->mOutputNodeIndex == selected_node_index)
+					link_itr = LinkArray.erase(link_itr);
+				else
+					++link_itr;
+			}
+		}
+
+		/* 记录剩余每个连线的索引需要更新的值，因为在删除节点时，部分节点在NodeArray的位置会向前移动，不更新Link的索引会导致绘制出错或Crash */
+		std::map<size_t, std::pair<int, int>> update_link_infos; /* <LinkIndex, <InputNodeIndexToSubtract, OutputNodeIndexToSubtract>>*/
+		for (const auto selected_node_index : selected_node_indices)
+		{
+			for (size_t link_index = 0; link_index < LinkArray.size(); ++link_index)
+			{
+				auto& link = LinkArray[link_index];
+
+				if (link.mInputNodeIndex > selected_node_index)
+					update_link_infos[link_index].first++;
+
+				if (link.mOutputNodeIndex > selected_node_index)
+					update_link_infos[link_index].second++;
+			}
+		}
+
+		/* 更新连线的索引 */
+		for (const auto& link_info : update_link_infos)
+		{
+			auto& link = LinkArray[link_info.first];
+			link.mInputNodeIndex -= link_info.second.first;
+			link.mOutputNodeIndex -= link_info.second.second;
+		}
 	}
 }

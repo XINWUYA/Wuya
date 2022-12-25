@@ -31,6 +31,7 @@ project "Kernel"
 		"%{IncludeDirs.tinyxml2}",
 		"%{IncludeDirs.xxHash}",
 		"%{IncludeDirs.tinyobjloader}",
+		"%{IncludeDirs.magic_enum}",
 		"%{IncludeDirs.VulkanSDK}",
 	}
 	

@@ -31,3 +31,6 @@
 [submodule "Kernel/third_party/tinyobjloader"]
 	path = Kernel/third_party/tinyobjloader
 	url = https://github.com/tinyobjloader/tinyobjloader
+[submodule "Kernel/third_party/magic_enum"]
+	path = Kernel/third_party/magic_enum
+	url = https://github.com/Neargye/magic_enum.git
