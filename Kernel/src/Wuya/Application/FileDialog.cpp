@@ -2,6 +2,7 @@
 #include "FileDialog.h"
 #include "Application.h"
 #include "commdlg.h"
+#include "shellapi.h"
 #include "GLFW/glfw3.h"
 #define GLFW_EXPOSE_NATIVE_WIN32
 #include <GLFW/glfw3native.h>
@@ -55,5 +56,26 @@ namespace Wuya
 			return ofn.lpstrFile;
 
 		return std::string();
+	}
+
+	/* 打开到指定文件目录 */
+	bool OpenFileExplorer(const char* path)
+	{
+		if (!path || path == "")
+			return false;
+
+		auto select_params = " /select, " + std::string(path);
+		std::wstring select_params_ws;
+		select_params_ws.assign(select_params.begin(), select_params.end());
+
+		SHELLEXECUTEINFO shex = { 0 };
+		shex.cbSize = sizeof(SHELLEXECUTEINFO);
+		shex.lpFile = L"explorer";
+		shex.lpParameters = select_params_ws.c_str();
+		shex.lpVerb = L"open";
+		shex.nShow = SW_SHOWDEFAULT;
+		shex.lpDirectory = NULL;
+
+		return ShellExecuteEx(&shex);
 	}
 }

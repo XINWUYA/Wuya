@@ -6,12 +6,12 @@ namespace Wuya
 	class Entity;
 
 	/* 场景实体列表 */
-	class EditorSceneHierarchy
+	class SceneHierarchy
 	{
 	public:
-		EditorSceneHierarchy();
-		EditorSceneHierarchy(const SharedPtr<Scene>& scene);
-		~EditorSceneHierarchy() = default;
+		SceneHierarchy();
+		SceneHierarchy(const SharedPtr<Scene>& scene);
+		~SceneHierarchy() = default;
 
 		/* 所属场景 */
 		void SetOwnerScene(const SharedPtr<Scene>& scene);

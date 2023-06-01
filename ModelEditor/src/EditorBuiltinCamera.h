@@ -14,34 +14,48 @@ namespace Wuya
 
 		/* 设置视口区域 */
 		void SetViewportRegion(const ViewportRegion& region);
+		[[nodiscard]]
 		const ViewportRegion& GetViewportRegion() const { return m_ViewportRegion; }
 
 		/* 设置聚焦模式 */
+		[[nodiscard]]
 		bool IsFocus() const { return m_IsFocus; }
 		void SetFocus(bool focus) { m_IsFocus = focus; }
 
 		/* 相机距离 */
-		void SetDistance(float distance) { m_Distance = distance; }
+		void SetDistance(float distance) { m_Distance = distance; m_IsDirty = true; }
+		[[nodiscard]]
 		float GetDistance() const { return m_Distance; }
 		/* 移动速度 */
 		void SetMoveSpeed(float speed) { m_MoveSpeed = speed; }
+		[[nodiscard]]
 		float GetMoveSpeed() const { return m_MoveSpeed; }
 
-		void SetFocalPoint(const glm::vec3& position) { m_FocalPoint = position; }
+		void SetFocalPoint(const glm::vec3& position) { m_FocalPoint = position; m_IsDirty = true; }
 
+		[[nodiscard]]
 		float GetPitch() const { return m_Pitch; }
+		[[nodiscard]]
 		float GetYaw() const { return m_Yaw; }
+		[[nodiscard]]
 		float GetAspectRatio() const { return m_AspectRatio; }
+		[[nodiscard]]
+		float GetFov() const { return m_Fov; }
 
+		[[nodiscard]]
 		const glm::vec3& GetUpDir() const { return m_UpDirection; }
+		[[nodiscard]]
 		const glm::vec3& GetRightDir() const { return m_RightDirection; }
+		[[nodiscard]]
 		const glm::vec3& GetForwardDir() const { return m_ForwardDirection; }
 
+		[[nodiscard]]
 		glm::quat GetOrientation() const;
 
 		void SetViewMatrix(const glm::mat4& view_mat);
 
 		/* 根据像素位置，获取EntityId */
+		[[nodiscard]]
 		int32_t PickingEntityByPixelPos(uint32_t x, uint32_t y) const;
 
 	private:
@@ -57,8 +71,11 @@ namespace Wuya
 		void OnMouseRotate(const glm::vec2& delta); // 绕聚焦中心旋转
 		void OnMouseZoom(float delta); // 拉远拉近
 
+		[[nodiscard]]
 		glm::vec2 PanSpeed() const;
+		[[nodiscard]]
 		float RotateSpeed() const;
+		[[nodiscard]]
 		float ZoomSpeed() const;
 
 		/* 相机基本参数 */

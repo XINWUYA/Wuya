@@ -1,22 +1,38 @@
 #pragma once
-#include "EditorSceneHierarchy.h"
+#include "SceneHierarchy.h"
 #include "EditorResourceBrowser.h"
 #include "EditorBuiltinCamera.h"
+#include "EditorCommon.h"
 
 namespace Wuya
 {
 	/* Editor层类 */
-	class EditorLayer final : public ILayer
+	class SceneEditorLayer final : public ILayer
 	{
 	public:
-		EditorLayer();
-		~EditorLayer() override = default;
+		SceneEditorLayer();
+		~SceneEditorLayer() override = default;
 
 		void OnAttached() override;
 		void OnDetached() override;
 		void OnUpdate(float delta_time) override;
 		void OnImGuiRender() override;
 		void OnEvent(IEvent* event) override;
+
+		/* 新建场景 */
+		void NewScene();
+		/* 导入场景：通过弹窗找到指定场景文件并打开 */
+		void ImportScene();
+		/* 保存场景 */
+		void SaveScene();
+		/* 保存场景到指定路径 */
+		void SaveSceneAs();
+
+		void Active(bool active = true) { m_IsActivated = active; }
+		bool IsActivated() const { return m_IsActivated; }
+
+		void SetGizmoType(int type) { m_GizmoType = type; }
+		void SetPlayMode(PlayMode mode) { m_PlayMode = mode; }
 
 	private:
 		/* 更新视口 */
@@ -30,19 +46,6 @@ namespace Wuya
 		/* 响应拖拽文件到主窗口 */
 		void OnDragItemToScene(const std::filesystem::path& path);
 
-		/* 新建场景 */
-		void NewScene();
-		/* 导入场景：通过弹窗找到指定场景文件并打开 */
-		void ImportScene();
-		/* 保存场景 */
-		void SaveScene();
-		/* 保存场景到指定路径 */
-		void SaveSceneAs();
-
-		/* 显示菜单栏UI */
-		void ShowMenuUI();
-		/* 显示场景控制UI */
-		void ShowSceneControllerUI();
 		/* 显示主场景视口 */
 		void ShowSceneViewportUI();
 		/* 显示渲染统计信息 */
@@ -53,13 +56,6 @@ namespace Wuya
 		/* 鼠标选中Entity时的响应 */
 		void CheckMouseSelectEntity();
 
-		/* 执行模式 */
-		enum class PlayMode : uint8_t
-		{
-			Edit = 0,	/* 编辑模式 */
-			Runtime		/* 运行模式 */
-		};
-
 		/* 编辑器相机 */
 		UniquePtr<EditorCamera> m_pEditorCamera{ nullptr };
 
@@ -68,9 +64,7 @@ namespace Wuya
 		/* 当前场景路径 */
 		std::string m_ActiveScenePath{};
 		/* 场景实体管理窗口 */
-		EditorSceneHierarchy m_SceneHierarchy;
-		/* 资源管理窗口 */
-		EditorResourceBrowser m_ResourceBrowser;
+		SceneHierarchy m_SceneHierarchy;
 		/* 选中实体 */
 		Entity m_HoveredEntity;
 		/* 视口范围: x: width_min; y: height_min; z: width_max; w: height_max */
@@ -79,9 +73,11 @@ namespace Wuya
 		bool m_IsViewportFocused{ false };
 		/* 鼠标停留在视口上 */
 		bool m_IsViewportHovered{ false };
-		/* 默认为编辑模式 */
-		PlayMode m_PlayMode{ PlayMode::Edit };
 		/* 移动，旋转，缩放UI */
 		int m_GizmoType = -1;
+		/* 默认为编辑模式 */
+		PlayMode m_PlayMode{ PlayMode::Edit };
+		/* 当前编辑器是否被启用 */
+		bool m_IsActivated{ true };
 	};
 }

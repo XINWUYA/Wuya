@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<MaterialGraph NodeCount="7" LinkCount="6">
+    <Nodes>
+        <Node NodeIndex="0" NodeType="0" ScreenPosX="703.98871" ScreenPosY="1.1920929e-06"/>
+        <Node NodeIndex="1" NodeType="1" ScreenPosX="-809.94965" ScreenPosY="65.496147">
+            <Texture TexturePath="assets/textures/default_texture.png" IsGenMipmap="true" TilingFactor="1"/>
+        </Node>
+        <Node NodeIndex="2" NodeType="2" ScreenPosX="-552.4903" ScreenPosY="5.0331502">
+            <SamplerState WrapMode="0" MinFilter="1" MagFilter="1"/>
+        </Node>
+        <Node NodeIndex="3" NodeType="1" ScreenPosX="-528.76758" ScreenPosY="350.11392">
+            <Texture TexturePath="assets/textures/default_texture.png" IsGenMipmap="true" TilingFactor="1"/>
+        </Node>
+        <Node NodeIndex="4" NodeType="2" ScreenPosX="-277.35471" ScreenPosY="290.88663">
+            <SamplerState WrapMode="0" MinFilter="1" MagFilter="1"/>
+        </Node>
+        <Node NodeIndex="5" NodeType="3" ScreenPosX="199.56392" ScreenPosY="328.58994">
+            <Float Value="0.5"/>
+        </Node>
+        <Node NodeIndex="6" NodeType="1" ScreenPosX="161.13753" ScreenPosY="582.18463">
+            <Texture TexturePath="assets/textures/default_texture.png" IsGenMipmap="true" TilingFactor="1"/>
+        </Node>
+    </Nodes>
+    <Links>
+        <Link InputNodeIndex="1" InputSlotIndex="0" OutputNodeIndex="2" OutputSlotIndex="0"/>
+        <Link InputNodeIndex="2" InputSlotIndex="1" OutputNodeIndex="0" OutputSlotIndex="0"/>
+        <Link InputNodeIndex="3" InputSlotIndex="0" OutputNodeIndex="4" OutputSlotIndex="0"/>
+        <Link InputNodeIndex="4" InputSlotIndex="1" OutputNodeIndex="0" OutputSlotIndex="1"/>
+        <Link InputNodeIndex="5" InputSlotIndex="0" OutputNodeIndex="0" OutputSlotIndex="2"/>
+        <Link InputNodeIndex="6" InputSlotIndex="0" OutputNodeIndex="0" OutputSlotIndex="5"/>
+    </Links>
+</MaterialGraph>

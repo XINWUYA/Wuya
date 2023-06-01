@@ -1,7 +1,6 @@
 #pragma once
 #include "EditorBuiltinCamera.h"
 #include "EditorResourceBrowser.h"
-#include "MaterialGraphEditor.h"
 #include "ModelInfo.h"
 
 namespace Wuya
@@ -10,7 +9,7 @@ namespace Wuya
 	 * ：模型导入
 	 * ：材质编辑
 	 */
-	class ModelEditorLayer : public ILayer
+	class ModelEditorLayer final : public ILayer
 	{
 	public:
 		ModelEditorLayer();
@@ -22,15 +21,9 @@ namespace Wuya
 		void OnImGuiRender() override;
 		void OnEvent(IEvent* event) override;
 
-	private:
-		/* 显示菜单栏UI */
-		void ShowMenuUI();
-		/* 显示主场景视口 */
-		void ShowSceneViewportUI();
-		/* 显示模型编辑UI */
-		void ShowModelParamsUI();
-		/* 响应拖拽文件到主窗口 */
-		void OnDragItemToScene(const std::filesystem::path& path);
+		/* 激活窗口 */
+		void Active(bool active = true) { m_IsActivated = active; }
+		bool IsActivated() const { return m_IsActivated; }
 
 		/* 导入模型 */
 		void ImportModel();
@@ -39,15 +32,18 @@ namespace Wuya
 		/* 导出Mesh */
 		void ExportMesh(const std::string& path);
 
+	private:
+		/* 显示主场景视口 */
+		void ShowSceneViewportUI();
+		/* 显示模型编辑UI */
+		void ShowModelParamsUI();
+		/* 响应拖拽文件到主窗口 */
+		void OnDragItemToScene(const std::filesystem::path& path);
+
 		/* 更新模型 */
 		void UpdateModel();
 		/* 更新材质：当用户修改时根据材质参数设置材质 */
 		void UpdateMaterial(const SharedPtr<Material>& material, const MaterialParams& material_params);
-
-		/* 资源管理窗口 */
-		EditorResourceBrowser m_ResourceBrowser;
-		/* 材质图编辑器 */
-		MaterialGraphEditor m_MaterialGraphEditor;
 
 		/* 默认场景 */
 		SharedPtr<Scene> m_pDefaultScene{ nullptr };
@@ -63,5 +59,8 @@ namespace Wuya
 		SharedPtr<Model> m_pModel{ nullptr };
 		/* 当前模型对应的材质组，其中每个Material对应一个子模型 */
 		SharedPtr<MaterialGroup> m_pMaterialGroup{ nullptr };
+
+		/* 当前窗口是否被激活 */
+		bool m_IsActivated{ false };
 	};
 }

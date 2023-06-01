@@ -14,7 +14,7 @@ namespace Wuya
 		glBufferData(GL_ARRAY_BUFFER, size, nullptr, GL_DYNAMIC_DRAW); // Init only, update data later
 	}
 
-	OpenGLVertexBuffer::OpenGLVertexBuffer(const float* vertices, uint32_t size)
+	OpenGLVertexBuffer::OpenGLVertexBuffer(const void* vertices, uint32_t size)
 		: m_DataSize(size)
 	{
 		PROFILE_FUNCTION();

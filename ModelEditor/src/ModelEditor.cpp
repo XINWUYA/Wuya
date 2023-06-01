@@ -1,18 +1,18 @@
 #include "Pch.h"
-#include "ModelEditorLayer.h"
+#include "ModelEditor.h"
 #include <glm/gtc/type_ptr.hpp>
 
 namespace Wuya
 {
 	extern const std::filesystem::path g_AssetPath;
 
-	ModelEditorLayer::ModelEditorLayer()
-		: ILayer("ModelEditorLayer")
+	ModelEditor::ModelEditor()
+		: ILayer("ModelEditor")
 	{
 		PROFILE_FUNCTION();
 	}
 
-	void ModelEditorLayer::OnAttached()
+	void ModelEditor::OnAttached()
 	{
 		PROFILE_FUNCTION();
 
@@ -25,16 +25,19 @@ namespace Wuya
 		Entity entity = m_pDefaultScene->CreateEntity("DirectionalLight");
 		auto& light_component = entity.AddComponent<LightComponent>(LightType::Directional);
 		light_component.Light->SetColor(glm::vec4(1, 1, 1, 1));
+		light_component.Light->SetIntensity(1);
+		auto& light_transform = entity.GetComponent<TransformComponent>();
+		light_transform.Rotation = glm::vec3(0, 0, PI/2);
 	}
 
-	void ModelEditorLayer::OnDetached()
+	void ModelEditor::OnDetached()
 	{
 		PROFILE_FUNCTION();
 
 		ILayer::OnDetached();
 	}
 
-	void ModelEditorLayer::OnUpdate(float delta_time)
+	void ModelEditor::OnUpdate(float delta_time)
 	{
 		PROFILE_FUNCTION();
 		
@@ -45,7 +48,7 @@ namespace Wuya
 		m_pDefaultScene->OnUpdateEditor(m_pEditorCamera.get(), delta_time);
 	}
 
-	void ModelEditorLayer::OnImGuiRender()
+	void ModelEditor::OnImGuiRender()
 	{
 		PROFILE_FUNCTION();
 
@@ -64,7 +67,7 @@ namespace Wuya
 		ImGui::ShowDemoWindow(&open);*/
 	}
 
-	void ModelEditorLayer::OnEvent(IEvent* event)
+	void ModelEditor::OnEvent(IEvent* event)
 	{
 		PROFILE_FUNCTION();
 
@@ -75,7 +78,7 @@ namespace Wuya
 	}
 
 	/* 显示菜单栏UI */
-	void ModelEditorLayer::ShowMenuUI()
+	void ModelEditor::ShowMenuUI()
 	{
 		PROFILE_FUNCTION();
 
@@ -192,7 +195,7 @@ namespace Wuya
 	}
 
 	/* 显示主场景视口 */
-	void ModelEditorLayer::ShowSceneViewportUI()
+	void ModelEditor::ShowSceneViewportUI()
 	{
 		PROFILE_FUNCTION();
 
@@ -244,7 +247,7 @@ namespace Wuya
 	}
 
 	/* 显示模型编辑UI */
-	void ModelEditorLayer::ShowModelParamsUI()
+	void ModelEditor::ShowModelParamsUI()
 	{
 		PROFILE_FUNCTION();
 
@@ -536,7 +539,7 @@ namespace Wuya
 	}
 
 	/* 响应拖拽文件到主窗口 */
-	void ModelEditorLayer::OnDragItemToScene(const std::filesystem::path& path)
+	void ModelEditor::OnDragItemToScene(const std::filesystem::path& path)
 	{
 		PROFILE_FUNCTION();
 
@@ -571,7 +574,7 @@ namespace Wuya
 	}
 
 	/* 导入模型 */
-	void ModelEditorLayer::ImportModel()
+	void ModelEditor::ImportModel()
 	{
 		PROFILE_FUNCTION();
 
@@ -622,7 +625,7 @@ namespace Wuya
 	}
 
 	/* 导出模型 */
-	void ModelEditorLayer::ExportMeshAndMtl()
+	void ModelEditor::ExportMeshAndMtl()
 	{
 		PROFILE_FUNCTION();
 
@@ -648,7 +651,7 @@ namespace Wuya
 	}
 
 	/* 导出Mesh */
-	void ModelEditorLayer::ExportMesh(const std::string& path)
+	void ModelEditor::ExportMesh(const std::string& path)
 	{
 		PROFILE_FUNCTION();
 		
@@ -724,7 +727,7 @@ namespace Wuya
 	}
 
 	/* 更新模型 */
-	void ModelEditorLayer::UpdateModel()
+	void ModelEditor::UpdateModel()
 	{
 		PROFILE_FUNCTION();
 
@@ -752,15 +755,17 @@ namespace Wuya
 		auto& mesh_component = entity.AddComponent<ModelComponent>();
 		mesh_component.Model = m_pModel;
 
-		/* todo: 根据模型大小自适应相机距离 */
-		const glm::vec3 center = (m_pModel->GetAABBMin() + m_pModel->GetAABBMax()) * 0.5f;
-		auto& transform_component = entity.GetComponent<TransformComponent>();
-		transform_component.Position = -center;
-		transform_component.Scale = glm::vec3(0.5f);
+		/* 根据模型大小自适应相机距离 */
+		const auto& aabb_min = m_pModel->GetAABBMin();
+		const auto& aabb_max = m_pModel->GetAABBMax();
+		const auto aabb_height = aabb_max.y - aabb_min.y;
+		const auto distance = (aabb_height) / std::tanf(m_pEditorCamera->GetFov() / 2.0f);
+		m_pEditorCamera->SetDistance(distance);
+		m_pEditorCamera->SetFocalPoint((aabb_min + aabb_max) * 0.5f);
 	}
 
 	/* 更新材质：根据材质参数设置材质 */
-	void ModelEditorLayer::UpdateMaterial(const SharedPtr<Material>& material, const MaterialParams& material_params)
+	void ModelEditor::UpdateMaterial(const SharedPtr<Material>& material, const MaterialParams& material_params)
 	{
 		PROFILE_FUNCTION();
 

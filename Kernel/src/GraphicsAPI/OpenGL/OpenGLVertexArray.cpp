@@ -116,7 +116,7 @@ namespace Wuya
 						layout.GetStride(),
 						(const void*)(element.Offset + sizeof(float) * count * i)
 					);
-					glVertexAttribDivisor(m_VertexBufferIdx, 1);
+					glVertexAttribDivisor(m_VertexBufferIdx, 1); // Ref: https://learnopengl-cn.github.io/04%20Advanced%20OpenGL/10%20Instancing/
 
 					m_VertexBufferIdx++;
 				}

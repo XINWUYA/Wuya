@@ -23,6 +23,6 @@ namespace Wuya
 		void SetDefaultStyle();
 		void SetDarkThemeColors();
 
-		bool m_IsBlockEvents = true;
+		bool m_IsBlockEvents = false;
 	};
 }

@@ -139,7 +139,7 @@ namespace Wuya
 							ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
 							{
 								/* Í¼±ê */
-								const SharedPtr<Texture> icon_texture = child_node->FileType == "Folder" ? m_pFolderIcon : m_pFileIcon;
+								const SharedPtr<Texture> icon_texture = child_node->FileType == "Folder" ? m_pFolderIcon : TextureAssetManager::Instance().GetOrCreateTexture(child_node->FilePath, {}); //m_pFileIcon;
 								ImGui::ImageButton((ImTextureID)icon_texture->GetTextureID(), ImVec2(thumbnail_size, thumbnail_size), ImVec2(0, 1), ImVec2(1, 0));
 
 								/* ÍÏ¶¯ */

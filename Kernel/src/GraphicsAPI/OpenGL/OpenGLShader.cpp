@@ -82,6 +82,11 @@ namespace Wuya
 		glUseProgram(0);
 	}
 
+	int OpenGLShader::GetUniformLocation(const std::string& name)
+	{
+		return glGetUniformLocation(m_ProgramID, name.c_str());
+	}
+
 	void OpenGLShader::SetInt(const std::string& name, int value)
 	{
 		PROFILE_FUNCTION();
@@ -249,7 +254,7 @@ namespace Wuya
 			std::filesystem::path cache_path = cache_dir / (shader_path.filename().string() + GetOpenGLShaderCacheFileExtension(shader_type));
 
 			std::ifstream in(cache_path, std::ios::in | std::ios::binary);
-			if (in.is_open())
+			if (false/*in.is_open()*/) /* ÔÝÊ±¹Ø±ÕShaderCache */
 			{
 				// Cache existed
 				in.seekg(0, std::ios::end);

@@ -3,7 +3,7 @@
 
 layout(location = 0) in vec3 a_Position;
 
-#include "builtin/uniforms.glsl"
+#include "builtin/Uniforms.glsl"
 
 void main()
 {
@@ -17,7 +17,7 @@ void main()
 layout(location = 0) out vec4 OutColor;
 layout(location = 5) out int  OutObjectId;
 
-#include "builtin/uniforms.glsl"
+#include "builtin/Uniforms.glsl"
 
 void main()
 {

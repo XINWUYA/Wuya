@@ -90,7 +90,7 @@ namespace Wuya
 		}
 	}
 
-	SharedPtr<VertexBuffer> VertexBuffer::Create(const float* vertices, uint32_t size)
+	SharedPtr<VertexBuffer> VertexBuffer::Create(const void* vertices, uint32_t size)
 	{
 		switch (Renderer::CurrentAPI())
 		{

@@ -82,7 +82,7 @@ namespace Wuya
 		/* ÕûÌåµÄAABB */
 		std::pair<glm::vec3, glm::vec3> m_AABB;
 
-		friend class ModelEditorLayer;
+		friend class ModelEditor;
 	};
 
 

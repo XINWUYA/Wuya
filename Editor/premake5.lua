@@ -31,6 +31,7 @@ project "Editor"
 		"%{IncludeDirs.tinyxml2}",
 		"%{IncludeDirs.ImGuizmo}",
 		"%{IncludeDirs.tinyobjloader}",
+		"%{IncludeDirs.magic_enum}",
 	}
 
 	links

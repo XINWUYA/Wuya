@@ -21,6 +21,7 @@ namespace Wuya
 		void PushLayer(const SharedPtr<ILayer>& layer);
 		void PushOverlay(const SharedPtr<ILayer>& layer);
 
+		const SharedPtr<ILayer>& GetLayerByName(const std::string& name) { return m_LayerStack.GetLayerByName(name); }
 		const SharedPtr<ImGuiLayer>& GetImGuiLayer() const { return m_pImGuiLayer; }
 
 		virtual void OnEvent(IEvent* event);

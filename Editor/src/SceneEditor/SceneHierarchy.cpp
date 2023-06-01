@@ -1,5 +1,5 @@
 #include "Pch.h"
-#include "EditorSceneHierarchy.h"
+#include "SceneHierarchy.h"
 #include "EditorUIFunctions.h"
 #include <glm/gtc/type_ptr.hpp>
 
@@ -7,14 +7,14 @@ namespace Wuya
 {
 	extern const std::filesystem::path g_AssetPath;
 
-	EditorSceneHierarchy::EditorSceneHierarchy()
+	SceneHierarchy::SceneHierarchy()
 	{
 		PROFILE_FUNCTION();
 
 		InitIcons();
 	}
 
-	EditorSceneHierarchy::EditorSceneHierarchy(const SharedPtr<Scene>& scene)
+	SceneHierarchy::SceneHierarchy(const SharedPtr<Scene>& scene)
 	{
 		PROFILE_FUNCTION();
 
@@ -22,13 +22,13 @@ namespace Wuya
 		InitIcons();
 	}
 
-	void EditorSceneHierarchy::SetOwnerScene(const SharedPtr<Scene>& scene)
+	void SceneHierarchy::SetOwnerScene(const SharedPtr<Scene>& scene)
 	{
 		m_pOwnerScene = scene;
 		m_SelectedEntity = {};
 	}
 
-	void EditorSceneHierarchy::OnImGuiRender()
+	void SceneHierarchy::OnImGuiRender()
 	{
 		PROFILE_FUNCTION();
 
@@ -39,12 +39,12 @@ namespace Wuya
 		ShowEntityPropertiesUI();
 	}
 
-	void EditorSceneHierarchy::SetSelectedEntity(const Entity& entity)
+	void SceneHierarchy::SetSelectedEntity(const Entity& entity)
 	{
 		m_SelectedEntity = entity;
 	}
 
-	void EditorSceneHierarchy::ShowSceneHierarchyUI()
+	void SceneHierarchy::ShowSceneHierarchyUI()
 	{
 		PROFILE_FUNCTION();
 
@@ -58,8 +58,8 @@ namespace Wuya
 				});
 
 			/* 点击左键，选中 */
-			if (ImGui::IsMouseDown(0) && ImGui::IsWindowHovered())
-				m_SelectedEntity = {};
+			// if (ImGui::IsMouseDown(0) && ImGui::IsWindowHovered())
+			// 	m_SelectedEntity = {};
 
 			/* 空白处右键，唤出新建 */
 			if (ImGui::BeginPopupContextWindow("New", 1, false))
@@ -115,7 +115,7 @@ namespace Wuya
 		ImGui::End();
 	}
 
-	void EditorSceneHierarchy::ShowEntityPropertiesUI()
+	void SceneHierarchy::ShowEntityPropertiesUI()
 	{
 		PROFILE_FUNCTION();
 
@@ -127,7 +127,7 @@ namespace Wuya
 		ImGui::End();
 	}
 
-	void EditorSceneHierarchy::InitIcons()
+	void SceneHierarchy::InitIcons()
 	{
 		PROFILE_FUNCTION();
 
@@ -136,7 +136,7 @@ namespace Wuya
 		m_pMenuIcon = TextureAssetManager::Instance().GetOrCreateTexture("editor_res/icons/menu.png", load_config);
 	}
 
-	void EditorSceneHierarchy::ShowEntityNode(Entity& entity)
+	void SceneHierarchy::ShowEntityNode(Entity& entity)
 	{
 		PROFILE_FUNCTION();
 
@@ -230,7 +230,7 @@ namespace Wuya
 		}
 	}
 
-	void EditorSceneHierarchy::ShowEntityComponents()
+	void SceneHierarchy::ShowEntityComponents()
 	{
 		PROFILE_FUNCTION();
 
@@ -259,7 +259,7 @@ namespace Wuya
 	}
 
 	/* 实体名称组件 */
-	void EditorSceneHierarchy::ShowNameComponent()
+	void SceneHierarchy::ShowNameComponent()
 	{
 		PROFILE_FUNCTION();
 
@@ -281,7 +281,7 @@ namespace Wuya
 	}
 
 	/* 增加组件按钮 */
-	void EditorSceneHierarchy::ShowAddComponentButton()
+	void SceneHierarchy::ShowAddComponentButton()
 	{
 		PROFILE_FUNCTION();
 
@@ -325,7 +325,7 @@ namespace Wuya
 	}
 
 	/* 空间变换组件 */
-	void EditorSceneHierarchy::ShowTransformComponent()
+	void SceneHierarchy::ShowTransformComponent()
 	{
 		PROFILE_FUNCTION();
 
@@ -342,7 +342,7 @@ namespace Wuya
 	}
 
 	/* 图片精灵组件 */
-	void EditorSceneHierarchy::ShowSpriteComponent()
+	void SceneHierarchy::ShowSpriteComponent()
 	{
 		PROFILE_FUNCTION();
 
@@ -355,7 +355,7 @@ namespace Wuya
 	}
 
 	/* 场景相机组件 */
-	void EditorSceneHierarchy::ShowCameraComponent()
+	void SceneHierarchy::ShowCameraComponent()
 	{
 		PROFILE_FUNCTION();
 
@@ -407,7 +407,7 @@ namespace Wuya
 	}
 
 	/* 模型组件 */
-	void EditorSceneHierarchy::ShowModelComponent()
+	void SceneHierarchy::ShowModelComponent()
 	{
 		PROFILE_FUNCTION();
 
@@ -446,7 +446,7 @@ namespace Wuya
 	}
 
 	/* 光源组件 */
-	void EditorSceneHierarchy::ShowLightComponent()
+	void SceneHierarchy::ShowLightComponent()
 	{
 		PROFILE_FUNCTION();
 		ShowComponent<LightComponent>("Light", m_SelectedEntity,
@@ -466,16 +466,19 @@ namespace Wuya
 					});
 
 				/* 光源颜色 */
-				EditorUIFunctions::DrawColorUI("Color", component.Color);
-				light->SetColor(component.Color);
+				glm::vec4 light_color = light->GetColor();
+				EditorUIFunctions::DrawColorUI("Color", light_color);
+				light->SetColor(light_color);
 
 				/* 光源强度 */
-				EditorUIFunctions::DrawDragFloatUI("Intensity", component.Intensity);
-				light->SetIntensity(component.Intensity);
+				float light_intensity = light->GetIntensity();
+				EditorUIFunctions::DrawDragFloatUI("Intensity", light_intensity);
+				light->SetIntensity(light_intensity);
 
 				/* 投影 */
-				EditorUIFunctions::DrawCheckboxUI("CastShadow", component.IsCastShadow);
-				light->SetIsCastShadow(component.IsCastShadow);
+				bool cast_shadow = light->IsCastShadow();
+				EditorUIFunctions::DrawCheckboxUI("CastShadow", cast_shadow);
+				light->SetIsCastShadow(cast_shadow);
 			});
 	}
 }

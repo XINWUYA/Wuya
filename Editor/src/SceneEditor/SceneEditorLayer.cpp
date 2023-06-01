@@ -1,5 +1,5 @@
 #include "Pch.h"
-#include "EditorLayer.h"
+#include "SceneEditorLayer.h"
 #include <glm/gtc/type_ptr.inl>
 #include "EditorBuiltinCamera.h"
 #include "EditorUIFunctions.h"
@@ -9,13 +9,13 @@ namespace Wuya
 {
 	extern const std::filesystem::path g_AssetPath;
 
-	EditorLayer::EditorLayer()
-		: ILayer("EditorLayer")
+	SceneEditorLayer::SceneEditorLayer()
+		: ILayer("SceneEditorLayer")
 	{
 		PROFILE_FUNCTION();
 	}
 
-	void EditorLayer::OnAttached()
+	void SceneEditorLayer::OnAttached()
 	{
 		PROFILE_FUNCTION();
 		
@@ -59,50 +59,44 @@ namespace Wuya
 		}*/
 	}
 
-	void EditorLayer::OnDetached()
+	void SceneEditorLayer::OnDetached()
 	{
 		PROFILE_FUNCTION();
 
 		ILayer::OnDetached();
 	}
 
-	void EditorLayer::OnImGuiRender()
+	void SceneEditorLayer::OnImGuiRender()
 	{
 		PROFILE_FUNCTION();
 
-		/* 菜单 */
-		ShowMenuUI();
-		/* 场景控制UI */
-		ShowSceneControllerUI();
+		if (!m_IsActivated)
+			return;
+		
 		/* 统计信息 */
 		ShowStatisticInfoUI();
 		/* 场景管理及属性窗口 */
 		m_SceneHierarchy.OnImGuiRender();
-		/* 资源管理窗口 */
-		m_ResourceBrowser.OnImGuiRenderer();
 
 		/* 主窗口，需要最后再画，以确保能够得到正确的窗口宽高 */
 		ShowSceneViewportUI();
-
-		//bool open = true;
-		//ImGui::ShowDemoWindow(&open);
 	}
 
-	void EditorLayer::OnEvent(IEvent* event)
+	void SceneEditorLayer::OnEvent(IEvent* event)
 	{
 		PROFILE_FUNCTION();
 
-		if (!event)
+		if (!m_IsActivated || !event)
 			return;
 
 		m_pEditorCamera->OnEvent(event);
 
 		EventDispatcher dispatcher(event);
-		dispatcher.Dispatch<KeyPressedEvent>(BIND_EVENT_FUNC(EditorLayer::OnKeyPressed));
-		dispatcher.Dispatch<MouseButtonPressedEvent>(BIND_EVENT_FUNC(EditorLayer::OnMouseButtonPressed));
+		dispatcher.Dispatch<KeyPressedEvent>(BIND_EVENT_FUNC(SceneEditorLayer::OnKeyPressed));
+		dispatcher.Dispatch<MouseButtonPressedEvent>(BIND_EVENT_FUNC(SceneEditorLayer::OnMouseButtonPressed));
 	}
 
-	void EditorLayer::UpdateViewport()
+	void SceneEditorLayer::UpdateViewport()
 	{
 		PROFILE_FUNCTION();
 
@@ -115,7 +109,7 @@ namespace Wuya
 		}
 	}
 
-	bool EditorLayer::OnKeyPressed(KeyPressedEvent* event)
+	bool SceneEditorLayer::OnKeyPressed(KeyPressedEvent* event)
 	{
 		PROFILE_FUNCTION();
 
@@ -133,7 +127,7 @@ namespace Wuya
 				if (is_ctrl_pressed)
 					NewScene();
 			}
-			break;
+			return true;
 		case Key::S: /* Ctrl+S: 保存场景; Ctrl+Shift+S: 场景另存为 */
 			if (is_ctrl_pressed)
 			{
@@ -142,43 +136,19 @@ namespace Wuya
 				else
 					SaveScene();
 			}
-			break;
+			return true;
 		case Key::I: /* Ctrl+I：导入一个场景 */
 			{
 				if (is_ctrl_pressed)
 					ImportScene();
 			}
-			break;
-		case Key::Q:
-			{
-				if (!ImGuizmo::IsUsing() && !is_button_right_pressed)
-					m_GizmoType = -1;
-			}
-			break;
-		case Key::W:
-			{
-				if (!ImGuizmo::IsUsing() && !is_button_right_pressed)
-					m_GizmoType = ImGuizmo::OPERATION::TRANSLATE;
-			}
-			break;
-		case Key::E:
-			{
-				if (!ImGuizmo::IsUsing() && !is_button_right_pressed)
-					m_GizmoType = ImGuizmo::OPERATION::ROTATE;
-			}
-			break;
-		case Key::R:
-			{
-				if (!ImGuizmo::IsUsing() && !is_button_right_pressed)
-					m_GizmoType = ImGuizmo::OPERATION::SCALE;
-			}
-			break;
+			return true;;
 		}
 
-		return true;
+		return false;
 	}
 
-	bool EditorLayer::OnMouseButtonPressed(MouseButtonPressedEvent* event)
+	bool SceneEditorLayer::OnMouseButtonPressed(MouseButtonPressedEvent* event)
 	{
 		PROFILE_FUNCTION();
 
@@ -192,23 +162,8 @@ namespace Wuya
 		return false;
 	}
 
-	void EditorLayer::OnPlayModeChanged()
-	{
-		PROFILE_FUNCTION();
-
-		if (m_PlayMode == PlayMode::Edit) /* 编辑模式切换为运行模式 */
-		{
-			m_PlayMode = PlayMode::Runtime;
-		}
-		else if (m_PlayMode == PlayMode::Runtime) /* 运行模式切换为编辑模式 */
-		{
-			m_PlayMode = PlayMode::Edit;
-		}
-
-	}
-
 	/* 响应拖拽文件到主窗口 */
-	void EditorLayer::OnDragItemToScene(const std::filesystem::path& path)
+	void SceneEditorLayer::OnDragItemToScene(const std::filesystem::path& path)
 	{
 		PROFILE_FUNCTION();
 
@@ -249,7 +204,7 @@ namespace Wuya
 		
 	}
 
-	void EditorLayer::NewScene()
+	void SceneEditorLayer::NewScene()
 	{
 		PROFILE_FUNCTION();
 
@@ -257,7 +212,7 @@ namespace Wuya
 		m_SceneHierarchy.SetOwnerScene(m_pMainScene);
 	}
 
-	void EditorLayer::ImportScene()
+	void SceneEditorLayer::ImportScene()
 	{
 		PROFILE_FUNCTION();
 
@@ -275,7 +230,7 @@ namespace Wuya
 		}
 	}
 
-	void EditorLayer::SaveScene()
+	void SceneEditorLayer::SaveScene()
 	{
 		PROFILE_FUNCTION();
 
@@ -287,7 +242,7 @@ namespace Wuya
 	}
 
 	/* 保存场景到指定路径 */
-	void EditorLayer::SaveSceneAs()
+	void SceneEditorLayer::SaveSceneAs()
 	{
 		PROFILE_FUNCTION();
 
@@ -299,230 +254,15 @@ namespace Wuya
 		m_ActiveScenePath = file_path;
 	}
 
-	void EditorLayer::ShowMenuUI()
-	{
-		PROFILE_FUNCTION();
-
-		static bool p_open = true;
-		static bool opt_fullscreen = true;
-		static bool opt_padding = false;
-		static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_None;
-
-		// We are using the ImGuiWindowFlags_NoDocking flag to make the parent window not dockable into,
-		// because it would be confusing to have two docking targets within each others.
-		ImGuiWindowFlags window_flags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking;
-		if (opt_fullscreen)
-		{
-			const ImGuiViewport* viewport = ImGui::GetMainViewport();
-			ImGui::SetNextWindowPos(viewport->WorkPos);
-			ImGui::SetNextWindowSize(viewport->WorkSize);
-			ImGui::SetNextWindowViewport(viewport->ID);
-			ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
-			ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
-			window_flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
-			window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
-		}
-		else
-		{
-			dockspace_flags &= ~ImGuiDockNodeFlags_PassthruCentralNode;
-		}
-
-		// When using ImGuiDockNodeFlags_PassthruCentralNode, DockSpace() will render our background
-		// and handle the pass-thru hole, so we ask Begin() to not render a background.
-		if (dockspace_flags & ImGuiDockNodeFlags_PassthruCentralNode)
-			window_flags |= ImGuiWindowFlags_NoBackground;
-
-		// Important: note that we proceed even if Begin() returns false (aka window is collapsed).
-		// This is because we want to keep our DockSpace() active. If a DockSpace() is inactive,
-		// all active windows docked into it will lose their parent and become undocked.
-		// We cannot preserve the docking relationship between an active window and an inactive docking, otherwise
-		// any change of dockspace/settings would lead to windows being stuck in limbo and never being visible.
-		if (!opt_padding)
-			ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
-		ImGui::Begin("DockSpace Demo", &p_open, window_flags);
-		{
-			if (!opt_padding)
-				ImGui::PopStyleVar();
-
-			if (opt_fullscreen)
-				ImGui::PopStyleVar(2);
-
-			// Submit the DockSpace
-			ImGuiIO& io = ImGui::GetIO();
-			if (io.ConfigFlags & ImGuiConfigFlags_DockingEnable)
-			{
-				ImGuiID dockspace_id = ImGui::GetID("MyDockSpace");
-				ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), dockspace_flags);
-			}
-
-			ImGuiStyle& style = ImGui::GetStyle();
-			style.WindowMinSize.x = 200.0f;
-
-			/* 菜单栏 */
-			if (ImGui::BeginMenuBar())
-			{
-				if (ImGui::BeginMenu("File"))
-				{
-					if (ImGui::MenuItem("New Scene", "Ctrl+N"))
-					{
-						NewScene();
-					}
-
-					if (ImGui::MenuItem("Open Scene", "Ctrl+O"))
-					{
-						ImportScene();
-					}
-
-					if (ImGui::MenuItem("Save Scene", "Ctrl+S"))
-					{
-						SaveScene();
-					}
-
-					if (ImGui::MenuItem("Save Scene As", "Ctrl+Shift+S"))
-					{
-						SaveSceneAs();
-					}
-
-					if (ImGui::MenuItem("Exit"))
-						Application::Instance()->Close();
-
-					ImGui::EndMenu();
-				}
-
-				if (ImGui::BeginMenu("Options"))
-				{
-					// Disabling fullscreen would allow the window to be moved to the front of other windows,
-					// which we can't undo at the moment without finer window depth/z control.
-					ImGui::MenuItem("Fullscreen", NULL, &opt_fullscreen);
-					ImGui::MenuItem("Padding", NULL, &opt_padding);
-					ImGui::Separator();
-
-					if (ImGui::MenuItem("Flag: NoSplit", "", (dockspace_flags & ImGuiDockNodeFlags_NoSplit) != 0)) { dockspace_flags ^= ImGuiDockNodeFlags_NoSplit; }
-					if (ImGui::MenuItem("Flag: NoResize", "", (dockspace_flags & ImGuiDockNodeFlags_NoResize) != 0)) { dockspace_flags ^= ImGuiDockNodeFlags_NoResize; }
-					if (ImGui::MenuItem("Flag: NoDockingInCentralNode", "", (dockspace_flags & ImGuiDockNodeFlags_NoDockingInCentralNode) != 0)) { dockspace_flags ^= ImGuiDockNodeFlags_NoDockingInCentralNode; }
-					if (ImGui::MenuItem("Flag: AutoHideTabBar", "", (dockspace_flags & ImGuiDockNodeFlags_AutoHideTabBar) != 0)) { dockspace_flags ^= ImGuiDockNodeFlags_AutoHideTabBar; }
-					if (ImGui::MenuItem("Flag: PassthruCentralNode", "", (dockspace_flags & ImGuiDockNodeFlags_PassthruCentralNode) != 0, opt_fullscreen)) { dockspace_flags ^= ImGuiDockNodeFlags_PassthruCentralNode; }
-					ImGui::Separator();
-
-					if (ImGui::MenuItem("Close", NULL, false))
-						p_open = false;
-					ImGui::EndMenu();
-				}
-
-				ImGui::EndMenuBar();
-			}
-		}
-		ImGui::End();
-	}
-
-	void EditorLayer::ShowSceneControllerUI()
-	{
-		PROFILE_FUNCTION();
-
-		const TextureLoadConfig load_config;
-		static auto save_icon = TextureAssetManager::Instance().GetOrCreateTexture("editor_res/icons/save.png", load_config);
-		static auto translate_icon = TextureAssetManager::Instance().GetOrCreateTexture("editor_res/icons/translate.png", load_config);
-		static auto rotate_icon = TextureAssetManager::Instance().GetOrCreateTexture("editor_res/icons/rotate.png", load_config);
-		static auto scale_icon = TextureAssetManager::Instance().GetOrCreateTexture("editor_res/icons/scale.png", load_config);
-		static auto play_icon = TextureAssetManager::Instance().GetOrCreateTexture("editor_res/icons/play.png", load_config);
-		static auto stop_icon = TextureAssetManager::Instance().GetOrCreateTexture("editor_res/icons/stop.png", load_config);
-		static auto menu_icon = TextureAssetManager::Instance().GetOrCreateTexture("editor_res/icons/menu.png", load_config);
-
-		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 2)); /* 指定间隔 */
-		ImGui::PushStyleVar(ImGuiStyleVar_ItemInnerSpacing, ImVec2(0, 2));
-
-		ImGui::Begin("##Scene Controller", nullptr, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
-		{
-			const float icon_size = ImGui::GetWindowHeight() - 4.0f;
-			const float panel_width = ImGui::GetWindowContentRegionMax().x;
-
-			START_TRANSPARENT_BUTTON;
-
-			constexpr float cursor_offset = 10.0f;
-			/* 保存场景按钮 */
-			ImGui::SetCursorPosX(cursor_offset);
-			if (ImGui::ImageButton((ImTextureID)save_icon->GetTextureID(), ImVec2(icon_size, icon_size), ImVec2(0, 1), ImVec2(1, 0), 0))
-				SaveScene();
-
-			/* 移动/旋转/平移操作 */
-			{
-				/* translate */
-				ImGui::SameLine(cursor_offset + icon_size * 2);
-				bool checked = m_GizmoType == ImGuizmo::OPERATION::TRANSLATE;
-				EditorUIFunctions::DrawCheckedImageButtonUI("Translate", translate_icon, ImVec2(icon_size, icon_size), checked,
-					[&]()
-					{
-						m_GizmoType = ImGuizmo::OPERATION::TRANSLATE;
-					});
-
-				/* rotate */
-				ImGui::SameLine();
-				checked = m_GizmoType == ImGuizmo::OPERATION::ROTATE;
-				EditorUIFunctions::DrawCheckedImageButtonUI("Rotate", rotate_icon, ImVec2(icon_size, icon_size), checked,
-					[&]()
-					{
-						m_GizmoType = ImGuizmo::OPERATION::ROTATE;
-					});
-
-				/* scale */
-
-				ImGui::SameLine();
-				checked = m_GizmoType == ImGuizmo::OPERATION::SCALE;
-				EditorUIFunctions::DrawCheckedImageButtonUI("Scale", scale_icon, ImVec2(icon_size, icon_size), checked,
-					[&]()
-					{
-						m_GizmoType = ImGuizmo::OPERATION::SCALE;
-					});
-			}
-
-			/* 切换执行模式 */
-			{
-				ImGui::SameLine();
-				const SharedPtr<Texture> icon = (m_PlayMode == PlayMode::Edit) ? play_icon : stop_icon;
-				ImGui::SetCursorPosX((panel_width - icon_size) * 0.5f);
-				if (ImGui::ImageButton((ImTextureID)icon->GetTextureID(), ImVec2(icon_size, icon_size), ImVec2(0, 1), ImVec2(1, 0), 0))
-				{
-					OnPlayModeChanged();
-				}
-			}
-
-			/* 配置 */
-			{
-				ImGui::SameLine(panel_width - cursor_offset - 20);
-				START_STYLE_ALPHA(0.5f);
-				if (ImGui::ImageButton((ImTextureID)menu_icon->GetTextureID(), ImVec2(20, 20), ImVec2(0, 1), ImVec2(1, 0)))
-					ImGui::OpenPopup("ConfigPopup");
-				END_STYLE_ALPHA;
-
-				/* 展开弹窗时，显示控件 */
-				if (ImGui::BeginPopup("ConfigPopup"))
-				{
-					ImGui::PushItemWidth(200);
-
-					bool is_focus = m_pEditorCamera->IsFocus();
-					ImGui::Checkbox("FocusMode", &is_focus);
-					m_pEditorCamera->SetFocus(is_focus);
-
-					ImGui::PopItemWidth();
-					ImGui::EndPopup();
-				}
-			}
-
-			END_TRANSPARENT_BUTTON;
-		}
-
-		ImGui::End();
-		ImGui::PopStyleVar(2);
-	}
-
-	void EditorLayer::ShowSceneViewportUI()
+	void SceneEditorLayer::ShowSceneViewportUI()
 	{
 		PROFILE_FUNCTION();
 
 		//m_ViewportRegion = { 268, 2188, 317, 1371 };
+		static ImGuiWindowFlags tab_bar_flags = ImGuiWindowFlags_NoFocusOnAppearing;
 
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
-		ImGui::Begin("Scene");
+		ImGui::Begin("Scene", &m_IsActivated);
 		{
 			/* 获取窗口范围 */
 			const auto viewport_region_min = ImGui::GetWindowContentRegionMin();
@@ -536,7 +276,7 @@ namespace Wuya
 			/* 若当前ImGui窗口不是主窗口，应阻塞事件传递 */
 			m_IsViewportFocused = ImGui::IsWindowFocused();
 			m_IsViewportHovered = ImGui::IsWindowHovered();
-			Application::Instance()->GetImGuiLayer()->BlockEvents(!m_IsViewportFocused && !m_IsViewportHovered);
+			// Application::Instance()->GetImGuiLayer()->BlockEvents(!m_IsViewportFocused && !m_IsViewportHovered);
 
 			/* 绘制场景 */
 			auto output_rt = m_pEditorCamera->GetRenderView()->GetRenderTarget();
@@ -561,11 +301,12 @@ namespace Wuya
 			/* Gizmos */
 			ShowOperationGizmoUI();
 		}
+
 		ImGui::End();
 		ImGui::PopStyleVar();
 	}
 
-	void EditorLayer::ShowStatisticInfoUI()
+	void SceneEditorLayer::ShowStatisticInfoUI()
 	{
 		PROFILE_FUNCTION();
 
@@ -590,7 +331,7 @@ namespace Wuya
 		ImGui::End();
 	}
 
-	void EditorLayer::ShowOperationGizmoUI()
+	void SceneEditorLayer::ShowOperationGizmoUI()
 	{
 		PROFILE_FUNCTION();
 
@@ -652,7 +393,7 @@ namespace Wuya
 
 	}
 
-	void EditorLayer::CheckMouseSelectEntity()
+	void SceneEditorLayer::CheckMouseSelectEntity()
 	{
 		PROFILE_FUNCTION();
 
@@ -671,9 +412,12 @@ namespace Wuya
 		}
 	}
 
-	void EditorLayer::OnUpdate(float delta_time)
+	void SceneEditorLayer::OnUpdate(float delta_time)
 	{
 		PROFILE_FUNCTION();
+
+		if (!m_IsActivated)
+			return;
 
 		UpdateViewport();
 

@@ -79,7 +79,7 @@ namespace Wuya
 		[[nodiscard]] virtual uint32_t GetVertexCount() const = 0;
 
 		static SharedPtr<VertexBuffer> Create(uint32_t size);
-		static SharedPtr<VertexBuffer> Create(const float* vertices, uint32_t size);
+		static SharedPtr<VertexBuffer> Create(const void* vertices, uint32_t size);
 	};
 
 	// Index Buffer

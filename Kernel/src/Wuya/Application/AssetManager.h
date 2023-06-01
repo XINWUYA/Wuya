@@ -34,6 +34,7 @@ namespace Wuya
 		static TextureAssetManager& Instance();
 
 		/* 获取Texture */
+		SharedPtr<Texture> GetOrCreateTexture(const std::string& path);
 		SharedPtr<Texture> GetOrCreateTexture(const std::string& path, const TextureLoadConfig& load_config);
 		/* 清空所有Texture */
 		void Clear();

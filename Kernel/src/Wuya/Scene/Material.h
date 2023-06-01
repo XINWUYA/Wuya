@@ -78,7 +78,7 @@ namespace Wuya
 		void SetParameters(ParamType type, const std::string& name, const std::any& param);
 		[[nodiscard]] const ParameterMap& GetAllParameters() const { return m_Parameters; }
 		/* 设置纹理 */
-		void SetTexture(const std::string& name, const SharedPtr<Texture>& texture, uint32_t slot);
+		void SetTexture(const std::string& name, const SharedPtr<Texture>& texture, int slot = -1);
 		/* 设置光栅化状态 */
 		void SetRasterState(RenderRasterState state) { m_RasterState = state; }
 		[[nodiscard]] const RenderRasterState& GetRasterState() const { return m_RasterState; }

@@ -1,11 +1,11 @@
 #include "Pch.h"
 #include "EditorApp.h"
-#include "ModelEditorLayer.h"
+#include "ModelEditor.h"
 
 namespace Wuya
 {
 	ModelEditorApp::ModelEditorApp() : Application("ModelEditor")
 	{
-		PushLayer(CreateSharedPtr<ModelEditorLayer>());
+		PushLayer(CreateSharedPtr<ModelEditor>());
 	}
 }

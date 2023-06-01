@@ -113,6 +113,11 @@ namespace Wuya
 						m_InternalFormat = GL_RGB8;
 						data_format = GL_RGB;
 					}
+					else if (channels == 2)
+					{
+						m_InternalFormat = GL_RG8;
+						data_format = GL_RG;
+					}
 					else if (channels == 1)
 					{
 						m_InternalFormat = GL_R8;

@@ -18,6 +18,7 @@ namespace Wuya
 		virtual void Bind() = 0;
 		virtual void Unbind() = 0;
 
+		virtual int GetUniformLocation(const std::string& name) = 0;
 		/* …Ë÷√Uniform≤Œ ˝ */
 		virtual void SetInt(const std::string& name, int value) = 0;
 		virtual void SetIntArray(const std::string& name, int* values, uint32_t count) = 0;

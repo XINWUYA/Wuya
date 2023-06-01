@@ -14,34 +14,37 @@ namespace Wuya
 
 		/* 设置视口区域 */
 		void SetViewportRegion(const ViewportRegion& region);
+		[[nodiscard]]
 		const ViewportRegion& GetViewportRegion() const { return m_ViewportRegion; }
 
 		/* 设置聚焦模式 */
+		[[nodiscard]]
 		bool IsFocus() const { return m_IsFocus; }
 		void SetFocus(bool focus) { m_IsFocus = focus; }
 
 		/* 相机距离 */
-		void SetDistance(float distance) { m_Distance = distance; }
+		void SetDistance(float distance) { m_Distance = distance; m_IsDirty = true; }
+		[[nodiscard]]
 		float GetDistance() const { return m_Distance; }
 		/* 移动速度 */
 		void SetMoveSpeed(float speed) { m_MoveSpeed = speed; }
+		[[nodiscard]]
 		float GetMoveSpeed() const { return m_MoveSpeed; }
 
-		void SetFocalPoint(const glm::vec3& position) { m_FocalPoint = position; }
+		void SetFocalPoint(const glm::vec3& position) { m_FocalPoint = position; m_IsDirty = true; }
 
+		[[nodiscard]]
 		float GetPitch() const { return m_Pitch; }
+		[[nodiscard]]
 		float GetYaw() const { return m_Yaw; }
-		float GetAspectRatio() const { return m_AspectRatio; }
 
-		const glm::vec3& GetUpDir() const { return m_UpDirection; }
-		const glm::vec3& GetRightDir() const { return m_RightDirection; }
-		const glm::vec3& GetForwardDir() const { return m_ForwardDirection; }
-
+		[[nodiscard]]
 		glm::quat GetOrientation() const;
 
 		void SetViewMatrix(const glm::mat4& view_mat);
 
 		/* 根据像素位置，获取EntityId */
+		[[nodiscard]]
 		int32_t PickingEntityByPixelPos(uint32_t x, uint32_t y) const;
 
 	private:
@@ -57,15 +60,12 @@ namespace Wuya
 		void OnMouseRotate(const glm::vec2& delta); // 绕聚焦中心旋转
 		void OnMouseZoom(float delta); // 拉远拉近
 
+		[[nodiscard]]
 		glm::vec2 PanSpeed() const;
+		[[nodiscard]]
 		float RotateSpeed() const;
+		[[nodiscard]]
 		float ZoomSpeed() const;
-
-		/* 相机基本参数 */
-		float m_Fov{ 45.0f };
-		float m_AspectRatio{ 1.778f };
-		float m_NearClip{ 0.1f };
-		float m_FarClip{ 1000.0f };
 
 		float m_Pitch{ 0.0f }, m_Yaw{ 0.0f };
 		/* 相机位置 */
@@ -79,11 +79,6 @@ namespace Wuya
 		bool m_IsDirty{ true };
 		/* 是否需要重新构建FrameGraph */
 		bool m_IsFrameGraphDirty = true;
-
-		/* 相机朝向 */
-		glm::vec3 m_UpDirection{ 0.0f, 1.0f, 0.0f };
-		glm::vec3 m_RightDirection{ 1.0f, 0.0f, 0.0f };
-		glm::vec3 m_ForwardDirection{ 0.0f, 0.0f, -1.0f };
 
 		glm::vec3 m_FocalPoint{ 0.0f, 0.0f, 0.0f };
 		glm::vec2 m_LastMousePosition{ 0.0f, 0.0f };

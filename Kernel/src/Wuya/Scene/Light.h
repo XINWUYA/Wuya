@@ -27,12 +27,15 @@ namespace Wuya
 
 		/* 光源颜色 */
 		void SetColor(const glm::vec4& color) { m_Color = color; }
+		[[nodiscard]] const glm::vec4& GetColor() const { return m_Color; }
 
 		/* 光源强度 */
 		void SetIntensity(float intensity) { m_Intensity = intensity; }
+		[[nodiscard]] float GetIntensity() const { return m_Intensity; }
 
 		/* 是否投影 */
 		void SetIsCastShadow(bool enable) { m_IsCastShadow = enable; }
+		[[nodiscard]] bool IsCastShadow() const { return m_IsCastShadow; }
 
 		/* 创建指定类型光源 */
 		static SharedPtr<Light> Create(LightType type);

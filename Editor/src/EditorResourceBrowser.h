@@ -13,20 +13,31 @@ namespace Wuya
 		void OnImGuiRenderer();
 
 	private:
+		/* 文件类型，根据文件后缀名来确认 */
+		enum class FileType : uint8_t
+		{
+			Default,
+			Folder,
+			Image,
+			Scene,
+			MtlGraph,
+		};
+
 		/* 资源目录下的文件节点，包括文件夹和文件 */
 		struct FileNode
 		{
 			std::string FileName;							/* 文件名 */
 			std::string FilePath;							/* 记录当前文件路径 */
-			std::string FileType;							/* 文件类型：Folder/File */
+			FileType	FileType;							/* 文件类型 */
 			float		FileSize{ 0 };						/* 文件大小 */
 			int			Depth{ -1 };						/* 文件夹距离根目录的层数 */
 			std::vector<SharedPtr<FileNode>> ChildNodes;	/* 子节点文件，目录下可能有多个 */
 			WeakPtr<FileNode> ParentNode;					/* 父节点，必须使用WeakPtr, 不然会出现智能指针循环引用，导致内存泄漏 */
+			SharedPtr<Texture> Icon;						/* 文件图标 */
 
 			FileNode() = default;
-			FileNode(std::string name, std::string path, std::string type, const float size, const int depth)
-				: FileName(std::move(name)), FilePath(std::move(path)), FileType(std::move(type)), FileSize(size), Depth(depth)
+			FileNode(std::string name, std::string path, enum class FileType type, float size, int depth)
+				: FileName(std::move(name)), FilePath(std::move(path)), FileType(type), FileSize(size), Depth(depth)
 			{}
 			~FileNode()
 			{

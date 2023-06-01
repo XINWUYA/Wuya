@@ -86,9 +86,6 @@ namespace Wuya
 	{
 		SharedPtr<Light> Light{ nullptr };
 		LightType Type{ LightType::Point };
-		glm::vec4 Color{ 1.0f, 1.0f, 1.0f, 1.0f };
-		float Intensity{ 1.0f };
-		bool IsCastShadow{ false };
 
 		LightComponent() = default;
 		LightComponent(const LightComponent&) = default;

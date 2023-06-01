@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Wuya/Common/Assert.h"
+#include "Wuya/Common/Math.h"
 #include "Wuya/Core/Input.h"
 #include "Wuya/Core/KeyCodes.h"
 #include "Wuya/Core/Logger.h"

@@ -245,14 +245,11 @@ namespace Wuya
 					{
 						auto& component = entity.AddComponent<LightComponent>();
 						component.Type = static_cast<LightType>(light_root->IntAttribute("LightType"));
-						component.Color = ToVec4(light_root->Attribute("LightColor"));
-						component.Intensity = light_root->FloatAttribute("LightIntensity");
-						component.IsCastShadow = light_root->BoolAttribute("IsCastShadow");
 
 						component.Light = Light::Create(component.Type);
-						component.Light->SetColor(component.Color);
-						component.Light->SetIntensity(component.Intensity);
-						component.Light->SetIsCastShadow(component.IsCastShadow);
+						component.Light->SetColor(ToVec4(light_root->Attribute("LightColor")));
+						component.Light->SetIntensity(light_root->FloatAttribute("LightIntensity"));
+						component.Light->SetIsCastShadow(light_root->BoolAttribute("IsCastShadow"));
 					}
 				}
 			}	
@@ -348,9 +345,9 @@ namespace Wuya
 			const auto& component = entity.GetComponent<LightComponent>();
 
 			model_root->SetAttribute("LightType", static_cast<int>(component.Type));
-			model_root->SetAttribute("LightColor", ToString(component.Color).c_str());
-			model_root->SetAttribute("LightIntensity", component.Intensity);
-			model_root->SetAttribute("IsCastShadow", component.IsCastShadow);
+			model_root->SetAttribute("LightColor", ToString(component.Light->GetColor()).c_str());
+			model_root->SetAttribute("LightIntensity", component.Light->GetIntensity());
+			model_root->SetAttribute("IsCastShadow", component.Light->IsCastShadow());
 		}
 	}
 

@@ -36,51 +36,68 @@ namespace Wuya
 		EDITOR_LOG_DEBUG("Materials : {}", m_Materials.size());
 #endif
 
+		/* 切线和副切线的计算按整个模型为基础 */
+		const auto total_vertex_count = m_Attributes.vertices.size();
+		std::vector<glm::vec3> tangents;
+		tangents.resize(total_vertex_count, glm::vec3(0));
+		std::vector<glm::vec3> bitangents;
+		bitangents.resize(total_vertex_count, glm::vec3(0));
+
+		std::vector<std::vector<int>> all_shape_indices;
+		std::vector<std::vector<glm::vec3>> all_shape_vertices;
+		std::vector<std::vector<glm::vec3>> all_shape_normals;
+		std::vector<std::vector<glm::vec3>> all_shape_colors;
+		std::vector<std::vector<glm::vec2>> all_shape_uvs;
+		std::vector<std::pair<glm::vec3, glm::vec3>> all_shape_aabbs;
+
 		/* 每个Shape对应一个MeshSegment */
 		for (size_t shape_idx = 0; shape_idx < m_Shapes.size(); ++shape_idx)
 		{
 			const auto& shape_data = m_Shapes[shape_idx];
 
-			SharedPtr<SubModelInfo> sub_model_info = CreateSharedPtr<SubModelInfo>();
-			sub_model_info->Name = shape_data.name;
-
 			/* 记录AABB信息 */
 			auto aabb_min = glm::vec3(std::numeric_limits<float>::max());
 			auto aabb_max = glm::vec3(-std::numeric_limits<float>::max());
 
-			const auto face_count = shape_data.mesh.indices.size() / 3;
+			const auto indices_count = shape_data.mesh.indices.size();
+			std::vector<int> indices;
+			indices.reserve(indices_count);
+			std::vector<glm::vec3> vertices;
+			vertices.reserve(indices_count);
+			std::vector<glm::vec3> normals;
+			normals.reserve(indices_count);
+			std::vector<glm::vec3> colors;
+			colors.reserve(indices_count);
+			std::vector<glm::vec2> uvs;
+			uvs.reserve(indices_count);
+
+			const auto face_count = indices_count / 3;
 			for (size_t face_idx = 0; face_idx < face_count; ++face_idx)
 			{
 				/* 三角形面片的3个顶点索引 */
-				auto index0 = shape_data.mesh.indices[face_idx * 3 + 0];
-				auto index1 = shape_data.mesh.indices[face_idx * 3 + 1];
-				auto index2 = shape_data.mesh.indices[face_idx * 3 + 2];
+				tinyobj::index_t vertex_indices[3] = {
+					shape_data.mesh.indices[face_idx * 3 + 0],
+					shape_data.mesh.indices[face_idx * 3 + 1],
+					shape_data.mesh.indices[face_idx * 3 + 2]
+				};
 
 				/* 收集3个顶点坐标 */
-				ASSERT(index0.vertex_index >= 0 && index1.vertex_index >= 0 && index2.vertex_index >= 0);
-				float vertex[3][3];
+				ASSERT(vertex_indices[0].vertex_index >= 0 && vertex_indices[1].vertex_index >= 0 && vertex_indices[2].vertex_index >= 0);
+
 				for (int i = 0; i < 3; ++i)
 				{
-					/* x->y->z值依次获取 */
-					vertex[0][i] = m_Attributes.vertices[index0.vertex_index * 3 + i];
-					vertex[1][i] = m_Attributes.vertices[index1.vertex_index * 3 + i];
-					vertex[2][i] = m_Attributes.vertices[index2.vertex_index * 3 + i];
-
-					/* 记录AABB */
-					aabb_min[i] = std::min(vertex[0][i], aabb_min[i]);
-					aabb_min[i] = std::min(vertex[1][i], aabb_min[i]);
-					aabb_min[i] = std::min(vertex[2][i], aabb_min[i]);
-					aabb_max[i] = std::max(vertex[0][i], aabb_max[i]);
-					aabb_max[i] = std::max(vertex[1][i], aabb_max[i]);
-					aabb_max[i] = std::max(vertex[2][i], aabb_max[i]);
+					glm::vec3 vertex(m_Attributes.vertices[vertex_indices[i].vertex_index * 3 + 0], m_Attributes.vertices[vertex_indices[i].vertex_index * 3 + 1], m_Attributes.vertices[vertex_indices[i].vertex_index * 3 + 2]);
+					aabb_min = min(vertex, aabb_min);
+					aabb_max = max(vertex, aabb_max);
+					vertices.emplace_back(vertex);
+					indices.emplace_back(vertex_indices[i].vertex_index);
 				}
 
 				/* 收集3个顶点法线 */
-				float normal[3][3];
 				bool invalid_normal = false;
 				if (!m_Attributes.normals.empty())
 				{
-					if (index0.normal_index < 0 || index1.normal_index < 0 || index2.normal_index < 0)
+					if (vertex_indices[0].normal_index < 0 || vertex_indices[1].normal_index < 0 || vertex_indices[2].normal_index < 0)
 					{
 						invalid_normal = true;
 					}
@@ -88,10 +105,7 @@ namespace Wuya
 					{
 						for (int i = 0; i < 3; ++i)
 						{
-							/* x->y->z值依次获取 */
-							normal[0][i] = m_Attributes.normals[index0.normal_index * 3 + i];
-							normal[1][i] = m_Attributes.normals[index1.normal_index * 3 + i];
-							normal[2][i] = m_Attributes.normals[index2.normal_index * 3 + i];
+							normals.emplace_back(m_Attributes.normals[vertex_indices[i].normal_index * 3 + 0], m_Attributes.normals[vertex_indices[i].normal_index * 3 + 1], m_Attributes.normals[vertex_indices[i].normal_index * 3 + 2]);
 						}
 					}
 				}
@@ -108,10 +122,7 @@ namespace Wuya
 				{
 					for (int i = 0; i < 3; ++i)
 					{
-						/* x->y->z值依次获取 */
-						color[0][i] = m_Attributes.colors[index0.vertex_index * 3 + i];
-						color[1][i] = m_Attributes.colors[index1.vertex_index * 3 + i];
-						color[2][i] = m_Attributes.colors[index2.vertex_index * 3 + i];
+						colors.emplace_back(m_Attributes.colors[vertex_indices[i].vertex_index * 3 + i], m_Attributes.colors[vertex_indices[i].vertex_index * 3 + i], m_Attributes.colors[vertex_indices[i].vertex_index * 3 + i]);
 					}
 				}
 
@@ -120,48 +131,147 @@ namespace Wuya
 				memset(uv, 0.0f, 6 * sizeof(float));
 				if (!m_Attributes.texcoords.empty())
 				{
-					if (index0.texcoord_index >= 0 && index1.texcoord_index >= 0 && index2.texcoord_index >= 0)
+					if (vertex_indices[0].texcoord_index >= 0 && vertex_indices[1].texcoord_index >= 0 && vertex_indices[2].texcoord_index >= 0)
 					{
-						uv[0][0] = m_Attributes.texcoords[index0.texcoord_index * 2];
-						uv[0][1] = 1.0f - m_Attributes.texcoords[index0.texcoord_index * 2 + 1];
-						uv[1][0] = m_Attributes.texcoords[index1.texcoord_index * 2];
-						uv[1][1] = 1.0f - m_Attributes.texcoords[index1.texcoord_index * 2 + 1];
-						uv[2][0] = m_Attributes.texcoords[index2.texcoord_index * 2];
-						uv[2][1] = 1.0f - m_Attributes.texcoords[index2.texcoord_index * 2 + 1];
+						for (int i = 0; i < 3; ++i)
+							uvs.emplace_back(m_Attributes.texcoords[vertex_indices[i].texcoord_index * 2], 1.0f - m_Attributes.texcoords[vertex_indices[i].texcoord_index * 2 + 1]);
 					}
 				}
 
-				/* Combine */
-				for (int v = 0; v < 3; ++v)
+				/* 计算Tangent和BiTangent */
+				if (!m_Attributes.texcoords.empty()) /* 确保存在uv数据 */
 				{
-					sub_model_info->VertexData.emplace_back(vertex[v][0]);
-					sub_model_info->VertexData.emplace_back(vertex[v][1]);
-					sub_model_info->VertexData.emplace_back(vertex[v][2]);
-					sub_model_info->VertexData.emplace_back(normal[v][0]);
-					sub_model_info->VertexData.emplace_back(normal[v][1]);
-					sub_model_info->VertexData.emplace_back(normal[v][2]);
-					sub_model_info->VertexData.emplace_back(color[v][0]);
-					sub_model_info->VertexData.emplace_back(color[v][1]);
-					sub_model_info->VertexData.emplace_back(color[v][2]);
-					sub_model_info->VertexData.emplace_back(uv[v][0]);
-					sub_model_info->VertexData.emplace_back(uv[v][1]);
+					// Ref: https://learnopengl-cn.github.io/05%20Advanced%20Lighting/04%20Normal%20Mapping/#_3
+					glm::vec3& v0 = vertices[face_idx * 3 + 0];
+					glm::vec3& v1 = vertices[face_idx * 3 + 1];
+					glm::vec3& v2 = vertices[face_idx * 3 + 2];
+
+					glm::vec2& w0 = uvs[face_idx * 3 + 0];
+					glm::vec2& w1 = uvs[face_idx * 3 + 1];
+					glm::vec2& w2 = uvs[face_idx * 3 + 2];
+
+					glm::vec3 edge01 = v1 - v0;
+					glm::vec3 edge02 = v2 - v0;
+					glm::vec2 uv01 = w1 - w0;
+					glm::vec2 uv02 = w2 - w0;
+
+					float f = uv01.x * uv02.y - uv01.y * uv02.x;
+					if (abs(f) < 1e-6f)
+						f = 1e-6f;
+					f = 1.0f / f;
+					glm::vec3 tangent(f * (uv02.y * edge01.x - uv01.y * edge02.x), f * (uv02.y * edge01.y - uv01.y * edge02.y), f * (uv02.y * edge01.z - uv01.y * edge02.z));
+					glm::vec3 bitangent(f * (-uv02.x * edge01.x + uv01.x * edge02.x), f * (-uv02.x * edge01.y + uv01.x * edge02.y), f * (-uv02.x * edge01.z + uv01.x * edge02.z));
+					if (abs(tangent.x) + abs(tangent.y) + abs(tangent.z) <= 0.001f || isnan(tangent.x) || isnan(tangent.y) || isnan(tangent.z) || isnan(bitangent.x) || isnan(bitangent.y) || isnan(bitangent.z))
+					{
+						tangent = glm::vec3(1.0f, 0.0f, 0.0f);
+						bitangent = glm::vec3(0.0f, 0.0f, 1.0f);
+					}
+					for (int i = 0; i < 3; ++i)
+					{
+						tangents[vertex_indices[i].vertex_index] += tangent;
+						bitangents[vertex_indices[i].vertex_index] += bitangent;
+					}
 				}
 			}
 
+			all_shape_indices.emplace_back(indices);
+			all_shape_vertices.emplace_back(vertices);
+			all_shape_normals.emplace_back(normals);
+			all_shape_colors.emplace_back(colors);
+			all_shape_uvs.emplace_back(uvs);
+			all_shape_aabbs.emplace_back(aabb_min, aabb_max);
+		}
+
+		/* Normalize Tangent and BiTangent */
+		for (size_t vertex_idx = 0; vertex_idx < total_vertex_count; ++vertex_idx)
+		{
+			tangents[vertex_idx] = glm::normalize(tangents[vertex_idx]);
+			bitangents[vertex_idx] = glm::normalize(bitangents[vertex_idx]);
+		}
+
+		for (size_t shape_idx = 0; shape_idx < m_Shapes.size(); ++shape_idx)
+		{
+			const auto& vertices = all_shape_vertices[shape_idx];
+			auto& normals = all_shape_normals[shape_idx];
+			auto& colors = all_shape_colors[shape_idx];
+			auto& uvs = all_shape_uvs[shape_idx];
+			auto& indices = all_shape_indices[shape_idx];
+
+			const auto& shape_data = m_Shapes[shape_idx];
+
+			SharedPtr<SubModelInfo> sub_model_info = CreateSharedPtr<SubModelInfo>();
+			sub_model_info->Name = shape_data.name;
+
+			/* Combine Vertex Data */
+			//for (size_t vertex_idx = 0; vertex_idx < vertices.size(); ++vertex_idx)
+			//{
+			//	const glm::vec3& vertex = vertices[vertex_idx];
+			//	const glm::vec3& normal = normals[vertex_idx];
+			//	const glm::vec3& color = colors[vertex_idx];
+			//	const glm::vec2& uv = uvs[vertex_idx];
+
+			//	int indice_idx = indices[vertex_idx];
+			//	const glm::vec3& tangent = tangents[indice_idx];
+			//	const glm::vec3& bitangent = bitangents[indice_idx];
+
+			//	glm::vec3 tangent_correct = glm::normalize(tangent - normal * glm::dot(normal, tangent));
+			//	// glm::vec3 t = glm::cross(normal, tangent);
+			//	// if (glm::dot(t, bitangent) < 0)
+			//	// 	tangent_correct *= -1.0f;
+			//	sub_model_info->VertexData.emplace_back(vertex.x);
+			//	sub_model_info->VertexData.emplace_back(vertex.y);
+			//	sub_model_info->VertexData.emplace_back(vertex.z);
+			//	sub_model_info->VertexData.emplace_back(normal.x);
+			//	sub_model_info->VertexData.emplace_back(normal.y);
+			//	sub_model_info->VertexData.emplace_back(normal.z);
+			//	sub_model_info->VertexData.emplace_back(color.x);
+			//	sub_model_info->VertexData.emplace_back(color.y);
+			//	sub_model_info->VertexData.emplace_back(color.z);
+			//	sub_model_info->VertexData.emplace_back(uv.x);
+			//	sub_model_info->VertexData.emplace_back(uv.y);
+			//	sub_model_info->VertexData.emplace_back(tangent_correct.x);
+			//	sub_model_info->VertexData.emplace_back(tangent_correct.y);
+			//	sub_model_info->VertexData.emplace_back(tangent_correct.z);
+			//	sub_model_info->VertexData.emplace_back(bitangent.x);
+			//	sub_model_info->VertexData.emplace_back(bitangent.y);
+			//	sub_model_info->VertexData.emplace_back(bitangent.z);
+			//}
+
 			/* Vertex Buffer */
-			auto vertex_buffer = VertexBuffer::Create(sub_model_info->VertexData.data(), sub_model_info->VertexData.size() * sizeof(float));
+			/*auto vertex_buffer = VertexBuffer::Create(sub_model_info->VertexData.data(), sub_model_info->VertexData.size() * sizeof(float));
 			VertexBufferLayout vertex_buffer_layout = {
 				{ "a_Position", BufferDataType::Float3 },
 				{ "a_Normal", BufferDataType::Float3 },
 				{ "a_Color", BufferDataType::Float3 },
 				{ "a_TexCoord", BufferDataType::Float2 },
+				{ "a_Tangent", BufferDataType::Float3 },
+				{ "a_BiTangent", BufferDataType::Float3 },
 			};
-			vertex_buffer->SetLayout(vertex_buffer_layout);
+			vertex_buffer->SetLayout(vertex_buffer_layout);*/
 
 			/* Vertex Array */
 			sub_model_info->VertexArray = VertexArray::Create();
 			sub_model_info->VertexArray->Bind();
-			sub_model_info->VertexArray->AddVertexBuffer(vertex_buffer);
+			{
+				auto vertex_buffer = VertexBuffer::Create(vertices.data(), vertices.size() * sizeof(glm::vec3));
+				vertex_buffer->SetLayout({ { "a_Position", BufferDataType::Float3 } });
+				sub_model_info->VertexArray->AddVertexBuffer(vertex_buffer);
+			}
+			{
+				auto vertex_buffer = VertexBuffer::Create(normals.data(), normals.size() * sizeof(glm::vec3));
+				vertex_buffer->SetLayout({ { "a_Normal", BufferDataType::Float3 } });
+				sub_model_info->VertexArray->AddVertexBuffer(vertex_buffer);
+			}
+			{
+				auto vertex_buffer = VertexBuffer::Create(colors.data(), colors.size() * sizeof(glm::vec3));
+				vertex_buffer->SetLayout({ { "a_Color", BufferDataType::Float3 } });
+				sub_model_info->VertexArray->AddVertexBuffer(vertex_buffer);
+			}
+			{
+				auto vertex_buffer = VertexBuffer::Create(uvs.data(), uvs.size() * sizeof(glm::vec2));
+				vertex_buffer->SetLayout({ { "a_TexCoord", BufferDataType::Float2 } });
+				sub_model_info->VertexArray->AddVertexBuffer(vertex_buffer);
+			}
 
 			/* MaterialParams */
 			std::filesystem::path relative_dir = std::filesystem::relative(basedir, g_AssetPath);
@@ -201,17 +311,13 @@ namespace Wuya
 				params.IOR = material_data.ior;
 			}
 
-			sub_model_info->AABB = std::make_pair(aabb_min, aabb_max);
+			sub_model_info->AABB = all_shape_aabbs[shape_idx];
 
 			m_SubModelInfos.emplace_back(sub_model_info);
 
 			/* 更新模型整体的AABB */
-			m_AABB.first.x = std::min(m_AABB.first.x, aabb_min.x);
-			m_AABB.first.y = std::min(m_AABB.first.y, aabb_min.y);
-			m_AABB.first.z = std::min(m_AABB.first.z, aabb_min.z);
-			m_AABB.second.x = std::max(m_AABB.second.x, aabb_max.x);
-			m_AABB.second.y = std::max(m_AABB.second.y, aabb_max.y);
-			m_AABB.second.z = std::max(m_AABB.second.z, aabb_max.z);
+			m_AABB.first = min(m_AABB.first, sub_model_info->AABB.first);
+			m_AABB.second = max(m_AABB.second, sub_model_info->AABB.second);
 		}
 	}
 

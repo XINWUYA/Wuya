@@ -42,6 +42,12 @@ namespace Wuya
 		return instance;
 	}
 
+	SharedPtr<Texture> TextureAssetManager::GetOrCreateTexture(const std::string& path)
+	{
+		constexpr TextureLoadConfig load_config;
+		return GetOrCreateTexture(path, load_config);
+	}
+
 	SharedPtr<Texture> TextureAssetManager::GetOrCreateTexture(const std::string& path, const TextureLoadConfig& load_config)
 	{
 		PROFILE_FUNCTION();

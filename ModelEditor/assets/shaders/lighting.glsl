@@ -1,14 +1,13 @@
 #type vertex
 #version 450 core
 
-layout(location = 0) in vec4 a_Position;
-
 struct SVextex2Frag
 {
 	vec2 TexCoord;
 };
 
-layout (location = 0) out SVextex2Frag Output;
+layout(location = 0) in vec4 a_Position;
+layout(location = 0) out SVextex2Frag Output;
 
 void main()
 {
@@ -22,23 +21,25 @@ void main()
 #type fragment
 #version 450 core
 
-#include "builtin/uniforms.glsl"
-
-layout(location = 0) out vec4 OutFragColor;
+#include "builtin/Uniforms.glsl"
+#include "builtin/GBuffer.glsl"
+#include "builtin/Math.glsl"
 
 struct SVextex2Frag
 {
 	vec2 TexCoord;
 };
 
-layout (location = 0) in SVextex2Frag Input;
-
-uniform sampler2D u_Texture;
+layout(location = 0) out vec4 OutFragColor;
+layout(location = 0) in SVextex2Frag Input;
 
 void main()
 {
-	vec2 uv = Input.TexCoord;
-	vec4 texture_color = texture(u_Texture, uv);
-	//OutFragColor = vec4(texture_color.rgb, 1.0f);
-	OutFragColor = texture_color * vec4(u_ColorIntensity.rgb, 1.0f);
+	SGBufferData gbuffer;
+	CalculateGBuffer(gbuffer, Input.TexCoord);
+	
+	float dotNL = dot(gbuffer.WorldNormal, -u_LightDir);
+	vec3 diffuse = dotNL * gbuffer.Albedo * u_ColorIntensity.rgb * u_ColorIntensity.a;
+
+	OutFragColor = vec4(diffuse, 1.0f);
 }

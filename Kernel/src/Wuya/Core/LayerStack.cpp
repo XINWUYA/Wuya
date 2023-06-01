@@ -51,4 +51,16 @@ namespace Wuya
 			CORE_LOG_WARN("Can't find layer ({0}) to pop up.", layer->GetName());
 		}
 	}
+
+	/* Get Layer */
+	const SharedPtr<ILayer>& LayerStack::GetLayerByName(const std::string& name)
+	{
+		for (auto& layer : m_Layers)
+		{
+			if (strcmp(layer->GetName().c_str(), name.c_str()) == 0)
+				return layer;
+		}
+
+		return {};
+	}
 }

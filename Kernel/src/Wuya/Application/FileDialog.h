@@ -10,4 +10,7 @@ namespace Wuya
 		/* 保存文件到指定路径 */
 		static std::string SaveFile(const char* filter = "*.*");
 	};
+
+	/* 打开到指定文件目录 */
+	bool OpenFileExplorer(const char* path);
 }

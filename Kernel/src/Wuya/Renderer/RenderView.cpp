@@ -129,7 +129,11 @@ namespace Wuya
 			auto [transform_component,light_component] = light_entity_view.get<TransformComponent, LightComponent>(entity);
 
 			const glm::vec3 light_dir = transform_component.GetTransform() * glm::vec4(0.0f, 1.0f, 0.0f, 1.0f);
-			m_ValidLights.emplace_back(static_cast<uint32_t>(light_component.Type), glm::vec4(light_component.Color.r, light_component.Color.g, light_component.Color.b, light_component.Intensity), light_dir, transform_component.Position, light_component.IsCastShadow);
+			const auto& light_color = light_component.Light->GetColor();
+			m_ValidLights.emplace_back(static_cast<uint32_t>(light_component.Type), 
+				glm::vec4(light_color.r, light_color.g, light_color.b, light_component.Light->GetIntensity()), 
+				light_dir, 
+				transform_component.Position, light_component.Light->IsCastShadow());
 		}
 	}
 }

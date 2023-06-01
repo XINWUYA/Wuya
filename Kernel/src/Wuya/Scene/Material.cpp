@@ -24,14 +24,20 @@ namespace Wuya
 		m_Parameters[ToID(name)] = { type, name, param };
 	}
 
-	void Material::SetTexture(const std::string& name, const SharedPtr<Texture>& texture, uint32_t slot)
+	void Material::SetTexture(const std::string& name, const SharedPtr<Texture>& texture, int slot)
 	{
 		PROFILE_FUNCTION();
 
 		if (!texture)
 			return;
 
-		m_Parameters[ToID(name)] = { ParamType::Texture, name, std::make_pair(texture, slot) };
+		if (slot < 0)
+			slot = m_pShader->GetUniformLocation(name);
+
+		if (slot < 0)
+			return;
+
+		m_Parameters[ToID(name)] = { ParamType::Texture, name, std::make_pair(texture, static_cast<uint32_t>(slot)) };
 	}
 
 	/* 绑定材质中的各参数 */

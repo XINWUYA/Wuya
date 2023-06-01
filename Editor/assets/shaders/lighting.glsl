@@ -1,14 +1,13 @@
 #type vertex
 #version 450 core
 
-layout(location = 0) in vec4 a_Position;
-
 struct SVextex2Frag
 {
 	vec2 TexCoord;
 };
 
-layout (location = 0) out SVextex2Frag Output;
+layout(location = 0) in vec4 a_Position;
+layout(location = 0) out SVextex2Frag Output;
 
 void main()
 {
@@ -22,23 +21,33 @@ void main()
 #type fragment
 #version 450 core
 
-#include "builtin/uniforms.glsl"
-
-layout(location = 0) out vec4 OutFragColor;
+#include "builtin/Uniforms.glsl"
+#include "builtin/GBuffer.glsl"
+#include "builtin/Math.glsl"
+#include "builtin/BRDF.glsl"
 
 struct SVextex2Frag
 {
 	vec2 TexCoord;
 };
 
-layout (location = 0) in SVextex2Frag Input;
-
-uniform sampler2D u_Texture;
+layout(location = 0) out vec4 OutFragColor;
+layout(location = 0) in SVextex2Frag Input;
 
 void main()
 {
-	vec2 uv = Input.TexCoord;
-	vec4 texture_color = texture(u_Texture, uv);
-	//OutFragColor = vec4(texture_color.rgb, 1.0f);
-	OutFragColor = texture_color * vec4(u_ColorIntensity.rgb, 1.0f);
+	SGBufferData gbuffer;
+	CalculateGBuffer(gbuffer, Input.TexCoord);
+	
+	vec3 l = -normalize(u_LightDir);
+	vec3 v = normalize(u_ViewDir);
+
+	// Direct Lighting
+	vec3 lighting_result = max(vec3(0.0f), BRDF(l, v, gbuffer.WorldNormal, gbuffer.Metallic, gbuffer.Roughness, gbuffer.Albedo));
+	// Ambient
+	lighting_result += max(vec3(0.0f), gbuffer.Ambient * gbuffer.Albedo * gbuffer.AO);
+	// Emissive
+	lighting_result += gbuffer.Emission;
+
+	OutFragColor = vec4(gbuffer.WorldNormal, 1.0f);
 }

@@ -5,7 +5,7 @@
 namespace Wuya
 {
 	EditorCamera::EditorCamera(const std::string& name, float fov, float aspect_ratio, float near_clip, float far_clip)
-		: Camera(name), m_Fov(fov), m_AspectRatio(aspect_ratio), m_NearClip(near_clip), m_FarClip(far_clip)
+		: Camera(name, fov, aspect_ratio, near_clip, far_clip)
 	{
 		PROFILE_FUNCTION();
 
@@ -96,6 +96,9 @@ namespace Wuya
 
 		m_AspectRatio = static_cast<float>(m_ViewportRegion.Width) / static_cast<float>(m_ViewportRegion.Height);
 		UpdateProjectionMatrix();
+
+		/* 更新视口区域时，需重新构建FrameGraph, 保证RenderTarget的size是正确的 */
+		m_IsFrameGraphDirty = true;
 	}
 
 	/* 构建内置的FrameGraph */
@@ -104,6 +107,9 @@ namespace Wuya
 		PROFILE_FUNCTION();
 
 		if (!m_IsFrameGraphDirty)
+			return;
+
+		if (m_ViewportRegion.Width <= 0 || m_ViewportRegion.Height <= 0)
 			return;
 
 		auto& frame_graph = m_pRenderView->GetFrameGraph();
@@ -127,41 +133,46 @@ namespace Wuya
 		/* GBuffer Pass */
 		struct GBufferPassData
 		{
-			FrameGraphResourceHandleTyped<FrameGraphTexture> GBufferAlbedo;
-			FrameGraphResourceHandleTyped<FrameGraphTexture> GBufferSpecular;
-			FrameGraphResourceHandleTyped<FrameGraphTexture> GBufferNormal;
-			FrameGraphResourceHandleTyped<FrameGraphTexture> GBufferRoughnessMetallic;
-			FrameGraphResourceHandleTyped<FrameGraphTexture> GBufferEmissive;
-			FrameGraphResourceHandleTyped<FrameGraphTexture> GBufferObjectId;
-			FrameGraphResourceHandleTyped<FrameGraphTexture> GBufferDepth;
+			FrameGraphResourceHandleTyped<FrameGraphTexture> GBufferTexture0;
+			FrameGraphResourceHandleTyped<FrameGraphTexture> GBufferTexture1;
+			FrameGraphResourceHandleTyped<FrameGraphTexture> GBufferTexture2;
+			FrameGraphResourceHandleTyped<FrameGraphTexture> GBufferTexture3;
+			FrameGraphResourceHandleTyped<FrameGraphTexture> GBufferTexture4;
+			FrameGraphResourceHandleTyped<FrameGraphTexture> GBufferTexture5;
+			FrameGraphResourceHandleTyped<FrameGraphTexture> ObjectId;
+			FrameGraphResourceHandleTyped<FrameGraphTexture> Depth;
 		};
 
 		auto gbuffer_pass = frame_graph->AddPass<GBufferPassData>("GBufferPass",
 			[&](FrameGraphBuilder& builder, GBufferPassData& data)
 			{
-				data.GBufferAlbedo = builder.CreateTexture("GBufferAlbedo", color_target_desc);
-				data.GBufferSpecular = builder.CreateTexture("GBufferSpecular", color_target_desc);
-				data.GBufferNormal = builder.CreateTexture("GBufferNormal", color_target_desc);
-				data.GBufferRoughnessMetallic = builder.CreateTexture("GBufferRoughnessMetallic", color_target_desc);
-				data.GBufferEmissive = builder.CreateTexture("GBufferEmissive", color_target_desc);
-				data.GBufferObjectId = builder.CreateTexture("GBufferObjectId", object_id_desc);
-				data.GBufferDepth = builder.CreateTexture("GBufferDepth", depth_target_desc);
-				builder.BindOutputResource(data.GBufferAlbedo, FrameGraphTexture::Usage::ColorAttachment);
-				builder.BindOutputResource(data.GBufferSpecular, FrameGraphTexture::Usage::ColorAttachment);
-				builder.BindOutputResource(data.GBufferNormal, FrameGraphTexture::Usage::ColorAttachment);
-				builder.BindOutputResource(data.GBufferRoughnessMetallic, FrameGraphTexture::Usage::ColorAttachment);
-				builder.BindOutputResource(data.GBufferEmissive, FrameGraphTexture::Usage::ColorAttachment);
-				builder.BindOutputResource(data.GBufferObjectId, FrameGraphTexture::Usage::ColorAttachment | FrameGraphTexture::Usage::Sampleable);
-				builder.BindOutputResource(data.GBufferDepth, FrameGraphTexture::Usage::DepthAttachment);
+				data.GBufferTexture0 = builder.CreateTexture("GBufferTexture0", color_target_desc);
+				data.GBufferTexture1 = builder.CreateTexture("GBufferTexture1", color_target_desc);
+				data.GBufferTexture2 = builder.CreateTexture("GBufferTexture2", color_target_desc);
+				data.GBufferTexture3 = builder.CreateTexture("GBufferTexture3", color_target_desc);
+				data.GBufferTexture4 = builder.CreateTexture("GBufferTexture4", color_target_desc);
+				data.GBufferTexture5 = builder.CreateTexture("GBufferTexture5", color_target_desc);
+				data.ObjectId = builder.CreateTexture("ObjectId", object_id_desc);
+				data.Depth = builder.CreateTexture("GBufferDepth", depth_target_desc);
+
+				builder.BindOutputResource(data.GBufferTexture0, FrameGraphTexture::Usage::ColorAttachment);
+				builder.BindOutputResource(data.GBufferTexture1, FrameGraphTexture::Usage::ColorAttachment);
+				builder.BindOutputResource(data.GBufferTexture2, FrameGraphTexture::Usage::ColorAttachment);
+				builder.BindOutputResource(data.GBufferTexture3, FrameGraphTexture::Usage::ColorAttachment);
+				builder.BindOutputResource(data.GBufferTexture4, FrameGraphTexture::Usage::ColorAttachment);
+				builder.BindOutputResource(data.GBufferTexture5, FrameGraphTexture::Usage::ColorAttachment);
+				builder.BindOutputResource(data.ObjectId, FrameGraphTexture::Usage::ColorAttachment | FrameGraphTexture::Usage::Sampleable);
+				builder.BindOutputResource(data.Depth, FrameGraphTexture::Usage::DepthAttachment);
 
 				FrameGraphPassInfo::Descriptor pass_desc;
-				pass_desc.Attachments.ColorAttachments[0] = data.GBufferAlbedo;
-				pass_desc.Attachments.ColorAttachments[1] = data.GBufferSpecular;
-				pass_desc.Attachments.ColorAttachments[2] = data.GBufferNormal;
-				pass_desc.Attachments.ColorAttachments[3] = data.GBufferRoughnessMetallic;
-				pass_desc.Attachments.ColorAttachments[4] = data.GBufferEmissive;
-				pass_desc.Attachments.ColorAttachments[5] = data.GBufferObjectId;
-				pass_desc.Attachments.DepthAttachment = data.GBufferDepth;
+				pass_desc.Attachments.ColorAttachments[0] = data.GBufferTexture0;
+				pass_desc.Attachments.ColorAttachments[1] = data.GBufferTexture1;
+				pass_desc.Attachments.ColorAttachments[2] = data.GBufferTexture2;
+				pass_desc.Attachments.ColorAttachments[3] = data.GBufferTexture3;
+				pass_desc.Attachments.ColorAttachments[4] = data.GBufferTexture4;
+				pass_desc.Attachments.ColorAttachments[5] = data.GBufferTexture5;
+				pass_desc.Attachments.ColorAttachments[6] = data.ObjectId;
+				pass_desc.Attachments.DepthAttachment = data.Depth;
 				pass_desc.ViewportRegion = m_ViewportRegion;
 				builder.CreateRenderPass("GBufferPassRenderTarget", pass_desc);
 			},
@@ -176,8 +187,9 @@ namespace Wuya
 				{
 					Renderer::GetRenderAPI()->Clear();
 
+					/* Clear ObjectId Texture */
 					int32_t clear_data = -1;
-					render_pass_info->ClearAttachment(5, 0, { PixelFormat::R_Integer, PixelType::Int }, &clear_data);
+					render_pass_info->ClearAttachment(6, 0, { PixelFormat::R_Integer, PixelType::Int }, &clear_data);
 
 					for (const auto& mesh_object : m_pRenderView->GetVisibleMeshObjects())
 					{
@@ -195,31 +207,49 @@ namespace Wuya
 
 				Renderer::GetRenderAPI()->PopDebugGroup();
 			}
-		);
-		frame_graph->GetBlackboard()["GBufferAlbedo"] = gbuffer_pass->GetData().GBufferAlbedo;
-		frame_graph->GetBlackboard()["GBufferSpecular"] = gbuffer_pass->GetData().GBufferSpecular;
-		frame_graph->GetBlackboard()["GBufferNormal"] = gbuffer_pass->GetData().GBufferNormal;
-		frame_graph->GetBlackboard()["GBufferRoughnessMetallic"] = gbuffer_pass->GetData().GBufferRoughnessMetallic;
-		frame_graph->GetBlackboard()["GBufferEmissive"] = gbuffer_pass->GetData().GBufferEmissive;
+			);
+
+		frame_graph->GetBlackboard()["GBufferTexture0"] = gbuffer_pass->GetData().GBufferTexture0;
+		frame_graph->GetBlackboard()["GBufferTexture1"] = gbuffer_pass->GetData().GBufferTexture1;
+		frame_graph->GetBlackboard()["GBufferTexture2"] = gbuffer_pass->GetData().GBufferTexture2;
+		frame_graph->GetBlackboard()["GBufferTexture3"] = gbuffer_pass->GetData().GBufferTexture3;
+		frame_graph->GetBlackboard()["GBufferTexture4"] = gbuffer_pass->GetData().GBufferTexture4;
+		frame_graph->GetBlackboard()["GBufferTexture5"] = gbuffer_pass->GetData().GBufferTexture5;
 
 		/* Lighting Pass */
 		struct LightingPassData
 		{
-			FrameGraphResourceHandleTyped<FrameGraphTexture> InputTexture;
-			FrameGraphResourceHandleTyped<FrameGraphTexture> OutputTexture;
+			FrameGraphResourceHandleTyped<FrameGraphTexture> GBufferTexture0;
+			FrameGraphResourceHandleTyped<FrameGraphTexture> GBufferTexture1;
+			FrameGraphResourceHandleTyped<FrameGraphTexture> GBufferTexture2;
+			FrameGraphResourceHandleTyped<FrameGraphTexture> GBufferTexture3;
+			FrameGraphResourceHandleTyped<FrameGraphTexture> GBufferTexture4;
+			FrameGraphResourceHandleTyped<FrameGraphTexture> GBufferTexture5;
+			FrameGraphResourceHandleTyped<FrameGraphTexture> LightingResult;
 		};
 
 		auto lighting_pass = frame_graph->AddPass<LightingPassData>("LightingPass",
 			[&](FrameGraphBuilder& builder, LightingPassData& data)
 			{
-				data.InputTexture = frame_graph->GetBlackboard().GetResourceHandle<FrameGraphTexture>("GBufferAlbedo");
-				data.OutputTexture = builder.CreateTexture("OutputTexture", color_target_desc);
+				data.GBufferTexture0 = frame_graph->GetBlackboard().GetResourceHandle<FrameGraphTexture>("GBufferTexture0");
+				data.GBufferTexture1 = frame_graph->GetBlackboard().GetResourceHandle<FrameGraphTexture>("GBufferTexture1");
+				data.GBufferTexture2 = frame_graph->GetBlackboard().GetResourceHandle<FrameGraphTexture>("GBufferTexture2");
+				data.GBufferTexture3 = frame_graph->GetBlackboard().GetResourceHandle<FrameGraphTexture>("GBufferTexture3");
+				data.GBufferTexture4 = frame_graph->GetBlackboard().GetResourceHandle<FrameGraphTexture>("GBufferTexture4");
+				data.GBufferTexture5 = frame_graph->GetBlackboard().GetResourceHandle<FrameGraphTexture>("GBufferTexture5");
 
-				builder.BindInputResource(data.InputTexture, FrameGraphTexture::Usage::Sampleable);
-				builder.BindOutputResource(data.OutputTexture, FrameGraphTexture::Usage::Sampleable);
+				data.LightingResult = builder.CreateTexture("LightingResult", color_target_desc);
+
+				builder.BindInputResource(data.GBufferTexture0, FrameGraphTexture::Usage::Sampleable);
+				builder.BindInputResource(data.GBufferTexture1, FrameGraphTexture::Usage::Sampleable);
+				builder.BindInputResource(data.GBufferTexture2, FrameGraphTexture::Usage::Sampleable);
+				builder.BindInputResource(data.GBufferTexture3, FrameGraphTexture::Usage::Sampleable);
+				builder.BindInputResource(data.GBufferTexture4, FrameGraphTexture::Usage::Sampleable);
+				builder.BindInputResource(data.GBufferTexture5, FrameGraphTexture::Usage::Sampleable);
+				builder.BindOutputResource(data.LightingResult, FrameGraphTexture::Usage::Sampleable);
 
 				FrameGraphPassInfo::Descriptor pass_desc;
-				pass_desc.Attachments.ColorAttachments[0] = data.OutputTexture;
+				pass_desc.Attachments.ColorAttachments[0] = data.LightingResult;
 				pass_desc.ViewportRegion = m_ViewportRegion;
 				builder.CreateRenderPass("LightingPassRenderTarget", pass_desc);
 
@@ -252,7 +282,12 @@ namespace Wuya
 						raster_state.BlendFuncDstA = BlendFunc::One;
 						const auto shader = ShaderAssetManager::Instance().GetOrLoad("assets/shaders/lighting.glsl");
 						material->SetShader(shader);
-						material->SetTexture("u_Texture", resources.Get(data.InputTexture).Texture, 0);
+						material->SetTexture("u_GBufferTexture0", resources.Get(data.GBufferTexture0).Texture, 0);
+						material->SetTexture("u_GBufferTexture1", resources.Get(data.GBufferTexture1).Texture, 1);
+						material->SetTexture("u_GBufferTexture2", resources.Get(data.GBufferTexture2).Texture, 2);
+						material->SetTexture("u_GBufferTexture3", resources.Get(data.GBufferTexture3).Texture, 3);
+						material->SetTexture("u_GBufferTexture4", resources.Get(data.GBufferTexture4).Texture, 4);
+						material->SetTexture("u_GBufferTexture5", resources.Get(data.GBufferTexture5).Texture, 5);
 						Renderer::Submit(material, Renderer::GetFullScreenVertexArray());
 					}
 				}
@@ -260,13 +295,13 @@ namespace Wuya
 
 				Renderer::GetRenderAPI()->PopDebugGroup();
 			}
-		);
-		frame_graph->GetBlackboard()["LightingPassOutput"] = lighting_pass->GetData().OutputTexture;
-		//frame_graph->ExportGraphviz("framegraph.txt");
+			);
+		frame_graph->GetBlackboard()["LightingPassOutput"] = lighting_pass->GetData().LightingResult;
+		frame_graph->ExportGraphviz("framegraph.txt");
 		m_pRenderView->Prepare();
 
 		/* 输出 */
-		m_pRenderView->SetRenderTargetHandle(lighting_pass->GetData().OutputTexture);
+		m_pRenderView->SetRenderTargetHandle(lighting_pass->GetData().LightingResult);
 
 		m_IsFrameGraphDirty = false;
 	}
@@ -276,7 +311,7 @@ namespace Wuya
 		int32_t entity_id = -1;
 		if (const auto& gbuffer_framebuffer = m_pRenderView->GetPassFrameBuffer("GBufferPass"))
 		{
-			gbuffer_framebuffer->ReadPixel(5, x, y, { PixelFormat::R_Integer, PixelType::Int }, &entity_id);
+			gbuffer_framebuffer->ReadPixel(6, x, y, { PixelFormat::R_Integer, PixelType::Int }, &entity_id);
 		}
 		return entity_id;
 	}

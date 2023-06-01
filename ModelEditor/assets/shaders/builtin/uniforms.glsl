@@ -15,7 +15,7 @@ layout(std140, binding = 1) uniform ObjectUniformBuffer
 
 layout(std140, binding = 3) uniform LightUniformBuffer
 {
-	vec4 u_ColorIntensity;
+	vec4 u_ColorIntensity; /* rgb： Color; a: Intensity */
 	vec3 u_LightDir;
 	vec3 u_LightPos;
 	uint u_LightType;
