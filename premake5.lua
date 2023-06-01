@@ -17,6 +17,7 @@ IncludeDirs["ImGuizmo"] = "%{wks.location}/Kernel/third_party/ImGuizmo"
 IncludeDirs["xxHash"] = "%{wks.location}/Kernel/third_party/xxHash"
 IncludeDirs["tinyobjloader"] = "%{wks.location}/Kernel/third_party/tinyobjloader"
 IncludeDirs["magic_enum"] = "%{wks.location}/Kernel/third_party/magic_enum/include"
+IncludeDirs["assimp"] = "%{wks.location}/Kernel/third_party/assimp/include"
 IncludeDirs["VulkanSDK"] = "%{VulkanSDKDir}/Include"
 
 -- LibDirs

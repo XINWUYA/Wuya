@@ -32,6 +32,7 @@ project "Kernel"
 		"%{IncludeDirs.xxHash}",
 		"%{IncludeDirs.tinyobjloader}",
 		"%{IncludeDirs.magic_enum}",
+		"%{IncludeDirs.assimp}",
 		"%{IncludeDirs.VulkanSDK}",
 	}
 	
@@ -49,6 +50,7 @@ project "Kernel"
 		"ImGui",
 		"tinyxml2",
 		"tinyobjloader",
+		"assimp",
 		"xxHash",
 		"opengl32.lib",
 		"%{Librarys.shaderc}"

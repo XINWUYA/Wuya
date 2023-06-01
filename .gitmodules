@@ -34,3 +34,6 @@
 [submodule "Kernel/third_party/magic_enum"]
 	path = Kernel/third_party/magic_enum
 	url = https://github.com/Neargye/magic_enum.git
+[submodule "Kernel/third_party/assimp"]
+	path = Kernel/third_party/assimp
+	url = https://github.com/assimp/assimp.git

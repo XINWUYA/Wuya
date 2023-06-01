@@ -32,6 +32,7 @@ project "ModelEditor"
 		"%{IncludeDirs.ImGuizmo}",
 		"%{IncludeDirs.tinyobjloader}",
 		"%{IncludeDirs.magic_enum}",
+		"%{IncludeDirs.assimp}",
 	}
 
 	links
