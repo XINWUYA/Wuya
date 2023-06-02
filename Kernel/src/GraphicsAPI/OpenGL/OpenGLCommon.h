@@ -161,9 +161,9 @@ namespace Wuya
 
 	/* OpenGL ´íÎó¼ì²é */
 #if WUYA_DEBUG
-	void CheckGLError(const char* func_name, uint32_t line) noexcept;
+	void CheckGLError(const char* file, const char* func_name, uint32_t line) noexcept;
 	void CheckGLFrameBufferStatus(GLenum target, const char* func_name, uint32_t line) noexcept;
-	#define CHECK_GL_ERROR { CheckGLError(__func__, __LINE__); }
+	#define CHECK_GL_ERROR { CheckGLError(__FILE__, __func__, __LINE__); }
 	#define CHECK_GL_FRAMEBUFFER_STATUS(target) { CheckGLFrameBufferStatus(target, __func__, __LINE__); }
 #else
 	#define CHECK_GL_ERROR

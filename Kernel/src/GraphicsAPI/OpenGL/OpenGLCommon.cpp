@@ -4,14 +4,14 @@
 namespace Wuya
 {
 	/* ºÏ≤ÈGLError –≈œ¢ */
-	void CheckGLError(const char* func_name, uint32_t line) noexcept
+	void CheckGLError(const char* file, const char* func_name, uint32_t line) noexcept
 	{
 		PROFILE_FUNCTION();
 
 		GLenum error = glGetError();
 		if (error != GL_NO_ERROR)
 		{
-			CORE_LOG_ERROR("OpenGLError: {} in {}:{}.", STRINGIFY(error), func_name, line);
+			CORE_LOG_ERROR("OpenGLError: {} in {}:{}, at: {}.", STRINGIFY(error), func_name, line, file);
 		}
 	}
 
