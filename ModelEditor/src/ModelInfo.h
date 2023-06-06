@@ -1,6 +1,10 @@
 #pragma once
 #include <tiny_obj_loader.h>
 
+struct aiScene;
+struct aiNode;
+struct aiMesh;
+
 namespace Wuya
 {
 	/* 模型材质参数，包括纹理和颜色等 */
@@ -10,40 +14,41 @@ namespace Wuya
 		std::string Name;
 
 		/* Ambient */
-		std::string AmbientTexPath;
-		glm::vec3 Ambient;
+		std::pair<std::string, bool> AmbientTexPath{"", false};
+		std::pair<glm::vec3, bool> AmbientFactor;
 
 		/* Diffuse/Albedo */
-		std::string DiffuseTexPath;
-		glm::vec3 Diffuse;
+		std::pair<std::string, bool> DiffuseTexPath;
+		std::pair<glm::vec3, bool> DiffuseFactor;
 
 		/* Specular */
-		std::string SpecularTexPath;
-		glm::vec3 Specular;
+		std::pair<std::string, bool> SpecularTexPath;
+		std::pair<glm::vec3, bool> SpecularFactor;
 
 		/* Normal */
-		std::string BumpTexPath;
-		std::string DisplacementTexPath;
+		std::pair<std::string, bool> NormalTexPath;
+		std::pair<std::string, bool> BumpTexPath;
+		std::pair<std::string, bool> DisplacementTexPath;
 
 		/* Roughness */
-		std::string RoughnessTexPath;
-		float Roughness;
+		std::pair<std::string, bool> RoughnessTexPath;
+		std::pair<float, bool> RoughnessFactor;
 
 		/* Metallic */
-		std::string MetallicTexPath;
-		float Metallic;
+		std::pair<std::string, bool> MetallicTexPath;
+		std::pair<float, bool> MetallicFactor;
 
 		/* Emission */
-		std::string EmissionTexPath;
-		glm::vec3 Emission;
+		std::pair<std::string, bool> EmissionTexPath;
+		std::pair<glm::vec3, bool> EmissionFactor;
 
 		/* ClearCoat */
-		float ClearCoatRoughness;
-		float ClearCoatThickness;
+		std::pair<float, bool> ClearCoatRoughness;
+		std::pair<float, bool> ClearCoatThickness;
 
 		/* Others */
-		glm::vec3 Transmittance;
-		float IOR;
+		std::pair<glm::vec3, bool> TransmittanceColor;
+		std::pair<float, bool> IOR;
 	};
 
 	/* 子模型信息 */
@@ -51,9 +56,13 @@ namespace Wuya
 	{
 		std::string Name;
 		SharedPtr<VertexArray> VertexArray;
-		std::vector<float> VertexData; /* 顶点数据的原始信息，保存模型时需要 */
+		uint32_t VertexCount;
+		std::vector<std::pair<uint32_t, float*>> VertexBufferDatas; /* 顶点数据的原始信息，保存模型时需要<stride, data> */
+		std::vector<uint32_t> Indices; /* 顶点数据的索引信息 */
 		MaterialParams MaterialParams;
 		std::pair<glm::vec3, glm::vec3> AABB;
+
+		~SubModelInfo();
 	};
 
 	/* 加载模型原始文件（Obj） */
@@ -65,10 +74,16 @@ namespace Wuya
 		/* 加载Obj模型信息 */
 		void LoadFromObj(const std::string& filepath);
 
+		/* 使用assimp */
+		void LoadFromPath(const std::string& filepath);
+
 		/* 重置数据 */
 		void Reset();
 
 	private:
+		void LoadNode(const aiNode* node, const aiScene* scene);
+		void LoadMesh(const aiMesh* mesh, const aiScene* scene);
+
 		/* 所在路径 */
 		std::string m_Path{};
 		/* 包含所有的vertex、normal、texcoords */
@@ -78,9 +93,12 @@ namespace Wuya
 		/* 包含各种textures，如diffuse, specular, normal等 */
 		std::vector<tinyobj::material_t> m_Materials;
 		/* 模型包含的子模型数据 */
-		std::vector<SharedPtr<SubModelInfo>> m_SubModelInfos;
+		std::vector<SharedPtr<SubModelInfo>> m_SubModelInfos{};
 		/* 整体的AABB */
-		std::pair<glm::vec3, glm::vec3> m_AABB;
+		std::pair<glm::vec3, glm::vec3> m_AABB{};
+
+		/* 模型所在的根目录 */
+		std::string m_Directory{};
 
 		friend class ModelEditor;
 	};

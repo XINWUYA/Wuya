@@ -29,10 +29,18 @@ namespace Wuya
 		bool IsFlipV = true;
 		bool IsGenMips = true;
 		SamplerType SamplerType{ SamplerType::Sampler2D }; /* 用于决定纹理加载的类型 */
+		SamplerWrapMode SamplerWrapMode{ SamplerWrapMode::Repeat };
+		SamplerMinFilter SamplerMinFilter{ SamplerMinFilter::Linear };
+		SamplerMagFilter SamplerMagFilter{ SamplerMagFilter::Linear };
 
 		bool operator==(const TextureLoadConfig& load_config) const
 		{
-			return IsFlipV == load_config.IsFlipV && IsGenMips == load_config.IsGenMips && SamplerType == load_config.SamplerType;
+			return IsFlipV == load_config.IsFlipV
+				&& IsGenMips == load_config.IsGenMips
+				&& SamplerType == load_config.SamplerType
+				&& SamplerWrapMode == load_config.SamplerWrapMode
+				&& SamplerMinFilter == load_config.SamplerMinFilter
+				&& SamplerMagFilter == load_config.SamplerMagFilter;
 		}
 
 		bool operator!=(const TextureLoadConfig& load_config) const
@@ -80,7 +88,9 @@ namespace Wuya
 		static SharedPtr<Texture> Create(const std::string& path, const TextureLoadConfig& load_config = {}); /* 目前仅支持加载二维纹理 */
 
 		/* 默认纹理 */
-		static SharedPtr<Texture>& White();
+		static SharedPtr<Texture> White();
+		static SharedPtr<Texture> Black();
+		static SharedPtr<Texture> Normal();
 
 	protected:
 		Texture() = default;

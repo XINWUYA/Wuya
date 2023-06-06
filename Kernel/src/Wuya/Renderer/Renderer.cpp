@@ -27,7 +27,7 @@ namespace Wuya
 	struct ViewUniformData
 	{
 		glm::mat4 ViewProjectionMatrix{ 1 };
-		glm::vec3 ViewDir{ 0.0f };
+		glm::vec3 ViewPos{ 0.0f };
 		uint32_t FrameCounter{ 0 }; /* 当前帧数计数 */
 	};
 
@@ -115,7 +115,7 @@ namespace Wuya
 
 		/* Fill view uniform buffer */
 		s_RenderData.ViewUniformData.ViewProjectionMatrix = view->GetCullingCamera()->GetViewProjectionMatrix();
-		s_RenderData.ViewUniformData.ViewDir = view->GetCullingCamera()->GetForwardDir();
+		s_RenderData.ViewUniformData.ViewPos = view->GetCullingCamera()->GetPosition();
 		s_RenderData.pViewUniformBuffer->SetData(&s_RenderData.ViewUniformData, sizeof(ViewUniformData));
 
 		view->Execute();

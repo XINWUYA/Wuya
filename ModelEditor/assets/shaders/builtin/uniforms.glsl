@@ -4,6 +4,7 @@
 layout(std140, binding = 0) uniform ViewUniformBuffer
 {
 	mat4 u_ViewProjectionMat;
+	vec3 u_ViewPos;
 	uint u_FrameCounter;
 };
 

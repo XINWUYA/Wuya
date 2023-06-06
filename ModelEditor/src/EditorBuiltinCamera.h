@@ -79,11 +79,6 @@ namespace Wuya
 		float ZoomSpeed() const;
 
 		/* 相机基本参数 */
-		float m_Fov{ 45.0f };
-		float m_AspectRatio{ 1.778f };
-		float m_NearClip{ 0.1f };
-		float m_FarClip{ 1000.0f };
-
 		float m_Pitch{ 0.0f }, m_Yaw{ 0.0f };
 		/* 相机位置 */
 		float m_Distance{ 10.0f };
@@ -96,11 +91,6 @@ namespace Wuya
 		bool m_IsDirty{ true };
 		/* 是否需要重新构建FrameGraph */
 		bool m_IsFrameGraphDirty = true;
-
-		/* 相机朝向 */
-		glm::vec3 m_UpDirection{ 0.0f, 1.0f, 0.0f };
-		glm::vec3 m_RightDirection{ 1.0f, 0.0f, 0.0f };
-		glm::vec3 m_ForwardDirection{ 0.0f, 0.0f, -1.0f };
 
 		glm::vec3 m_FocalPoint{ 0.0f, 0.0f, 0.0f };
 		glm::vec2 m_LastMousePosition{ 0.0f, 0.0f };

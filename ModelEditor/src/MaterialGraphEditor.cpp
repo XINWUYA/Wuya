@@ -664,7 +664,7 @@ namespace Wuya
 				/* 挂载相关组件 */
 				node_inst.EntityHandle = Registry.create();
 				auto& component = Registry.emplace<MGTexture2DComponent>(node_inst.EntityHandle);
-				component.Texture = TextureAssetManager::Instance().GetOrCreateTexture("assets/textures/default_texture.png", {});
+				component.Texture = TextureAssetManager::Instance().GetOrCreateTexture("assets/textures/Default.png", {});
 			}
 			break;
 		case MaterialGraphNodeType::SamplerState:

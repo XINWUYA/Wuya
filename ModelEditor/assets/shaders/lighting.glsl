@@ -41,5 +41,6 @@ void main()
 	float dotNL = dot(gbuffer.WorldNormal, -u_LightDir);
 	vec3 diffuse = dotNL * gbuffer.Albedo * u_ColorIntensity.rgb * u_ColorIntensity.a;
 
+	//OutFragColor = vec4(gbuffer.WorldNormal, 1.0f);
 	OutFragColor = vec4(diffuse, 1.0f);
 }

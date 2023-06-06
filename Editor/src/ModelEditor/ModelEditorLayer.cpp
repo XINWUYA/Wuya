@@ -231,7 +231,7 @@ namespace Wuya
 															return TextureSlot::Invalid;
 														};
 														/* 填入默认值 */
-														const auto& default_texture = TextureAssetManager::Instance().GetOrCreateTexture("assets/textures/default_texture.png", {});
+														const auto& default_texture = TextureAssetManager::Instance().GetOrCreateTexture("assets/textures/Default.png", {});
 														material->SetTexture(param_info.Name, default_texture, GetSlot(param_info.Name));
 													}
 													break;
@@ -498,6 +498,7 @@ namespace Wuya
 				}
 			}
 		}
+		return true;
 	}
 
 	/* 导出模型 */

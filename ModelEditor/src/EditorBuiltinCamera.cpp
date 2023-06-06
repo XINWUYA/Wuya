@@ -5,7 +5,7 @@
 namespace Wuya
 {
 	EditorCamera::EditorCamera(const std::string& name, float fov, float aspect_ratio, float near_clip, float far_clip)
-		: Camera(name), m_Fov(fov), m_AspectRatio(aspect_ratio), m_NearClip(near_clip), m_FarClip(far_clip)
+		: Camera(name, fov, aspect_ratio, near_clip, far_clip)
 	{
 		PROFILE_FUNCTION();
 
@@ -282,12 +282,12 @@ namespace Wuya
 						raster_state.BlendFuncDstA = BlendFunc::One;
 						const auto shader = ShaderAssetManager::Instance().GetOrLoad("assets/shaders/lighting.glsl");
 						material->SetShader(shader);
-						material->SetTexture("u_GBufferTexture0", resources.Get(data.GBufferTexture0).Texture);
-						material->SetTexture("u_GBufferTexture1", resources.Get(data.GBufferTexture1).Texture);
-						material->SetTexture("u_GBufferTexture2", resources.Get(data.GBufferTexture2).Texture);
-						material->SetTexture("u_GBufferTexture3", resources.Get(data.GBufferTexture3).Texture);
-						material->SetTexture("u_GBufferTexture4", resources.Get(data.GBufferTexture4).Texture);
-						material->SetTexture("u_GBufferTexture5", resources.Get(data.GBufferTexture5).Texture);
+						material->SetTexture("u_GBufferTexture0", resources.Get(data.GBufferTexture0).Texture, 0);
+						material->SetTexture("u_GBufferTexture1", resources.Get(data.GBufferTexture1).Texture, 1);
+						material->SetTexture("u_GBufferTexture2", resources.Get(data.GBufferTexture2).Texture, 2);
+						material->SetTexture("u_GBufferTexture3", resources.Get(data.GBufferTexture3).Texture, 3);
+						material->SetTexture("u_GBufferTexture4", resources.Get(data.GBufferTexture4).Texture, 4);
+						material->SetTexture("u_GBufferTexture5", resources.Get(data.GBufferTexture5).Texture, 5);
 						Renderer::Submit(material, Renderer::GetFullScreenVertexArray());
 					}
 				}

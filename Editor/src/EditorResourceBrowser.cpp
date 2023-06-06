@@ -1,23 +1,11 @@
 #include "Pch.h"
 #include "EditorResourceBrowser.h"
 #include "EditorUIFunctions.h"
-#include "Windows.h"
 
 namespace Wuya
 {
 	extern const std::filesystem::path g_AssetPath = "assets";
-	EditorResourceBrowser::EditorResourceBrowser()
-	{
-		PROFILE_FUNCTION();
-
-		const TextureLoadConfig load_config;
-		m_pFolderIcon = TextureAssetManager::Instance().GetOrCreateTexture("editor_res/icons/directory.png", load_config);
-		m_pFileIcon = TextureAssetManager::Instance().GetOrCreateTexture("editor_res/icons/file.png", load_config);
-		m_pFilterIcon = TextureAssetManager::Instance().GetOrCreateTexture("editor_res/icons/filter.png", load_config);
-		m_pMenuIcon = TextureAssetManager::Instance().GetOrCreateTexture("editor_res/icons/menu.png", load_config);
-		m_pReturnIcon = TextureAssetManager::Instance().GetOrCreateTexture("editor_res/icons/return.png", load_config);
-	}
-
+	
 	void EditorResourceBrowser::OnImGuiRenderer()
 	{
 		PROFILE_FUNCTION();
@@ -59,7 +47,8 @@ namespace Wuya
 				}
 
 				START_STYLE_ALPHA(button_alpha);
-				if (ImGui::ImageButton((ImTextureID)m_pReturnIcon->GetTextureID(), ImVec2(20, 20), ImVec2(0, 1), ImVec2(1, 0)))
+				const auto return_icon = TextureAssetManager::Instance().GetOrCreateTexture("editor_res/icons/return.png");
+				if (ImGui::ImageButton((ImTextureID)return_icon->GetTextureID(), ImVec2(20, 20), ImVec2(0, 1), ImVec2(1, 0)))
 					m_CurrentFileNode = m_CurrentFileNode->ParentNode.lock();
 				END_STYLE_ALPHA;
 
@@ -84,7 +73,7 @@ namespace Wuya
 				ImGui::SameLine(40, 20);
 				filter.Draw("##", 200);
 				ImGui::SameLine(236);
-				const SharedPtr<Texture> filter_icon = m_pFilterIcon;
+				const auto filter_icon = TextureAssetManager::Instance().GetOrCreateTexture("editor_res/icons/filter.png");
 
 				START_STYLE_ALPHA(0.5f);
 				ImGui::Image((ImTextureID)filter_icon->GetTextureID(), ImVec2(20, 20), ImVec2(0, 1), ImVec2(1, 0));
@@ -95,7 +84,8 @@ namespace Wuya
 			{
 				ImGui::SameLine(panel_width - 15);
 				START_STYLE_ALPHA(0.5f);
-				if (ImGui::ImageButton((ImTextureID)m_pMenuIcon->GetTextureID(), ImVec2(20, 20), ImVec2(0, 1), ImVec2(1, 0)))
+				const auto menu_icon = TextureAssetManager::Instance().GetOrCreateTexture("editor_res/icons/menu.png");
+				if (ImGui::ImageButton((ImTextureID)menu_icon->GetTextureID(), ImVec2(20, 20), ImVec2(0, 1), ImVec2(1, 0)))
 					ImGui::OpenPopup("SettingPopup");
 				END_STYLE_ALPHA;
 

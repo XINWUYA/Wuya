@@ -143,7 +143,7 @@ namespace Wuya
 		/* Texture */
 		ImGui::NextColumn();
 		{
-			const auto& show_texture = texture ? texture : TextureAssetManager::Instance().GetOrCreateTexture("editor_res/icons/default_texture.png", {});
+			const auto& show_texture = texture ? texture : TextureAssetManager::Instance().GetOrCreateTexture("editor_res/icons/Default.png", {});
 
 			/* Image */
 			ImGui::ImageButton((ImTextureID)show_texture->GetTextureID(), ImVec2(80, 80), ImVec2(0, 1), ImVec2(1, 0), 0);

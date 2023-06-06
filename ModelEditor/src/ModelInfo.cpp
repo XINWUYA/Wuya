@@ -1,9 +1,20 @@
 #include "Pch.h"
 #include "ModelInfo.h"
+#include <assimp/Importer.hpp>
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>
 
 namespace Wuya
 {
 	extern const std::filesystem::path g_AssetPath;
+
+	SubModelInfo::~SubModelInfo()
+	{
+		for (auto& [stride, buffer_data] : VertexBufferDatas)
+		{
+			delete[] buffer_data;
+		}
+	}
 
 	/* 加载Obj模型信息 */
 	void ModelInfo::LoadFromObj(const std::string& filepath)
@@ -283,32 +294,32 @@ namespace Wuya
 				/* Name */
 				params.Name = material_data.name;
 				/* Ambient */
-				params.AmbientTexPath = material_data.ambient_texname.empty() ? "" : (relative_dir / material_data.ambient_texname).generic_string();
-				params.Ambient = glm::vec3(material_data.ambient[0], material_data.ambient[1], material_data.ambient[2]);
+				params.AmbientTexPath = { material_data.ambient_texname.empty() ? "" : (relative_dir / material_data.ambient_texname).generic_string(), !material_data.ambient_texname.empty() };
+				params.AmbientFactor = { glm::vec3(material_data.ambient[0], material_data.ambient[1], material_data.ambient[2]), true };
 				/* Diffuse/Albedo */
-				params.DiffuseTexPath = material_data.diffuse_texname.empty() ? "" : (relative_dir / material_data.diffuse_texname).generic_string();
-				params.Diffuse = glm::vec3(material_data.diffuse[0], material_data.diffuse[1], material_data.diffuse[2]);
+				params.DiffuseTexPath = { material_data.diffuse_texname.empty() ? "" : (relative_dir / material_data.diffuse_texname).generic_string(), !material_data.diffuse_texname.empty() };
+				params.DiffuseFactor = { glm::vec3(material_data.diffuse[0], material_data.diffuse[1], material_data.diffuse[2]), true };
 				/* Specular */
-				params.SpecularTexPath = material_data.specular_texname.empty() ? "" : (relative_dir / material_data.specular_texname).generic_string();
-				params.Specular = glm::vec3(material_data.specular[0], material_data.specular[1], material_data.specular[2]);
+				params.SpecularTexPath = { material_data.specular_texname.empty() ? "" : (relative_dir / material_data.specular_texname).generic_string(), !material_data.specular_texname.empty() };
+				params.SpecularFactor = { glm::vec3(material_data.specular[0], material_data.specular[1], material_data.specular[2]), true };
 				/* NormalTex */
-				params.BumpTexPath = material_data.bump_texname.empty() ? "" : (relative_dir / material_data.bump_texname).generic_string();
-				params.DisplacementTexPath = material_data.displacement_texname.empty() ? "" : (relative_dir / material_data.displacement_texname).generic_string();
+				params.BumpTexPath = { material_data.bump_texname.empty() ? "" : (relative_dir / material_data.bump_texname).generic_string(), !material_data.bump_texname.empty() };
+				params.DisplacementTexPath = { material_data.displacement_texname.empty() ? "" : (relative_dir / material_data.displacement_texname).generic_string(), !material_data.displacement_texname.empty() };
 				/* Roughness */
-				params.RoughnessTexPath = material_data.roughness_texname.empty() ? "" : (relative_dir / material_data.roughness_texname).generic_string();
-				params.Roughness = material_data.roughness;
+				params.RoughnessTexPath = { material_data.roughness_texname.empty() ? "" : (relative_dir / material_data.roughness_texname).generic_string(), !material_data.roughness_texname.empty() };
+				params.RoughnessFactor = { material_data.roughness, true };
 				/* Metallic */
-				params.MetallicTexPath = material_data.metallic_texname.empty() ? "" : (relative_dir / material_data.metallic_texname).generic_string();
-				params.Metallic = material_data.metallic;
+				params.MetallicTexPath = { material_data.metallic_texname.empty() ? "" : (relative_dir / material_data.metallic_texname).generic_string(), !material_data.metallic_texname.empty() };
+				params.MetallicFactor = { material_data.metallic, true };
 				/* Emission */
-				params.EmissionTexPath = material_data.emissive_texname.empty() ? "" : (relative_dir / material_data.emissive_texname).generic_string();
-				params.Emission = glm::vec3(material_data.emission[0], material_data.emission[1], material_data.emission[2]);
+				params.EmissionTexPath = { material_data.emissive_texname.empty() ? "" : (relative_dir / material_data.emissive_texname).generic_string(), !material_data.emissive_texname.empty() };
+				params.EmissionFactor = { glm::vec3(material_data.emission[0], material_data.emission[1], material_data.emission[2]), true };
 				/* ClearCoat */
-				params.ClearCoatRoughness = material_data.clearcoat_roughness;
-				params.ClearCoatThickness = material_data.clearcoat_thickness;
+				params.ClearCoatRoughness = { material_data.clearcoat_roughness, true };
+				params.ClearCoatThickness = { material_data.clearcoat_thickness, true };
 				/* Others */
-				params.Transmittance = glm::vec3(material_data.transmittance[0], material_data.transmittance[1], material_data.transmittance[2]);
-				params.IOR = material_data.ior;
+				params.TransmittanceColor = { glm::vec3(material_data.transmittance[0], material_data.transmittance[1], material_data.transmittance[2]), true };
+				params.IOR = { material_data.ior, true };
 			}
 
 			sub_model_info->AABB = all_shape_aabbs[shape_idx];
@@ -321,6 +332,27 @@ namespace Wuya
 		}
 	}
 
+	void ModelInfo::LoadFromPath(const std::string& filepath)
+	{
+		if (filepath.empty())
+		{
+			EDITOR_LOG_ERROR("Model filepath is empty.");
+		}
+
+		m_Path = filepath;
+		
+		Assimp::Importer importer;
+		const auto* scene = importer.ReadFile(filepath, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_GenNormals | aiProcess_CalcTangentSpace);
+		if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
+		{
+			EDITOR_LOG_ERROR("Error: Assimp load file({}) failed.", importer.GetErrorString());
+			return;
+		}
+
+		m_Directory = ExtractFileBaseDir(filepath);
+		LoadNode(scene->mRootNode, scene);
+	}
+
 	/* 重置数据 */
 	void ModelInfo::Reset()
 	{
@@ -328,5 +360,219 @@ namespace Wuya
 		m_Materials.clear();
 		m_SubModelInfos.clear();
 		m_Path.clear();
+	}
+
+	void ModelInfo::LoadNode(const aiNode* node, const aiScene* scene)
+	{
+		/* Load当前节点的Mesh */
+		for (uint32_t i = 0; i < node->mNumMeshes; ++i)
+			LoadMesh(scene->mMeshes[node->mMeshes[i]], scene);
+
+		/* 递归Load所有子节点 */
+		for (uint32_t i = 0; i < node->mNumChildren; ++i)
+			LoadNode(node->mChildren[i], scene);
+	}
+
+	void ModelInfo::LoadMesh(const aiMesh* mesh, const aiScene* scene)
+	{
+		auto sub_model_info = CreateSharedPtr<SubModelInfo>();
+		sub_model_info->Name = mesh->mName.C_Str();
+		sub_model_info->VertexCount = mesh->mNumVertices;
+		
+		sub_model_info->VertexArray = VertexArray::Create();
+		sub_model_info->VertexArray->Bind();
+
+		/* Position */
+		{
+			auto vertex_buffer = VertexBuffer::Create(mesh->mVertices, mesh->mNumVertices * sizeof(glm::vec3));
+			vertex_buffer->SetLayout({ { "a_Position", BufferDataType::Float3 } });
+			sub_model_info->VertexArray->AddVertexBuffer(vertex_buffer);
+
+			/* Copy Vertices */
+			auto& [stride, data] = sub_model_info->VertexBufferDatas.emplace_back();
+			stride = 3;
+			data = new float[mesh->mNumVertices * stride];
+			memcpy(data, mesh->mVertices, mesh->mNumVertices * sizeof(glm::vec3));
+		}
+
+		/* Normal */
+		if (mesh->HasNormals())
+		{
+			auto normal_buffer = VertexBuffer::Create(mesh->mNormals, mesh->mNumVertices * sizeof(glm::vec3));
+			normal_buffer->SetLayout({ { "a_Normal", BufferDataType::Float3 } });
+			sub_model_info->VertexArray->AddVertexBuffer(normal_buffer);
+
+			/* Copy Normal */
+			auto& [stride, data] = sub_model_info->VertexBufferDatas.emplace_back();
+			stride = 3;
+			data = new float[mesh->mNumVertices * stride];
+			memcpy(data, mesh->mNormals, mesh->mNumVertices * sizeof(glm::vec3));
+		}
+		else
+		{
+			std::vector normal(mesh->mNumVertices, glm::vec3(0.0f, 0.0f, 1.0f));
+			auto normal_buffer = VertexBuffer::Create(normal.data(), mesh->mNumVertices * sizeof(glm::vec3));
+			normal_buffer->SetLayout({ { "a_Normal", BufferDataType::Float3 } });
+			sub_model_info->VertexArray->AddVertexBuffer(normal_buffer);
+
+			/* Copy Normal */
+			auto& [stride, data] = sub_model_info->VertexBufferDatas.emplace_back();
+			stride = 3;
+			data = new float[mesh->mNumVertices * stride];
+			memcpy(data, normal.data(), mesh->mNumVertices * sizeof(glm::vec3));
+		}
+
+		/* Color */
+		if (mesh->HasVertexColors(0))
+		{
+			auto color_buffer = VertexBuffer::Create(mesh->mColors[0], mesh->mNumVertices * sizeof(glm::vec4));
+			color_buffer->SetLayout({ { "a_Color", BufferDataType::Float4 } });
+			sub_model_info->VertexArray->AddVertexBuffer(color_buffer);
+
+			/* Copy Color */
+			auto& [stride, data] = sub_model_info->VertexBufferDatas.emplace_back();
+			stride = 4;
+			data = new float[mesh->mNumVertices * stride];
+			memcpy(data, mesh->mColors[0], mesh->mNumVertices * sizeof(glm::vec4));
+		}
+		else
+		{
+			std::vector colors(mesh->mNumVertices, glm::vec4(1.0f));
+			auto color_buffer = VertexBuffer::Create(colors.data(), mesh->mNumVertices * sizeof(glm::vec4));
+			color_buffer->SetLayout({ { "a_Color", BufferDataType::Float4 } });
+			sub_model_info->VertexArray->AddVertexBuffer(color_buffer);
+
+			/* Copy Color */
+			auto& [stride, data] = sub_model_info->VertexBufferDatas.emplace_back();
+			stride = 4;
+			data = new float[mesh->mNumVertices * stride];
+			memcpy(data, colors.data(), mesh->mNumVertices * sizeof(glm::vec4));
+		}
+
+		/* UV */
+		if (mesh->HasTextureCoords(0))
+		{
+			auto uv_buffer = VertexBuffer::Create(mesh->mTextureCoords[0], mesh->mNumVertices * sizeof(glm::vec3));
+			uv_buffer->SetLayout({ { "a_TexCoord", BufferDataType::Float3 } });
+			sub_model_info->VertexArray->AddVertexBuffer(uv_buffer);
+
+			/* Copy UV */
+			auto& [stride, data] = sub_model_info->VertexBufferDatas.emplace_back();
+			stride = 3;
+			data = new float[mesh->mNumVertices * stride];
+			memcpy(data, mesh->mTextureCoords[0], mesh->mNumVertices * sizeof(glm::vec3));
+		}
+		else
+		{
+			std::vector uvs(mesh->mNumVertices, glm::vec3(0.0f));
+			auto uv_buffer = VertexBuffer::Create(uvs.data(), mesh->mNumVertices * sizeof(glm::vec3));
+			uv_buffer->SetLayout({ { "a_TexCoord", BufferDataType::Float3 } });
+			sub_model_info->VertexArray->AddVertexBuffer(uv_buffer);
+
+			/* Copy UV */
+			auto& [stride, data] = sub_model_info->VertexBufferDatas.emplace_back();
+			stride = 3;
+			data = new float[mesh->mNumVertices * stride];
+			memcpy(data, uvs.data(), mesh->mNumVertices * sizeof(glm::vec3));
+		}
+
+		/* Tangent */
+		if (mesh->HasTangentsAndBitangents())
+		{
+			auto tangent_buffer = VertexBuffer::Create(mesh->mTangents, mesh->mNumVertices * sizeof(glm::vec3));
+			tangent_buffer->SetLayout({ { "a_Tangent", BufferDataType::Float3 } });
+			sub_model_info->VertexArray->AddVertexBuffer(tangent_buffer);
+
+			/* Not needed */
+			// auto bitangent_buffer = VertexBuffer::Create(mesh->mBitangents, mesh->mNumVertices * sizeof(glm::vec3));
+			// bitangent_buffer->SetLayout({ { "a_BiTangent", BufferDataType::Float3 } });
+			// sub_model_info->VertexArray->AddVertexBuffer(bitangent_buffer);
+
+			/* Copy Tangent */
+			auto& [stride, data] = sub_model_info->VertexBufferDatas.emplace_back();
+			stride = 3;
+			data = new float[mesh->mNumVertices * stride];
+			memcpy(data, mesh->mTangents, mesh->mNumVertices * sizeof(glm::vec3));
+		}
+
+		/* 收集indices */
+		for (uint32_t face_idx = 0; face_idx < mesh->mNumFaces; ++face_idx)
+		{
+			auto& face = mesh->mFaces[face_idx];
+			for (uint32_t idx = 0; idx < face.mNumIndices; ++idx)
+			{
+				sub_model_info->Indices.emplace_back(face.mIndices[idx]);
+			}
+		}
+		/* Index Buffer */
+		auto index_buffer = IndexBuffer::Create(sub_model_info->Indices.data(), sub_model_info->Indices.size());
+		sub_model_info->VertexArray->SetIndexBuffer(index_buffer);
+
+		sub_model_info->VertexArray->Unbind();
+
+		/* MaterialParams */
+		std::filesystem::path relative_dir = std::filesystem::relative(m_Directory, g_AssetPath);
+
+		auto GetTexture = [&](const aiMaterial* mtl, aiTextureType type, std::pair<std::string, bool>& params)
+		{
+			for (uint32_t i = 0; i < mtl->GetTextureCount(type); ++i)
+			{
+				aiString str;
+				if (mtl->GetTexture(type, i, &str) == AI_SUCCESS)
+					params = { (relative_dir / str.C_Str()).generic_string(), true };
+			}
+		};
+
+		auto GetVec3 = [](const aiMaterial* mtl, const char* pKey, unsigned int type, unsigned int idx, std::pair<glm::vec3, bool>& params)
+		{
+			aiColor3D color;
+			if (mtl->Get(pKey, type, idx, color) == AI_SUCCESS)
+				params = { glm::vec3(color.r, color.g, color.b), true };
+		};
+
+		auto GetFloat = [](const aiMaterial* mtl, const char* pKey, unsigned int type, unsigned int idx, std::pair<float, bool>& params)
+		{
+			ai_real value;
+			if (mtl->Get(pKey, type, idx, value) == AI_SUCCESS)
+				params = { value, true };
+		};
+
+		auto material = scene->mMaterials[mesh->mMaterialIndex];
+		auto& params = sub_model_info->MaterialParams;
+
+		GetTexture(material, aiTextureType_AMBIENT, params.AmbientTexPath);
+		GetTexture(material, aiTextureType_AMBIENT_OCCLUSION, params.AmbientTexPath);
+		GetTexture(material, aiTextureType_DIFFUSE, params.DiffuseTexPath);
+		GetTexture(material, aiTextureType_SPECULAR, params.SpecularTexPath);
+		GetTexture(material, aiTextureType_NORMALS, params.NormalTexPath);
+		GetTexture(material, aiTextureType_HEIGHT, params.BumpTexPath);
+		GetTexture(material, aiTextureType_DISPLACEMENT, params.DisplacementTexPath);
+		GetTexture(material, aiTextureType_DIFFUSE_ROUGHNESS, params.RoughnessTexPath);
+		GetTexture(material, aiTextureType_METALNESS, params.MetallicTexPath);
+		GetTexture(material, aiTextureType_EMISSIVE, params.EmissionTexPath);
+		GetTexture(material, aiTextureType_EMISSION_COLOR, params.EmissionTexPath);
+		GetVec3(material, AI_MATKEY_COLOR_AMBIENT, params.AmbientFactor);
+		GetVec3(material, AI_MATKEY_COLOR_DIFFUSE, params.DiffuseFactor);
+		GetVec3(material, AI_MATKEY_COLOR_SPECULAR, params.SpecularFactor);
+		GetFloat(material, AI_MATKEY_ROUGHNESS_FACTOR, params.RoughnessFactor);
+		GetFloat(material, AI_MATKEY_METALLIC_FACTOR, params.MetallicFactor);
+		GetVec3(material, AI_MATKEY_EMISSIVE_INTENSITY, params.EmissionFactor);
+		GetFloat(material, AI_MATKEY_CLEARCOAT_ROUGHNESS_FACTOR, params.ClearCoatRoughness);
+		GetFloat(material, AI_MATKEY_CLEARCOAT_FACTOR, params.ClearCoatThickness);
+		GetVec3(material, AI_MATKEY_TRANSMISSION_FACTOR, params.TransmittanceColor);
+		GetFloat(material, AI_MATKEY_REFRACTI, params.IOR);
+
+		m_SubModelInfos.emplace_back(sub_model_info);
+
+		/* 更新模型整体的AABB */
+		for (uint32_t i = 0; i < mesh->mNumVertices; ++i)
+		{
+			auto vertex = glm::vec3(mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z);
+			sub_model_info->AABB.first = min(sub_model_info->AABB.first, vertex);
+			sub_model_info->AABB.second = max(sub_model_info->AABB.second, vertex);
+		}
+
+		m_AABB.first = min(m_AABB.first, sub_model_info->AABB.first);
+		m_AABB.second = max(m_AABB.second, sub_model_info->AABB.second);
 	}
 }

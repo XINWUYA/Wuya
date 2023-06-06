@@ -159,6 +159,44 @@ namespace Wuya
 		return 0;
 	}
 
+	/* 翻译到OpenGL对应的纹理环绕方式 */
+	constexpr GLint TranslateToOpenGLSamplerWrapMode(SamplerWrapMode mode)
+	{
+		switch (mode)
+		{
+		case SamplerWrapMode::ClampToEdge:		return GL_CLAMP_TO_EDGE;
+		case SamplerWrapMode::Repeat:			return GL_REPEAT;
+		case SamplerWrapMode::MirroredRepeat:	return GL_MIRRORED_REPEAT;
+		}
+		return 0;
+	}
+
+	/* 翻译到OpenGL对应的纹理缩小过滤方式 */
+	constexpr GLint TranslateToOpenGLSamplerMinFilter(SamplerMinFilter mode)
+	{
+		switch (mode)
+		{
+		case SamplerMinFilter::Nearest:					return GL_NEAREST;
+		case SamplerMinFilter::Linear:					return GL_LINEAR;
+		case SamplerMinFilter::NearestMipmapNearest:	return GL_NEAREST_MIPMAP_NEAREST;
+		case SamplerMinFilter::LinearMipmapNearest:		return GL_LINEAR_MIPMAP_NEAREST;
+		case SamplerMinFilter::NearestMipmapLinear:		return GL_NEAREST_MIPMAP_LINEAR;
+		case SamplerMinFilter::LinearMipmapLinear:		return GL_LINEAR_MIPMAP_LINEAR;
+		}
+		return 0;
+	}
+
+	/* 翻译到OpenGL对应的纹理放大过滤方式 */
+	constexpr GLint TranslateToOpenGLSamplerMagFilter(SamplerMagFilter mode)
+	{
+		switch (mode)
+		{
+		case SamplerMagFilter::Nearest:		return GL_NEAREST;
+		case SamplerMagFilter::Linear:		return GL_LINEAR;
+		}
+		return 0;
+	}
+
 	/* OpenGL 错误检查 */
 #if WUYA_DEBUG
 	void CheckGLError(const char* file, const char* func_name, uint32_t line) noexcept;

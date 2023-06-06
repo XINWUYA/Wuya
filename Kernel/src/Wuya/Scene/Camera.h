@@ -16,33 +16,41 @@ namespace Wuya
 
 		/* 相机位置 */
 		[[nodiscard]]
-		const glm::vec3& GetPosition() const { return m_Position; }
+		virtual const glm::vec3& GetPosition() const { return m_Position; }
 		virtual void SetPosition(const glm::vec3& position) { m_Position = position; }
 
 		/* 相机方向 */
 		[[nodiscard]]
-		const glm::vec3& GetUpDir() const { return m_UpDirection; }
+		virtual const glm::vec3& GetUpDir() const { return m_UpDirection; }
 		[[nodiscard]]
-		const glm::vec3& GetRightDir() const { return m_RightDirection; }
+		virtual const glm::vec3& GetRightDir() const { return m_RightDirection; }
 		[[nodiscard]]
-		const glm::vec3& GetForwardDir() const { return m_ForwardDirection; }
+		virtual const glm::vec3& GetForwardDir() const { return m_ForwardDirection; }
 
 		[[nodiscard]]
-		float GetAspectRatio() const { return m_AspectRatio; }
+		virtual float GetAspectRatio() const { return m_AspectRatio; }
 		[[nodiscard]]
-		float GetFov() const { return m_Fov; }
+		virtual float GetFov() const { return m_Fov; }
+
+		[[nodiscard]]
+		virtual float GetNearClip() const { return m_NearClip; }
+		virtual void SetNearClip(float near_clip) { m_NearClip = near_clip; }
+
+		[[nodiscard]]
+		virtual float GetFarClip() const { return m_FarClip; }
+		virtual void SetFarClip(float far_clip) { m_FarClip = far_clip; }
 
 		/* 矩阵信息 */
 		[[nodiscard]]
-		const glm::mat4& GetViewMatrix() const { return m_ViewMatrix; }
+		virtual const glm::mat4& GetViewMatrix() const { return m_ViewMatrix; }
 		[[nodiscard]]
-		const glm::mat4& GetProjectionMatrix() const { return m_ProjectionMatrix; }
+		virtual const glm::mat4& GetProjectionMatrix() const { return m_ProjectionMatrix; }
 		[[nodiscard]]
-		glm::mat4 GetViewProjectionMatrix() const { return m_ProjectionMatrix * m_ViewMatrix; }
+		virtual glm::mat4 GetViewProjectionMatrix() const { return m_ProjectionMatrix * m_ViewMatrix; }
 
 		/* 获取RenderView */
 		[[nodiscard]]
-		RenderView* GetRenderView() const { return m_pRenderView.get(); }
+		virtual RenderView* GetRenderView() const { return m_pRenderView.get(); }
 
 	protected:
 		/* 为当前相机构建RenderView:

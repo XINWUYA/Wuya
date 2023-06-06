@@ -345,10 +345,14 @@ namespace Wuya
 																return TextureSlot::Emissive;
 															if (strcmp(name.c_str(), "Normal") == 0)
 																return TextureSlot::Normal;
+															if (strcmp(name.c_str(), "Bump") == 0)
+																return TextureSlot::Bump;
+															if (strcmp(name.c_str(), "Displacement") == 0)
+																return TextureSlot::Displacement;
 															return TextureSlot::Invalid;
 														};
 														/* 填入默认值 */
-														const auto& default_texture = TextureAssetManager::Instance().GetOrCreateTexture("assets/textures/default_texture.png", {});
+														const auto& default_texture = TextureAssetManager::Instance().GetOrCreateTexture("assets/textures/Default.png", {});
 														material->SetTexture(param_info.Name, default_texture, GetSlot(param_info.Name));
 													}
 													break;
@@ -400,7 +404,7 @@ namespace Wuya
 													const std::filesystem::path texture_path = path;
 
 													material->SetTexture(param_info.Name, TextureAssetManager::Instance().GetOrCreateTexture((g_AssetPath / texture_path).generic_string(), load_config), texture_info.second);
-													sub_model_info->MaterialParams.AmbientTexPath = texture_path.string();
+													sub_model_info->MaterialParams.AmbientTexPath = { texture_path.string(), true };
 												}
 												ImGui::EndDragDropTarget();
 											}
@@ -546,13 +550,13 @@ namespace Wuya
 		const auto extension = path.extension().string();
 
 		/* 模型文件 */
-		if (extension == ".obj")
+		if (extension == ".obj" || extension == ".fbx")
 		{
 			EDITOR_LOG_DEBUG("Import model file: {}.", path.generic_string());
 
 			/* 读取模型 */
 			m_pModelInfo->Reset();
-			m_pModelInfo->LoadFromObj(path.generic_string());
+			m_pModelInfo->LoadFromPath(path.generic_string());
 
 			/* 初始化材质 */
 			m_pMaterialGroup->ClearAllMaterials();
@@ -578,12 +582,12 @@ namespace Wuya
 	{
 		PROFILE_FUNCTION();
 
-		const auto file_path = FileDialog::OpenFile("Obj(*.obj)\0*.obj\0");
+		const auto file_path = FileDialog::OpenFile("Obj(*.obj)\0*.obj\0FBX(*.fbx)\0*.fbx\0");
 		if (!file_path.empty())
 		{
 			/* 读取模型 */
 			m_pModelInfo->Reset();
-			m_pModelInfo->LoadFromObj(file_path);
+			m_pModelInfo->LoadFromPath(file_path);
 
 			/* 初始化材质 */
 			m_pMaterialGroup->ClearAllMaterials();
@@ -622,6 +626,7 @@ namespace Wuya
 				}
 			}
 		}
+		return true;
 	}
 
 	/* 导出模型 */
@@ -670,37 +675,59 @@ namespace Wuya
 			size_t name_size = sub_model_info->Name.size();
 			out_mesh_file.write((char*)&name_size, sizeof(size_t));
 
-			/* 写入Name内容：name_size */
+			/* 写入Name内容: name_size */
 			out_mesh_file.write(sub_model_info->Name.c_str(), name_size);
 
-			/* 写入VertexData的大小: size_t * 1 */
-			size_t data_size = sub_model_info->VertexData.size();
-			out_mesh_file.write((char*)&data_size, sizeof(size_t));
+			/* 写入顶点数量: uint32_t */
+			out_mesh_file.write((char*)&(sub_model_info->VertexCount), sizeof(uint32_t));
 
-			/* 写入VertexData内容: data_size */
-			out_mesh_file.write((char*)(sub_model_info->VertexData.data()), data_size * sizeof(float));
-
-			/* 写入VertexLayout */
-			auto& vertex_layout = sub_model_info->VertexArray->GetVertexBuffers()[0]->GetLayout();
-			auto& elements = vertex_layout.GetElements();
-
-			/* 写入 VertexLayout的Element数量: size_t * 1 */
-			size_t element_count = elements.size();
-			out_mesh_file.write((char*)&element_count, sizeof(size_t));
-			/* 逐个写入Element信息 */
-			for (auto& element : elements)
+			/*先写Indices信息 */
 			{
-				/* 写入Name的size: size_t * 1 */
-				size_t element_name_size = element.Name.size();
-				out_mesh_file.write((char*)&element_name_size, sizeof(size_t));
-				/* 写入Name内容：element_name_size */
-				out_mesh_file.write(element.Name.c_str(), element_name_size);
-				/* 写入Element的类型: uint8_t * 1 */
-				out_mesh_file.write((char*)&element.Type, sizeof(uint8_t));
-				/* 写入Element的偏移：size_t * 1 */
-				out_mesh_file.write((char*)&element.Offset, sizeof(size_t));
-				/* 写入Element的Normalized: bool * 1 */
-				out_mesh_file.write((char*)&element.Normalized, sizeof(bool));
+				/* 写入Indices的size: size_t * 1 */
+				size_t count = sub_model_info->Indices.size();
+				out_mesh_file.write((char*)&count, sizeof(size_t));
+				
+				/* 写入Indices内容: data_size */
+				out_mesh_file.write((char*)(sub_model_info->Indices.data()), count * sizeof(uint32_t));
+			}
+
+			const auto& vertex_buffers = sub_model_info->VertexArray->GetVertexBuffers();
+			/* 写入VertexBuffer的数量: size_t * 1 */
+			size_t vertex_buffer_count = vertex_buffers.size();
+			out_mesh_file.write((char*)&vertex_buffer_count, sizeof(size_t));
+
+			/* 再写入每个VertexData信息 */
+			for (size_t i = 0; i < vertex_buffer_count; ++i)
+			{
+				const auto& buffer_data = sub_model_info->VertexBufferDatas[i];
+				
+				/* 写入该data具有多少float: uint32_t * 1 */
+				out_mesh_file.write((char*)&(buffer_data.first), sizeof(uint32_t));
+				/* 写入顶点数据: data_size */
+				out_mesh_file.write((char*)(buffer_data.second), sub_model_info->VertexCount * buffer_data.first * sizeof(float));
+
+				/* 写入VertexLayout */
+				const auto& vertex_buffer = vertex_buffers[i];
+				const auto& elements = vertex_buffer->GetLayout().GetElements();
+
+				/* 写入 VertexLayout的Element数量: size_t * 1 */
+				size_t element_count = elements.size();
+				out_mesh_file.write((char*)&element_count, sizeof(size_t));
+				/* 逐个写入Element信息: */
+				for (auto& element : elements)
+				{
+					/* 写入Name的size: size_t * 1 */
+					size_t element_name_size = element.Name.size();
+					out_mesh_file.write((char*)&element_name_size, sizeof(size_t));
+					/* 写入Name内容：element_name_size */
+					out_mesh_file.write(element.Name.c_str(), element_name_size);
+					/* 写入Element的类型: uint8_t * 1 */
+					out_mesh_file.write((char*)&element.Type, sizeof(uint8_t));
+					/* 写入Element的偏移：size_t * 1 */
+					out_mesh_file.write((char*)&element.Offset, sizeof(size_t));
+					/* 写入Element的Normalized: bool * 1 */
+					out_mesh_file.write((char*)&element.Normalized, sizeof(bool));
+				}
 			}
 
 			/* 写入材质索引：int * 1 */
@@ -760,7 +787,10 @@ namespace Wuya
 		const auto& aabb_max = m_pModel->GetAABBMax();
 		const auto aabb_height = aabb_max.y - aabb_min.y;
 		const auto distance = (aabb_height) / std::tanf(m_pEditorCamera->GetFov() / 2.0f);
+		auto aabb_half_range = (aabb_max - aabb_min) * 0.5f;
+		float radius = std::sqrt(aabb_half_range.x * aabb_half_range.x + aabb_half_range.y * aabb_half_range.y + aabb_half_range.z * aabb_half_range.z);
 		m_pEditorCamera->SetDistance(distance);
+		m_pEditorCamera->SetFarClip(radius + distance);
 		m_pEditorCamera->SetFocalPoint((aabb_min + aabb_max) * 0.5f);
 	}
 
@@ -771,58 +801,84 @@ namespace Wuya
 
 		TextureLoadConfig load_config;
 		load_config.IsFlipV = false;
+		// load_config.SamplerWrapMode = SamplerWrapMode::ClampToEdge;
+		load_config.SamplerMinFilter = SamplerMinFilter::LinearMipmapLinear;
 		{
 			/* Ambient */
-			if (!material_params.AmbientTexPath.empty())
-				material->SetTexture("Ambient", TextureAssetManager::Instance().GetOrCreateTexture((g_AssetPath / material_params.AmbientTexPath).generic_string(), load_config), TextureSlot::Ambient);
+			if (material_params.AmbientTexPath.second)
+				material->SetTexture("AmbientTex", TextureAssetManager::Instance().GetOrCreateTexture((g_AssetPath / material_params.AmbientTexPath.first).generic_string(), load_config), TextureSlot::Ambient);
 			else
-				material->SetParameters(ParamType::Vec3, "Ambient", material_params.Ambient);
+				material->SetTexture("AmbientTex", TextureAssetManager::Instance().GetOrCreateTexture("assets/textures/Black.png", load_config), TextureSlot::Ambient);
+			if (material_params.AmbientFactor.second)
+				material->SetParameters(ParamType::Vec3, "AmbientColor", material_params.AmbientFactor.first);
 
 			/* Diffuse/Albedo */
-			if (!material_params.DiffuseTexPath.empty())
-				material->SetTexture("Albedo", TextureAssetManager::Instance().GetOrCreateTexture((g_AssetPath / material_params.DiffuseTexPath).generic_string(), load_config), TextureSlot::Albedo);
+			if (material_params.DiffuseTexPath.second)
+				material->SetTexture("AlbedoTex", TextureAssetManager::Instance().GetOrCreateTexture((g_AssetPath / material_params.DiffuseTexPath.first).generic_string(), load_config), TextureSlot::Albedo);
 			else
-				material->SetParameters(ParamType::Vec3, "Albedo", material_params.Diffuse);
+				material->SetTexture("AlbedoTex", TextureAssetManager::Instance().GetOrCreateTexture("assets/textures/White.png", load_config), TextureSlot::Albedo);
+			if (material_params.DiffuseFactor.second)
+				material->SetParameters(ParamType::Vec3, "AlbedoColor", material_params.DiffuseFactor.first);
 
 			/* Specular */
-			if (!material_params.SpecularTexPath.empty())
-				material->SetTexture("Specular", TextureAssetManager::Instance().GetOrCreateTexture((g_AssetPath / material_params.SpecularTexPath).generic_string(), load_config), TextureSlot::Specular);
+			if (material_params.SpecularTexPath.second)
+				material->SetTexture("SpecularTex", TextureAssetManager::Instance().GetOrCreateTexture((g_AssetPath / material_params.SpecularTexPath.first).generic_string(), load_config), TextureSlot::Specular);
 			else
-				material->SetParameters(ParamType::Vec3, "Specular", material_params.Specular);
+				material->SetTexture("SpecularTex", TextureAssetManager::Instance().GetOrCreateTexture("assets/textures/Black.png", load_config), TextureSlot::Specular);
+			if (material_params.SpecularFactor.second)
+				material->SetParameters(ParamType::Vec3, "SpecularColor", material_params.SpecularFactor.first);
 
 			/* Normal, todo: 处理Bump和Displacement */
-			if (!material_params.BumpTexPath.empty())
-				material->SetTexture("Normal", TextureAssetManager::Instance().GetOrCreateTexture((g_AssetPath / material_params.BumpTexPath).generic_string(), load_config), TextureSlot::Normal);
-			else if (!material_params.DisplacementTexPath.empty())
-				material->SetTexture("Normal", TextureAssetManager::Instance().GetOrCreateTexture((g_AssetPath / material_params.DisplacementTexPath).generic_string(), load_config), TextureSlot::Normal);
+			if (material_params.NormalTexPath.second)
+				material->SetTexture("NormalTex", TextureAssetManager::Instance().GetOrCreateTexture((g_AssetPath / material_params.NormalTexPath.first).generic_string(), load_config), TextureSlot::Normal);
 			else
-				material->SetParameters(ParamType::Vec3, "Normal", glm::vec3(0.0f, 0.0f, 1.0f));
+				material->SetTexture("NormalTex", TextureAssetManager::Instance().GetOrCreateTexture("assets/textures/Normal.png", load_config), TextureSlot::Normal);
+			if (material_params.BumpTexPath.second)
+				material->SetTexture("BumpTex", TextureAssetManager::Instance().GetOrCreateTexture((g_AssetPath / material_params.BumpTexPath.first).generic_string(), load_config), TextureSlot::Bump);
+			else
+				material->SetTexture("BumpTex", TextureAssetManager::Instance().GetOrCreateTexture("assets/textures/Black.png", load_config), TextureSlot::Bump);
+			if (material_params.DisplacementTexPath.second)
+				material->SetTexture("DisplacementTex", TextureAssetManager::Instance().GetOrCreateTexture((g_AssetPath / material_params.DisplacementTexPath.first).generic_string(), load_config), TextureSlot::Displacement);
+			else
+				material->SetTexture("DisplacementTex", TextureAssetManager::Instance().GetOrCreateTexture("assets/textures/Black.png", load_config), TextureSlot::Displacement);
+			if (!material_params.NormalTexPath.second && !material_params.BumpTexPath.second && !material_params.DisplacementTexPath.second)
+				material->SetTexture("NormalTex", TextureAssetManager::Instance().GetOrCreateTexture("assets/textures/Normal.png", load_config), TextureSlot::Normal);
 
 			/* Roughness */
-			if (!material_params.RoughnessTexPath.empty())
-				material->SetTexture("Roughness", TextureAssetManager::Instance().GetOrCreateTexture((g_AssetPath / material_params.RoughnessTexPath).generic_string(), load_config), TextureSlot::Roughness);
+			if (material_params.RoughnessTexPath.second)
+				material->SetTexture("RoughnessTex", TextureAssetManager::Instance().GetOrCreateTexture((g_AssetPath / material_params.RoughnessTexPath.first).generic_string(), load_config), TextureSlot::Roughness);
 			else
-				material->SetParameters(ParamType::Float, "Roughness", material_params.Roughness);
+				material->SetTexture("RoughnessTex", TextureAssetManager::Instance().GetOrCreateTexture("assets/textures/White.png", load_config), TextureSlot::Roughness);
+			if (material_params.RoughnessFactor.second)
+				material->SetParameters(ParamType::Float, "Roughness", material_params.RoughnessFactor.first);
 
 			/* Metallic */
-			if (!material_params.MetallicTexPath.empty())
-				material->SetTexture("Metallic", TextureAssetManager::Instance().GetOrCreateTexture((g_AssetPath / material_params.MetallicTexPath).generic_string(), load_config), TextureSlot::Metallic);
+			if (material_params.MetallicTexPath.second)
+				material->SetTexture("MetallicTex", TextureAssetManager::Instance().GetOrCreateTexture((g_AssetPath / material_params.MetallicTexPath.first).generic_string(), load_config), TextureSlot::Metallic);
 			else
-				material->SetParameters(ParamType::Float, "Metallic", material_params.Metallic);
+				material->SetTexture("MetallicTex", TextureAssetManager::Instance().GetOrCreateTexture("assets/textures/Black.png", load_config), TextureSlot::Metallic);
+			if (material_params.MetallicFactor.second)
+				material->SetParameters(ParamType::Float, "Metallic", material_params.MetallicFactor.first);
 
 			/* Emission */
-			if (!material_params.EmissionTexPath.empty())
-				material->SetTexture("Emissive", TextureAssetManager::Instance().GetOrCreateTexture((g_AssetPath / material_params.EmissionTexPath).generic_string(), load_config), TextureSlot::Emissive);
+			if (material_params.EmissionTexPath.second)
+				material->SetTexture("EmissiveTex", TextureAssetManager::Instance().GetOrCreateTexture((g_AssetPath / material_params.EmissionTexPath.first).generic_string(), load_config), TextureSlot::Emissive);
 			else
-				material->SetParameters(ParamType::Vec3, "Emissive", material_params.Emission);
+				material->SetTexture("EmissiveTex", TextureAssetManager::Instance().GetOrCreateTexture("assets/textures/Black.png", load_config), TextureSlot::Emissive);
+			if (material_params.EmissionFactor.second)
+				material->SetParameters(ParamType::Vec3, "EmissiveColor", material_params.EmissionFactor.first);
 
 			/* ClearCoat */
-			material->SetParameters(ParamType::Float, "ClearCoatRoughness", material_params.ClearCoatRoughness);
-			material->SetParameters(ParamType::Float, "ClearCoatThickness", material_params.ClearCoatThickness);
+			if (material_params.ClearCoatRoughness.second)
+				material->SetParameters(ParamType::Float, "ClearCoatRoughness", material_params.ClearCoatRoughness.first);
+			if (material_params.ClearCoatThickness.second)
+				material->SetParameters(ParamType::Float, "ClearCoatThickness", material_params.ClearCoatThickness.first);
 
 			/* Others */
-			material->SetParameters(ParamType::Vec3, "Transmittance", material_params.Transmittance);
-			material->SetParameters(ParamType::Float, "IOR", material_params.IOR);
+			if (material_params.TransmittanceColor.second)
+				material->SetParameters(ParamType::Vec3, "TransmittanceColor", material_params.TransmittanceColor.first);
+			if (material_params.IOR.second)
+				material->SetParameters(ParamType::Float, "IOR", material_params.IOR.first);
 		}
 	}
 }

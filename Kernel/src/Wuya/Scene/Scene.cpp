@@ -377,18 +377,18 @@ namespace Wuya
 	template<>
 	void Scene::OnComponentAdded<CameraComponent>(Entity& entity, CameraComponent& component)
 	{
-
+		// 收集相机
 	}
 
 	template<>
 	void Scene::OnComponentAdded<ModelComponent>(Entity& entity, ModelComponent& component)
 	{
-
+		// 收集模型
 	}
 
 	template<>
 	void Scene::OnComponentAdded<LightComponent>(Entity& entity, LightComponent& component)
 	{
-
+		// 收集光源
 	}
 }

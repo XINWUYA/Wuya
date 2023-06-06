@@ -191,7 +191,7 @@ namespace Wuya
 		}
 
 		/* 模型文件 */
-		if (extension == ".obj")
+		if (extension == ".mesh")
 		{
 			EDITOR_LOG_DEBUG("Import model file: {}.", path.generic_string());
 

@@ -3,20 +3,19 @@
 
 layout(location = 0) in vec3 a_Position;
 layout(location = 1) in vec3 a_Normal;
-layout(location = 2) in vec3 a_Color;
-layout(location = 3) in vec2 a_TexCoord;
+layout(location = 2) in vec4 a_Color;
+layout(location = 3) in vec3 a_TexCoord;
+layout(location = 4) in vec3 a_Tangent;
 
 #include "builtin/Uniforms.glsl"
-
-// layout (location = 0) uniform mat4 u_ViewProjectionMat;
-// layout (location = 1) uniform mat4 u_Local2WorldMat;
 
 struct SVextex2Frag
 {
 	vec3 Position;
 	vec3 Normal;
-	vec3 BaseColor;
+	vec4 BaseColor;
 	vec2 TexCoord;
+	vec3 Tangent;
 };
 
 layout (location = 0) out SVextex2Frag Output;
@@ -25,10 +24,17 @@ void main()
 {
 	gl_Position = u_ViewProjectionMat * u_Local2WorldMat * vec4(a_Position, 1.0f);
 
-	Output.Position = a_Position;
-	Output.Normal = a_Normal;
+	Output.Position = vec3(u_Local2WorldMat * vec4(a_Position, 1.0f));
 	Output.BaseColor = a_Color;
-	Output.TexCoord = a_TexCoord;
+	Output.TexCoord = a_TexCoord.xy;
+	
+	mat3 normalMat = transpose(inverse(mat3(u_Local2WorldMat)));
+	Output.Normal = normalize(normalMat *a_Normal);
+	Output.Tangent = normalize(normalMat * a_Tangent);
+	/* Gram-Schmidt process:
+	 * Re-orthogonalize T with respect to N
+	 */
+//	Output.Tangent = normalize(Output.Tangent - dot(Output.Tangent, Output.Normal) * Output.Normal);
 }
 
 
@@ -52,8 +58,9 @@ struct SVextex2Frag
 {
 	vec3 Position;
 	vec3 Normal;
-	vec3 BaseColor;
+	vec4 BaseColor;
 	vec2 TexCoord;
+	vec3 Tangent;
 };
 
 layout (location = 0) in SVextex2Frag Input;
@@ -61,20 +68,39 @@ layout (location = 0) in SVextex2Frag Input;
 layout(binding = 0) uniform sampler2D u_AlbedoTexture;
 layout(binding = 1) uniform sampler2D u_SpecularTexture;
 layout(binding = 2) uniform sampler2D u_NormalTexture;
-layout(binding = 3) uniform sampler2D u_RoughnessTexture;
-layout(binding = 4) uniform sampler2D u_MetallicTexture;
-layout(binding = 5) uniform sampler2D u_EmissiveTexture;
+layout(binding = 3) uniform sampler2D u_BumpTexture;
+layout(binding = 4) uniform sampler2D u_DisplacementTexture;
+layout(binding = 5) uniform sampler2D u_RoughnessTexture;
+layout(binding = 6) uniform sampler2D u_MetallicTexture;
+layout(binding = 7) uniform sampler2D u_EmissiveTexture;
+layout(binding = 8) uniform sampler2D u_AmbientTexture;
 
 void CalculateMaterial(inout SMaterialInput mtl)
 {
 	
 	mtl.Albedo = texture(u_AlbedoTexture, Input.TexCoord).rgb;
-	mtl.Normal = texture(u_NormalTexture, Input.TexCoord).rgb;
-	mtl.Roughness = texture(u_RoughnessTexture, Input.TexCoord).r;
-	mtl.Metallic = texture(u_MetallicTexture, Input.TexCoord).r;
-	mtl.Specular = texture(u_SpecularTexture, Input.TexCoord).rgb;
-	mtl.Emission = texture(u_EmissiveTexture, Input.TexCoord).rgb;
-	mtl.Ambient = vec3(0.0f, 0.0f, 0.0f);
+
+	/* TBN */
+	vec3 T = normalize(Input.Tangent);
+	vec3 N = normalize(Input.Normal);
+	vec3 B = cross(T, N);
+	mat3 TBN = mat3(T, B, N);
+
+	/* Calculate Parallax Mapping */
+	vec3 view_dir = u_ViewPos - Input.Position;
+	view_dir = normalize(TBN * view_dir);
+	float height = texture(u_BumpTexture, Input.TexCoord).x;
+	vec2 uv = Input.TexCoord - view_dir.xy / view_dir.z * height;
+
+	vec3 normal = texture(u_NormalTexture, uv).xyz * 2.0f - 1.0f;
+	//normal.z = sqrt(max(1.0f - normal.x * normal.x - normal.y * normal.y, 0.0f));
+	mtl.Normal = normalize(TBN * normal);
+	
+	mtl.Roughness = texture(u_RoughnessTexture, uv).r;
+	mtl.Metallic = texture(u_MetallicTexture, uv).r;
+	mtl.Specular = texture(u_SpecularTexture, uv).rgb;
+	mtl.Emission = texture(u_EmissiveTexture, uv).rgb;
+	mtl.Ambient = texture(u_AmbientTexture, uv).rgb;
 	mtl.Anisotropy = 0.0f;
 	mtl.AO = 1.0f;
 	mtl.IOR = 0.0f;

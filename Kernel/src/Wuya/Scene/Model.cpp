@@ -217,48 +217,72 @@ namespace Wuya
 				in_mesh_file.read((char*)&name_size, sizeof(size_t));
 				std::string name;
 				in_mesh_file.read(name.data(), name_size);
-
-				/* 子模型顶点数据 */
-				size_t vertex_data_size;
-				in_mesh_file.read((char*)&vertex_data_size, sizeof(size_t));
-				float* vertex_data = new float[vertex_data_size];
-				in_mesh_file.read((char*)vertex_data, vertex_data_size * sizeof(float));
-
-				/* 子模型Layout */
-				VertexBufferLayout vertex_buffer_layout;
-				size_t element_cnt;
-				in_mesh_file.read((char*)&element_cnt, sizeof(size_t));
-				for (size_t element_idx = 0; element_idx < element_cnt; ++element_idx)
-				{
-					/* Name */
-					size_t element_name_size;
-					in_mesh_file.read((char*)&element_name_size, sizeof(size_t));
-					std::string element_name;
-					in_mesh_file.read(element_name.data(), element_name_size);
-
-					/* Type */
-					uint8_t element_type;
-					in_mesh_file.read((char*)&element_type, sizeof(uint8_t));
-
-					/* Offset */
-					size_t element_offset;
-					in_mesh_file.read((char*)&element_offset, sizeof(size_t));
-
-					/* Normalized */
-					bool element_normalized;
-					in_mesh_file.read((char*)&element_normalized, sizeof(bool));
-
-					vertex_buffer_layout.EmplaceElement({ element_name, static_cast<BufferDataType>(element_type), element_normalized });
-				}
-
-				/* Vertex Buffer */
-				auto vertex_buffer = VertexBuffer::Create(vertex_data, vertex_data_size * sizeof(float));
-				vertex_buffer->SetLayout(vertex_buffer_layout);
-
+				
 				/* Vertex Array */
 				auto vertex_array = VertexArray::Create();
 				vertex_array->Bind();
-				vertex_array->AddVertexBuffer(vertex_buffer);
+
+				/* 顶点数量 */
+				uint32_t vertex_count;
+				in_mesh_file.read((char*)&vertex_count, sizeof(uint32_t));
+
+				/* 子模型索引数据 */
+				size_t index_count;
+				in_mesh_file.read((char*)&index_count, sizeof(size_t));
+				uint32_t* indices = new uint32_t[index_count];
+				in_mesh_file.read((char*)indices, index_count * sizeof(uint32_t));
+
+				/* Index Buffer */
+				auto index_buffer = IndexBuffer::Create(indices, index_count);
+				vertex_array->SetIndexBuffer(index_buffer);
+				delete[] indices;
+
+				/* VertexBuffer的数量 */
+				size_t vertex_buffer_count;
+				in_mesh_file.read((char*)&vertex_buffer_count, sizeof(size_t));
+
+				/* VertexBuffer数据 */
+				for (size_t i = 0; i < vertex_buffer_count; ++i)
+				{
+					uint32_t stride;
+					in_mesh_file.read((char*)&stride, sizeof(uint32_t));
+
+					float* buffer_data = new float[vertex_count * stride];
+					in_mesh_file.read((char*)buffer_data, vertex_count * stride * sizeof(float));
+
+					/* VertexLayout */
+					VertexBufferLayout vertex_buffer_layout;
+					size_t element_cnt;
+					in_mesh_file.read((char*)&element_cnt, sizeof(size_t));
+					for (size_t element_idx = 0; element_idx < element_cnt; ++element_idx)
+					{
+						/* Name */
+						size_t element_name_size;
+						in_mesh_file.read((char*)&element_name_size, sizeof(size_t));
+						std::string element_name;
+						in_mesh_file.read(element_name.data(), element_name_size);
+
+						/* Type */
+						uint8_t element_type;
+						in_mesh_file.read((char*)&element_type, sizeof(uint8_t));
+
+						/* Offset */
+						size_t element_offset;
+						in_mesh_file.read((char*)&element_offset, sizeof(size_t));
+
+						/* Normalized */
+						bool element_normalized;
+						in_mesh_file.read((char*)&element_normalized, sizeof(bool));
+
+						vertex_buffer_layout.EmplaceElement({ element_name, static_cast<BufferDataType>(element_type), element_normalized });
+					}
+					
+					/* Vertex Buffer */
+					auto vertex_buffer = VertexBuffer::Create(buffer_data, vertex_count * stride * sizeof(float));
+					vertex_buffer->SetLayout(vertex_buffer_layout);
+					vertex_array->AddVertexBuffer(vertex_buffer);
+					delete[] buffer_data;
+				}
 
 				/* Material */
 				int material_idx;
@@ -277,7 +301,6 @@ namespace Wuya
 				mesh_segment->SetAABB(aabb_min, aabb_max);
 
 				model->AddMeshSegment(mesh_segment);
-				delete[] vertex_data;
 			}
 
 			/* 关闭文件 */

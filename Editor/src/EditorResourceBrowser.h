@@ -6,7 +6,7 @@ namespace Wuya
 	class EditorResourceBrowser
 	{
 	public:
-		EditorResourceBrowser();
+		EditorResourceBrowser() = default;
 		~EditorResourceBrowser() = default;
 
 		/* 绘制相关UI */
@@ -71,12 +71,5 @@ namespace Wuya
 
 		/* 只有目录文件被更改时，才更新文件节点树 */
 		bool m_IsDirty{ true };
-
-		/* 图标 */
-		SharedPtr<Texture> m_pFolderIcon;
-		SharedPtr<Texture> m_pFileIcon;
-		SharedPtr<Texture> m_pFilterIcon;
-		SharedPtr<Texture> m_pMenuIcon;
-		SharedPtr<Texture> m_pReturnIcon;
 	};
 }

@@ -126,18 +126,19 @@ namespace Wuya
 
 					ASSERT(m_InternalFormat & data_format, "Format not supported!");
 
-					glCreateTextures(m_TextureTarget, 1, &m_TextureId);
-					glTextureStorage2D(m_TextureId, 1, m_InternalFormat, width, height);
-
-					glTextureParameteri(m_TextureId, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-					glTextureParameteri(m_TextureId, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-					glTextureParameteri(m_TextureId, GL_TEXTURE_WRAP_S, GL_REPEAT);
-					glTextureParameteri(m_TextureId, GL_TEXTURE_WRAP_T, GL_REPEAT);
-
-					glTextureSubImage2D(m_TextureId, 0, 0, 0, width, height, data_format, GL_UNSIGNED_BYTE, data);
+					glGenTextures(1, &m_TextureId);
+					glBindTexture(m_TextureTarget, m_TextureId);
+					glTexImage2D(m_TextureTarget, 0, m_InternalFormat, width, height, 0, data_format, GL_UNSIGNED_BYTE, data);
 
 					if (load_config.IsGenMips)
+					{
 						glGenerateMipmap(m_TextureTarget);
+					}
+					
+					glTextureParameteri(m_TextureId, GL_TEXTURE_MIN_FILTER, TranslateToOpenGLSamplerMinFilter(load_config.SamplerMinFilter));
+					glTextureParameteri(m_TextureId, GL_TEXTURE_MAG_FILTER, TranslateToOpenGLSamplerMagFilter(load_config.SamplerMagFilter));
+					glTextureParameteri(m_TextureId, GL_TEXTURE_WRAP_S, TranslateToOpenGLSamplerWrapMode(load_config.SamplerWrapMode));
+					glTextureParameteri(m_TextureId, GL_TEXTURE_WRAP_T, TranslateToOpenGLSamplerWrapMode(load_config.SamplerWrapMode));
 
 					stbi_image_free(data);
 				}

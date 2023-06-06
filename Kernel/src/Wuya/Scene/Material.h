@@ -13,11 +13,13 @@ namespace Wuya
 		constexpr uint8_t Albedo = 0;
 		constexpr uint8_t Specular = 1;
 		constexpr uint8_t Normal = 2;
-		constexpr uint8_t Roughness = 3;
-		constexpr uint8_t Metallic = 4;
-		constexpr uint8_t Emissive = 5;
-		constexpr uint8_t Ambient = 6;
-		constexpr uint8_t ValidSlotCnt = 7;
+		constexpr uint8_t Bump = 3;
+		constexpr uint8_t Displacement = 4;
+		constexpr uint8_t Roughness = 5;
+		constexpr uint8_t Metallic = 6;
+		constexpr uint8_t Emissive = 7;
+		constexpr uint8_t Ambient = 8;
+		constexpr uint8_t ValidSlotCnt = 9;
 
 		constexpr uint8_t Invalid = 255;
 
@@ -25,14 +27,16 @@ namespace Wuya
 		{
 			switch (slot)
 			{
-			case Albedo:	return "Albedo";
-			case Specular:	return "Specular";
-			case Normal:	return "Normal";
-			case Roughness: return "Roughness";
-			case Metallic:	return "Metallic";
-			case Emissive:	return "Emissive";
-			case Ambient:	return "Ambient";
-			default:		return "Invalid";
+			case Albedo:		return "Albedo";
+			case Specular:		return "Specular";
+			case Normal:		return "Normal";
+			case Bump:			return "Bump";
+			case Displacement:	return "Displacement";
+			case Roughness:		return "Roughness";
+			case Metallic:		return "Metallic";
+			case Emissive:		return "Emissive";
+			case Ambient:		return "Ambient";
+			default:			return "Invalid";
 			}
 		}
 	}
