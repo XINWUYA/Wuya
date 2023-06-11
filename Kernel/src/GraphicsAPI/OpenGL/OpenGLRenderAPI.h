@@ -18,8 +18,8 @@ namespace Wuya
 		void ApplyRasterState(RenderRasterState raster_state) override;
 
 		/* µ÷ÓÃ»æÖÆÃüÁî */
-		void DrawIndexed(const SharedPtr<VertexArray>& vertex_array, uint32_t index_count = 0) override;
-		void DrawArrays(const SharedPtr<VertexArray>& vertex_array) override;
+		void DrawIndexed(PrimitiveType type, const SharedPtr<VertexArray>& vertex_array, uint32_t index_count = 0) override;
+		void DrawArrays(PrimitiveType type, const SharedPtr<VertexArray>& vertex_array) override;
 
 		void Flush() override;
 

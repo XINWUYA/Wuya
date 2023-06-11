@@ -26,6 +26,8 @@ namespace Wuya
 	/* Per view uniform data */
 	struct ViewUniformData
 	{
+		glm::mat4 ViewMatrix{ 1 };
+		glm::mat4 ProjectionMatrix{ 1 };
 		glm::mat4 ViewProjectionMatrix{ 1 };
 		glm::vec3 ViewPos{ 0.0f };
 		uint32_t FrameCounter{ 0 }; /* 当前帧数计数 */
@@ -114,6 +116,8 @@ namespace Wuya
 		PROFILE_FUNCTION();
 
 		/* Fill view uniform buffer */
+		s_RenderData.ViewUniformData.ViewMatrix = view->GetCullingCamera()->GetViewMatrix();
+		s_RenderData.ViewUniformData.ProjectionMatrix = view->GetCullingCamera()->GetProjectionMatrix();
 		s_RenderData.ViewUniformData.ViewProjectionMatrix = view->GetCullingCamera()->GetViewProjectionMatrix();
 		s_RenderData.ViewUniformData.ViewPos = view->GetCullingCamera()->GetPosition();
 		s_RenderData.pViewUniformBuffer->SetData(&s_RenderData.ViewUniformData, sizeof(ViewUniformData));
@@ -245,22 +249,22 @@ namespace Wuya
 
 	}
 
-	void Renderer::Submit(const SharedPtr<Material>& material, const SharedPtr<VertexArray>& vertex_array, uint32_t index_count)
+	void Renderer::Submit(const SharedPtr<Material>& material, const MeshPrimitive& mesh_primitive, uint32_t index_count)
 	{
 		PROFILE_FUNCTION();
 
 		material->Bind();
-		vertex_array->Bind();
+		mesh_primitive.VertexArray->Bind();
 
 		m_pRenderAPI->ApplyRasterState(material->GetRasterState());
 
-		if (vertex_array->GetIndexBuffer())
-			m_pRenderAPI->DrawIndexed(vertex_array, index_count);
+		if (mesh_primitive.VertexArray->GetIndexBuffer())
+			m_pRenderAPI->DrawIndexed(mesh_primitive.PrimitiveType, mesh_primitive.VertexArray, index_count);
 		else
-			m_pRenderAPI->DrawArrays(vertex_array);
+			m_pRenderAPI->DrawArrays(mesh_primitive.PrimitiveType, mesh_primitive.VertexArray);
 
 		material->Unbind();
-		vertex_array->Unbind();
+		mesh_primitive.VertexArray->Unbind();
 	}
 
 	SharedPtr<VertexArray> Renderer::GetFullScreenVertexArray()

@@ -105,22 +105,22 @@ namespace Wuya
 					GLenum data_format = 0;
 					if (channels == 4)
 					{
-						m_InternalFormat = GL_RGBA8;
+						m_InternalFormat = load_config.IsHdr ? GL_RGBA16F : GL_RGBA8;
 						data_format = GL_RGBA;
 					}
 					else if (channels == 3)
 					{
-						m_InternalFormat = GL_RGB8;
+						m_InternalFormat = load_config.IsHdr ? GL_RGB16F : GL_RGB8;
 						data_format = GL_RGB;
 					}
 					else if (channels == 2)
 					{
-						m_InternalFormat = GL_RG8;
+						m_InternalFormat = load_config.IsHdr ? GL_RG16F : GL_RG8;
 						data_format = GL_RG;
 					}
 					else if (channels == 1)
 					{
-						m_InternalFormat = GL_R8;
+						m_InternalFormat = load_config.IsHdr ? GL_R16F : GL_R8;
 						data_format = GL_RED;
 					}
 
@@ -151,7 +151,9 @@ namespace Wuya
 		case SamplerType::Sampler2DArray: 
 			ASSERT(false, "Not implemented!")
 			break;
-		case SamplerType::SamplerCubeMap: 
+		case SamplerType::SamplerCubeMap:
+			m_TextureTarget = GL_TEXTURE_CUBE_MAP;
+
 			ASSERT(false, "Not implemented!")
 			break;
 		case SamplerType::Sampler3D: 

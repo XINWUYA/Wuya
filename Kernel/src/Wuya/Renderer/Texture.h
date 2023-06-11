@@ -28,6 +28,8 @@ namespace Wuya
 	{
 		bool IsFlipV = true;
 		bool IsGenMips = true;
+		bool IsHdr = false;
+		bool IsSrgb = false;
 		SamplerType SamplerType{ SamplerType::Sampler2D }; /* 用于决定纹理加载的类型 */
 		SamplerWrapMode SamplerWrapMode{ SamplerWrapMode::Repeat };
 		SamplerMinFilter SamplerMinFilter{ SamplerMinFilter::Linear };
@@ -37,6 +39,8 @@ namespace Wuya
 		{
 			return IsFlipV == load_config.IsFlipV
 				&& IsGenMips == load_config.IsGenMips
+				&& IsHdr == load_config.IsHdr
+				&& IsSrgb == load_config.IsSrgb
 				&& SamplerType == load_config.SamplerType
 				&& SamplerWrapMode == load_config.SamplerWrapMode
 				&& SamplerMinFilter == load_config.SamplerMinFilter

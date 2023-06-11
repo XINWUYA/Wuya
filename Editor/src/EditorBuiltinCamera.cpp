@@ -199,7 +199,7 @@ namespace Wuya
 						auto& material = mesh_object.MeshSegment->GetMaterial();
 						//material->SetParameters("u_Local2WorldMat", mesh_object.Local2WorldMat);
 						//material->SetParameters("u_ViewProjectionMat", GetViewProjectionMatrix());
-						Renderer::Submit(material, mesh_object.MeshSegment->GetVertexArray());
+						Renderer::Submit(material, mesh_object.MeshSegment->GetMeshPrimitive());
 					}
 				}
 				render_pass_info->Unbind();

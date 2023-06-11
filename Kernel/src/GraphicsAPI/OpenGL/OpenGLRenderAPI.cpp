@@ -133,20 +133,20 @@ namespace Wuya
 
 	}
 
-	void OpenGLRenderAPI::DrawIndexed(const SharedPtr<VertexArray>& vertex_array, uint32_t index_count)
+	void OpenGLRenderAPI::DrawIndexed(PrimitiveType type, const SharedPtr<VertexArray>& vertex_array, uint32_t index_count)
 	{
 		PROFILE_FUNCTION();
 
 		const uint32_t count = index_count ? index_count : vertex_array->GetVertexCount();
-		glDrawElements(GL_TRIANGLES, (GLsizei)count, GL_UNSIGNED_INT, nullptr);
+		glDrawElements(TranslateToOpenGLPrimitiveType(type), (GLsizei)count, GL_UNSIGNED_INT, nullptr);
 	}
 
-	void OpenGLRenderAPI::DrawArrays(const SharedPtr<VertexArray>& vertex_array)
+	void OpenGLRenderAPI::DrawArrays(PrimitiveType type, const SharedPtr<VertexArray>& vertex_array)
 	{
 		PROFILE_FUNCTION();
 
 		const auto count = vertex_array->GetVertexCount();
-		glDrawArrays(GL_TRIANGLES, 0, count);
+		glDrawArrays(TranslateToOpenGLPrimitiveType(type), 0, count);
 	}
 
 	void OpenGLRenderAPI::Flush()

@@ -84,7 +84,7 @@ namespace Wuya
 		/* 设置纹理 */
 		void SetTexture(const std::string& name, const SharedPtr<Texture>& texture, int slot = -1);
 		/* 设置光栅化状态 */
-		void SetRasterState(RenderRasterState state) { m_RasterState = state; }
+		void SetRasterState(const RenderRasterState& state) { m_RasterState = state; }
 		[[nodiscard]] const RenderRasterState& GetRasterState() const { return m_RasterState; }
 		RenderRasterState& GetRasterState() { return m_RasterState; }
 

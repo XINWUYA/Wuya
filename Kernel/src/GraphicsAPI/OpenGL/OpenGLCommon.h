@@ -4,6 +4,20 @@
 
 namespace Wuya
 {
+	/* 翻译到OpenGL对应的图元类型 */
+	constexpr GLenum TranslateToOpenGLPrimitiveType(PrimitiveType type)
+	{
+		switch (type)
+		{
+		case PrimitiveType::Points:			return GL_POINTS;
+		case PrimitiveType::Lines:			return GL_LINES;
+		case PrimitiveType::Line_Strip:		return GL_LINE_STRIP;
+		case PrimitiveType::Triangles:		return GL_TRIANGLES;
+		case PrimitiveType::Triangle_Strip: return GL_TRIANGLE_STRIP;
+		}
+		return 0;
+	}
+
 	/* 翻译到OpenGL对应的纹理类型 */
 	constexpr GLenum TranslateToOpenGLTextureFormat(TextureFormat format)
 	{

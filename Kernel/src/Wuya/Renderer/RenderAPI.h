@@ -25,8 +25,8 @@ namespace Wuya
 		virtual void ApplyRasterState(RenderRasterState raster_state) = 0;
 
 		/* µ÷ÓÃ»æÖÆÃüÁî */
-		virtual void DrawIndexed(const SharedPtr<VertexArray>& vertex_array, uint32_t index_count = 0) = 0;
-		virtual void DrawArrays(const SharedPtr<VertexArray>& vertex_array) = 0;
+		virtual void DrawIndexed(PrimitiveType type, const SharedPtr<VertexArray>& vertex_array, uint32_t index_count = 0) = 0;
+		virtual void DrawArrays(PrimitiveType type, const SharedPtr<VertexArray>& vertex_array) = 0;
 
 		/* Flush */
 		virtual void Flush() = 0;

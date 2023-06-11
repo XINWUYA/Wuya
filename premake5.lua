@@ -61,10 +61,11 @@ group "App"
 	include "ModelEditor"
 group ""
 
---group "Samples"
+group "Samples"
+	include "Samples/Sample_SkyBox"
 --	include "Samples/001_Triangle"
 --	include "Samples/002_Texture"
 --	include "Samples/003_Camera"
 --	include "Samples/004_FrameBuffer"
---group ""
+group ""
 

@@ -4,6 +4,16 @@
 
 namespace Wuya
 {
+	/* Primitive类型 */
+	enum class PrimitiveType : uint8_t
+	{
+		Points,
+		Lines,
+		Line_Strip,
+		Triangles,
+		Triangle_Strip
+	};
+
 	/* Buffer使用方式 */
 	enum class BufferUsage : uint8_t
 	{
@@ -244,10 +254,10 @@ namespace Wuya
 	/* 视口区域信息 */
 	struct ViewportRegion
 	{
-		int32_t MinX;	/* 水平方向最小值 */
-		int32_t MinY;	/* 竖直方向最小值 */
-		int32_t Width;	/* 宽度值 */
-		int32_t Height;	/* 高度值 */
+		int32_t MinX;		/* 水平方向最小值 */
+		int32_t MinY;		/* 竖直方向最小值 */
+		uint32_t Width;		/* 宽度值 */
+		uint32_t Height;	/* 高度值 */
 
 		/* 区域水平最大值和竖直最大值 */
 		[[nodiscard]] uint32_t MaxX() const { return MinX + Width; }

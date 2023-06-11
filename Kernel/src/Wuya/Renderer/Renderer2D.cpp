@@ -9,6 +9,7 @@
 #include "Wuya/Application/AssetManager.h"
 #include "Wuya/Scene/Components.h"
 #include "Wuya/Scene/Material.h"
+#include "Wuya/Scene/Mesh.h"
 
 namespace Wuya
 {

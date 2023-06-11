@@ -4,13 +4,16 @@
 
 namespace Wuya
 {
-	MeshSegment::MeshSegment(std::string name)
-		: m_DebugName(std::move(name))
+	MeshSegment::MeshSegment(const std::string& name, const MeshPrimitive& mesh_primitive, const SharedPtr<Material>& material)
+		: m_DebugName(name), m_MeshPrimitive(mesh_primitive), m_pMaterial(material)
 	{
 	}
 
-	MeshSegment::MeshSegment(std::string name, const SharedPtr<VertexArray>& vertex_array, const SharedPtr<Material>& material)
-		: m_DebugName(std::move(name)), m_pVertexArray(vertex_array), m_pMaterial(material)
+	SharedPtr<MeshSegment> MeshSegment::Create(const std::string& name, const MeshPrimitive& mesh_primitive, const SharedPtr<Material>& material)
 	{
+		if (!material)
+			return nullptr;
+
+		return CreateSharedPtr<MeshSegment>(name, mesh_primitive, material);
 	}
 }

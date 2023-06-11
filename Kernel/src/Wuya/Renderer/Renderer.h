@@ -8,6 +8,7 @@ namespace Wuya
 	class UniformBuffer;
 	struct VisibleMeshObject;
 	struct ValidLight;
+	struct MeshPrimitive;
 
 	class Renderer
 	{
@@ -23,7 +24,7 @@ namespace Wuya
 		/* 绘制一个视图 */
 		static void RenderAView(RenderView* view);
 
-		static void Submit(const SharedPtr<Material>& material, const SharedPtr<VertexArray>& vertex_array, uint32_t index_count = 0);
+		static void Submit(const SharedPtr<Material>& material, const MeshPrimitive& mesh_primitive, uint32_t index_count = 0);
 
 		static int CurrentAPI() { return RenderAPI::GetAPI(); }
 

@@ -1,14 +1,15 @@
 #include "Pch.h"
 #include "Model.h"
-#include "Mesh.h"
-#include "ModelImporter.h"
-#include "Wuya/Renderer/VertexArray.h"
-#include "Wuya/Renderer/Buffer.h"
-#include "Wuya/Renderer/Texture.h"
-#include <tiny_obj_loader.h>
+
 #include <tinyxml2.h>
 
+#include "Mesh.h"
+#include "ModelImporter.h"
+#include "Wuya/Common/Math.h"
+#include "Wuya/Renderer/Buffer.h"
 #include "Wuya/Renderer/Shader.h"
+#include "Wuya/Renderer/Texture.h"
+#include "Wuya/Renderer/VertexArray.h"
 
 namespace Wuya
 {
@@ -90,34 +91,89 @@ namespace Wuya
 	{
 		auto model = CreateSharedPtr<Model>("BuiltinSphere");
 
-		/* 填充MeshSegment */
+		constexpr int32_t segments_x = 32;
+		constexpr int32_t segments_y = 32;
+
+		/* Calculate vertices, normals, uvs */
+		std::vector<glm::vec3> vertices;
+		std::vector<glm::vec3> normals;
+		std::vector<glm::vec2> uvs;
+
+		constexpr int32_t vertex_count = (segments_x + 1) * (segments_y + 1);
+		vertices.reserve(vertex_count);
+		normals.reserve(vertex_count);
+		uvs.reserve(vertex_count);
+
+		for (int32_t x = 0; x <= segments_x; ++x)
 		{
-			// todo: Cube vertices
-			static constexpr float vertices[] = {
-				// Position,          TexCoord,    EntityId
-				-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,  0,
-				 0.5f, -0.5f, -0.5f,  1.0f, 0.0f,  0,
-				 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,  0,
-				 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,  0,
-				-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,  0,
-				-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,  0,
-			};
+			float s_x = static_cast<float>(x) / segments_x;
+			for (int32_t y = 0; y <= segments_y; ++y)
+			{
+				float s_y = static_cast<float>(y) / segments_y;
 
-			// Vertex Array
-			SharedPtr<VertexBuffer> vertex_buffer = VertexBuffer::Create(vertices, sizeof(vertices));
-			VertexBufferLayout vertex_buffer_layout = {
-				{ "a_Position", BufferDataType::Float3 },
-				{ "a_TexCoord", BufferDataType::Float2 },
-				{ "a_EntityId", BufferDataType::Int}
-			};
-			vertex_buffer->SetLayout(vertex_buffer_layout);
+				glm::vec3 position(
+					std::cos(s_x * 2.0f * PI) * std::sin(s_y * PI),
+					std::cos(s_y * PI),
+					std::sin(s_x * 2.0f * PI) * std::sin(s_y * PI)
+				);
 
-			auto vertex_array = VertexArray::Create();
-			vertex_array->Bind();
-			vertex_array->AddVertexBuffer(vertex_buffer);
-
-			model->AddMeshSegment(CreateSharedPtr<MeshSegment>("BuiltinSphere", vertex_array, material));
+				vertices.emplace_back(position);
+				normals.emplace_back(position); /* 对球心在坐标原点的球，其normal与position相等 */
+				uvs.emplace_back(s_x, s_y);
+			}
 		}
+
+		/* Calculate indices */
+		std::vector<uint32_t> indices;
+		bool odd_row = false;
+		for (int32_t y = 0; y < segments_y; ++y)
+		{
+			if (!odd_row) // even rows: y == 0, y == 2; and so on
+			{
+				for (int32_t x = 0; x <= segments_x; ++x)
+				{
+					indices.emplace_back(y * (segments_x + 1) + x);
+					indices.emplace_back((y + 1) * (segments_x + 1) + x);
+				}
+			}
+			else
+			{
+				for (int32_t x = segments_x; x >= 0; --x)
+				{
+					indices.emplace_back((y + 1) * (segments_x + 1) + x);
+					indices.emplace_back(y * (segments_x + 1) + x);
+				}
+			}
+			odd_row = !odd_row;
+		}
+
+		auto vertex_array = VertexArray::Create();
+		vertex_array->Bind();
+		/* vertices */
+		{
+			auto vertex_buffer = VertexBuffer::Create(vertices.data(), vertex_count * sizeof(glm::vec3));
+			vertex_buffer->SetLayout({ { "a_Position", BufferDataType::Float3 } });
+			vertex_array->AddVertexBuffer(vertex_buffer);
+		}
+		/* normals */
+		{
+			auto vertex_buffer = VertexBuffer::Create(normals.data(), vertex_count * sizeof(glm::vec3));
+			vertex_buffer->SetLayout({ { "a_Normal", BufferDataType::Float3 } });
+			vertex_array->AddVertexBuffer(vertex_buffer);
+		}
+		/* uvs */
+		{
+			auto vertex_buffer = VertexBuffer::Create(uvs.data(), vertex_count * sizeof(glm::vec2));
+			vertex_buffer->SetLayout({ { "a_TexCoord", BufferDataType::Float2 } });
+			vertex_array->AddVertexBuffer(vertex_buffer);
+		}
+		/* indices */
+		{
+			auto index_buffer = IndexBuffer::Create(indices.data(), indices.size());
+			vertex_array->SetIndexBuffer(index_buffer);
+		}
+
+		model->AddMeshSegment(MeshSegment::Create("BuiltinSphere", { vertex_array, PrimitiveType::Triangle_Strip }, material));
 
 		return model;
 	}
