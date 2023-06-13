@@ -280,7 +280,7 @@ namespace Wuya
 						raster_state.BlendFuncSrcA = BlendFunc::One;
 						raster_state.BlendFuncDstRGB = BlendFunc::One;
 						raster_state.BlendFuncDstA = BlendFunc::One;
-						const auto shader = ShaderAssetManager::Instance().GetOrLoad("assets/shaders/lighting.glsl");
+						const auto shader = ShaderAssetManager::Instance().GetOrLoad(RELATIVE_PATH("Shaders/lighting.glsl"));
 						material->SetShader(shader);
 						material->SetTexture("u_GBufferTexture0", resources.Get(data.GBufferTexture0).Texture, 0);
 						material->SetTexture("u_GBufferTexture1", resources.Get(data.GBufferTexture1).Texture, 1);

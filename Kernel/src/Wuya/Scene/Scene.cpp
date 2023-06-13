@@ -7,7 +7,6 @@
 #include "Wuya/Common/Utils.h"
 #include "Camera.h"
 #include "Wuya/Renderer/Renderer.h"
-#include "Wuya/Renderer/Renderer2D.h"
 #include "Wuya/Renderer/RenderView.h"
 
 namespace Wuya
@@ -85,21 +84,6 @@ namespace Wuya
 		{
 			Renderer::RenderAView(view);
 		}
-
-
-		/* 更新Renderer2D信息 */
-		Renderer2D::BeginFrame(camera);
-
-		/* 更新所有图片实体 */
-		const auto& sprite_entity_view = m_Registry.view<TransformComponent, SpriteComponent>();
-		for (auto& entity : sprite_entity_view)
-		{
-			auto [transform_component, sprite_component] = sprite_entity_view.get<TransformComponent, SpriteComponent>(entity);
-			Renderer2D::DrawSprite(transform_component.GetTransform(), &sprite_component, static_cast<int>(entity));
-		}
-
-		/* 提交绘制数据 */
-		Renderer2D::EndFrame();
 	}
 
 	Entity Scene::GetPrimaryCameraEntity()

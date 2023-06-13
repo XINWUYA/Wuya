@@ -3,8 +3,6 @@
 
 namespace Wuya
 {
-	extern const std::filesystem::path g_AssetPath = "assets";
-
 	void EditorResourceBrowser::OnImGuiRenderer()
 	{
 		PROFILE_FUNCTION();
@@ -12,14 +10,14 @@ namespace Wuya
 		/* 重新生成文件目录节点树 */
 		if (m_IsDirty)
 		{
-			m_RootFileNodeTree = CreateSharedPtr<FileNode>(g_AssetPath.string(), "", FileType::Folder, 0, -1);
+			m_RootFileNodeTree = CreateSharedPtr<FileNode>(g_AssetsPath.string(), "", FileType::Folder, 0, -1);
 			BuildFileNodeTree(m_RootFileNodeTree);
 		}
 
 		/* 文件目录列表窗口 */
 		ImGui::Begin("File List");
 		{
-			if (ImGui::CollapsingHeader(g_AssetPath.string().c_str()))
+			if (ImGui::CollapsingHeader(g_AssetsPath.string().c_str()))
 			{
 				/* 根据文件节点树生成UI */
 				BuildFileUIListTreeSimple(m_RootFileNodeTree);
@@ -46,7 +44,7 @@ namespace Wuya
 				}
 
 				ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * button_alpha);
-				const auto return_icon = TextureAssetManager::Instance().GetOrCreateTexture("editor_res/icons/return.png");
+				const auto return_icon = TextureAssetManager::Instance().GetOrCreateTexture(RELATIVE_PATH("EditorRes/icons/return.png"));
 				if (ImGui::ImageButton((ImTextureID)return_icon->GetTextureID(), ImVec2(20, 20), ImVec2(0, 1), ImVec2(1, 0)))
 					m_CurrentFileNode = m_CurrentFileNode->ParentNode.lock();
 				ImGui::PopStyleVar();
@@ -72,7 +70,7 @@ namespace Wuya
 				ImGui::SameLine(40, 20);
 				filter.Draw("##", 200);
 				ImGui::SameLine(236);
-				const auto filter_icon = TextureAssetManager::Instance().GetOrCreateTexture("editor_res/icons/filter.png");;
+				const auto filter_icon = TextureAssetManager::Instance().GetOrCreateTexture(RELATIVE_PATH("EditorRes/icons/filter.png"));
 
 				ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
 				ImGui::Image((ImTextureID)filter_icon->GetTextureID(), ImVec2(20, 20), ImVec2(0, 1), ImVec2(1, 0));
@@ -83,7 +81,7 @@ namespace Wuya
 			{
 				ImGui::SameLine(panel_width - 15);
 				ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
-				const auto menu_icon = TextureAssetManager::Instance().GetOrCreateTexture("editor_res/icons/menu.png");
+				const auto menu_icon = TextureAssetManager::Instance().GetOrCreateTexture(RELATIVE_PATH("EditorRes/icons/menu.png"));
 				if (ImGui::ImageButton((ImTextureID)menu_icon->GetTextureID(), ImVec2(20, 20), ImVec2(0, 1), ImVec2(1, 0)))
 					ImGui::OpenPopup("SettingPopup");
 				ImGui::PopStyleVar();
@@ -155,7 +153,7 @@ namespace Wuya
 								/* 在系统文件夹中显示 */
 								if (ImGui::MenuItem("Show in file explorer"))
 								{
-									auto path = g_AssetPath / child_node->FilePath;
+									auto path = g_AssetsPath / child_node->FilePath;
 									path = absolute(path).make_preferred();
 									OpenFileExplorer(path.string().c_str());
 								}
@@ -194,10 +192,10 @@ namespace Wuya
 
 	void EditorResourceBrowser::BuildFileNodeTree(const SharedPtr<FileNode>& parent_node)
 	{
-		for (auto& directory_entry : std::filesystem::directory_iterator(g_AssetPath / parent_node->FilePath))
+		for (auto& directory_entry : std::filesystem::directory_iterator(g_AssetsPath / parent_node->FilePath))
 		{
 			const auto& path = directory_entry.path();
-			auto relative_path = GetRelativePath(g_AssetPath, path);
+			auto relative_path = GetRelativePath(g_AssetsPath, path);
 			auto filename = relative_path.filename();
 
 			/* 构造一个文件节点 */
@@ -210,7 +208,7 @@ namespace Wuya
 			if (directory_entry.is_directory()) /* 文件夹，递归子目录 */
 			{
 				file_node->FileType = FileType::Folder;
-				file_node->Icon = TextureAssetManager::Instance().GetOrCreateTexture("editor_res/icons/directory.png");
+				file_node->Icon = TextureAssetManager::Instance().GetOrCreateTexture(RELATIVE_PATH("EditorRes/icons/directory.png"));
 				parent_node->ChildNodes.emplace_back(file_node);
 				BuildFileNodeTree(file_node);
 			}
@@ -223,24 +221,24 @@ namespace Wuya
 					file_node->FileType = FileType::Image;
 
 					auto filepath = std::filesystem::path(file_node->FilePath);
-					auto relative_path = g_AssetPath / filepath;
+					auto relative_path = g_AssetsPath / filepath;
 					file_node->Icon = TextureAssetManager::Instance().GetOrCreateTexture(relative_path.generic_string());
 				}
 				else if (ext == ".SCN")
 				{
 					file_node->FileType = FileType::Scene;
-					file_node->Icon = TextureAssetManager::Instance().GetOrCreateTexture("editor_res/icons/file_scn.png");
+					file_node->Icon = TextureAssetManager::Instance().GetOrCreateTexture(RELATIVE_PATH("EditorRes/icons/file_scn.png"));
 
 				}
 				else if (ext == ".MTLGRAPH")
 				{
 					file_node->FileType = FileType::MtlGraph;
-					file_node->Icon = TextureAssetManager::Instance().GetOrCreateTexture("editor_res/icons/file_mtlgraph.png");
+					file_node->Icon = TextureAssetManager::Instance().GetOrCreateTexture(RELATIVE_PATH("EditorRes/icons/file_mtlgraph.png"));
 				}
 				else
 				{
 					file_node->FileType = FileType::Default;
-					file_node->Icon = TextureAssetManager::Instance().GetOrCreateTexture("editor_res/icons/file.png");
+					file_node->Icon = TextureAssetManager::Instance().GetOrCreateTexture(RELATIVE_PATH("EditorRes/icons/file.png"));
 				}
 
 				file_node->FileSize = static_cast<float>(std::filesystem::file_size(path)) / 1024.0f;
@@ -298,7 +296,7 @@ namespace Wuya
 					/* 在系统文件夹中显示 */
 					if (ImGui::MenuItem("Show in file explorer"))
 					{
-						auto path = g_AssetPath / child_node->FilePath;
+						auto path = g_AssetsPath / child_node->FilePath;
 						path = absolute(path).make_preferred();
 						OpenFileExplorer(path.string().c_str());
 					}

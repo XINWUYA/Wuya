@@ -3,6 +3,7 @@
 #include <cstdint>
 #include <string>
 #include <sstream>
+#include <filesystem>
 
 #include "Wuya/Common/Utils.h"
 #include "Wuya/Common/Common.h"

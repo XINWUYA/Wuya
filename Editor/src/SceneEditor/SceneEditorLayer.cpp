@@ -7,8 +7,6 @@
 
 namespace Wuya
 {
-	extern const std::filesystem::path g_AssetPath;
-
 	SceneEditorLayer::SceneEditorLayer()
 		: ILayer("SceneEditorLayer")
 	{
@@ -293,7 +291,7 @@ namespace Wuya
 				if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("RESOURCE_BROWSER_ITEM"))
 				{
 					const wchar_t* path = (const wchar_t*)payload->Data;
-					OnDragItemToScene(g_AssetPath / path);
+					OnDragItemToScene(g_AssetsPath / path);
 				}
 				ImGui::EndDragDropTarget();
 			}
@@ -312,16 +310,6 @@ namespace Wuya
 
 		ImGui::Begin("Stat Info");
 		{
-			// todo: Ö¡ÂÊµÈ
-			// Renderer2D Stats
-			if (ImGui::CollapsingHeader("2D"))
-			{
-				auto statistics = Renderer2D::GetStatisticsInfo();
-				ImGui::BulletText("Draw Calls: %d", statistics.DrawCalls);
-				ImGui::BulletText("Quads: %d", statistics.QuadCount);
-				ImGui::BulletText("Vertices: %d", statistics.TotalVertexCount());
-				ImGui::BulletText("Indices: %d", statistics.TotalIndexCount());
-			}
 			// Renderer3D Stats
 			if (ImGui::CollapsingHeader("3D"))
 			{

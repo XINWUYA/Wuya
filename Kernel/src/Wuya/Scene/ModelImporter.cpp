@@ -3,6 +3,8 @@
 #include <tiny_obj_loader.h>
 #include <glm/glm.hpp>
 #include <tinyxml2.h>
+
+#include "SceneCommon.h"
 #include "Wuya/Common/Utils.h"
 
 namespace Wuya
@@ -194,7 +196,7 @@ namespace Wuya
 				tinyxml2::XMLElement* mtl_inst = mtl_root->InsertNewChildElement("Material");
 				mtl_inst->SetAttribute("ID", material_idx);
 				mtl_inst->SetAttribute("Name", material_data.name.c_str());
-				mtl_inst->SetAttribute("Shader", "assets/shaders/default.glsl"); /* 首次导入使用默认材质 */
+				mtl_inst->SetAttribute("Shader", RELATIVE_PATH("Shaders/default.glsl.glsl").c_str()); /* 首次导入使用默认材质 */
 
 				if (!material_data.diffuse_texname.empty())
 					mtl_inst->SetAttribute("AlbedoTex", (basedir + material_data.diffuse_texname).c_str());

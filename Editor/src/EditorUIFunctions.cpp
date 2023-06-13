@@ -9,8 +9,6 @@
 
 namespace Wuya
 {
-	extern const std::filesystem::path g_AssetPath;
-
 	/* 定义注册列表 */
 	std::unordered_map<std::string, std::function<void()>> EditorUIFunctions::m_PopupUIRegistry{};
 
@@ -143,7 +141,7 @@ namespace Wuya
 		/* Texture */
 		ImGui::NextColumn();
 		{
-			const auto& show_texture = texture ? texture : TextureAssetManager::Instance().GetOrCreateTexture("editor_res/icons/Default.png", {});
+			const auto& show_texture = texture ? texture : TextureAssetManager::Instance().GetOrCreateTexture(RELATIVE_PATH("EditorRes/icons/Default.png"));
 
 			/* Image */
 			ImGui::ImageButton((ImTextureID)show_texture->GetTextureID(), ImVec2(80, 80), ImVec2(0, 1), ImVec2(1, 0), 0);
@@ -152,7 +150,7 @@ namespace Wuya
 				if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("RESOURCE_BROWSER_ITEM"))
 				{
 					const wchar_t* path = (const wchar_t*)payload->Data;
-					const std::filesystem::path texture_path = g_AssetPath / path;
+					const std::filesystem::path texture_path = g_AssetsPath / path;
 					const auto new_texture = TextureAssetManager::Instance().GetOrCreateTexture(texture_path.string(), {});
 					if (new_texture->IsLoaded())
 						texture = new_texture;

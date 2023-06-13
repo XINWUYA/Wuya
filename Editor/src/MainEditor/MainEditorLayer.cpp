@@ -9,8 +9,6 @@
 
 namespace Wuya
 {
-	extern const std::filesystem::path g_AssetPath;
-
 	MainEditorLayer::MainEditorLayer()
 		: ILayer("MainEditorLayer")
 	{
@@ -327,14 +325,13 @@ namespace Wuya
 	{
 		PROFILE_FUNCTION();
 
-		const TextureLoadConfig load_config;
-		static auto save_icon = TextureAssetManager::Instance().GetOrCreateTexture("editor_res/icons/save.png", load_config);
-		static auto translate_icon = TextureAssetManager::Instance().GetOrCreateTexture("editor_res/icons/translate.png", load_config);
-		static auto rotate_icon = TextureAssetManager::Instance().GetOrCreateTexture("editor_res/icons/rotate.png", load_config);
-		static auto scale_icon = TextureAssetManager::Instance().GetOrCreateTexture("editor_res/icons/scale.png", load_config);
-		static auto play_icon = TextureAssetManager::Instance().GetOrCreateTexture("editor_res/icons/play.png", load_config);
-		static auto stop_icon = TextureAssetManager::Instance().GetOrCreateTexture("editor_res/icons/stop.png", load_config);
-		static auto menu_icon = TextureAssetManager::Instance().GetOrCreateTexture("editor_res/icons/menu.png", load_config);
+		static auto save_icon = TextureAssetManager::Instance().GetOrCreateTexture(RELATIVE_PATH("EditorRes/icons/save.png"));
+		static auto translate_icon = TextureAssetManager::Instance().GetOrCreateTexture(RELATIVE_PATH("EditorRes/icons/translate.png"));
+		static auto rotate_icon = TextureAssetManager::Instance().GetOrCreateTexture(RELATIVE_PATH("EditorRes/icons/rotate.png"));
+		static auto scale_icon = TextureAssetManager::Instance().GetOrCreateTexture(RELATIVE_PATH("EditorRes/icons/scale.png"));
+		static auto play_icon = TextureAssetManager::Instance().GetOrCreateTexture(RELATIVE_PATH("EditorRes/icons/play.png"));
+		static auto stop_icon = TextureAssetManager::Instance().GetOrCreateTexture(RELATIVE_PATH("EditorRes/icons/stop.png"));
+		static auto menu_icon = TextureAssetManager::Instance().GetOrCreateTexture(RELATIVE_PATH("EditorRes/icons/menu.png"));
 
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 2)); /* 指定间隔 */
 		ImGui::PushStyleVar(ImGuiStyleVar_ItemInnerSpacing, ImVec2(0, 2));
@@ -441,15 +438,6 @@ namespace Wuya
 		ImGui::Begin("Stat Info");
 		{
 			// todo: 帧率等
-			// Renderer2D Stats
-			if (ImGui::CollapsingHeader("2D"))
-			{
-				auto statistics = Renderer2D::GetStatisticsInfo();
-				ImGui::BulletText("Draw Calls: %d", statistics.DrawCalls);
-				ImGui::BulletText("Quads: %d", statistics.QuadCount);
-				ImGui::BulletText("Vertices: %d", statistics.TotalVertexCount());
-				ImGui::BulletText("Indices: %d", statistics.TotalIndexCount());
-			}
 			// Renderer3D Stats
 			if (ImGui::CollapsingHeader("3D"))
 			{

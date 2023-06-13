@@ -5,16 +5,18 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <shaderc/shaderc.hpp>
 
+#include "Wuya/Scene/SceneCommon.h"
+
 namespace Wuya
 {
-	static const char* GetShaderCacheDirectory()
+	static std::filesystem::path GetShaderCacheDirectory()
 	{
-		return "assets/cache/shader/opengl";
+		return g_AssetsPath / "Cache/shader/opengl";
 	}
 
 	static void CreateShaderCacheDirectoryIfNeed()
 	{
-		const std::string shader_cache_dir = GetShaderCacheDirectory();
+		const auto shader_cache_dir = GetShaderCacheDirectory();
 		if (!std::filesystem::exists(shader_cache_dir))
 			std::filesystem::create_directories(shader_cache_dir);
 	}
@@ -247,7 +249,7 @@ namespace Wuya
 
 		m_OpenGLSPIRVs.clear();
 
-		std::filesystem::path cache_dir = GetShaderCacheDirectory();
+		auto cache_dir = GetShaderCacheDirectory();
 		for (auto&& [shader_type, source] : m_OpenGLSourceCodes)
 		{
 			std::filesystem::path shader_path = m_Path;

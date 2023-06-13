@@ -5,8 +5,6 @@
 
 namespace Wuya
 {
-	extern const std::filesystem::path g_AssetPath;
-
 	MaterialGraphEditor::MaterialGraphEditor()
 	{
 		/* 默认显示所有端口名 */
@@ -38,7 +36,7 @@ namespace Wuya
 			constexpr float cursor_offset = 10.0f;
 			/* 保存场景按钮 */
 			ImGui::SetCursorPosX(cursor_offset);
-			static auto save_icon = TextureAssetManager::Instance().GetOrCreateTexture("editor_res/icons/save.png", {});
+			static auto save_icon = TextureAssetManager::Instance().GetOrCreateTexture(RELATIVE_PATH("EditorRes/icons/save.png"));
 			if (ImGui::ImageButton((ImTextureID)save_icon->GetTextureID(), ImVec2(icon_size, icon_size), ImVec2(0, 1), ImVec2(1, 0), 0))
 			{
 				if (m_Path.empty())
@@ -512,7 +510,7 @@ namespace Wuya
 					if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("RESOURCE_BROWSER_ITEM"))
 					{
 						const wchar_t* path = (const wchar_t*)payload->Data;
-						const std::filesystem::path texture_path = g_AssetPath / path;
+						const std::filesystem::path texture_path = g_AssetsPath / path;
 						component.Texture = TextureAssetManager::Instance().GetOrCreateTexture(texture_path.generic_string(), {});
 					}
 					ImGui::EndDragDropTarget();

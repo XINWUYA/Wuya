@@ -41,6 +41,7 @@ project "Kernel"
 		"PLATFORM_WINDOWS",
 		"GLFW_INCLUDE_NONE",
 		"_CRT_SECURE_NO_WARNINGS",
+		"ASSETS_PATH=R\"($(SolutionDir)Assets)\""
 	}
 
 	links

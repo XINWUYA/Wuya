@@ -7,6 +7,7 @@
 #include <GLFW/glfw3.h>
 #include "Wuya/Application/Application.h"
 #include "Wuya/Renderer/Renderer.h"
+#include "Wuya/Scene/SceneCommon.h"
 
 namespace Wuya
 {
@@ -33,9 +34,9 @@ namespace Wuya
 		//io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
 
 		const float fontSize = 18.0f;// *2.0f;
-		io.Fonts->AddFontFromFileTTF("editor_res/fonts/msyh.ttf", fontSize);
-		//io.Fonts->AddFontFromFileTTF("editor_res/fonts/opensans/OpenSans-Bold.ttf", fontSize, nullptr, io.Fonts->GetGlyphRangesChineseSimplifiedCommon());
-		//io.FontDefault = io.Fonts->AddFontFromFileTTF("editor_res/fonts/opensans/OpenSans-Regular.ttf", fontSize, nullptr, io.Fonts->GetGlyphRangesChineseSimplifiedCommon());
+		io.Fonts->AddFontFromFileTTF(RELATIVE_PATH("EditorRes/fonts/msyh.ttf").c_str(), fontSize);
+		//io.Fonts->AddFontFromFileTTF(RELATIVE_PATH("EditorRes/fonts/opensans/OpenSans-Bold.ttf", fontSize, nullptr, io.Fonts->GetGlyphRangesChineseSimplifiedCommon());
+		//io.FontDefault = io.Fonts->AddFontFromFileTTF(RELATIVE_PATH("EditorRes/fonts/opensans/OpenSans-Regular.ttf", fontSize, nullptr, io.Fonts->GetGlyphRangesChineseSimplifiedCommon());
 
 		// Setup Dear ImGui style
 		SetDefaultStyle();

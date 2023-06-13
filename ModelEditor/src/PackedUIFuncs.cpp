@@ -9,8 +9,6 @@
 
 namespace Wuya
 {
-	extern const std::filesystem::path g_AssetPath;
-
 	namespace PackedUIFuncs
 	{
 		/* 绘制一个普通的文本UI */
@@ -77,7 +75,7 @@ namespace Wuya
 					if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("RESOURCE_BROWSER_ITEM"))
 					{
 						const wchar_t* path = (const wchar_t*)payload->Data;
-						const std::filesystem::path texture_path = g_AssetPath / path;
+						const std::filesystem::path texture_path = g_AssetsPath / path;
 						const auto new_texture = TextureAssetManager::Instance().GetOrCreateTexture(texture_path.string(), {});
 						if (new_texture->IsLoaded())
 							texture = new_texture;

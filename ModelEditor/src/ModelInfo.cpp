@@ -6,8 +6,6 @@
 
 namespace Wuya
 {
-	extern const std::filesystem::path g_AssetPath;
-
 	SubModelInfo::~SubModelInfo()
 	{
 		for (auto& [stride, buffer_data] : VertexBufferDatas)
@@ -285,7 +283,7 @@ namespace Wuya
 			}
 
 			/* MaterialParams */
-			std::filesystem::path relative_dir = std::filesystem::relative(basedir, g_AssetPath);
+			std::filesystem::path relative_dir = std::filesystem::relative(basedir, g_AssetsPath);
 			auto& params = sub_model_info->MaterialParams;
 			int shape_material_id = shape_data.mesh.material_ids[0];
 			if (shape_material_id >= 0 && shape_material_id < m_Materials.size())
@@ -511,7 +509,7 @@ namespace Wuya
 		sub_model_info->VertexArray->Unbind();
 
 		/* MaterialParams */
-		std::filesystem::path relative_dir = std::filesystem::relative(m_Directory, g_AssetPath);
+		std::filesystem::path relative_dir = std::filesystem::relative(m_Directory, g_AssetsPath);
 
 		auto GetTexture = [&](const aiMaterial* mtl, aiTextureType type, std::pair<std::string, bool>& params)
 		{

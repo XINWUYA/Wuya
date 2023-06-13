@@ -54,6 +54,7 @@ project "ModelEditor"
 		{
 			"PLATFORM_WINDOWS",
 			"_CRT_SECURE_NO_WARNINGS",
+			"ASSETS_PATH=R\"($(SolutionDir)Assets)\""
 		}
 
 	filter "configurations:Debug"

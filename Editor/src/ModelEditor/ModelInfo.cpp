@@ -3,8 +3,6 @@
 
 namespace Wuya
 {
-	extern const std::filesystem::path g_AssetPath;
-
 	/* 加载Obj模型信息 */
 	void ModelInfo::LoadFromObj(const std::string& filepath)
 	{
@@ -190,7 +188,7 @@ namespace Wuya
 			sub_model_info->VertexArray->AddVertexBuffer(vertex_buffer);
 
 			/* MaterialParams */
-			std::filesystem::path relative_dir = std::filesystem::relative(basedir, g_AssetPath);
+			std::filesystem::path relative_dir = std::filesystem::relative(basedir, g_AssetsPath);
 			auto& params = sub_model_info->MaterialParams;
 			int shape_material_id = shape_data.mesh.material_ids[0];
 			if (shape_material_id >= 0 && shape_material_id < m_Materials.size())

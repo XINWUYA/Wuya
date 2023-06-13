@@ -5,8 +5,6 @@
 
 namespace Wuya
 {
-	extern const std::filesystem::path g_AssetPath;
-
 	SceneHierarchy::SceneHierarchy()
 	{
 		PROFILE_FUNCTION();
@@ -131,9 +129,8 @@ namespace Wuya
 	{
 		PROFILE_FUNCTION();
 
-		const TextureLoadConfig load_config;
-		m_pAddComponentIcon = TextureAssetManager::Instance().GetOrCreateTexture("editor_res/icons/add.png", load_config);
-		m_pMenuIcon = TextureAssetManager::Instance().GetOrCreateTexture("editor_res/icons/menu.png", load_config);
+		m_pAddComponentIcon = TextureAssetManager::Instance().GetOrCreateTexture(RELATIVE_PATH("EditorRes/icons/add.png"));
+		m_pMenuIcon = TextureAssetManager::Instance().GetOrCreateTexture(RELATIVE_PATH("EditorRes/icons/menu.png"));
 	}
 
 	void SceneHierarchy::ShowEntityNode(Entity& entity)
@@ -201,7 +198,7 @@ namespace Wuya
 			START_TRANSPARENT_BUTTON;
 			START_STYLE_ALPHA(0.5f);
 			ImGui::SameLine(panel_width - 15);
-			const auto menu_icon = TextureAssetManager::Instance().GetOrCreateTexture("editor_res/icons/menu.png", {});
+			const auto menu_icon = TextureAssetManager::Instance().GetOrCreateTexture(RELATIVE_PATH("EditorRes/icons/menu.png"));
 			if (ImGui::ImageButton((ImTextureID)menu_icon->GetTextureID(), ImVec2(20, 20), ImVec2(0, 1), ImVec2(1, 0)))
 				ImGui::OpenPopup("ComponentSettings");
 			END_STYLE_ALPHA;

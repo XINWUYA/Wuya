@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Scene>
+    <Entities>
+        <Entity ID="1" Name="Camera">
+            <Transform Position="0.000000 0.000000 2.300000" Rotation="0.040143 0.000000 0.000000" Scale="1.000000 1.000000 1.000000"/>
+            <Camera IsPrimary="true" IsFixedAspectRatio="false" ProjectionType="1" HeightSize="10" Near="-1" Far="1"/>
+        </Entity>
+        <Entity ID="1" Name="Sprite">
+            <Transform Position="3.100000 1.300000 0.000000" Rotation="0.000000 0.027925 0.000000" Scale="1.000000 1.000000 1.000000"/>
+            <Sprite TexturePath="assets\textures\game-sky.jpg" BaseColor="1.000000 1.000000 1.000000 1.000000" TilingFactor="6.8000002"/>
+        </Entity>
+    </Entities>
+</Scene>
