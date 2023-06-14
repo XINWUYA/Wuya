@@ -64,7 +64,7 @@ namespace Wuya
 	{
 		PROFILE_FUNCTION();
 
-		/* 生成当前FrameBuffer */
+		/* 生成当前FrameGraph */
 		m_pFrameGraph->Build();
 	}
 
@@ -126,7 +126,7 @@ namespace Wuya
 		const auto light_entity_view = owner_scene->GetRegistry().view<TransformComponent, LightComponent>();
 		for (auto& entity : light_entity_view)
 		{
-			auto [transform_component,light_component] = light_entity_view.get<TransformComponent, LightComponent>(entity);
+			auto [transform_component, light_component] = light_entity_view.get<TransformComponent, LightComponent>(entity);
 
 			const glm::vec3 light_dir = transform_component.GetTransform() * glm::vec4(0.0f, 1.0f, 0.0f, 1.0f);
 			const auto& light_color = light_component.Light->GetColor();

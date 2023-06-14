@@ -114,7 +114,6 @@ namespace Wuya
 				if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("RESOURCE_BROWSER_ITEM"))
 				{
 					const wchar_t* path = (const wchar_t*)payload->Data;
-					std::filesystem::path absolute_path = absolute(g_AssetsPath);
 					OnDragItemToScene(g_AssetsPath / path);
 				}
 				ImGui::EndDragDropTarget();
@@ -280,7 +279,7 @@ namespace Wuya
 													const wchar_t* path = (const wchar_t*)payload->Data;
 													const std::filesystem::path texture_path = path;
 
-													material->SetTexture(param_info.Name, TextureAssetManager::Instance().GetOrCreateTexture(RELATIVE_PATH(texture_path), load_config), texture_info.second);
+													material->SetTexture(param_info.Name, TextureAssetManager::Instance().GetOrCreateTexture(ABSOLUTE_PATH(texture_path), load_config), texture_info.second);
 													sub_model_info->MaterialParams.AmbientTexPath = texture_path.string();
 												}
 												ImGui::EndDragDropTarget();
@@ -649,45 +648,45 @@ namespace Wuya
 		{
 			/* Ambient */
 			if (!material_params.AmbientTexPath.empty())
-				material->SetTexture("Ambient", TextureAssetManager::Instance().GetOrCreateTexture(RELATIVE_PATH(material_params.AmbientTexPath), load_config), TextureSlot::Ambient);
+				material->SetTexture("Ambient", TextureAssetManager::Instance().GetOrCreateTexture(ABSOLUTE_PATH(material_params.AmbientTexPath), load_config), TextureSlot::Ambient);
 			else
 				material->SetParameters(ParamType::Vec3, "Ambient", material_params.Ambient);
 
 			/* Diffuse/Albedo */
 			if (!material_params.DiffuseTexPath.empty())
-				material->SetTexture("Albedo", TextureAssetManager::Instance().GetOrCreateTexture(RELATIVE_PATH(material_params.DiffuseTexPath), load_config), TextureSlot::Albedo);
+				material->SetTexture("Albedo", TextureAssetManager::Instance().GetOrCreateTexture(ABSOLUTE_PATH(material_params.DiffuseTexPath), load_config), TextureSlot::Albedo);
 			else
 				material->SetParameters(ParamType::Vec3, "Albedo", material_params.Diffuse);
 
 			/* Specular */
 			if (!material_params.SpecularTexPath.empty())
-				material->SetTexture("Specular", TextureAssetManager::Instance().GetOrCreateTexture(RELATIVE_PATH(material_params.SpecularTexPath), load_config), TextureSlot::Specular);
+				material->SetTexture("Specular", TextureAssetManager::Instance().GetOrCreateTexture(ABSOLUTE_PATH(material_params.SpecularTexPath), load_config), TextureSlot::Specular);
 			else
 				material->SetParameters(ParamType::Vec3, "Specular", material_params.Specular);
 
 			/* Normal, todo: ´¦ÀíBumpºÍDisplacement */
 			if (!material_params.BumpTexPath.empty())
-				material->SetTexture("Normal", TextureAssetManager::Instance().GetOrCreateTexture(RELATIVE_PATH(material_params.BumpTexPath), load_config), TextureSlot::Normal);
+				material->SetTexture("Normal", TextureAssetManager::Instance().GetOrCreateTexture(ABSOLUTE_PATH(material_params.BumpTexPath), load_config), TextureSlot::Normal);
 			else if (!material_params.DisplacementTexPath.empty())
-				material->SetTexture("Normal", TextureAssetManager::Instance().GetOrCreateTexture(RELATIVE_PATH(material_params.DisplacementTexPath), load_config), TextureSlot::Normal);
+				material->SetTexture("Normal", TextureAssetManager::Instance().GetOrCreateTexture(ABSOLUTE_PATH(material_params.DisplacementTexPath), load_config), TextureSlot::Normal);
 			else
 				material->SetParameters(ParamType::Vec3, "Normal", glm::vec3(0.0f, 0.0f, 1.0f));
 
 			/* Roughness */
 			if (!material_params.RoughnessTexPath.empty())
-				material->SetTexture("Roughness", TextureAssetManager::Instance().GetOrCreateTexture(RELATIVE_PATH(material_params.RoughnessTexPath), load_config), TextureSlot::Roughness);
+				material->SetTexture("Roughness", TextureAssetManager::Instance().GetOrCreateTexture(ABSOLUTE_PATH(material_params.RoughnessTexPath), load_config), TextureSlot::Roughness);
 			else
 				material->SetParameters(ParamType::Float, "Roughness", material_params.Roughness);
 
 			/* Metallic */
 			if (!material_params.MetallicTexPath.empty())
-				material->SetTexture("Metallic", TextureAssetManager::Instance().GetOrCreateTexture(RELATIVE_PATH(material_params.MetallicTexPath), load_config), TextureSlot::Metallic);
+				material->SetTexture("Metallic", TextureAssetManager::Instance().GetOrCreateTexture(ABSOLUTE_PATH(material_params.MetallicTexPath), load_config), TextureSlot::Metallic);
 			else
 				material->SetParameters(ParamType::Float, "Metallic", material_params.Metallic);
 
 			/* Emission */
 			if (!material_params.EmissionTexPath.empty())
-				material->SetTexture("Emissive", TextureAssetManager::Instance().GetOrCreateTexture(RELATIVE_PATH(material_params.EmissionTexPath), load_config), TextureSlot::Emissive);
+				material->SetTexture("Emissive", TextureAssetManager::Instance().GetOrCreateTexture(ABSOLUTE_PATH(material_params.EmissionTexPath), load_config), TextureSlot::Emissive);
 			else
 				material->SetParameters(ParamType::Vec3, "Emissive", material_params.Emission);
 

@@ -274,7 +274,7 @@ namespace Wuya
 		{
 			auto* sprite_root = entity_root->InsertNewChildElement("Sprite");
 			const auto& component = entity.GetComponent<SpriteComponent>();
-			sprite_root->SetAttribute("TexturePath", component.Texture->GetPath().c_str());
+			sprite_root->SetAttribute("TexturePath", RELATIVE_PATH(component.Texture->GetPath()).c_str());
 			sprite_root->SetAttribute("BaseColor", ToString(component.BaseColor).c_str());
 			sprite_root->SetAttribute("TilingFactor", component.TilingFactor);
 		}
@@ -319,7 +319,7 @@ namespace Wuya
 			auto* model_root = entity_root->InsertNewChildElement("Model");
 			const auto& component = entity.GetComponent<ModelComponent>();
 
-			model_root->SetAttribute("ModelPath", component.Model->GetPath().c_str());
+			model_root->SetAttribute("ModelPath", RELATIVE_PATH(component.Model->GetPath()).c_str());
 		}
 
 		/* Light */
@@ -361,18 +361,15 @@ namespace Wuya
 	template<>
 	void Scene::OnComponentAdded<CameraComponent>(Entity& entity, CameraComponent& component)
 	{
-		// 收集相机
 	}
 
 	template<>
 	void Scene::OnComponentAdded<ModelComponent>(Entity& entity, ModelComponent& component)
 	{
-		// 收集模型
 	}
 
 	template<>
 	void Scene::OnComponentAdded<LightComponent>(Entity& entity, LightComponent& component)
 	{
-		// 收集光源
 	}
 }

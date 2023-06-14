@@ -3,7 +3,7 @@
 
 namespace Wuya
 {
-	/* ¹âÔ´ÀàĞÍ */
+	/* å…‰æºç±»å‹ */
 	enum class LightType : uint8_t
 	{
 		Directional,
@@ -13,7 +13,7 @@ namespace Wuya
 		Volume
 	};
 
-	/* ¹âÔ´Àà */
+	/* å…‰æºç±» */
 	class Light
 	{
 	public:
@@ -22,44 +22,48 @@ namespace Wuya
 		Light() = default;
 		virtual ~Light() = default;
 
-		/* »ñÈ¡¹âÔ´ÀàĞÍ */
+		/* è·å–å…‰æºç±»å‹ */
 		[[nodiscard]] virtual LightType GetLightType() const = 0;
 
-		/* ¹âÔ´ÑÕÉ« */
+		/* å…‰æºé¢œè‰² */
 		void SetColor(const glm::vec4& color) { m_Color = color; }
 		[[nodiscard]] const glm::vec4& GetColor() const { return m_Color; }
 
-		/* ¹âÔ´Ç¿¶È */
+		/* å…‰æºå¼ºåº¦ */
 		void SetIntensity(float intensity) { m_Intensity = intensity; }
 		[[nodiscard]] float GetIntensity() const { return m_Intensity; }
 
-		/* ÊÇ·ñÍ¶Ó° */
+		/* æ˜¯å¦æŠ•å½± */
 		void SetIsCastShadow(bool enable) { m_IsCastShadow = enable; }
 		[[nodiscard]] bool IsCastShadow() const { return m_IsCastShadow; }
 
-		/* ´´½¨Ö¸¶¨ÀàĞÍ¹âÔ´ */
+		/* åˆ›å»ºæŒ‡å®šç±»å‹å…‰æº */
 		static SharedPtr<Light> Create(LightType type);
 
 	protected:
-		/* ±ê¼ÇÃû */
+		/* æ ‡è®°å */
 		std::string m_DebugName{ "Unnamed Light" };
-		/* ¹âÔ´ÑÕÉ« */
+		/* å…‰æºé¢œè‰² */
 		glm::vec4 m_Color{ 1.0f };
-		/* ¹âÔ´Ç¿¶È */
+		/* å…‰æºå¼ºåº¦ */
 		float m_Intensity{ 1.0f };
-		/* ÊÇ·ñÍ¶Ó° */
+		/* æ˜¯å¦æŠ•å½± */
 		bool m_IsCastShadow{ false };
+		/* å…‰æºä½ç½® */
+		glm::vec3 m_LightPos{ 0.0f };
+		/* å…‰æºæ–¹å‘ */
+		glm::vec3 m_LightDir{0.0f, -1.0f, 0.0f};
 	};
 
 
-	/* ·½Ïò¹â */
+	/* æ–¹å‘å…‰ */
 	class DirectionalLight : public Light
 	{
 	public:
 		DirectionalLight() = default;
 		~DirectionalLight() override = default;
 
-		/* »ñÈ¡¹âÔ´ÀàĞÍ */
+		/* è·å–å…‰æºç±»å‹ */
 		[[nodiscard]] LightType GetLightType() const override { return LightType::Directional; }
 
 	private:
@@ -67,50 +71,50 @@ namespace Wuya
 	};
 
 
-	/* µã¹â */
+	/* ç‚¹å…‰ */
 	class PointLight final : public Light
 	{
 	public:
 		PointLight() = default;
 		~PointLight() override = default;
 
-		/* »ñÈ¡¹âÔ´ÀàĞÍ */
+		/* è·å–å…‰æºç±»å‹ */
 		[[nodiscard]] LightType GetLightType() const override { return LightType::Point; }
 	};
 
 
-	/* ¾Û¹â */
+	/* èšå…‰ */
 	class SpotLight final : public Light
 	{
 	public:
 		SpotLight() = default;
 		~SpotLight() override = default;
 
-		/* »ñÈ¡¹âÔ´ÀàĞÍ */
+		/* è·å–å…‰æºç±»å‹ */
 		[[nodiscard]] LightType GetLightType() const override { return LightType::Spot; }
 	};
 
 
-	/* Ãæ¹â */
+	/* é¢å…‰ */
 	class AreaLight final : public Light
 	{
 	public:
 		AreaLight() = default;
 		~AreaLight() override = default;
 
-		/* »ñÈ¡¹âÔ´ÀàĞÍ */
+		/* è·å–å…‰æºç±»å‹ */
 		[[nodiscard]] LightType GetLightType() const override { return LightType::Area; }
 	};
 
 
-	/* Ìå»ı¹â */
+	/* ä½“ç§¯å…‰ */
 	class VolumeLight final : public Light
 	{
 	public:
 		VolumeLight() = default;
 		~VolumeLight() override = default;
 
-		/* »ñÈ¡¹âÔ´ÀàĞÍ */
+		/* è·å–å…‰æºç±»å‹ */
 		[[nodiscard]] LightType GetLightType() const override { return LightType::Volume; }
 	};
 

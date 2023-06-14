@@ -7,6 +7,7 @@ namespace Wuya
 	const std::string& GetDebugName() const { return m_DebugName; }
 
 const std::filesystem::path g_AssetsPath = ASSETS_PATH;
-#define RELATIVE_PATH(path) (g_AssetsPath / (path)).generic_string()
+#define ABSOLUTE_PATH(path) (g_AssetsPath / (path)).generic_string()
+#define RELATIVE_PATH(path) (relative((path), g_AssetsPath)).generic_string()
 
 }

@@ -2,6 +2,7 @@
 #include "Material.h"
 #include <tinyxml2.h>
 
+#include "SceneCommon.h"
 #include "Wuya/Application/AssetManager.h"
 #include "Wuya/Renderer/Shader.h"
 #include "Wuya/Renderer/Texture.h"
@@ -162,7 +163,7 @@ namespace Wuya
 			mtl_doc->SetAttribute("ID", i);
 
 			/* Shader*/
-			mtl_doc->SetAttribute("ShaderPath", material->GetShader()->GetPath().c_str());
+			mtl_doc->SetAttribute("ShaderPath", RELATIVE_PATH(material->GetShader()->GetPath()).c_str());
 
 			/* Parameters */
 			auto params_root = mtl_doc->InsertNewChildElement("Parameters");
@@ -181,7 +182,7 @@ namespace Wuya
 						const auto texture_info = std::any_cast<std::pair<SharedPtr<Texture>, uint32_t>>(param_info.Value);
 						auto& texture = texture_info.first;
 						
-						texture_doc->SetAttribute("Path", texture->GetPath().c_str());
+						texture_doc->SetAttribute("Path", RELATIVE_PATH(texture->GetPath()).c_str());
 						texture_doc->SetAttribute("Slot", texture_info.second);
 
 						auto load_config_doc = texture_doc->InsertNewChildElement("LoadConfig");

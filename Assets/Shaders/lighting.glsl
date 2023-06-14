@@ -43,7 +43,7 @@ void main()
 	vec3 v = normalize(u_ViewPos - gbuffer.WorldPosition);
 
 	// Direct Lighting
-	vec3 lighting_result = max(vec3(0.0f), BRDF(l, v, gbuffer.WorldNormal, gbuffer.Metallic, gbuffer.Roughness, gbuffer.Albedo));
+	vec3 lighting_result = max(vec3(0.0f), BRDF(l, v, gbuffer.WorldNormal, gbuffer.Metallic, gbuffer.Roughness, gbuffer.Albedo)) * u_ColorIntensity.rgb * u_ColorIntensity.a;
 	// Ambient
 	lighting_result += max(vec3(0.0f), gbuffer.Ambient * gbuffer.Albedo * gbuffer.AO);
 	// Emissive

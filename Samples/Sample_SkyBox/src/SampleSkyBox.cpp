@@ -77,9 +77,9 @@ void SampleSkyBox::OnAttached()
 		SamplerMinFilter::Linear,
 		SamplerMagFilter::Linear
 	};
-	auto sky_texture = Texture::Create(RELATIVE_PATH("Textures/drakensberg_solitary_mountain_4k.hdr"), load_config);
+	auto sky_texture = Texture::Create(ABSOLUTE_PATH("Textures/drakensberg_solitary_mountain_4k.hdr"), load_config);
 
-	auto shader = ShaderAssetManager::Instance().GetOrLoad(RELATIVE_PATH("Shaders/SkyBox.glsl"));
+	auto shader = ShaderAssetManager::Instance().GetOrLoad(ABSOLUTE_PATH("Shaders/SkyBox.glsl"));
 	auto material = Material::Create(shader);
 	material->SetTexture("u_SkyTex", sky_texture);
 	RenderRasterState raster_state;

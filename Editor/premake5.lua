@@ -44,7 +44,8 @@ project "Editor"
 	disablewarnings 
 	{ 
 		"4244", 
-		"4312" 
+		"4312",
+		"4819",
 	}
 
 	filter "system:windows"

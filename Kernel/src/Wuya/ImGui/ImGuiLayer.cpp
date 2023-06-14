@@ -34,9 +34,9 @@ namespace Wuya
 		//io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
 
 		const float fontSize = 18.0f;// *2.0f;
-		io.Fonts->AddFontFromFileTTF(RELATIVE_PATH("EditorRes/fonts/msyh.ttf").c_str(), fontSize);
-		//io.Fonts->AddFontFromFileTTF(RELATIVE_PATH("EditorRes/fonts/opensans/OpenSans-Bold.ttf", fontSize, nullptr, io.Fonts->GetGlyphRangesChineseSimplifiedCommon());
-		//io.FontDefault = io.Fonts->AddFontFromFileTTF(RELATIVE_PATH("EditorRes/fonts/opensans/OpenSans-Regular.ttf", fontSize, nullptr, io.Fonts->GetGlyphRangesChineseSimplifiedCommon());
+		io.Fonts->AddFontFromFileTTF(ABSOLUTE_PATH("EditorRes/fonts/msyh.ttf").c_str(), fontSize);
+		//io.Fonts->AddFontFromFileTTF(RELATIVE_PATH("EditorRes/fonts/opensans/OpenSans-Bold.ttf").c_str(), fontSize, nullptr, io.Fonts->GetGlyphRangesChineseSimplifiedCommon());
+		//io.FontDefault = io.Fonts->AddFontFromFileTTF(RELATIVE_PATH("EditorRes/fonts/opensans/OpenSans-Regular.ttf").c_str(), fontSize, nullptr, io.Fonts->GetGlyphRangesChineseSimplifiedCommon());
 
 		// Setup Dear ImGui style
 		SetDefaultStyle();

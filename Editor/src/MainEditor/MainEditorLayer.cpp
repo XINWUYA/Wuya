@@ -2,7 +2,6 @@
 #include "MainEditorLayer.h"
 #include <glm/gtc/type_ptr.inl>
 #include "EditorBuiltinCamera.h"
-#include "EditorUIFunctions.h"
 #include "ImGuizmo.h"
 #include "ModelEditor/ModelEditorLayer.h"
 #include "SceneEditor/SceneEditorLayer.h"
@@ -325,13 +324,13 @@ namespace Wuya
 	{
 		PROFILE_FUNCTION();
 
-		static auto save_icon = TextureAssetManager::Instance().GetOrCreateTexture(RELATIVE_PATH("EditorRes/icons/save.png"));
-		static auto translate_icon = TextureAssetManager::Instance().GetOrCreateTexture(RELATIVE_PATH("EditorRes/icons/translate.png"));
-		static auto rotate_icon = TextureAssetManager::Instance().GetOrCreateTexture(RELATIVE_PATH("EditorRes/icons/rotate.png"));
-		static auto scale_icon = TextureAssetManager::Instance().GetOrCreateTexture(RELATIVE_PATH("EditorRes/icons/scale.png"));
-		static auto play_icon = TextureAssetManager::Instance().GetOrCreateTexture(RELATIVE_PATH("EditorRes/icons/play.png"));
-		static auto stop_icon = TextureAssetManager::Instance().GetOrCreateTexture(RELATIVE_PATH("EditorRes/icons/stop.png"));
-		static auto menu_icon = TextureAssetManager::Instance().GetOrCreateTexture(RELATIVE_PATH("EditorRes/icons/menu.png"));
+		static auto save_icon = TextureAssetManager::Instance().GetOrCreateTexture(ABSOLUTE_PATH("EditorRes/icons/save.png"));
+		static auto translate_icon = TextureAssetManager::Instance().GetOrCreateTexture(ABSOLUTE_PATH("EditorRes/icons/translate.png"));
+		static auto rotate_icon = TextureAssetManager::Instance().GetOrCreateTexture(ABSOLUTE_PATH("EditorRes/icons/rotate.png"));
+		static auto scale_icon = TextureAssetManager::Instance().GetOrCreateTexture(ABSOLUTE_PATH("EditorRes/icons/scale.png"));
+		static auto play_icon = TextureAssetManager::Instance().GetOrCreateTexture(ABSOLUTE_PATH("EditorRes/icons/play.png"));
+		static auto stop_icon = TextureAssetManager::Instance().GetOrCreateTexture(ABSOLUTE_PATH("EditorRes/icons/stop.png"));
+		static auto menu_icon = TextureAssetManager::Instance().GetOrCreateTexture(ABSOLUTE_PATH("EditorRes/icons/menu.png"));
 
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 2)); /* Ö¸¶¨¼ä¸ô */
 		ImGui::PushStyleVar(ImGuiStyleVar_ItemInnerSpacing, ImVec2(0, 2));
@@ -349,7 +348,7 @@ namespace Wuya
 			/*if (ImGui::ImageButton((ImTextureID)save_icon->GetTextureID(), ImVec2(icon_size, icon_size), ImVec2(0, 1), ImVec2(1, 0), 0))
 				SaveScene();*/
 			bool checked = false;
-			EditorUIFunctions::DrawCheckedImageButtonUI("Save", save_icon, ImVec2(icon_size, icon_size), checked,
+			ImGuiExt::DrawCheckedImageButtonUI("Save", save_icon, ImVec2(icon_size, icon_size), checked,
 				[&]()
 				{
 					SaveScene();
@@ -360,7 +359,7 @@ namespace Wuya
 				/* translate */
 				ImGui::SameLine(cursor_offset + icon_size * 2);
 				bool checked = m_GizmoType == ImGuizmo::OPERATION::TRANSLATE;
-				EditorUIFunctions::DrawCheckedImageButtonUI("Translate", translate_icon, ImVec2(icon_size, icon_size), checked,
+				ImGuiExt::DrawCheckedImageButtonUI("Translate", translate_icon, ImVec2(icon_size, icon_size), checked,
 					[&]()
 					{
 						m_GizmoType = ImGuizmo::OPERATION::TRANSLATE;
@@ -370,7 +369,7 @@ namespace Wuya
 				/* rotate */
 				ImGui::SameLine();
 				checked = m_GizmoType == ImGuizmo::OPERATION::ROTATE;
-				EditorUIFunctions::DrawCheckedImageButtonUI("Rotate", rotate_icon, ImVec2(icon_size, icon_size), checked,
+				ImGuiExt::DrawCheckedImageButtonUI("Rotate", rotate_icon, ImVec2(icon_size, icon_size), checked,
 					[&]()
 					{
 						m_GizmoType = ImGuizmo::OPERATION::ROTATE;
@@ -381,7 +380,7 @@ namespace Wuya
 
 				ImGui::SameLine();
 				checked = m_GizmoType == ImGuizmo::OPERATION::SCALE;
-				EditorUIFunctions::DrawCheckedImageButtonUI("Scale", scale_icon, ImVec2(icon_size, icon_size), checked,
+				ImGuiExt::DrawCheckedImageButtonUI("Scale", scale_icon, ImVec2(icon_size, icon_size), checked,
 					[&]()
 					{
 						m_GizmoType = ImGuizmo::OPERATION::SCALE;

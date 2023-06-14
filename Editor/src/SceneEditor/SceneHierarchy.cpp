@@ -1,6 +1,5 @@
 #include "Pch.h"
 #include "SceneHierarchy.h"
-#include "EditorUIFunctions.h"
 #include <glm/gtc/type_ptr.hpp>
 
 namespace Wuya
@@ -129,8 +128,8 @@ namespace Wuya
 	{
 		PROFILE_FUNCTION();
 
-		m_pAddComponentIcon = TextureAssetManager::Instance().GetOrCreateTexture(RELATIVE_PATH("EditorRes/icons/add.png"));
-		m_pMenuIcon = TextureAssetManager::Instance().GetOrCreateTexture(RELATIVE_PATH("EditorRes/icons/menu.png"));
+		m_pAddComponentIcon = TextureAssetManager::Instance().GetOrCreateTexture(ABSOLUTE_PATH("EditorRes/icons/add.png"));
+		m_pMenuIcon = TextureAssetManager::Instance().GetOrCreateTexture(ABSOLUTE_PATH("EditorRes/icons/menu.png"));
 	}
 
 	void SceneHierarchy::ShowEntityNode(Entity& entity)
@@ -198,7 +197,7 @@ namespace Wuya
 			START_TRANSPARENT_BUTTON;
 			START_STYLE_ALPHA(0.5f);
 			ImGui::SameLine(panel_width - 15);
-			const auto menu_icon = TextureAssetManager::Instance().GetOrCreateTexture(RELATIVE_PATH("EditorRes/icons/menu.png"));
+			const auto menu_icon = TextureAssetManager::Instance().GetOrCreateTexture(ABSOLUTE_PATH("EditorRes/icons/menu.png"));
 			if (ImGui::ImageButton((ImTextureID)menu_icon->GetTextureID(), ImVec2(20, 20), ImVec2(0, 1), ImVec2(1, 0)))
 				ImGui::OpenPopup("ComponentSettings");
 			END_STYLE_ALPHA;
@@ -329,11 +328,11 @@ namespace Wuya
 		ShowComponent<TransformComponent>("Transform", m_SelectedEntity,
 			[](auto& component)
 			{
-				EditorUIFunctions::DrawVec3ControlUI("Position", component.Position, 0.0f);
+				ImGuiExt::DrawVec3ControlUI("Position", component.Position, 0.0f);
 				glm::vec3 rotation = glm::degrees(component.Rotation);
-				EditorUIFunctions::DrawVec3ControlUI("Rotation", rotation, 0.0f);
+				ImGuiExt::DrawVec3ControlUI("Rotation", rotation, 0.0f);
 				component.Rotation = glm::radians(rotation);
-				EditorUIFunctions::DrawVec3ControlUI("Scale", component.Scale, 1.0f);
+				ImGuiExt::DrawVec3ControlUI("Scale", component.Scale, 1.0f);
 
 			});
 	}
@@ -346,8 +345,8 @@ namespace Wuya
 		ShowComponent<SpriteComponent>("Sprite", m_SelectedEntity,
 			[](auto& component)
 			{
-				EditorUIFunctions::DrawColorUI("BaseColor", component.BaseColor);
-				EditorUIFunctions::DrawTextureUI("Texture", component.Texture, component.TilingFactor);
+				ImGuiExt::DrawColorUI("BaseColor", component.BaseColor);
+				ImGuiExt::DrawTextureUI("Texture", component.Texture, component.TilingFactor);
 			});
 	}
 
@@ -359,11 +358,11 @@ namespace Wuya
 		ShowComponent<CameraComponent>("Camera", m_SelectedEntity,
 			[](auto& component)
 			{
-				EditorUIFunctions::DrawCheckboxUI("IsPrimary", component.IsPrimary);
-				EditorUIFunctions::DrawCheckboxUI("IsFixedAspectRatio", component.IsFixedAspectRatio);
+				ImGuiExt::DrawCheckboxUI("IsPrimary", component.IsPrimary);
+				ImGuiExt::DrawCheckboxUI("IsFixedAspectRatio", component.IsFixedAspectRatio);
 				auto& scene_camera = component.Camera;
 				int projection_idx = static_cast<int>(scene_camera->GetProjectionType());
-				EditorUIFunctions::DrawComboUI("ProjectionType", GetEnumNames<SceneCamera::ProjectionType>(), projection_idx,
+				ImGuiExt::DrawComboUI("ProjectionType", GetEnumNames<SceneCamera::ProjectionType>(), projection_idx,
 					[&scene_camera](int selected_idx)
 					{
 						scene_camera->SetProjectionType(static_cast<SceneCamera::ProjectionType>(selected_idx));
@@ -376,11 +375,11 @@ namespace Wuya
 					const auto& camera_desc = scene_camera->GetPerspectiveCameraDesc();
 
 					float fov = camera_desc->Fov;
-					EditorUIFunctions::DrawDragFloatUI("Fov", fov);
+					ImGuiExt::DrawDragFloatUI("Fov", fov);
 					float near_clip = camera_desc->Near;
-					EditorUIFunctions::DrawDragFloatUI("Near", near_clip);
+					ImGuiExt::DrawDragFloatUI("Near", near_clip);
 					float far_clip = camera_desc->Far;
-					EditorUIFunctions::DrawDragFloatUI("Far", far_clip);
+					ImGuiExt::DrawDragFloatUI("Far", far_clip);
 
 					scene_camera->SetPerspectiveCameraDesc({ fov, near_clip, far_clip });
 				}
@@ -390,11 +389,11 @@ namespace Wuya
 					const auto& camera_desc = scene_camera->GetOrthographicCameraDesc();
 
 					float height_size = camera_desc->HeightSize;
-					EditorUIFunctions::DrawDragFloatUI("HeightSize", height_size);
+					ImGuiExt::DrawDragFloatUI("HeightSize", height_size);
 					float near_clip = camera_desc->Near;
-					EditorUIFunctions::DrawDragFloatUI("Near", near_clip);
+					ImGuiExt::DrawDragFloatUI("Near", near_clip);
 					float far_clip = camera_desc->Far;
-					EditorUIFunctions::DrawDragFloatUI("Far", far_clip);
+					ImGuiExt::DrawDragFloatUI("Far", far_clip);
 
 					scene_camera->SetOrthographicCameraDesc({ height_size, near_clip, far_clip });
 				}
@@ -455,7 +454,7 @@ namespace Wuya
 
 				/* 光源类型 */
 				int type_idx = static_cast<int>(light->GetLightType());
-				EditorUIFunctions::DrawComboUI("Type", GetEnumNames<LightType>(), type_idx,
+				ImGuiExt::DrawComboUI("Type", GetEnumNames<LightType>(), type_idx,
 					[&light](int selected_idx)
 					{
 						/* todo: 切换光源类型 */
@@ -464,17 +463,17 @@ namespace Wuya
 
 				/* 光源颜色 */
 				glm::vec4 light_color = light->GetColor();
-				EditorUIFunctions::DrawColorUI("Color", light_color);
+				ImGuiExt::DrawColorUI("Color", light_color);
 				light->SetColor(light_color);
 
 				/* 光源强度 */
 				float light_intensity = light->GetIntensity();
-				EditorUIFunctions::DrawDragFloatUI("Intensity", light_intensity);
+				ImGuiExt::DrawDragFloatUI("Intensity", light_intensity);
 				light->SetIntensity(light_intensity);
 
 				/* 投影 */
 				bool cast_shadow = light->IsCastShadow();
-				EditorUIFunctions::DrawCheckboxUI("CastShadow", cast_shadow);
+				ImGuiExt::DrawCheckboxUI("CastShadow", cast_shadow);
 				light->SetIsCastShadow(cast_shadow);
 			});
 	}

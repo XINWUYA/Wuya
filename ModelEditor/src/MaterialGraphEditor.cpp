@@ -1,6 +1,5 @@
 #include "Pch.h"
 #include "MaterialGraphEditor.h"
-#include "PackedUIFuncs.h"
 #include <tinyxml2.h>
 
 namespace Wuya
@@ -36,7 +35,7 @@ namespace Wuya
 			constexpr float cursor_offset = 10.0f;
 			/* 保存场景按钮 */
 			ImGui::SetCursorPosX(cursor_offset);
-			static auto save_icon = TextureAssetManager::Instance().GetOrCreateTexture(RELATIVE_PATH("EditorRes/icons/save.png"));
+			static auto save_icon = TextureAssetManager::Instance().GetOrCreateTexture(ABSOLUTE_PATH("EditorRes/icons/save.png"));
 			if (ImGui::ImageButton((ImTextureID)save_icon->GetTextureID(), ImVec2(icon_size, icon_size), ImVec2(0, 1), ImVec2(1, 0), 0))
 			{
 				if (m_Path.empty())
@@ -131,7 +130,7 @@ namespace Wuya
 					{
 						/* 显示组件 */
 						auto& component = m_Delegate.Registry.get_or_emplace<MGTexture2DComponent>(node.EntityHandle);
-						PackedUIFuncs::DrawTextureUI("Texture", component.Texture, component.TilingFactor);
+						ImGuiExt::DrawTextureUI("Texture", component.Texture, component.TilingFactor);
 					}
 					break;
 				case MaterialGraphNodeType::SamplerState:
@@ -139,53 +138,53 @@ namespace Wuya
 						auto& component = m_Delegate.Registry.get_or_emplace<MGSamplerStateComponent>(node.EntityHandle);
 
 						int warp_mode_idx = static_cast<int>(component.WrapMode);
-						PackedUIFuncs::DrawComboUI("WrapType", GetEnumNames<SamplerWrapMode>(), warp_mode_idx);
+						ImGuiExt::DrawComboUI("WrapType", GetEnumNames<SamplerWrapMode>(), warp_mode_idx);
 						component.WrapMode = static_cast<SamplerWrapMode>(warp_mode_idx);
 
 						int min_filter_index = static_cast<int>(component.MinFilter);
-						PackedUIFuncs::DrawComboUI("MinFilter", GetEnumNames<SamplerMinFilter>(), min_filter_index);
+						ImGuiExt::DrawComboUI("MinFilter", GetEnumNames<SamplerMinFilter>(), min_filter_index);
 						component.MinFilter = static_cast<SamplerMinFilter>(min_filter_index);
 
 						int mag_filter_index = static_cast<int>(component.MagFilter);
-						PackedUIFuncs::DrawComboUI("MagFilter", GetEnumNames<SamplerMagFilter>(), mag_filter_index);
+						ImGuiExt::DrawComboUI("MagFilter", GetEnumNames<SamplerMagFilter>(), mag_filter_index);
 						component.MagFilter = static_cast<SamplerMagFilter>(mag_filter_index);
 					}
 					break;
 				case MaterialGraphNodeType::Float:
 					{
 						auto& component = m_Delegate.Registry.get_or_emplace<MGFloatComponent>(node.EntityHandle);
-						PackedUIFuncs::DrawDragFloatUI("Float", component.Value);
+						ImGuiExt::DrawDragFloatUI("Float", component.Value);
 					}
 					break;
 				case MaterialGraphNodeType::Float2:
 					{
 						auto& component = m_Delegate.Registry.get_or_emplace<MGFloat2Component>(node.EntityHandle);
-						PackedUIFuncs::DrawDragFloat2UI("Float2", component.Value);
+						ImGuiExt::DrawDragFloat2UI("Float2", component.Value);
 					}
 					break;
 				case MaterialGraphNodeType::Float3:
 					{
 						auto& component = m_Delegate.Registry.get_or_emplace<MGFloat3Component>(node.EntityHandle);
-						PackedUIFuncs::DrawDragFloat3UI("Float3", component.Value);
+						ImGuiExt::DrawDragFloat3UI("Float3", component.Value);
 					}
 					break;
 				case MaterialGraphNodeType::Float4:
 					{
 						auto& component = m_Delegate.Registry.get_or_emplace<MGFloat4Component>(node.EntityHandle);
-						PackedUIFuncs::DrawDragFloat4UI("Float4", component.Value);
+						ImGuiExt::DrawDragFloat4UI("Float4", component.Value);
 					}
 					break;
 				case MaterialGraphNodeType::Color:
 					{
 						auto& component = m_Delegate.Registry.get_or_emplace<MGColorComponent>(node.EntityHandle);
-						PackedUIFuncs::DrawColorUI("Color", component.Color);
+						ImGuiExt::DrawColorUI("Color", component.Color);
 					}
 					break;
 				case MaterialGraphNodeType::Operator:
 					{
 						auto& component = m_Delegate.Registry.get_or_emplace<MGOperatorComponent>(node.EntityHandle);
 						int operator_type_idx = static_cast<int>(component.OperatorType);
-						PackedUIFuncs::DrawComboUI("OperatorType", GetEnumNames<MGNodeOperatorType>(), operator_type_idx);
+						ImGuiExt::DrawComboUI("OperatorType", GetEnumNames<MGNodeOperatorType>(), operator_type_idx);
 						component.OperatorType = static_cast<MGNodeOperatorType>(operator_type_idx);
 
 						/* 暂不支持多元操作符，麻烦太多 */
@@ -250,7 +249,7 @@ namespace Wuya
 				{
 					auto* texture_doc = node_doc->InsertNewChildElement("Texture");
 					auto& component = m_Delegate.Registry.get_or_emplace<MGTexture2DComponent>(node.EntityHandle);
-					texture_doc->SetAttribute("TexturePath", component.Texture->GetPath().c_str());
+					texture_doc->SetAttribute("TexturePath", RELATIVE_PATH(component.Texture->GetPath()).c_str());
 					texture_doc->SetAttribute("IsGenMipmap", component.IsGenMipmap);
 					texture_doc->SetAttribute("TilingFactor", component.TilingFactor);
 				}
@@ -366,7 +365,7 @@ namespace Wuya
 				{
 					const auto* texture_doc = node_doc->FirstChildElement("Texture");
 					auto& component = m_Delegate.Registry.get_or_emplace<MGTexture2DComponent>(node.EntityHandle);
-					component.Texture = TextureAssetManager::Instance().GetOrCreateTexture(texture_doc->Attribute("TexturePath"), {}); // todo: loadConfig
+					component.Texture = TextureAssetManager::Instance().GetOrCreateTexture(ABSOLUTE_PATH(texture_doc->Attribute("TexturePath"))); // todo: loadConfig
 					component.IsGenMipmap = texture_doc->BoolAttribute("IsGenMipmap");
 					component.TilingFactor = texture_doc->FloatAttribute("TilingFactor");
 				}
@@ -510,15 +509,14 @@ namespace Wuya
 					if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("RESOURCE_BROWSER_ITEM"))
 					{
 						const wchar_t* path = (const wchar_t*)payload->Data;
-						const std::filesystem::path texture_path = g_AssetsPath / path;
-						component.Texture = TextureAssetManager::Instance().GetOrCreateTexture(texture_path.generic_string(), {});
+						component.Texture = TextureAssetManager::Instance().GetOrCreateTexture(ABSOLUTE_PATH(path));
 					}
 					ImGui::EndDragDropTarget();
 				}
 
 				/* 鼠标掠过时显示图片路径 */
 				if (ImGui::IsItemHovered())
-					draw_list->AddText(rectangle.Min, IM_COL32(255, 128, 64, 255), component.Texture->GetPath().c_str());
+					draw_list->AddText(rectangle.Min, IM_COL32(255, 128, 64, 255), RELATIVE_PATH(component.Texture->GetPath()).c_str());
 			}
 			break;
 		case MaterialGraphNodeType::SamplerState:
@@ -662,7 +660,7 @@ namespace Wuya
 				/* 挂载相关组件 */
 				node_inst.EntityHandle = Registry.create();
 				auto& component = Registry.emplace<MGTexture2DComponent>(node_inst.EntityHandle);
-				component.Texture = TextureAssetManager::Instance().GetOrCreateTexture("assets/textures/Default.png", {});
+				component.Texture = TextureAssetManager::Instance().GetOrCreateTexture(ABSOLUTE_PATH("Textures/Default.png"));
 			}
 			break;
 		case MaterialGraphNodeType::SamplerState:

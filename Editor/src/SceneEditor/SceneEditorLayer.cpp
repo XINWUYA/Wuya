@@ -2,7 +2,6 @@
 #include "SceneEditorLayer.h"
 #include <glm/gtc/type_ptr.inl>
 #include "EditorBuiltinCamera.h"
-#include "EditorUIFunctions.h"
 #include "ImGuizmo.h"
 
 namespace Wuya
