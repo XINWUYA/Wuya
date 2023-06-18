@@ -3,44 +3,46 @@
 
 namespace Wuya
 {
-/* ÉèÖÃ°ëÍ¸Ã÷UI */
+/* è®¾ç½®åŠé€æ˜UI */
 #define START_STYLE_ALPHA(alpha) ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * (alpha))
 #define END_STYLE_ALPHA ImGui::PopStyleVar()
 
-/* ±³¾°Í¸Ã÷Button */
+/* èƒŒæ™¯é€æ˜Button */
 #define START_TRANSPARENT_BUTTON ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0))
 #define END_TRANSPARENT_BUTTON ImGui::PopStyleColor()
 
 class Texture;
 
-/* À©Õ¹Ò»Ğ©³£ÓÃµÄUI */
+/* æ‰©å±•ä¸€äº›å¸¸ç”¨çš„UI */
 namespace ImGuiExt
 {
-	/* »æÖÆÒ»¸öÆÕÍ¨µÄÎÄ±¾UI */
+	/* ç»˜åˆ¶ä¸€ä¸ªæ™®é€šçš„æ–‡æœ¬UI */
 	void DrawCommonTextUI(const std::string& label, const std::string& value, float label_width = 100.0f);
-	/* »æÖÆÒ»¸öColor UI */
+	/* ç»˜åˆ¶ä¸€ä¸ªColor UI */
 	void DrawColorUI(const std::string& label, glm::vec4& color, float label_width = 100.0f);
-	/* »æÖÆÒ»¸öÍ¼Æ¬UI */
+	/* ç»˜åˆ¶ä¸€ä¸ªå›¾ç‰‡UI */
 	void DrawTextureUI(const std::string& label, SharedPtr<Texture>& texture, float& tiling_factor, float label_width = 100.0f);
-	/* »æÖÆÒ»¸ö¿ÉÍÏ¶¯µÄInt UI */
+	/* ç»˜åˆ¶ä¸€ä¸ªå¯æ‹–åŠ¨çš„Int UI */
 	void DrawDragIntUI(const char* label, int& value, float label_width = 100.0f);
-	/* »æÖÆÒ»¸ö¿ÉÍÏ¶¯µÄFloat UI */
+	/* ç»˜åˆ¶ä¸€ä¸ªå¯æ‹–åŠ¨çš„Float UI */
 	void DrawDragFloatUI(const std::string& label, float& value, float label_width = 100.0f);
-	/* »æÖÆÒ»¸ö¿ÉÍÏ¶¯µÄFloat2 UI */
+	/* ç»˜åˆ¶ä¸€ä¸ªå¯æ‹–åŠ¨çš„Float2 UI */
 	void DrawDragFloat2UI(const char* label, glm::vec2& value, float label_width = 100.0f);
-	/* »æÖÆÒ»¸ö¿ÉÍÏ¶¯µÄFloat3 UI */
+	/* ç»˜åˆ¶ä¸€ä¸ªå¯æ‹–åŠ¨çš„Float3 UI */
 	void DrawDragFloat3UI(const char* label, glm::vec3& value, float label_width = 100.0f);
-	/* »æÖÆÒ»¸ö¿ÉÍÏ¶¯µÄFloat4 UI */
+	/* ç»˜åˆ¶ä¸€ä¸ªå¯æ‹–åŠ¨çš„Float4 UI */
 	void DrawDragFloat4UI(const char* label, glm::vec4& value, float label_width = 100.0f);
-	/* »æÖÆÒ»¸övec3 UI£¬ ´øXYZ */
+	/* ç»˜åˆ¶ä¸€ä¸ªvec3 UIï¼Œ å¸¦XYZ */
 	void DrawVec3ControlUI(const std::string& label, glm::vec3& values, float reset_value = 0.0f, float label_width = 100.0f);
-	/* »æÖÆ´øÑ¡ÖĞµÄÍ¼Ïñ°´Å¥UI */
+	/* ç»˜åˆ¶å¸¦é€‰ä¸­çš„å›¾åƒæŒ‰é’®UI */
 	void DrawCheckedImageButtonUI(const std::string& label, const SharedPtr<Texture>& texture, const ImVec2& size, bool checked = false, const std::function<void()>& button_func = []() {});
-	/* »æÖÆÒ»¸öCheckbox */
+	/* ç»˜åˆ¶ä¸€ä¸ªCheckbox */
 	void DrawCheckboxUI(const std::string& label, bool& value, float label_width = 100.0f);
-	/* »æÖÆÒ»¸öCombo */
+	/* ç»˜åˆ¶ä¸€ä¸ªCombo */
 	void DrawComboUI(const std::string& label, const std::vector<std::string>& options, int& selected_idx, const std::function<void(int)>& callback = [](int) {}, float label_width = 100.0f);
-	/* »æÖÆÒ»¸öÑ¯ÎÊµ¯´°UI(todo: »¹²»ÄÜÓÃ£¬ĞèÒªµ÷ÊÔ) */
+	/* ç»˜åˆ¶ä¸€ä¸ªæ–¹å‘æŒ‡ç¤º */
+	void DrawDirectionIndicator(const std::string& label, glm::vec3& direction, float label_width = 100);
+	/* ç»˜åˆ¶ä¸€ä¸ªè¯¢é—®å¼¹çª—UI(todo: è¿˜ä¸èƒ½ç”¨ï¼Œéœ€è¦è°ƒè¯•) */
 	bool DrawModalUI(const std::string& label, const std::string& content_text, bool& never_ask);
 }
 
