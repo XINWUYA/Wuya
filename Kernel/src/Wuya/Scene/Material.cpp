@@ -9,7 +9,7 @@
 
 namespace Wuya
 {
-	/* Ä¬ÈÏ²ÄÖÊºÍ´íÎó²ÄÖÊ */
+	/* é»˜è®¤æè´¨å’Œé”™è¯¯æè´¨ */
 	SharedPtr<Material> Material::m_pDefaultMaterial = CreateSharedPtr<Material>();// Material::Create();
 	SharedPtr<Material> Material::m_pErrorMaterial = CreateSharedPtr<Material>();
 
@@ -41,15 +41,15 @@ namespace Wuya
 		m_Parameters[ToID(name)] = { ParamType::Texture, name, std::make_pair(texture, static_cast<uint32_t>(slot)) };
 	}
 
-	/* °ó¶¨²ÄÖÊÖĞµÄ¸÷²ÎÊı */
+	/* ç»‘å®šæè´¨ä¸­çš„å„å‚æ•° */
 	void Material::Bind()
 	{
 		PROFILE_FUNCTION();
 
-		/* ÏÈ°ó¶¨Shader */
+		/* å…ˆç»‘å®šShader */
 		m_pShader->Bind();
 
-		/* °ó¶¨²ÎÊı */
+		/* ç»‘å®šå‚æ•° */
 		for (auto& param : m_Parameters)
 		{
 			auto& param_info = param.second;
@@ -58,7 +58,7 @@ namespace Wuya
 			{
 			case ParamType::Texture:
 				{
-					/* °ó¶¨ÎÆÀí */
+					/* ç»‘å®šçº¹ç† */
 					const auto texture_info = std::any_cast<std::pair<SharedPtr<Texture>, uint32_t>>(value);
 					if (texture_info.second != TextureSlot::Invalid)
 						texture_info.first->Bind(texture_info.second);
@@ -83,25 +83,25 @@ namespace Wuya
 		}
 	}
 
-	/* ½â°ó²ÄÖÊ */
+	/* è§£ç»‘æè´¨ */
 	void Material::Unbind()
 	{
 		m_pShader->Unbind();
 	}
 
-	/* Ä¬ÈÏ²ÄÖÊ */
+	/* é»˜è®¤æè´¨ */
 	SharedPtr<Material>& Material::Default()
 	{
 		if (!m_pDefaultMaterial->GetShader())
 		{
-			/* Ö»ÄÜÔÚ»ñÈ¡Ê±ÉèÖÃShader£¬ÔÚ¾²Ì¬±àÒëÆÚ£¬OpenGLÉĞÎ´³õÊ¼»¯£¬ÎŞ·¨ÕıÈ·´´½¨ShaderProgram */
+			/* åªèƒ½åœ¨è·å–æ—¶è®¾ç½®Shaderï¼Œåœ¨é™æ€ç¼–è¯‘æœŸï¼ŒOpenGLå°šæœªåˆå§‹åŒ–ï¼Œæ— æ³•æ­£ç¡®åˆ›å»ºShaderProgram */
 			m_pDefaultMaterial->SetShader(ShaderAssetManager::Instance().GetOrLoad("assets/shaders/default.glsl"));
 		}
 
 		return m_pDefaultMaterial;
 	}
 
-	/* ´íÎó²ÄÖÊ */
+	/* é”™è¯¯æè´¨ */
 	SharedPtr<Material>& Material::Error()
 	{
 		if (!m_pErrorMaterial->GetShader())
@@ -111,7 +111,7 @@ namespace Wuya
 		return m_pErrorMaterial;
 	}
 	
-	/* ´´½¨²ÄÖÊ */
+	/* åˆ›å»ºæè´¨ */
 	SharedPtr<Material> Material::Create(const SharedPtr<Shader>& shader)
 	{
 		PROFILE_FUNCTION();
@@ -122,13 +122,13 @@ namespace Wuya
 		return material;
 	}
 
-	/* Ìí¼ÓÒ»¸öMaterial */
+	/* æ·»åŠ ä¸€ä¸ªMaterial */
 	void MaterialGroup::EmplaceMaterial(const SharedPtr<Material>& material)
 	{
 		m_Materials.emplace_back(material);
 	}
 
-	/* ¸ù¾İË÷Òı»ñÈ¡Material */
+	/* æ ¹æ®ç´¢å¼•è·å–Material */
 	const SharedPtr<Material>& MaterialGroup::GetMaterialByIndex(int idx)
 	{
 		if (idx < 0 || idx >= m_Materials.size())
@@ -140,14 +140,14 @@ namespace Wuya
 		return m_Materials[idx];
 	}
 
-	/* ĞòÁĞ»¯ */
+	/* åºåˆ—åŒ– */
 	void MaterialGroup::Serializer(const std::string& path)
 	{
 		m_Path = path;
 
 		ASSERT(!m_Path.empty());
 		
-		/* Ğ´Èë²ÄÖÊĞÅÏ¢ */
+		/* å†™å…¥æè´¨ä¿¡æ¯ */
 		auto* out_mtl_file = new tinyxml2::XMLDocument();
 		out_mtl_file->InsertEndChild(out_mtl_file->NewDeclaration());
 		auto* mtl_root = out_mtl_file->NewElement("Materials");
@@ -227,12 +227,12 @@ namespace Wuya
 			raster_state_doc->SetAttribute("EnableColorWrite", raster_state.EnableColorWrite);
 		}
 
-		/* ±£´æµ½ÎÄ±¾ */
+		/* ä¿å­˜åˆ°æ–‡æœ¬ */
 		out_mtl_file->SaveFile(path.c_str());
 		delete out_mtl_file;
 	}
 
-	/* ·´ĞòÁĞ»¯ */
+	/* ååºåˆ—åŒ– */
 	bool MaterialGroup::Deserializer(const std::string& path)
 	{
 		PROFILE_FUNCTION();
@@ -240,7 +240,7 @@ namespace Wuya
 		m_Path = path;
 		ASSERT(!m_Path.empty());
 
-		/* ¶ÁÈ¡²ÄÖÊĞÅÏ¢ */
+		/* è¯»å–æè´¨ä¿¡æ¯ */
 		auto* in_mtl_file = new tinyxml2::XMLDocument();
 		tinyxml2::XMLError error = in_mtl_file->LoadFile(m_Path.c_str());
 		if (error != tinyxml2::XML_SUCCESS)
@@ -261,7 +261,7 @@ namespace Wuya
 			ASSERT(id >= 0 && id < m_Materials.size());
 
 			/* Shader */
-			material->SetShader(ShaderAssetManager::Instance().GetOrLoad(mtl_doc->Attribute("ShaderPath")));
+			material->SetShader(ShaderAssetManager::Instance().GetOrLoad(ABSOLUTE_PATH(mtl_doc->Attribute("ShaderPath"))));
 
 			/* Parameters */
 			const auto params_root = mtl_doc->FirstChildElement("Parameters");
@@ -283,7 +283,7 @@ namespace Wuya
 						load_config.IsGenMips = load_config_doc->BoolAttribute("IsGenMips");
 						load_config.SamplerType = static_cast<SamplerType>(load_config_doc->IntAttribute("SamplerType"));
 						
-						auto texture = TextureAssetManager::Instance().GetOrCreateTexture(texture_path, load_config);
+						auto texture = TextureAssetManager::Instance().GetOrCreateTexture(ABSOLUTE_PATH(texture_path), load_config);
 						material->SetTexture(param_name, texture, slot);
 					}
 					break;

@@ -4,6 +4,7 @@
 #include "Wuya/Scene/Scene.h"
 #include "Wuya/Scene/Components.h"
 #include "Wuya/Scene/Material.h"
+#include "Wuya/Scene/ShadowMap.h"
 
 namespace Wuya
 {
@@ -13,6 +14,7 @@ namespace Wuya
 		PROFILE_FUNCTION();
 
 		m_pFrameGraph = CreateSharedPtr<FrameGraph>(m_DebugName + "_FrameGraph");
+		m_pShadowMapManager = CreateSharedPtr<ShadowMapManager>();
 	}
 
 	RenderView::~RenderView()
@@ -22,7 +24,7 @@ namespace Wuya
 		m_VisibleMeshObjects.clear();
 	}
 
-	/* ÉèÖÃÊÓ¿ÚÇøÓò */
+	/* è®¾ç½®è§†å£åŒºåŸŸ */
 	void RenderView::SetViewportRegion(const ViewportRegion& region)
 	{
 		PROFILE_FUNCTION();
@@ -41,7 +43,7 @@ namespace Wuya
 		return DynamicPtrCast<Resource<FrameGraphTexture>>(m_pFrameGraph->GetResource(m_RenderTargetHandle))->GetResource().Texture;
 	}
 
-	/* ´æ´¢¸÷PassµÄFrameBuffer */
+	/* å­˜å‚¨å„Passçš„FrameBuffer */
 	void RenderView::EmplacePassFrameBuffer(const std::string& name, const SharedPtr<FrameBuffer>& frame_buffer)
 	{
 		PROFILE_FUNCTION();
@@ -59,38 +61,38 @@ namespace Wuya
 		return {};
 	}
 
-	/* ×¼±¸Ò»Ö¡µÄRenderViewÊı¾İ */
+	/* å‡†å¤‡ä¸€å¸§çš„RenderViewæ•°æ® */
 	void RenderView::Prepare()
 	{
 		PROFILE_FUNCTION();
 
-		/* Éú³Éµ±Ç°FrameGraph */
+		/* ç”Ÿæˆå½“å‰FrameGraph */
 		m_pFrameGraph->Build();
 	}
 
-	/* Ö´ĞĞäÖÈ¾µ±Ç°View */
+	/* æ‰§è¡Œæ¸²æŸ“å½“å‰View */
 	void RenderView::Execute()
 	{
 		PROFILE_FUNCTION();
 
-		/* ÊÕ¼¯µ±Ç°RenderView¿É¼ûµÄ¶ÔÏó */
+		/* æ”¶é›†å½“å‰RenderViewå¯è§çš„å¯¹è±¡ */
 		PrepareVisibleObjects();
-		/* ÊÕ¼¯¹âÔ´ĞÅÏ¢ */
+		/* æ”¶é›†å…‰æºä¿¡æ¯ */
 		PrepareLights();
 
 		m_pFrameGraph->Execute();
 	}
 
-	/* ÊÓ×¶ÌåÌŞ³ı */
+	/* è§†é”¥ä½“å‰”é™¤ */
 	void RenderView::PrepareVisibleObjects()
 	{
 		PROFILE_FUNCTION();
 
 		m_VisibleMeshObjects.clear();
 
-		// todo: ÊÓ×¶ÌåÌŞ³ı
+		// todo: è§†é”¥ä½“å‰”é™¤
 
-		/* ÊÕ¼¯ËùÓĞÄ£ĞÍ */
+		/* æ”¶é›†æ‰€æœ‰æ¨¡å‹ */
 		const auto owner_scene = m_pOwnerScene.lock();
 		if (!owner_scene)
 			return;
@@ -99,11 +101,13 @@ namespace Wuya
 		for (auto& entity : model_entity_view)
 		{
 			auto [transform_component, model_component] = model_entity_view.get<TransformComponent, ModelComponent>(entity);
+			if (!model_component.Model)
+				 continue;
 
 			for (const auto& mesh_segment : model_component.Model->GetMeshSegments())
 			{
 				const auto& world_position = transform_component.Position;
-				// todo: Ö´ĞĞÌŞ³ı
+				// todo: æ‰§è¡Œå‰”é™¤
 				//if ()
 				m_VisibleMeshObjects.emplace_back((int)entity, transform_component.GetTransform(), mesh_segment);
 			}
@@ -111,14 +115,16 @@ namespace Wuya
 
 	}
 
-	/* ×¼±¸¹âÔ´ĞÅÏ¢ */
+	/* å‡†å¤‡å…‰æºä¿¡æ¯ */
 	void RenderView::PrepareLights()
 	{
 		PROFILE_FUNCTION();
 
 		m_ValidLights.clear();
+		m_IsHasShadowCast = false;
+		m_pShadowMapManager.reset();
 
-		/* ÊÕ¼¯ËùÓĞ¹âÔ´ */
+		/* æ”¶é›†æ‰€æœ‰å…‰æº */
 		const auto owner_scene = m_pOwnerScene.lock();
 		if (!owner_scene)
 			return;
@@ -130,10 +136,21 @@ namespace Wuya
 
 			const glm::vec3 light_dir = transform_component.GetTransform() * glm::vec4(0.0f, 1.0f, 0.0f, 1.0f);
 			const auto& light_color = light_component.Light->GetColor();
+			const bool cast_shadow = light_component.Light->IsCastShadow();
 			m_ValidLights.emplace_back(static_cast<uint32_t>(light_component.Type), 
 				glm::vec4(light_color.r, light_color.g, light_color.b, light_component.Light->GetIntensity()), 
 				light_dir, 
-				transform_component.Position, light_component.Light->IsCastShadow());
+				transform_component.Position, 
+				cast_shadow);
+
+			if (cast_shadow)
+			{
+				m_pShadowMapManager->AddShadowMap(light_component.Light);
+				m_IsHasShadowCast = true;
+			}
 		}
+
+		if (m_IsHasShadowCast)
+			m_pShadowMapManager->PrepareAllShadowMaps(owner_scene);
 	}
 }

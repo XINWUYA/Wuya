@@ -845,7 +845,7 @@ namespace Wuya::ImGuiExt
 	}
 
 	/* 绘制一个方向指示 */
-	void DrawDirectionIndicator(const std::string& label, glm::vec3& direction, float label_width)
+	bool DrawDirectionIndicator(const std::string& label, glm::vec3& direction, float label_width)
 	{
 		PROFILE_FUNCTION();
 
@@ -856,18 +856,23 @@ namespace Wuya::ImGuiExt
 		ImGui::SetColumnWidth(0, label_width);
 		ImGui::Text(label.c_str());
 
-		/* Combo */
+		bool changed = false;
+
+		/* Arrow */
 		ImGui::NextColumn();
 		{
 			ArrowWidget widget(glm::normalize(direction));
 			if (widget.Draw()) 
 			{
+				changed = true;
 				direction = widget.GetDirection();
 			}
 		}
 
 		ImGui::Columns(1);
 		ImGui::PopID();
+
+		return changed;
 	}
 
 	/* 绘制一个询问弹窗UI(todo: 还不能用，需要调试) */

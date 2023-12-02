@@ -19,7 +19,7 @@ namespace Wuya
 		m_pModelInfo = CreateUniquePtr<ModelInfo>();
 		m_pMaterialGroup = CreateSharedPtr<MaterialGroup>();
 
-		/* Ä¬ÈÏÔÚ³¡¾°ÖĞÔö¼ÓÒ»Õµ·½Ïò¹â£¬¹âÔ´ÑÕÉ«Îª°×É« */
+		/* é»˜è®¤åœ¨åœºæ™¯ä¸­å¢åŠ ä¸€ç›æ–¹å‘å…‰ï¼Œå…‰æºé¢œè‰²ä¸ºç™½è‰² */
 		Entity entity = m_pDefaultScene->CreateEntity("DirectionalLight");
 		auto& light_component = entity.AddComponent<LightComponent>(LightType::Directional);
 		light_component.Light->SetColor(glm::vec4(1, 1, 1, 1));
@@ -56,9 +56,9 @@ namespace Wuya
 		if (!m_IsActivated)
 			return;
 		
-		/* ÏÔÊ¾Ä£ĞÍ±à¼­UI */
+		/* æ˜¾ç¤ºæ¨¡å‹ç¼–è¾‘UI */
 		ShowModelParamsUI();
-		/* ÏÔÊ¾Ö÷³¡¾°ÊÓ¿Ú */
+		/* æ˜¾ç¤ºä¸»åœºæ™¯è§†å£ */
 		ShowSceneViewportUI();
 	}
 
@@ -75,7 +75,7 @@ namespace Wuya
 		m_pEditorCamera->OnEvent(event);
 	}
 
-	/* ÏÔÊ¾Ö÷³¡¾°ÊÓ¿Ú */
+	/* æ˜¾ç¤ºä¸»åœºæ™¯è§†å£ */
 	void ModelEditorLayer::ShowSceneViewportUI()
 	{
 		PROFILE_FUNCTION();
@@ -83,7 +83,7 @@ namespace Wuya
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
 		ImGui::Begin("Model", &m_IsActivated);
 		{
-			/* »ñÈ¡´°¿Ú·¶Î§ */
+			/* è·å–çª—å£èŒƒå›´ */
 			const auto viewport_region_min = ImGui::GetWindowContentRegionMin();
 			const auto viewport_region_max = ImGui::GetWindowContentRegionMax();
 			const auto viewport_offset = ImGui::GetWindowPos();
@@ -94,12 +94,12 @@ namespace Wuya
 
 			m_pEditorCamera->SetViewportRegion({ 0,0,m_ViewportRegion.Width, m_ViewportRegion.Height });
 
-			///* Èôµ±Ç°ImGui´°¿Ú²»ÊÇÖ÷´°¿Ú£¬Ó¦×èÈûÊÂ¼ş´«µİ */
+			///* è‹¥å½“å‰ImGuiçª—å£ä¸æ˜¯ä¸»çª—å£ï¼Œåº”é˜»å¡äº‹ä»¶ä¼ é€’ */
 			//m_IsViewportFocused = ImGui::IsWindowFocused();
 			//m_IsViewportHovered = ImGui::IsWindowHovered();
 			//Application::Instance()->GetImGuiLayer()->BlockEvents(!m_IsViewportFocused && !m_IsViewportHovered);
 
-			/* »æÖÆ³¡¾° */
+			/* ç»˜åˆ¶åœºæ™¯ */
 			auto output_rt = m_pEditorCamera->GetRenderView()->GetRenderTarget();
 			if (output_rt)
 			{
@@ -108,7 +108,7 @@ namespace Wuya
 				ImGui::Image((ImTextureID)texture_id, viewport_panel_size, ImVec2{ 0, 1 }, ImVec2{ 1, 0 });
 			}
 
-			/* ÍÏ¶¯×ÊÔ´µ½Ö÷´°¿Ú */
+			/* æ‹–åŠ¨èµ„æºåˆ°ä¸»çª—å£ */
 			if (ImGui::BeginDragDropTarget())
 			{
 				if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("RESOURCE_BROWSER_ITEM"))
@@ -126,7 +126,7 @@ namespace Wuya
 		ImGui::PopStyleVar();
 	}
 
-	/* ÏÔÊ¾Ä£ĞÍ±à¼­UI */
+	/* æ˜¾ç¤ºæ¨¡å‹ç¼–è¾‘UI */
 	void ModelEditorLayer::ShowModelParamsUI()
 	{
 		PROFILE_FUNCTION();
@@ -139,7 +139,7 @@ namespace Wuya
 		{
 			const ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_AllowItemOverlap | ImGuiTreeNodeFlags_FramePadding;
 			
-			/* ÏÔÊ¾Ä£ĞÍ»ù±¾ĞÅÏ¢ */
+			/* æ˜¾ç¤ºæ¨¡å‹åŸºæœ¬ä¿¡æ¯ */
 			{
 				ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2{ 4, 4 });
 				//float lineHeight = GImGui->Font->FontSize + GImGui->Style.FramePadding.y * 2.0f;
@@ -147,10 +147,10 @@ namespace Wuya
 				bool open = ImGui::TreeNodeEx(ExtractFilename(m_pModelInfo->m_Path).c_str(), flags);
 				ImGui::PopStyleVar();
 
-				/* Õ¹¿ªÊ±ÏÔÊ¾×é¼şÄÚÈİ */
+				/* å±•å¼€æ—¶æ˜¾ç¤ºç»„ä»¶å†…å®¹ */
 				if (open)
 				{
-					/* »ù±¾ĞÅÏ¢ */
+					/* åŸºæœ¬ä¿¡æ¯ */
 					ImGui::Text("Base Info:");
 
 					{
@@ -163,7 +163,7 @@ namespace Wuya
 						ImGui::BulletText("MeshSegment Cnt: %llu", m_pModelInfo->m_SubModelInfos.size());
 					}
 
-					/* ÏÔÊ¾¸÷×ÓÄ£ĞÍĞÅÏ¢ */
+					/* æ˜¾ç¤ºå„å­æ¨¡å‹ä¿¡æ¯ */
 					for (size_t i = 0; i < m_pModelInfo->m_SubModelInfos.size(); ++i)
 					{
 						auto& sub_model_info = m_pModelInfo->m_SubModelInfos[i];
@@ -173,7 +173,7 @@ namespace Wuya
 
 						if (ImGui::TreeNode(sub_model_info->Name.empty() ? "Unnamed" : sub_model_info->Name.c_str()))
 						{
-							/* »ù±¾ĞÅÏ¢ */
+							/* åŸºæœ¬ä¿¡æ¯ */
 							ImGui::Text("Base Info:");
 							{
 								const auto& aabb_min = sub_model_info->AABB.first;
@@ -183,7 +183,7 @@ namespace Wuya
 								ImGui::BulletText("Vertex Cnt: %d", sub_model_info->VertexArray->GetVertexCount());
 							}
 
-							/* ²ÄÖÊ²ÎÊıĞÅÏ¢ */
+							/* æè´¨å‚æ•°ä¿¡æ¯ */
 							auto& parameters = material->GetAllParameters();
 							for (auto& param : parameters)
 							{
@@ -191,7 +191,7 @@ namespace Wuya
 
 								if (ImGui::TreeNode(param_info.Name.c_str()))
 								{
-									/* ²ÎÊıÀàĞÍ */
+									/* å‚æ•°ç±»å‹ */
 									const char* data_types[] = { "Texture", "Int", "Float", "Vec2", "Vec3", "Vec4" };
 									int current_type_idx = static_cast<int>(param_info.Type);
 									const char* preview_value = data_types[current_type_idx];
@@ -199,7 +199,7 @@ namespace Wuya
 									{
 										for (int selected_idx = 0; selected_idx < IM_ARRAYSIZE(data_types); ++selected_idx)
 										{
-											/* ÇĞ»»Êı¾İÀàĞÍÊ±£¬ÉèÖÃĞÂÀàĞÍµÄÄ¬ÈÏÖµ */
+											/* åˆ‡æ¢æ•°æ®ç±»å‹æ—¶ï¼Œè®¾ç½®æ–°ç±»å‹çš„é»˜è®¤å€¼ */
 											const bool is_selected = (current_type_idx == selected_idx);
 											if (ImGui::Selectable(data_types[selected_idx], is_selected))
 											{
@@ -227,8 +227,8 @@ namespace Wuya
 																return TextureSlot::Normal;
 															return TextureSlot::Invalid;
 														};
-														/* ÌîÈëÄ¬ÈÏÖµ */
-														const auto& default_texture = TextureAssetManager::Instance().GetOrCreateTexture("assets/textures/Default.png", {});
+														/* å¡«å…¥é»˜è®¤å€¼ */
+														const auto& default_texture = TextureAssetManager::Instance().GetOrCreateTexture(ABSOLUTE_PATH("Textures/Default.png"));
 														material->SetTexture(param_info.Name, default_texture, GetSlot(param_info.Name));
 													}
 													break;
@@ -257,7 +257,7 @@ namespace Wuya
 										ImGui::EndCombo();
 									}
 
-									/* ÏÔÊ¾µ±Ç°²ÎÊı */
+									/* æ˜¾ç¤ºå½“å‰å‚æ•° */
 									switch (param_info.Type)
 									{
 									case ParamType::Texture:
@@ -301,7 +301,7 @@ namespace Wuya
 											ImGui::Checkbox("IsFlipV", &load_config.IsFlipV);
 											ImGui::Checkbox("IsGenMips", &load_config.IsGenMips);
 
-											/* ¼ÓÔØÑ¡Ïî·¢Éú¸Ä¶¯Ê±£¬Á¢¼´ÖØĞÂ¼ÓÔØÌùÍ¼ */
+											/* åŠ è½½é€‰é¡¹å‘ç”Ÿæ”¹åŠ¨æ—¶ï¼Œç«‹å³é‡æ–°åŠ è½½è´´å›¾ */
 											if (load_config != texture->GetTextureLoadConfig())
 											{
 												auto new_texture = TextureAssetManager::Instance().GetOrCreateTexture(texture->GetPath(), load_config);
@@ -418,35 +418,35 @@ namespace Wuya
 		ImGui::PopStyleVar();
 	}
 
-	/* ÏìÓ¦ÍÏ×§ÎÄ¼şµ½Ö÷´°¿Ú */
+	/* å“åº”æ‹–æ‹½æ–‡ä»¶åˆ°ä¸»çª—å£ */
 	void ModelEditorLayer::OnDragItemToScene(const std::filesystem::path& path)
 	{
 		PROFILE_FUNCTION();
 
 		const auto extension = path.extension().string();
 
-		/* Ä£ĞÍÎÄ¼ş */
+		/* æ¨¡å‹æ–‡ä»¶ */
 		if (extension == ".obj")
 		{
 			EDITOR_LOG_DEBUG("Import model file: {}.", path.generic_string());
 
-			/* ¶ÁÈ¡Ä£ĞÍ */
+			/* è¯»å–æ¨¡å‹ */
 			m_pModelInfo->Reset();
 			m_pModelInfo->LoadFromObj(path.generic_string());
 
-			/* ³õÊ¼»¯²ÄÖÊ */
+			/* åˆå§‹åŒ–æè´¨ */
 			m_pMaterialGroup->ClearAllMaterials();
 			for (size_t i = 0; i < m_pModelInfo->m_SubModelInfos.size(); ++i)
 				m_pMaterialGroup->EmplaceMaterial(Material::Create(ShaderAssetManager::Instance().GetOrLoad("assets/shaders/default.glsl")));
 
-			/* ¸üĞÂ³¡¾°Ä£ĞÍĞÅÏ¢ */
+			/* æ›´æ–°åœºæ™¯æ¨¡å‹ä¿¡æ¯ */
 			UpdateModel();
 
 			return;
 		}
 	}
 
-	/* µ¼ÈëÄ£ĞÍ */
+	/* å¯¼å…¥æ¨¡å‹ */
 	void ModelEditorLayer::ImportModel()
 	{
 		PROFILE_FUNCTION();
@@ -454,21 +454,21 @@ namespace Wuya
 		const auto file_path = FileDialog::OpenFile("Obj(*.obj)\0*.obj\0");
 		if (!file_path.empty())
 		{
-			/* ¶ÁÈ¡Ä£ĞÍ */
+			/* è¯»å–æ¨¡å‹ */
 			m_pModelInfo->Reset();
 			m_pModelInfo->LoadFromObj(file_path);
 
-			/* ³õÊ¼»¯²ÄÖÊ */
+			/* åˆå§‹åŒ–æè´¨ */
 			m_pMaterialGroup->ClearAllMaterials();
 			for (size_t i = 0; i < m_pModelInfo->m_SubModelInfos.size(); ++i)
 				m_pMaterialGroup->EmplaceMaterial(Material::Create(ShaderAssetManager::Instance().GetOrLoad("assets/shaders/default.glsl")));
 
-			/* ¸üĞÂ³¡¾°Ä£ĞÍĞÅÏ¢ */
+			/* æ›´æ–°åœºæ™¯æ¨¡å‹ä¿¡æ¯ */
 			UpdateModel();
 		}
 	}
 
-	/* ¿½±´Ö¸¶¨¸ñÊ½µÄÎÄ¼şµ½Ä¿±êÂ·¾¶ */
+	/* æ‹·è´æŒ‡å®šæ ¼å¼çš„æ–‡ä»¶åˆ°ç›®æ ‡è·¯å¾„ */
 	static bool CopyFileFromTo(const std::filesystem::path& src_path, const std::filesystem::path& dst_path, const std::regex& suffix)
 	{
 		PROFILE_FUNCTION();
@@ -498,7 +498,7 @@ namespace Wuya
 		return true;
 	}
 
-	/* µ¼³öÄ£ĞÍ */
+	/* å¯¼å‡ºæ¨¡å‹ */
 	void ModelEditorLayer::ExportMeshAndMtl()
 	{
 		PROFILE_FUNCTION();
@@ -509,14 +509,14 @@ namespace Wuya
 		const auto file_path = FileDialog::SaveFile("Mesh(*.mesh)\0*.mesh\0");
 		if (!file_path.empty())
 		{
-			/* µ¼³öÄ£ĞÍ */
+			/* å¯¼å‡ºæ¨¡å‹ */
 			ExportMesh(file_path);
 
-			/* µ¼³ö²ÄÖÊ */
+			/* å¯¼å‡ºæè´¨ */
 			const auto& material_path = ReplaceFileSuffix(file_path, ".mtl");
 			m_pMaterialGroup->Serializer(material_path);
 
-			/* ¿½±´ÌùÍ¼ÎÄ¼ş */
+			/* æ‹·è´è´´å›¾æ–‡ä»¶ */
 			std::filesystem::path current_model_path(m_pModelInfo->m_Path);
 			std::filesystem::path target_path(file_path);
 			const std::regex pattern("^[\s\S]*\.(pdf|png|jpeg|jpg|tga|bmp|dds)$");
@@ -524,60 +524,60 @@ namespace Wuya
 		}
 	}
 
-	/* µ¼³öMesh */
+	/* å¯¼å‡ºMesh */
 	void ModelEditorLayer::ExportMesh(const std::string& path)
 	{
 		PROFILE_FUNCTION();
 		
 		std::ofstream out_mesh_file(path, std::ios::out | std::ios::binary);
 
-		/* Ğ´Èë×ÓÄ£ĞÍÊıÁ¿: size_t * 1 */
+		/* å†™å…¥å­æ¨¡å‹æ•°é‡: size_t * 1 */
 		size_t sub_model_count = m_pModelInfo->m_SubModelInfos.size();
 		out_mesh_file.write((char*)&sub_model_count, sizeof(size_t));
 
-		/* Öğ¸öĞ´Èë×ÓÄ£ĞÍĞÅÏ¢ */
+		/* é€ä¸ªå†™å…¥å­æ¨¡å‹ä¿¡æ¯ */
 		for (int i = 0; i < m_pModelInfo->m_SubModelInfos.size(); ++i)
 		{
 			const auto& sub_model_info = m_pModelInfo->m_SubModelInfos[i];
 
-			/* Ğ´ÈëNameµÄsize: size_t * 1 */
+			/* å†™å…¥Nameçš„size: size_t * 1 */
 			size_t name_size = sub_model_info->Name.size();
 			out_mesh_file.write((char*)&name_size, sizeof(size_t));
 
-			/* Ğ´ÈëNameÄÚÈİ£ºname_size */
+			/* å†™å…¥Nameå†…å®¹ï¼šname_size */
 			out_mesh_file.write(sub_model_info->Name.c_str(), name_size);
 
-			/* Ğ´ÈëVertexDataµÄ´óĞ¡: size_t * 1 */
+			/* å†™å…¥VertexDataçš„å¤§å°: size_t * 1 */
 			size_t data_size = sub_model_info->VertexData.size();
 			out_mesh_file.write((char*)&data_size, sizeof(size_t));
 
-			/* Ğ´ÈëVertexDataÄÚÈİ: data_size */
+			/* å†™å…¥VertexDataå†…å®¹: data_size */
 			out_mesh_file.write((char*)(sub_model_info->VertexData.data()), data_size * sizeof(float));
 
-			/* Ğ´ÈëVertexLayout */
+			/* å†™å…¥VertexLayout */
 			auto& vertex_layout = sub_model_info->VertexArray->GetVertexBuffers()[0]->GetLayout();
 			auto& elements = vertex_layout.GetElements();
 
-			/* Ğ´Èë VertexLayoutµÄElementÊıÁ¿: size_t * 1 */
+			/* å†™å…¥ VertexLayoutçš„Elementæ•°é‡: size_t * 1 */
 			size_t element_count = elements.size();
 			out_mesh_file.write((char*)&element_count, sizeof(size_t));
-			/* Öğ¸öĞ´ÈëElementĞÅÏ¢ */
+			/* é€ä¸ªå†™å…¥Elementä¿¡æ¯ */
 			for (auto& element : elements)
 			{
-				/* Ğ´ÈëNameµÄsize: size_t * 1 */
+				/* å†™å…¥Nameçš„size: size_t * 1 */
 				size_t element_name_size = element.Name.size();
 				out_mesh_file.write((char*)&element_name_size, sizeof(size_t));
-				/* Ğ´ÈëNameÄÚÈİ£ºelement_name_size */
+				/* å†™å…¥Nameå†…å®¹ï¼šelement_name_size */
 				out_mesh_file.write(element.Name.c_str(), element_name_size);
-				/* Ğ´ÈëElementµÄÀàĞÍ: uint8_t * 1 */
+				/* å†™å…¥Elementçš„ç±»å‹: uint8_t * 1 */
 				out_mesh_file.write((char*)&element.Type, sizeof(uint8_t));
-				/* Ğ´ÈëElementµÄÆ«ÒÆ£ºsize_t * 1 */
+				/* å†™å…¥Elementçš„åç§»ï¼šsize_t * 1 */
 				out_mesh_file.write((char*)&element.Offset, sizeof(size_t));
-				/* Ğ´ÈëElementµÄNormalized: bool * 1 */
+				/* å†™å…¥Elementçš„Normalized: bool * 1 */
 				out_mesh_file.write((char*)&element.Normalized, sizeof(bool));
 			}
 
-			/* Ğ´Èë²ÄÖÊË÷Òı£ºint * 1 */
+			/* å†™å…¥æè´¨ç´¢å¼•ï¼šint * 1 */
 			auto material = m_pMaterialGroup->GetMaterialByIndex(i);
 			int material_id = -1;
 			for (int i = 0; i < m_pMaterialGroup->GetAllMaterials().size(); ++i)
@@ -591,31 +591,31 @@ namespace Wuya
 			}
 			out_mesh_file.write((char*)&material_id, sizeof(int));
 
-			/* Ğ´Èëaabb: sizeof(glm::vec3) * 2 */
+			/* å†™å…¥aabb: sizeof(glm::vec3) * 2 */
 			out_mesh_file.write((char*)&sub_model_info->AABB.first, sizeof(glm::vec3));
 			out_mesh_file.write((char*)&sub_model_info->AABB.second, sizeof(glm::vec3));
 		}
 
-		/* ±£´æMeshÎÄ¼ş */
+		/* ä¿å­˜Meshæ–‡ä»¶ */
 		out_mesh_file.close();
 	}
 
-	/* ¸üĞÂÄ£ĞÍ */
+	/* æ›´æ–°æ¨¡å‹ */
 	void ModelEditorLayer::UpdateModel()
 	{
 		PROFILE_FUNCTION();
 
-		/* ÏÈÒÆ³ı³¡¾°ÖĞµÄÆäËûÄ£ĞÍ */
+		/* å…ˆç§»é™¤åœºæ™¯ä¸­çš„å…¶ä»–æ¨¡å‹ */
 		m_pDefaultScene->DestroyTargetEntities<ModelComponent>();
 
-		/* ĞÂ½¨Ä£ĞÍ */
+		/* æ–°å»ºæ¨¡å‹ */
 		m_pModel = CreateSharedPtr<Model>(m_pModelInfo->m_Path);
 		for (size_t i = 0; i < m_pModelInfo->m_SubModelInfos.size(); ++i)
 		{
 			auto& sub_model_info = m_pModelInfo->m_SubModelInfos[i];
 			auto& material = m_pMaterialGroup->GetMaterialByIndex(i);
 
-			/* ¸üĞÂ²ÄÖÊ */
+			/* æ›´æ–°æè´¨ */
 			UpdateMaterial(material, sub_model_info->MaterialParams);
 			
 			SharedPtr<MeshSegment> mesh_segment = CreateSharedPtr<MeshSegment>(sub_model_info->Name, sub_model_info->VertexArray, material);
@@ -624,12 +624,12 @@ namespace Wuya
 			m_pModel->AddMeshSegment(mesh_segment);
 		}
 
-		/* ½«Ä£ĞÍÌí¼Óµ½³¡¾°ÖĞ */
+		/* å°†æ¨¡å‹æ·»åŠ åˆ°åœºæ™¯ä¸­ */
 		Entity entity = m_pDefaultScene->CreateEntity(m_pModel->GetDebugName());
 		auto& mesh_component = entity.AddComponent<ModelComponent>();
 		mesh_component.Model = m_pModel;
 
-		/* ¸ù¾İÄ£ĞÍ´óĞ¡×ÔÊÊÓ¦Ïà»ú¾àÀë */
+		/* æ ¹æ®æ¨¡å‹å¤§å°è‡ªé€‚åº”ç›¸æœºè·ç¦» */
 		const auto& aabb_min = m_pModel->GetAABBMin();
 		const auto& aabb_max = m_pModel->GetAABBMax();
 		const auto aabb_height = aabb_max.y - aabb_min.y;
@@ -638,7 +638,7 @@ namespace Wuya
 		m_pEditorCamera->SetFocalPoint((aabb_min + aabb_max) * 0.5f);
 	}
 
-	/* ¸üĞÂ²ÄÖÊ£º¸ù¾İ²ÄÖÊ²ÎÊıÉèÖÃ²ÄÖÊ */
+	/* æ›´æ–°æè´¨ï¼šæ ¹æ®æè´¨å‚æ•°è®¾ç½®æè´¨ */
 	void ModelEditorLayer::UpdateMaterial(const SharedPtr<Material>& material, const MaterialParams& material_params)
 	{
 		PROFILE_FUNCTION();
@@ -664,7 +664,7 @@ namespace Wuya
 			else
 				material->SetParameters(ParamType::Vec3, "Specular", material_params.Specular);
 
-			/* Normal, todo: ´¦ÀíBumpºÍDisplacement */
+			/* Normal, todo: å¤„ç†Bumpå’ŒDisplacement */
 			if (!material_params.BumpTexPath.empty())
 				material->SetTexture("Normal", TextureAssetManager::Instance().GetOrCreateTexture(ABSOLUTE_PATH(material_params.BumpTexPath), load_config), TextureSlot::Normal);
 			else if (!material_params.DisplacementTexPath.empty())

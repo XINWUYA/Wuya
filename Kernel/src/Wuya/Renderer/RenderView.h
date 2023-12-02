@@ -12,8 +12,9 @@ namespace Wuya
 	class Texture;
 	class FrameBuffer;
 	class FrameGraph;
+	class ShadowMapManager;
 
-	/* ¶Ôµ±Ç°RenderView¿É¼ûµÄÄ£ĞÍ */
+	/* å¯¹å½“å‰RenderViewå¯è§çš„æ¨¡å‹ */
 	struct VisibleMeshObject
 	{
 		int ObjectId{ -1 };
@@ -26,7 +27,7 @@ namespace Wuya
 		{}
 	};
 
-	/* Ó°Ïì³¡¾°µÄÓĞĞ§¹âÔ´ */
+	/* å½±å“åœºæ™¯çš„æœ‰æ•ˆå…‰æº */
 	struct ValidLight
 	{
 		uint32_t LightType{ 0 };
@@ -41,11 +42,11 @@ namespace Wuya
 		{}
 	};
 
-	/* ÊÓÍ¼Àà£º
-	 * Ã¿¸öÏà»úµ±¶ÔÓ¦Ò»¸öRenderView
-	 * Ã¿¸öRenderViewµ¥¶À¶ÔÓ¦Ò»¸öFrameGraph
-	 * Ã¿¸öRenderViewµ¥¶À×ö²Ã¼ô
-	 * Ã¿¸öRenderViewµ¥¶À¶ÔÓ¦Ò»Ì×ºó´¦Àí
+	/* è§†å›¾ç±»ï¼š
+	 * æ¯ä¸ªç›¸æœºå½“å¯¹åº”ä¸€ä¸ªRenderView
+	 * æ¯ä¸ªRenderViewå•ç‹¬å¯¹åº”ä¸€ä¸ªFrameGraph
+	 * æ¯ä¸ªRenderViewå•ç‹¬åšè£å‰ª
+	 * æ¯ä¸ªRenderViewå•ç‹¬å¯¹åº”ä¸€å¥—åå¤„ç†
 	 */
 	class RenderView
 	{
@@ -53,72 +54,77 @@ namespace Wuya
 		RenderView(std::string name, Camera* owner_camera);
 		~RenderView();
 
-		/* ÉèÖÃÃû³Æ */
+		/* è®¾ç½®åç§° */
 		void SetDebugName(const std::string& name) { m_DebugName = name; }
 		[[nodiscard]] const std::string& GetDebugName() const { return m_DebugName; }
 
-		/* »ñÈ¡²Ã¼ôÏà»ú */
+		/* è·å–è£å‰ªç›¸æœº */
 		[[nodiscard]] const Camera* GetCullingCamera() const { return m_pOwnerCamera; }
 
-		/* ÉèÖÃÆôÓÃÊÓ×¶ÌåÌŞ³ı */
+		/* è®¾ç½®å¯ç”¨è§†é”¥ä½“å‰”é™¤ */
 		void SetEnableFrustumCulling(bool enable) { m_IsEnableCulling = enable; }
 		[[nodiscard]] bool IsEnableFrustumCulling() const { return m_IsEnableCulling; }
 
-		/* ÉèÖÃÊÓ¿ÚÇøÓò */
+		/* è®¾ç½®è§†å£åŒºåŸŸ */
 		void SetViewportRegion(const ViewportRegion& region);
 		[[nodiscard]] const ViewportRegion& GetViewportRegion() const { return m_ViewportRegion; }
 
-		/* ÉèÖÃËùÊôµÄScene */
+		/* è®¾ç½®æ‰€å±çš„Scene */
 		void SetOwnerScene(const SharedPtr<Scene>& scene) { m_pOwnerScene = scene; }
 
-		/* ÉèÖÃRenderTarget */
+		/* è®¾ç½®RenderTarget */
 		void SetRenderTargetHandle(FrameGraphResourceHandle handle) { m_RenderTargetHandle = handle; }
 		[[nodiscard]] SharedPtr<Texture> GetRenderTarget() const;
 
-		/* »ñÈ¡FrameGraph */
+		/* è·å–FrameGraph */
 		[[nodiscard]] const SharedPtr<FrameGraph>& GetFrameGraph() const { return m_pFrameGraph; }
 
-		/* ´æ´¢¸÷PassµÄFrameBuffer */
+		/* å­˜å‚¨å„Passçš„FrameBuffer */
 		void EmplacePassFrameBuffer(const std::string& name, const SharedPtr<FrameBuffer>& frame_buffer);
 		[[nodiscard]] const SharedPtr<FrameBuffer>& GetPassFrameBuffer(const std::string& name) const;
 
-		/* ×¼±¸Ò»Ö¡µÄRenderViewÊı¾İ */
+		/* å‡†å¤‡ä¸€å¸§çš„RenderViewæ•°æ® */
 		void Prepare();
 
-		/* Ö´ĞĞäÖÈ¾µ±Ç°View */
+		/* æ‰§è¡Œæ¸²æŸ“å½“å‰View */
 		void Execute();
 
-		/* »ñÈ¡¿É¼ûMeshSegment */
+		/* è·å–å¯è§MeshSegment */
 		[[nodiscard]] const std::vector<VisibleMeshObject>& GetVisibleMeshObjects() const { return m_VisibleMeshObjects; }
 
-		/* »ñÈ¡¹âÔ´ */
+		/* è·å–å…‰æº */
 		[[nodiscard]] const std::vector<ValidLight>& GetValidLights() const { return m_ValidLights; }
 
 	private:
-		/* ÊÓ×¶ÌåÌŞ³ı£¬½ö±£Áô¶Ôµ±Ç°RenderView¿É¼ûµÄ¶ÔÏó */
+		/* è§†é”¥ä½“å‰”é™¤ï¼Œä»…ä¿ç•™å¯¹å½“å‰RenderViewå¯è§çš„å¯¹è±¡ */
 		void PrepareVisibleObjects();
-		/* ×¼±¸¹âÔ´ĞÅÏ¢ */
+		/* å‡†å¤‡å…‰æºä¿¡æ¯ */
 		void PrepareLights();
 
-		/* RenderViewÃû */
+		/* RenderViewå */
 		std::string m_DebugName{ "Unnamed RenderView" };
-		/* ÊÓ¿ÚÇøÓò */
+		/* è§†å£åŒºåŸŸ */
 		ViewportRegion m_ViewportRegion{};
-		/* ÊÇ·ñÆôÓÃÊÓ×¶ÌåÌŞ³ı */
+		/* æ˜¯å¦å¯ç”¨è§†é”¥ä½“å‰”é™¤ */
 		bool m_IsEnableCulling{ true };
-		/* Ïà»ú */
+		/* ç›¸æœº */
 		Camera* m_pOwnerCamera{ nullptr };
-		/* ËùÊôµÄScene */
+		/* æ‰€å±çš„Scene */
 		WeakPtr<Scene> m_pOwnerScene;
-		/* ÊÓ×¶ÌåÌŞ³ıÖ®ºó£¬¶Ôµ±Ç°¿É¼ûMeshSegment */
+		/* è§†é”¥ä½“å‰”é™¤ä¹‹åï¼Œå¯¹å½“å‰å¯è§MeshSegment */
 		std::vector<VisibleMeshObject> m_VisibleMeshObjects{};
-		/* ¶Ô³¡¾°²úÉúÓ°ÏìµÄ¹âÔ´ */
+		/* å¯¹åœºæ™¯äº§ç”Ÿå½±å“çš„å…‰æº */
 		std::vector<ValidLight> m_ValidLights{};
-		/* µ±Ç°ViewµÄäÖÈ¾½á¹ûÊä³öµ½¸ÃRenderTarget */
+		/* å½“å‰Viewçš„æ¸²æŸ“ç»“æœè¾“å‡ºåˆ°è¯¥RenderTarget */
 		FrameGraphResourceHandle m_RenderTargetHandle{};
 		/* FrameGraph */
 		SharedPtr<FrameGraph> m_pFrameGraph{ nullptr };
-		/* ÊÕ¼¯µ±Ç°RenderView¶ÔÓ¦µÄFrameGraphÖĞ¸÷Pass½×¶ÎµÄFrameBuffer£¬ÓÃÓÚReadPixels<PassName, FrameBufferPtr> */
+		/* æ”¶é›†å½“å‰RenderViewå¯¹åº”çš„FrameGraphä¸­å„Passé˜¶æ®µçš„FrameBufferï¼Œç”¨äºReadPixels<PassName, FrameBufferPtr> */
 		std::unordered_map<std::string, SharedPtr<FrameBuffer>> m_PassFrameBuffers{};
+
+		/* æ˜¯å¦å¼€å¯æŠ•å½± */
+		bool m_IsHasShadowCast{ false };
+		/* é˜´å½±ç®¡ç† */
+		SharedPtr<ShadowMapManager> m_pShadowMapManager{ nullptr };
 	};
 }

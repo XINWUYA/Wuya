@@ -63,6 +63,7 @@ group ""
 
 group "Samples"
 	include "Samples/Sample_SkyBox"
+	include "Samples/Sample_CSM"
 --	include "Samples/001_Triangle"
 --	include "Samples/002_Texture"
 --	include "Samples/003_Camera"

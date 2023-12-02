@@ -41,7 +41,7 @@ namespace ImGuiExt
 	/* 绘制一个Combo */
 	void DrawComboUI(const std::string& label, const std::vector<std::string>& options, int& selected_idx, const std::function<void(int)>& callback = [](int) {}, float label_width = 100.0f);
 	/* 绘制一个方向指示 */
-	void DrawDirectionIndicator(const std::string& label, glm::vec3& direction, float label_width = 100);
+	bool DrawDirectionIndicator(const std::string& label, glm::vec3& direction, float label_width = 100);
 	/* 绘制一个询问弹窗UI(todo: 还不能用，需要调试) */
 	bool DrawModalUI(const std::string& label, const std::string& content_text, bool& never_ask);
 }

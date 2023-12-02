@@ -13,6 +13,17 @@ namespace Wuya
 		Volume
 	};
 
+	/* 阴影信息 */
+	struct ShadowMapInfo
+	{
+		uint32_t Size{ 1024 };
+		uint8_t CascadeCnt{ 1 };
+		glm::vec4 CascadeRadius{ 0.0f };
+		float ConstantBias{ 0.01f };
+		float NormalBias{ 1.0f };
+		float ShadowFar{ 0.0f };
+	};
+
 	/* 光源类 */
 	class Light
 	{
@@ -37,6 +48,9 @@ namespace Wuya
 		void SetIsCastShadow(bool enable) { m_IsCastShadow = enable; }
 		[[nodiscard]] bool IsCastShadow() const { return m_IsCastShadow; }
 
+		/* 阴影信息 */
+		[[nodiscard]] const SharedPtr<ShadowMapInfo>& GetShadowMapInfo() const { return m_pShadowMapInfo; }
+
 		/* 创建指定类型光源 */
 		static SharedPtr<Light> Create(LightType type);
 
@@ -49,15 +63,13 @@ namespace Wuya
 		float m_Intensity{ 1.0f };
 		/* 是否投影 */
 		bool m_IsCastShadow{ false };
-		/* 光源位置 */
-		glm::vec3 m_LightPos{ 0.0f };
-		/* 光源方向 */
-		glm::vec3 m_LightDir{0.0f, -1.0f, 0.0f};
+		/* 阴影信息 */
+		SharedPtr<ShadowMapInfo> m_pShadowMapInfo{ nullptr };
 	};
 
 
 	/* 方向光 */
-	class DirectionalLight : public Light
+	class DirectionalLight final : public Light
 	{
 	public:
 		DirectionalLight() = default;
@@ -66,8 +78,13 @@ namespace Wuya
 		/* 获取光源类型 */
 		[[nodiscard]] LightType GetLightType() const override { return LightType::Directional; }
 
-	private:
+		/* 光源方向 */
+		[[nodiscard]] const glm::vec3& GetDirection() const { return m_Direciton; }
+		void SetDirection(const glm::vec3& dir) { m_Direciton = dir; }
 
+	private:
+		/* 光源方向 */
+		glm::vec3 m_Direciton{ 0.0f, -1.0f, 0.0f };
 	};
 
 
@@ -80,6 +97,10 @@ namespace Wuya
 
 		/* 获取光源类型 */
 		[[nodiscard]] LightType GetLightType() const override { return LightType::Point; }
+
+	private:
+		/* 光源位置 */
+		glm::vec3 m_LightPos{ 0.0f };
 	};
 
 

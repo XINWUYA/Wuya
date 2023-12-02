@@ -29,10 +29,10 @@ namespace Wuya
 	{
 		PROFILE_FUNCTION();
 
-		/* ³¡¾°ÊµÌåÁĞ±í */
+		/* åœºæ™¯å®ä½“åˆ—è¡¨ */
 		ShowSceneHierarchyUI();
 
-		/* ÊµÌåÊôĞÔ */
+		/* å®ä½“å±æ€§ */
 		ShowEntityPropertiesUI();
 	}
 
@@ -54,11 +54,11 @@ namespace Wuya
 					ShowEntityNode(entity);
 				});
 
-			/* µã»÷×ó¼ü£¬Ñ¡ÖĞ */
+			/* ç‚¹å‡»å·¦é”®ï¼Œé€‰ä¸­ */
 			// if (ImGui::IsMouseDown(0) && ImGui::IsWindowHovered())
 			// 	m_SelectedEntity = {};
 
-			/* ¿Õ°×´¦ÓÒ¼ü£¬»½³öĞÂ½¨ */
+			/* ç©ºç™½å¤„å³é”®ï¼Œå”¤å‡ºæ–°å»º */
 			if (ImGui::BeginPopupContextWindow("New", 1, false))
 			{
 				if (ImGui::BeginMenu("New A Entity"))
@@ -147,7 +147,7 @@ namespace Wuya
 			m_SelectedEntity = entity;
 		}
 
-		/* ÓÒ¼üÑ¡ÔñÉ¾³ıµ±Ç°½Úµã */
+		/* å³é”®é€‰æ‹©åˆ é™¤å½“å‰èŠ‚ç‚¹ */
 		bool entity_deleted = false;
 		if (ImGui::BeginPopupContextItem())
 		{
@@ -157,7 +157,7 @@ namespace Wuya
 			ImGui::EndPopup();
 		}
 
-		/* Õ¹¿ª×Ó½Úµã */
+		/* å±•å¼€å­èŠ‚ç‚¹ */
 		if (is_opened)
 		{
 			ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_SpanAvailWidth;
@@ -166,7 +166,7 @@ namespace Wuya
 			ImGui::TreePop();
 		}
 
-		/* È·ÈÏÉ¾³ı½Úµã */
+		/* ç¡®è®¤åˆ é™¤èŠ‚ç‚¹ */
 		if (entity_deleted)
 		{
 			m_pOwnerScene->DestroyEntity(entity);
@@ -175,7 +175,7 @@ namespace Wuya
 		}
 	}
 
-	/* ×é¼ş¿ò¼Ü */
+	/* ç»„ä»¶æ¡†æ¶ */
 	template<typename T, typename UIFunction>
 	static void ShowComponent(const std::string& name, Entity& entity, UIFunction show_custom)
 	{
@@ -193,7 +193,7 @@ namespace Wuya
 			bool open = ImGui::TreeNodeEx((void*)typeid(T).hash_code(), flags, name.c_str());
 			ImGui::PopStyleVar();
 
-			/* ÉèÖÃÍ¼±ê */
+			/* è®¾ç½®å›¾æ ‡ */
 			START_TRANSPARENT_BUTTON;
 			START_STYLE_ALPHA(0.5f);
 			ImGui::SameLine(panel_width - 15);
@@ -203,7 +203,7 @@ namespace Wuya
 			END_STYLE_ALPHA;
 			END_TRANSPARENT_BUTTON;
 
-			/* É¾³ı×é¼şÑ¡Ïî */
+			/* åˆ é™¤ç»„ä»¶é€‰é¡¹ */
 			bool remove = false;
 			if (ImGui::BeginPopup("ComponentSettings"))
 			{
@@ -213,14 +213,14 @@ namespace Wuya
 				ImGui::EndPopup();
 			}
 
-			/* Õ¹¿ªÊ±ÏÔÊ¾×é¼şÄÚÈİ */
+			/* å±•å¼€æ—¶æ˜¾ç¤ºç»„ä»¶å†…å®¹ */
 			if (open)
 			{
 				show_custom(component);
 				ImGui::TreePop();
 			}
 
-			/* É¾³ı×é¼ş */
+			/* åˆ é™¤ç»„ä»¶ */
 			if (remove)
 				entity.RemoveComponent<T>();
 		}
@@ -230,31 +230,31 @@ namespace Wuya
 	{
 		PROFILE_FUNCTION();
 
-		/* ÊµÌåÃû³Æ×é¼ş */
+		/* å®ä½“åç§°ç»„ä»¶ */
 		ShowNameComponent();
 
-		/* Ôö¼Ó×é¼ş°´Å¥ */
-		const float panel_width = ImGui::GetContentRegionAvail().x; /* ´°¿ÚÇøÓò¿í¶È */
-		ImGui::SameLine(panel_width - 15); /* ·ÅÖÃÔÚÍ¬ĞĞ¿¿ÓÒµÄÎ»ÖÃ */
+		/* å¢åŠ ç»„ä»¶æŒ‰é’® */
+		const float panel_width = ImGui::GetContentRegionAvail().x; /* çª—å£åŒºåŸŸå®½åº¦ */
+		ImGui::SameLine(panel_width - 15); /* æ”¾ç½®åœ¨åŒè¡Œé å³çš„ä½ç½® */
 		ShowAddComponentButton();
 
-		/* ¿Õ¼ä±ä»»×é¼ş */
+		/* ç©ºé—´å˜æ¢ç»„ä»¶ */
 		ShowTransformComponent();
 
-		/* Í¼Æ¬¾«Áé×é¼ş */
+		/* å›¾ç‰‡ç²¾çµç»„ä»¶ */
 		ShowSpriteComponent();
 
-		/* ³¡¾°Ïà»ú×é¼ş */
+		/* åœºæ™¯ç›¸æœºç»„ä»¶ */
 		ShowCameraComponent();
 
-		/* Ä£ĞÍ×é¼ş */
+		/* æ¨¡å‹ç»„ä»¶ */
 		ShowModelComponent();
 
-		/* ¹âÔ´×é¼ş */
+		/* å…‰æºç»„ä»¶ */
 		ShowLightComponent();
 	}
 
-	/* ÊµÌåÃû³Æ×é¼ş */
+	/* å®ä½“åç§°ç»„ä»¶ */
 	void SceneHierarchy::ShowNameComponent()
 	{
 		PROFILE_FUNCTION();
@@ -276,7 +276,7 @@ namespace Wuya
 		}
 	}
 
-	/* Ôö¼Ó×é¼ş°´Å¥ */
+	/* å¢åŠ ç»„ä»¶æŒ‰é’® */
 	void SceneHierarchy::ShowAddComponentButton()
 	{
 		PROFILE_FUNCTION();
@@ -288,28 +288,28 @@ namespace Wuya
 
 		if (ImGui::BeginPopup("AddComponentPopup"))
 		{
-			/* Ïà»ú */
+			/* ç›¸æœº */
 			if (ImGui::MenuItem("Camera Component"))
 			{
 				m_SelectedEntity.AddComponent<CameraComponent>();
 				ImGui::CloseCurrentPopup();
 			}
 
-			/* Í¼Æ¬¾«Áé */
+			/* å›¾ç‰‡ç²¾çµ */
 			if (ImGui::MenuItem("Sprite Component"))
 			{
 				m_SelectedEntity.AddComponent<SpriteComponent>();
 				ImGui::CloseCurrentPopup();
 			}
 
-			/* Ä£ĞÍ */
+			/* æ¨¡å‹ */
 			if (ImGui::MenuItem("Model Component"))
 			{
 				m_SelectedEntity.AddComponent<ModelComponent>();
 				ImGui::CloseCurrentPopup();
 			}
 
-			/* ¹âÔ´ */
+			/* å…‰æº */
 			if (ImGui::MenuItem("Light Component"))
 			{
 				m_SelectedEntity.AddComponent<LightComponent>();
@@ -320,7 +320,7 @@ namespace Wuya
 		}
 	}
 
-	/* ¿Õ¼ä±ä»»×é¼ş */
+	/* ç©ºé—´å˜æ¢ç»„ä»¶ */
 	void SceneHierarchy::ShowTransformComponent()
 	{
 		PROFILE_FUNCTION();
@@ -337,7 +337,7 @@ namespace Wuya
 			});
 	}
 
-	/* Í¼Æ¬¾«Áé×é¼ş */
+	/* å›¾ç‰‡ç²¾çµç»„ä»¶ */
 	void SceneHierarchy::ShowSpriteComponent()
 	{
 		PROFILE_FUNCTION();
@@ -350,7 +350,7 @@ namespace Wuya
 			});
 	}
 
-	/* ³¡¾°Ïà»ú×é¼ş */
+	/* åœºæ™¯ç›¸æœºç»„ä»¶ */
 	void SceneHierarchy::ShowCameraComponent()
 	{
 		PROFILE_FUNCTION();
@@ -402,7 +402,7 @@ namespace Wuya
 			});
 	}
 
-	/* Ä£ĞÍ×é¼ş */
+	/* æ¨¡å‹ç»„ä»¶ */
 	void SceneHierarchy::ShowModelComponent()
 	{
 		PROFILE_FUNCTION();
@@ -412,6 +412,7 @@ namespace Wuya
 			{
 				auto& model = component.Model;
 
+				if (model)
 				{
 					ImGui::PushID("ModelPath");
 					ImGui::Columns(2);
@@ -441,7 +442,7 @@ namespace Wuya
 			});
 	}
 
-	/* ¹âÔ´×é¼ş */
+	/* å…‰æºç»„ä»¶ */
 	void SceneHierarchy::ShowLightComponent()
 	{
 		PROFILE_FUNCTION();
@@ -452,26 +453,26 @@ namespace Wuya
 				if (!light)
 					return;
 
-				/* ¹âÔ´ÀàĞÍ */
+				/* å…‰æºç±»å‹ */
 				int type_idx = static_cast<int>(light->GetLightType());
 				ImGuiExt::DrawComboUI("Type", GetEnumNames<LightType>(), type_idx,
 					[&light](int selected_idx)
 					{
-						/* todo: ÇĞ»»¹âÔ´ÀàĞÍ */
+						/* todo: åˆ‡æ¢å…‰æºç±»å‹ */
 						//scene_camera.SetProjectionType(static_cast<SceneCamera::ProjectionType>(selected_idx));
 					});
 
-				/* ¹âÔ´ÑÕÉ« */
+				/* å…‰æºé¢œè‰² */
 				glm::vec4 light_color = light->GetColor();
 				ImGuiExt::DrawColorUI("Color", light_color);
 				light->SetColor(light_color);
 
-				/* ¹âÔ´Ç¿¶È */
+				/* å…‰æºå¼ºåº¦ */
 				float light_intensity = light->GetIntensity();
 				ImGuiExt::DrawDragFloatUI("Intensity", light_intensity);
 				light->SetIntensity(light_intensity);
 
-				/* Í¶Ó° */
+				/* æŠ•å½± */
 				bool cast_shadow = light->IsCastShadow();
 				ImGuiExt::DrawCheckboxUI("CastShadow", cast_shadow);
 				light->SetIsCastShadow(cast_shadow);
