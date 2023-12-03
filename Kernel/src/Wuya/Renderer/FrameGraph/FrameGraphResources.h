@@ -1,6 +1,7 @@
 #pragma once
 #include "FrameGraphResourceHandle.h"
 #include "Wuya/Renderer/RenderCommon.h"
+#include "Wuya/Renderer/FrameGraph/Resource.h"
 
 namespace Wuya
 {
@@ -9,71 +10,71 @@ namespace Wuya
 	class IResource;
 	class FrameBuffer;
 
-	/* FrameGraphÖĞÒ»¸öRenderPassNodeÖĞÊ¹ÓÃµÄ×ÊÔ´ */
+	/* FrameGraphä¸­ä¸€ä¸ªRenderPassNodeä¸­ä½¿ç”¨çš„èµ„æº */
 	class FrameGraphResources
 	{
 	public:
 		FrameGraphResources(FrameGraph& frame_graph, RenderPassNode& render_pass_node);
 		~FrameGraphResources() = default;
 
-		/* »ñÈ¡µ±Ç°RenderPassNodeÃû */
+		/* è·å–å½“å‰RenderPassNodeå */
 		[[nodiscard]] const std::string& GetPassName() const;
 
-		/* »ñÈ¡Ö¸¶¨×ÊÔ´ */
+		/* è·å–æŒ‡å®šèµ„æº */
 		template<typename ResourceType>
 		const ResourceType& Get(FrameGraphResourceHandleTyped<ResourceType> handle) const
 		{
 			return StaticPtrCast<const Resource<ResourceType>>(GetResource(handle))->GetResource();
 		}
 
-		/* »ñÈ¡Ö¸¶¨×ÊÔ´µÄÃèÊö */
+		/* è·å–æŒ‡å®šèµ„æºçš„æè¿° */
 		template <typename ResourceType>
 		const typename ResourceType::Descriptor& GetDescriptor(FrameGraphResourceHandleTyped<ResourceType> handle) const
 		{
 			return StaticPtrCast<const Resource<ResourceType>>(GetResource(handle))->GetDescriptor();
 		}
 
-		/* »ñÈ¡Ö¸¶¨×ÊÔ´µÄÓÃÍ¾ */
+		/* è·å–æŒ‡å®šèµ„æºçš„ç”¨é€” */
 		template <typename ResourceType>
 		const typename ResourceType::Usage& GetUsage(FrameGraphResourceHandleTyped<ResourceType> handle) const
 		{
 			return StaticPtrCast<const Resource<ResourceType>>(GetResource(handle))->GetUsage();
 		}
 
-		/* »ñÈ¡µ±Ç°RenderPassµÄRenderTarget */
+		/* è·å–å½“å‰RenderPassçš„RenderTarget */
 		[[nodiscard]] SharedPtr<FrameBuffer> GetPassRenderTarget(uint32_t idx = 0) const;
 
 	private:
-		/* ´ÓFrameGraphÖĞ»ñÈ¡×ÊÔ´ */
+		/* ä»FrameGraphä¸­è·å–èµ„æº */
 		[[nodiscard]] const SharedPtr<IResource>& GetResource(FrameGraphResourceHandle handle) const;
 
-		/* ËùÊôFrameGraph */
+		/* æ‰€å±FrameGraph */
 		FrameGraph& m_FrameGraph;
-		/* ËùÊôµÄFrameGraphPass */
+		/* æ‰€å±çš„FrameGraphPass */
 		RenderPassNode& m_RenderPassNode;
 	};
 
 	class Texture;
 
-	/* FrameGraphÖĞÊ¹ÓÃµÄTexture */
+	/* FrameGraphä¸­ä½¿ç”¨çš„Texture */
 	struct FrameGraphTexture
 	{
 		SharedPtr<Texture> Texture;
 
-		/* ÃèÊö */
+		/* æè¿° */
 		struct Descriptor
 		{
 			uint32_t Width{ 1 };
 			uint32_t Height{ 1 }; 
-			uint32_t Depth{ 1 }; /* ¿É±íÊ¾3DÎÆÀí */
-			uint8_t  MipLevels{ 1 }; /* Éú³ÉµÄMip²ã¼¶Êı */
-			uint8_t  Samples{ 0 }; /* 0£º×Ô¶¯²ÉÑù£»1£º²»¿ªÆô¶àÖØ²ÉÑù£»>1£º²»¿É²ÉÑù */
+			uint32_t Depth{ 1 }; /* å¯è¡¨ç¤º3Dçº¹ç† */
+			uint8_t  MipLevels{ 1 }; /* ç”Ÿæˆçš„Mipå±‚çº§æ•° */
+			uint8_t  Samples{ 0 }; /* 0ï¼šè‡ªåŠ¨é‡‡æ ·ï¼›1ï¼šä¸å¼€å¯å¤šé‡é‡‡æ ·ï¼›>1ï¼šä¸å¯é‡‡æ · */
 
 			TextureFormat TextureFormat{ TextureFormat::RGBA8 };
 			SamplerType   SamplerType{ SamplerType::Sampler2D };
 		};
 
-		/* ×Ó×ÊÔ´ÃèÊö */
+		/* å­èµ„æºæè¿° */
 		struct SubDescriptor
 		{
 			/* Mip level */
@@ -82,14 +83,14 @@ namespace Wuya
 			uint16_t Layer{ 0 };
 		};
 
-		/* Ê¹ÓÃ·½Ê½ */
+		/* ä½¿ç”¨æ–¹å¼ */
 		using Usage = TextureUsage;
 		static constexpr Usage DefaultReadUsage = TextureUsage::Sampleable;
 		static constexpr Usage DefaultWriteUsage = TextureUsage::ColorAttachment;
 
-		/* ´´½¨ */
+		/* åˆ›å»º */
 		void Create(const std::string& name, const Descriptor& desc, Usage usage);
-		/* Ïú»Ù */
+		/* é”€æ¯ */
 		void Destroy();
 	};
 }

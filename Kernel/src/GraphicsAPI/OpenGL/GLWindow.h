@@ -1,14 +1,13 @@
 #pragma once
 #include "Wuya/Core/Window.h"
+#include "Wuya/Renderer/RenderContext.h"
 
 struct GLFWwindow;
 
 namespace Wuya
 {
-	class IRenderContext;
-
-	/* GLWindowÀà£º
-	 * Ê¹ÓÃGLFWwindow´´½¨OpenGL´°¿Ú
+	/* GLWindowç±»ï¼š
+	 * ä½¿ç”¨GLFWwindowåˆ›å»ºOpenGLçª—å£
 	 */
 	class GLWindow : public IWindow
 	{
@@ -16,41 +15,41 @@ namespace Wuya
 		GLWindow(const WindowDesc& desc);
 		~GLWindow() override;
 
-		/* ¸üĞÂ£¬½»»»Ò»Ö¡ */
+		/* æ›´æ–°ï¼Œäº¤æ¢ä¸€å¸§ */
 		void OnUpdate() override;
 
-		/* »ñÈ¡¿í¶È/¸ß¶È */
+		/* è·å–å®½åº¦/é«˜åº¦ */
 		[[nodiscard]] uint32_t GetWidth() const override { return m_WindowInfo.Descriptor.Width; }
 		[[nodiscard]] uint32_t GetHeight() const override { return m_WindowInfo.Descriptor.Height; }
 
-		/* ÉèÖÃ´¹Ö±Í¬²½ */
+		/* è®¾ç½®å‚ç›´åŒæ­¥ */
 		[[nodiscard]] bool IsVSync() const override { return m_WindowInfo.Descriptor.IsVSync; }
 		void SetVSync(bool enable) override;
 
-		/* »ñÈ¡GLFWwindow* */
+		/* è·å–GLFWwindow* */
 		[[nodiscard]] void* GetNativeWindow() const override { return m_pGLFWWindow; }
 
-		/* ÉèÖÃÏìÓ¦ÊÂ¼ş */
+		/* è®¾ç½®å“åº”äº‹ä»¶ */
 		virtual void SetEventCallback(const EventCallbackFunc& callback) override { m_WindowInfo.CallBackFunc = callback; }
 
 	private:
-		/* ´´½¨´°¿Ú£»´´½¨ÉÏÏÂÎÄ£»°ó¶¨ÏìÓ¦ÊÂ¼ş */
+		/* åˆ›å»ºçª—å£ï¼›åˆ›å»ºä¸Šä¸‹æ–‡ï¼›ç»‘å®šå“åº”äº‹ä»¶ */
 		void Build(const WindowDesc& desc);
-		/* Ïú»Ù´°¿Ú */
+		/* é”€æ¯çª—å£ */
 		void Destroy();
 
-		/* ´°¿ÚĞÅÏ¢ */
+		/* çª—å£ä¿¡æ¯ */
 		struct WindowInfo
 		{
-			WindowDesc Descriptor;			/* ´°¿ÚÃèÊö */
-			EventCallbackFunc CallBackFunc; /* ´°¿ÚÊÂ¼ş»Øµ÷ */
+			WindowDesc Descriptor;			/* çª—å£æè¿° */
+			EventCallbackFunc CallBackFunc; /* çª—å£äº‹ä»¶å›è°ƒ */
 		};
 
-		/* GLFWwindowÖ¸Õë */
+		/* GLFWwindowæŒ‡é’ˆ */
 		GLFWwindow* m_pGLFWWindow{ nullptr };
-		/* ´°¿ÚĞÅÏ¢*/
+		/* çª—å£ä¿¡æ¯*/
 		WindowInfo m_WindowInfo{};
-		/* ´°¿ÚÉÏÏÂÎÄ */
+		/* çª—å£ä¸Šä¸‹æ–‡ */
 		UniquePtr<IRenderContext> m_pRenderContext{ nullptr };
 	};
 

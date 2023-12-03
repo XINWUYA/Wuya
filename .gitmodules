@@ -37,3 +37,6 @@
 [submodule "Libraries/ThirdParty/assimp"]
 	path = Libraries/ThirdParty/assimp
 	url = https://github.com/assimp/assimp.git
+[submodule "Libraries/ThirdParty/tracy"]
+	path = Libraries/ThirdParty/tracy
+	url = https://github.com/wolfpld/tracy.git

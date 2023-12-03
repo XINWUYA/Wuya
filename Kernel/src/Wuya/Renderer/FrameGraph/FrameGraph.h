@@ -10,59 +10,10 @@
 
 namespace Wuya
 {
-	class FrameGraph;
+	class FrameGraphBuilder;
 	class RenderResourceNode;
 
-	/* FrameGraph BuilderÀà
-	 * Ã¿¸öRenderPass¶ÔÓ¦¶ÔÓ¦Ò»¸öBuilder
-	 * ÓÃÓÚ´´½¨»ò°ó¶¨µ±Ç°RenderPassËùĞèµÄ×ÊÔ´
-	 */
-	class FrameGraphBuilder
-	{
-	public:
-		explicit FrameGraphBuilder(FrameGraphBuilder&) = delete;
-		FrameGraphBuilder& operator=(const FrameGraphBuilder&) = delete;
-		~FrameGraphBuilder() = default;
-
-		/* ¸ù¾İÃèÊö´´½¨RenderPass */
-		uint32_t CreateRenderPass(const std::string& name, const FrameGraphPassInfo::Descriptor& desc = {});
-
-		/* ¸ù¾İÃèÊö´´½¨Ò»¸öÎÆÀí×ÊÔ´ */
-		FrameGraphResourceHandleTyped<FrameGraphTexture> CreateTexture(const std::string& name, const FrameGraphTexture::Descriptor& desc = {});
-
-		/* Îªµ±Ç°RenderPass°ó¶¨ÊäÈë×ÊÔ´ */
-		template<typename ResourceType>
-		void BindInputResource(FrameGraphResourceHandleTyped<ResourceType> handle, typename ResourceType::Usage usage = ResourceType::DefaultReadUsage)
-		{
-			m_FrameGraph.BindInputResource<ResourceType>(m_pRenderPassNode, handle, usage);
-		}
-
-		/* Îªµ±Ç°RenderPass°ó¶¨Êä³ö×ÊÔ´ */
-		template<typename ResourceType>
-		void BindOutputResource(FrameGraphResourceHandleTyped<ResourceType> handle, typename ResourceType::Usage usage = ResourceType::DefaultWriteUsage)
-		{
-			m_FrameGraph.BindOutputResource<ResourceType>(m_pRenderPassNode, handle, usage);
-		}
-
-		/* Ê¹µ±Ç°½Úµã²»»á±»ÓÅ»¯µô£¬¼´Ê¹Ã»ÓĞÃ»Ê¹ÓÃµ½ */
-		void AsSideEffect(bool value = true);
-
-		/* ¸ù¾İ×ÊÔ´HandleÔÚFrameGraphÖĞ»ñÈ¡×ÊÔ´Ãû */
-		[[nodiscard]] const std::string& GetResourceName(FrameGraphResourceHandle handle) const;
-
-
-	private:
-		FrameGraphBuilder(FrameGraph& frame_graph, const SharedPtr<RenderPassNode>& render_pass_node);
-
-		/* µ±Ç°BuilderËùÊôµÄFrameGraph */
-		FrameGraph& m_FrameGraph;
-		/* ¶ÔÓ¦µÄRenderPass */
-		SharedPtr<RenderPassNode> m_pRenderPassNode{ nullptr };
-
-		friend class FrameGraph;
-	};
-
-	/* FrameGraphÀà */
+	/* FrameGraphç±» */
 	class FrameGraph final
 	{
 	public:
@@ -71,16 +22,16 @@ namespace Wuya
 		FrameGraph& operator=(const FrameGraph&) = delete;
 		~FrameGraph();
 
-		/* Ìí¼ÓÒ»¸öFrameGraphPass£º
-		 * SetupFunc½«±»Á¢¼´Ö´ĞĞ£»
-		 * ExecuteFunc½«ÔÚÖ´ĞĞÕû¸öFrameGraphÊ±²Å»áÖ´ĞĞ£»
+		/* æ·»åŠ ä¸€ä¸ªFrameGraphPassï¼š
+		 * SetupFuncå°†è¢«ç«‹å³æ‰§è¡Œï¼›
+		 * ExecuteFuncå°†åœ¨æ‰§è¡Œæ•´ä¸ªFrameGraphæ—¶æ‰ä¼šæ‰§è¡Œï¼›
 		 */
 		template<typename Data, typename SetupFunc, typename ExecuteFunc>
 		SharedPtr<FrameGraphPass<Data, ExecuteFunc>> AddPass(const std::string& name, SetupFunc setup_func, ExecuteFunc&& execute_func)
 		{
 			auto frame_graph_pass = CreateSharedPtr<FrameGraphPass<Data, ExecuteFunc>>(std::forward<ExecuteFunc>(execute_func));
 			auto render_pass_node = CreateSharedPtr<RenderPassNode>(name, *this, frame_graph_pass);
-			/* ½«Pass½Úµã×¢²áµ½ÒÀÀµÍ¼ÖĞ */
+			/* å°†PassèŠ‚ç‚¹æ³¨å†Œåˆ°ä¾èµ–å›¾ä¸­ */
 			m_DependencyGraph.RegisterNode(render_pass_node);
 
 			frame_graph_pass->SetRenderPassNode(render_pass_node);
@@ -88,13 +39,13 @@ namespace Wuya
 
 			FrameGraphBuilder builder(*this, render_pass_node);
 
-			/* Ö´ĞĞSetup½×¶Î */
+			/* æ‰§è¡ŒSetupé˜¶æ®µ */
 			setup_func(builder, const_cast<Data&>(frame_graph_pass->GetData()));
 
 			return frame_graph_pass;
 		}
 
-		/* ´´½¨×ÊÔ´ */
+		/* åˆ›å»ºèµ„æº */
 		template<typename ResourceType>
 		FrameGraphResourceHandleTyped<ResourceType> CreateResource(const std::string& name, const typename ResourceType::Descriptor& desc = {})
 		{
@@ -102,92 +53,141 @@ namespace Wuya
 			return FrameGraphResourceHandleTyped<ResourceType>(AddResourceInternal(resource));
 		}
 
-		/* ÎªRenderPass°ó¶¨ÊäÈë×ÊÔ´ */
+		/* ä¸ºRenderPassç»‘å®šè¾“å…¥èµ„æº */
 		template<typename ResourceType>
 		void BindInputResource(const SharedPtr<RenderPassNode>& render_pass_node, FrameGraphResourceHandleTyped<ResourceType> handle, typename ResourceType::Usage usage = ResourceType::DefaultReadUsage)
 		{
 			BindInputResourceInternal(render_pass_node, handle,
 				[this, render_pass_node, usage](const SharedPtr<IResource>& resource, const SharedPtr<RenderResourceNode>& resource_node)
 				{
-					/* ½«×ÊÔ´½ÚµãÁ¬½Óµ½ÒÀÀµÍ¼ÖĞ */
+					/* å°†èµ„æºèŠ‚ç‚¹è¿æ¥åˆ°ä¾èµ–å›¾ä¸­ */
 					auto res = DynamicPtrCast<Resource<ResourceType>>(resource);
 					return res->ConnectAsInput(m_DependencyGraph, render_pass_node, resource_node, usage);
 				});
 		}
 
-		/* ÎªRenderPass°ó¶¨Êä³ö×ÊÔ´ */
+		/* ä¸ºRenderPassç»‘å®šè¾“å‡ºèµ„æº */
 		template<typename ResourceType>
 		void BindOutputResource(const SharedPtr<RenderPassNode>& render_pass_node, FrameGraphResourceHandleTyped<ResourceType> handle, typename ResourceType::Usage usage = ResourceType::DefaultWriteUsage)
 		{
 			BindOutputResourceInternal(render_pass_node, handle,
 				[this, render_pass_node, usage](const SharedPtr<IResource>& resource, const SharedPtr<RenderResourceNode>& resource_node)
 				{
-					/* ½«×ÊÔ´½ÚµãÁ¬½Óµ½ÒÀÀµÍ¼ÖĞ */
+					/* å°†èµ„æºèŠ‚ç‚¹è¿æ¥åˆ°ä¾èµ–å›¾ä¸­ */
 					auto res = DynamicPtrCast<Resource<ResourceType>>(resource);
 					return res->ConnectAsOutput(m_DependencyGraph, render_pass_node, resource_node, usage);
 				});
 		}
 
-		/* »ñÈ¡×ÊÔ´ */
+		/* è·å–èµ„æº */
 		[[nodiscard]] SharedPtr<IResource> GetResource(FrameGraphResourceHandle handle);
-		/* »ñÈ¡×ÊÔ´½Úµã */
+		/* è·å–èµ„æºèŠ‚ç‚¹ */
 		[[nodiscard]] SharedPtr<RenderResourceNode> GetRenderResourceNode(FrameGraphResourceHandle handle);
-		/* »ñÈ¡ÒÀÀµ¹ØÏµÍ¼ */
+		/* è·å–ä¾èµ–å…³ç³»å›¾ */
 		[[nodiscard]] DependencyGraph& GetDependencyGraph() { return m_DependencyGraph; }
-		/* »ñÈ¡Blackboard */
+		/* è·å–Blackboard */
 		[[nodiscard]] Blackboard& GetBlackboard() { return m_Blackboard; }
 		[[nodiscard]] const Blackboard& GetBlackboard() const { return m_Blackboard; }
 		//const DependencyGraph& GetDependencyGraph() const { return m_DependencyGraph; }
 
-		/* ¼ì²éÒ»¸ö×ÊÔ´½ÚµãÊÇ·ñÓĞĞ§ */
+		/* æ£€æŸ¥ä¸€ä¸ªèµ„æºèŠ‚ç‚¹æ˜¯å¦æœ‰æ•ˆ */
 		[[nodiscard]] bool IsHandleValid(FrameGraphResourceHandle handle) const;
-		/* ÅĞ¶ÏÒ»¸ö×ÊÔ´Á¬ÏßÊÇ·ñÓĞĞ§ */
+		/* åˆ¤æ–­ä¸€ä¸ªèµ„æºè¿çº¿æ˜¯å¦æœ‰æ•ˆ */
 		[[nodiscard]] bool IsConnectionValid(const SharedPtr<DependencyGraph::Connection>& connection) const;
-		/* ¼ì²éÒ»¸öFrameGraphPass½ÚµãÊÇ·ñ±»ÓÅ»¯µô */
+		/* æ£€æŸ¥ä¸€ä¸ªFrameGraphPassèŠ‚ç‚¹æ˜¯å¦è¢«ä¼˜åŒ–æ‰ */
 		[[nodiscard]] bool IsPassCulled(const SharedPtr<IFrameGraphPass>& pass) const;
 
-		/* ¹¹½¨FrameGraph */
+		/* æ„å»ºFrameGraph */
 		void Build() noexcept;
-		/* Ö´ĞĞ */
+		/* æ‰§è¡Œ */
 		void Execute() noexcept;
-		/* ÖØÖÃ */
+		/* é‡ç½® */
 		void Reset() noexcept;
 
-		/* µ¼³öÒÀÀµÍ¼ http://dreampuf.github.io/GraphvizOnline/ */
+		/* å¯¼å‡ºä¾èµ–å›¾ http://dreampuf.github.io/GraphvizOnline/ */
 		void ExportGraphviz(const std::string& path);
 
 	private:
-		/* ÌŞ³ıµôÎŞĞ§µÄRenderPassNode */
+		/* å‰”é™¤æ‰æ— æ•ˆçš„RenderPassNode */
 		void CullRenderPassNodes();
 
-		/* Ìí¼Ó×ÊÔ´µ½m_ResourcesMap */
+		/* æ·»åŠ èµ„æºåˆ°m_ResourcesMap */
 		FrameGraphResourceHandle AddResourceInternal(const SharedPtr<IResource>& resource);
 
-		/* ÎªRenderPass°ó¶¨ÊäÈë×ÊÔ´ */
+		/* ä¸ºRenderPassç»‘å®šè¾“å…¥èµ„æº */
 		void BindInputResourceInternal(const SharedPtr<RenderPassNode>& render_pass_node, FrameGraphResourceHandle handle, 
 			const std::function<bool(const SharedPtr<IResource>&, const SharedPtr<RenderResourceNode>&)>& callback = [](const SharedPtr<IResource>&, const SharedPtr<RenderResourceNode>&)->bool { return true; });
 
-		/* ÎªRenderPass°ó¶¨Êä³ö×ÊÔ´ */
+		/* ä¸ºRenderPassç»‘å®šè¾“å‡ºèµ„æº */
 		void BindOutputResourceInternal(const SharedPtr<RenderPassNode>& render_pass_node, FrameGraphResourceHandle handle, 
 			const std::function<bool(const SharedPtr<IResource>&, const SharedPtr<RenderResourceNode>&)>& callback = [](const SharedPtr<IResource>&, const SharedPtr<RenderResourceNode>&)->bool { return true; });
 
-		/* ÊÍ·ÅFrameGraph */
+		/* é‡Šæ”¾FrameGraph */
 		void Destroy();
 
-		/* ±ê¼ÇÃû */
+		/* æ ‡è®°å */
 		std::string m_DebugName{ "Unnamed FrameGraph" };
-		/* RenderPassNodeÁĞ±í£¬°üº¬µ±Ç°FrameGraphËùÓĞPass½Úµã£¬ÔÙCull½×¶Î²Å»áÌŞ³ıÆäÖĞÎŞĞ§µÄ½Úµã */
+		/* RenderPassNodeåˆ—è¡¨ï¼ŒåŒ…å«å½“å‰FrameGraphæ‰€æœ‰PassèŠ‚ç‚¹ï¼Œå†Cullé˜¶æ®µæ‰ä¼šå‰”é™¤å…¶ä¸­æ— æ•ˆçš„èŠ‚ç‚¹ */
 		std::vector<SharedPtr<RenderPassNode>> m_RenderPassNodes{};
-		/* ×ÊÔ´ÁĞ±í<IFrameGraphResourceHandle.m_Index, IResource> */
+		/* èµ„æºåˆ—è¡¨<IFrameGraphResourceHandle.m_Index, IResource> */
 		std::unordered_map<uint16_t, SharedPtr<IResource>> m_ResourcesMap{};
-		/* ×ÊÔ´Ë÷ÒıÓë×ÊÔ´½ÚµãË÷ÒıµÄÓ³Éä: first->IResource, second->RenderResourceNode */
+		/* èµ„æºç´¢å¼•ä¸èµ„æºèŠ‚ç‚¹ç´¢å¼•çš„æ˜ å°„: first->IResource, second->RenderResourceNode */
 		std::unordered_map<uint16_t, SharedPtr<RenderResourceNode>> m_ResourceToResourceNodeMap{};
-		/* Blackboard: ×ÊÔ´Ãûµ½×ÊÔ´µÄÓ³Éä */
+		/* Blackboard: èµ„æºååˆ°èµ„æºçš„æ˜ å°„ */
 		Blackboard m_Blackboard{};
-		/* PassÒÀÀµ¹ØÏµÍ¼ */
+		/* Passä¾èµ–å…³ç³»å›¾ */
 		DependencyGraph m_DependencyGraph;
-		/* ×îºóÒ»¸öÓĞĞ§µÄRenderPassNode */
+		/* æœ€åä¸€ä¸ªæœ‰æ•ˆçš„RenderPassNode */
 		std::vector<SharedPtr<RenderPassNode>>::iterator m_LastValidRenderPassNodeIter;
+	};
+
+	/* FrameGraph Builderç±»
+	 * æ¯ä¸ªRenderPasså¯¹åº”å¯¹åº”ä¸€ä¸ªBuilder
+	 * ç”¨äºåˆ›å»ºæˆ–ç»‘å®šå½“å‰RenderPassæ‰€éœ€çš„èµ„æº
+	 */
+	class FrameGraphBuilder
+	{
+	public:
+		explicit FrameGraphBuilder(FrameGraphBuilder&) = delete;
+		FrameGraphBuilder& operator=(const FrameGraphBuilder&) = delete;
+		~FrameGraphBuilder() = default;
+
+		/* æ ¹æ®æè¿°åˆ›å»ºRenderPass */
+		uint32_t CreateRenderPass(const std::string& name, const FrameGraphPassInfo::Descriptor& desc = {});
+
+		/* æ ¹æ®æè¿°åˆ›å»ºä¸€ä¸ªçº¹ç†èµ„æº */
+		FrameGraphResourceHandleTyped<FrameGraphTexture> CreateTexture(const std::string& name, const FrameGraphTexture::Descriptor& desc = {});
+
+		/* ä¸ºå½“å‰RenderPassç»‘å®šè¾“å…¥èµ„æº */
+		template<typename ResourceType>
+		void BindInputResource(FrameGraphResourceHandleTyped<ResourceType> handle, typename ResourceType::Usage usage = ResourceType::DefaultReadUsage)
+		{
+			m_FrameGraph.BindInputResource<ResourceType>(m_pRenderPassNode, handle, usage);
+		}
+
+		/* ä¸ºå½“å‰RenderPassç»‘å®šè¾“å‡ºèµ„æº */
+		template<typename ResourceType>
+		void BindOutputResource(FrameGraphResourceHandleTyped<ResourceType> handle, typename ResourceType::Usage usage = ResourceType::DefaultWriteUsage)
+		{
+			m_FrameGraph.BindOutputResource<ResourceType>(m_pRenderPassNode, handle, usage);
+		}
+
+		/* ä½¿å½“å‰èŠ‚ç‚¹ä¸ä¼šè¢«ä¼˜åŒ–æ‰ï¼Œå³ä½¿æ²¡æœ‰æ²¡ä½¿ç”¨åˆ° */
+		void AsSideEffect(bool value = true);
+
+		/* æ ¹æ®èµ„æºHandleåœ¨FrameGraphä¸­è·å–èµ„æºå */
+		[[nodiscard]] const std::string& GetResourceName(FrameGraphResourceHandle handle) const;
+
+
+	private:
+		FrameGraphBuilder(FrameGraph& frame_graph, const SharedPtr<RenderPassNode>& render_pass_node);
+
+		/* å½“å‰Builderæ‰€å±çš„FrameGraph */
+		FrameGraph& m_FrameGraph;
+		/* å¯¹åº”çš„RenderPass */
+		SharedPtr<RenderPassNode> m_pRenderPassNode{ nullptr };
+
+		friend class FrameGraph;
 	};
 
 }

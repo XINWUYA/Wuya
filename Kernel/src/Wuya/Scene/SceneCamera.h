@@ -4,7 +4,7 @@
 
 namespace Wuya
 {
-	/* Í¶Ó°Ïà»úÃèÊö */
+	/* æŠ•å½±ç›¸æœºæè¿° */
 	struct PerspectiveCameraDesc
 	{
 		float Fov{ glm::radians(45.0f) };
@@ -12,9 +12,12 @@ namespace Wuya
 		float Far{ 1000.0f };
 
 		PerspectiveCameraDesc() = default;
+		PerspectiveCameraDesc(float fov, float n, float f)
+			: Fov(fov), Near(n), Far(f)
+		{}
 	};
 
-	/* Õı½»Ïà»úÃèÊö */
+	/* æ­£äº¤ç›¸æœºæè¿° */
 	struct OrthographicCameraDesc
 	{
 		float HeightSize{ 10.0f };
@@ -22,15 +25,18 @@ namespace Wuya
 		float Far{ 1.0f };
 
 		OrthographicCameraDesc() = default;
+		OrthographicCameraDesc(float height_size, float n, float f)
+			: HeightSize(height_size), Near(n), Far(f)
+		{}
 	};
 
-	/* ³¡¾°Ïà»úÀà */
+	/* åœºæ™¯ç›¸æœºç±» */
 	class SceneCamera : public Camera
 	{
 	public:
 		COMPONENT_CLASS(SceneCamera)
 
-		/* Í¶Ó°ÀàĞÍ */
+		/* æŠ•å½±ç±»å‹ */
 		enum class ProjectionType : uint8_t
 		{
 			Perspective = 0,
@@ -40,30 +46,30 @@ namespace Wuya
 		SceneCamera(const std::string& name = "SceneCamera", float aspect_ratio = 1.778f);
 		~SceneCamera() override = default;
 
-		/* Í¶Ó°ÀàĞÍ */
+		/* æŠ•å½±ç±»å‹ */
 		ProjectionType GetProjectionType() const { return m_ProjectionType; }
 		void SetProjectionType(ProjectionType type);
-		/* Ïà»úÃèÊö */
+		/* ç›¸æœºæè¿° */
 		const SharedPtr<PerspectiveCameraDesc>& GetPerspectiveCameraDesc() const { return m_pPerspectiveCameraDesc; }
 		const SharedPtr<OrthographicCameraDesc>& GetOrthographicCameraDesc() const { return m_pOrthographicCameraDesc; }
 		void SetPerspectiveCameraDesc(const SharedPtr<PerspectiveCameraDesc>& desc);
 		void SetPerspectiveCameraDesc(const PerspectiveCameraDesc& desc);
 		void SetOrthographicCameraDesc(const SharedPtr<OrthographicCameraDesc>& desc);
 		void SetOrthographicCameraDesc(const OrthographicCameraDesc& desc);
-		/* ¿í¸ß±È */
+		/* å®½é«˜æ¯” */
 		float GetAspectRatio() const { return m_AspectRatio; }
 		void SetAspectRatio(float ratio);
 
 	private:
-		/* ¸üĞÂÏà»úÍ¶Ó°¾ØÕó */
+		/* æ›´æ–°ç›¸æœºæŠ•å½±çŸ©é˜µ */
 		void UpdateProjectionMatrix();
 		
-		/* Í¶Ó°ÀàĞÍ */
+		/* æŠ•å½±ç±»å‹ */
 		ProjectionType m_ProjectionType{ ProjectionType::Perspective };
-		/* Ïà»úÀàĞÍÃèÊö */
+		/* ç›¸æœºç±»å‹æè¿° */
 		SharedPtr<PerspectiveCameraDesc> m_pPerspectiveCameraDesc{ nullptr };
 		SharedPtr<OrthographicCameraDesc> m_pOrthographicCameraDesc{ nullptr };
-		/* ¿í¸ß±È */
+		/* å®½é«˜æ¯” */
 		float m_AspectRatio{ 1.778f };
 	};
 }

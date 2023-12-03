@@ -2,7 +2,8 @@ project "Sample_CSM"
 	kind "ConsoleApp"
 	staticruntime "on"
 	language "C++"
-	cppdialect "C++17"
+	-- cppdialect "C++17"
+	cppdialect "C++latest"
 
 	targetdir ("%{wks.location}/build/bin/" .. outputdir .. "/%{prj.name}")
 	objdir ("%{wks.location}/build/intermediates/" .. outputdir .. "/%{prj.name}")

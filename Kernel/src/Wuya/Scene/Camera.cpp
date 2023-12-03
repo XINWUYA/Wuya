@@ -11,7 +11,7 @@ namespace Wuya
 		m_pRenderView = CreateUniquePtr<RenderView>(m_DebugName + "_RenderView", this);
 	}
 
-	/* ¸üÐÂÊ±¼ä´Á */
+	/* æ›´æ–°æ—¶é—´æˆ³ */
 	void Camera::OnUpdate(float delta_time)
 	{
 		PROFILE_FUNCTION();

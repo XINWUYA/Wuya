@@ -1,18 +1,22 @@
 #pragma once
 #include <mutex>
 #include <fstream>
+#if TRACY_ENABLE
+#include "tracy/Tracy.hpp"
+#include "client/TracyScoped.hpp"
+#endif
 
 namespace Wuya
 {
 	struct ProfileResult
 	{
-		std::string Name; // ±ê¼ÇÃû
-		std::chrono::duration<double, std::micro> StartTime; // ¿ªÊ¼Ê±¼ä
-		std::chrono::microseconds ElapsedTime; // ºÄÊ±
-		std::thread::id ThreadId; // ËùÊôÏß³Ì
+		std::string Name; // æ ‡è®°å
+		std::chrono::duration<double, std::micro> StartTime; // å¼€å§‹æ—¶é—´
+		std::chrono::microseconds ElapsedTime; // è€—æ—¶
+		std::thread::id ThreadId; // æ‰€å±çº¿ç¨‹
 	};
 
-	// ºÄÊ±·ÖÎö
+	// è€—æ—¶åˆ†æ
 	class TimeCostProfiler
 	{
 	public:
@@ -45,7 +49,7 @@ namespace Wuya
 		std::ofstream m_OutputStream{};
 	};
 
-	// ·ÖÎö¼ÆÊ±Æ÷
+	// åˆ†æè®¡æ—¶å™¨
 	class ProfilerTimer
 	{
 	public:
@@ -96,7 +100,11 @@ namespace Wuya
 // Just Drag the json file in.
 #define WUYA_PROFILE 0
 
-#if WUYA_PROFILE
+#if TRACY_ENABLE
+	#define PROFILE_SCOPE(name) ZoneScopedN(name)
+	#define PROFILE_FUNCTION() ZoneScoped
+
+#elif WUYA_PROFILE
 	// Resolve which function signature macro will be used. Note that this only
 	// is resolved when the (pre)compiler starts, so the syntax highlighting
 	// could mark the wrong one in your editor!
@@ -118,15 +126,15 @@ namespace Wuya
 		#define FUNC_SIG "FUNC_SIG unknown!"
 	#endif
 
-	// ¿ªÆôÒ»¸öºÄÊ±·ÖÎö
+	// å¼€å¯ä¸€ä¸ªè€—æ—¶åˆ†æ
 	#define PROFILER_BEGIN_SESSION(name, filepath) ::Wuya::TimeCostProfiler::Instance().BeginSession(name, filepath)
-	// ¹Ø±ÕÒ»¸öºÄÊ±·ÖÎö
+	// å…³é—­ä¸€ä¸ªè€—æ—¶åˆ†æ
 	#define PROFILER_END_SESSION() ::Wuya::TimeCostProfiler::Instance().EndSession()
-	// ·ÖÎöµ±Ç°Ö¸Áî¶ÎºÄÊ±
-	#define PROFILE_SCOPE_LINE(name, line) constexpr auto fixed_name_##line = ::Wuya::ProfilerUtils::CleanupOutputString(name, "__cdecl "); /*È¥µôÇ°×º*/\
+	// åˆ†æå½“å‰æŒ‡ä»¤æ®µè€—æ—¶
+	#define PROFILE_SCOPE_LINE(name, line) constexpr auto fixed_name_##line = ::Wuya::ProfilerUtils::CleanupOutputString(name, "__cdecl "); /*å»æ‰å‰ç¼€*/\
 											::Wuya::ProfilerTimer timer_##line(fixed_name_##line.Data)
 	#define PROFILE_SCOPE(name) PROFILE_SCOPE_LINE(name, __LINE__)
-	// ·ÖÎöµ±Ç°º¯ÊıºÄÊ±
+	// åˆ†æå½“å‰å‡½æ•°è€—æ—¶
 	#define PROFILE_FUNCTION() PROFILE_SCOPE(FUNC_SIG)
 #else
 	#define PROFILER_BEGIN_SESSION(name, filepath)

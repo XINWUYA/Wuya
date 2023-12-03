@@ -4,7 +4,6 @@
 #include "Wuya/Events/ApplicationEvent.h"
 #include "Wuya/Events/KeyEvent.h"
 #include "Wuya/Events/MouseEvent.h"
-#include "Wuya/Renderer/RenderContext.h"
 #include "Wuya/Renderer/Renderer.h"
 
 namespace Wuya
@@ -23,7 +22,7 @@ namespace Wuya
 		Destroy();
 	}
 
-	/* ¸üĞÂ£¬½»»»Ò»Ö¡ */
+	/* æ›´æ–°ï¼Œäº¤æ¢ä¸€å¸§ */
 	void GLWindow::OnUpdate()
 	{
 		PROFILE_FUNCTION();
@@ -32,7 +31,7 @@ namespace Wuya
 		m_pRenderContext->SwapBuffers();
 	}
 
-	/* ÉèÖÃ´¹Ö±Í¬²½ */
+	/* è®¾ç½®å‚ç›´åŒæ­¥ */
 	void GLWindow::SetVSync(bool enable)
 	{
 		if (enable)
@@ -43,7 +42,7 @@ namespace Wuya
 
 	}
 
-	/* ´´½¨´°¿Ú£»´´½¨ÉÏÏÂÎÄ£»°ó¶¨ÏìÓ¦ÊÂ¼ş */
+	/* åˆ›å»ºçª—å£ï¼›åˆ›å»ºä¸Šä¸‹æ–‡ï¼›ç»‘å®šå“åº”äº‹ä»¶ */
 	void GLWindow::Build(const WindowDesc& desc)
 	{
 		PROFILE_FUNCTION();
@@ -56,7 +55,7 @@ namespace Wuya
 		{
 			PROFILE_SCOPE("glfwInit()");
 
-			// ³õÊ¼»¯GLFW
+			// åˆå§‹åŒ–GLFW
 			int success = glfwInit();
 
 			ASSERT(success, "Failed to init GLFW!");
@@ -72,7 +71,7 @@ namespace Wuya
 			glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);
 #endif
 
-		// ´´½¨GLFW´°¿Ú
+		// åˆ›å»ºGLFWçª—å£
 		{
 			PROFILE_SCOPE("glfwCreateWindow");
 
@@ -83,11 +82,11 @@ namespace Wuya
 		m_pRenderContext = IRenderContext::Create(m_pGLFWWindow);
 		m_pRenderContext->Init();
 
-		// Ö¸¶¨´°¿ÚĞÅÏ¢
+		// æŒ‡å®šçª—å£ä¿¡æ¯
 		glfwSetWindowUserPointer(m_pGLFWWindow, &m_WindowInfo);
 		SetVSync(desc.IsVSync);
 
-		// ÉèÖÃ´°¿ÚResize»Øµ÷
+		// è®¾ç½®çª—å£Resizeå›è°ƒ
 		glfwSetWindowSizeCallback(m_pGLFWWindow, [](GLFWwindow* window, int width, int height)
 			{
 				WindowInfo& info = *(WindowInfo*)glfwGetWindowUserPointer(window);
@@ -98,7 +97,7 @@ namespace Wuya
 				info.CallBackFunc(&event);
 			});
 
-		// ÉèÖÃ´°¿ÚClose»Øµ÷
+		// è®¾ç½®çª—å£Closeå›è°ƒ
 		glfwSetWindowCloseCallback(m_pGLFWWindow, [](GLFWwindow* window)
 			{
 				WindowInfo& info = *(WindowInfo*)glfwGetWindowUserPointer(window);
@@ -107,7 +106,7 @@ namespace Wuya
 				info.CallBackFunc(&event);
 			});
 
-		// ÉèÖÃ¼üÅÌ»Øµ÷
+		// è®¾ç½®é”®ç›˜å›è°ƒ
 		glfwSetKeyCallback(m_pGLFWWindow, [](GLFWwindow* window, int key, int scancode, int action, int mods) 
 			{
 				WindowInfo& info = *(WindowInfo*)glfwGetWindowUserPointer(window);
@@ -135,7 +134,7 @@ namespace Wuya
 				}
 			});
 
-		// ÉèÖÃÊäÈëÎÄ±¾»Øµ÷
+		// è®¾ç½®è¾“å…¥æ–‡æœ¬å›è°ƒ
 		glfwSetCharCallback(m_pGLFWWindow, [](GLFWwindow* window, unsigned int key)
 			{
 				WindowInfo& info = *(WindowInfo*)glfwGetWindowUserPointer(window);
@@ -144,7 +143,7 @@ namespace Wuya
 				info.CallBackFunc(&event);
 			});
 
-		// ÉèÖÃÊó±ê°´¼ü»Øµ÷
+		// è®¾ç½®é¼ æ ‡æŒ‰é”®å›è°ƒ
 		glfwSetMouseButtonCallback(m_pGLFWWindow, [](GLFWwindow* window, int button, int action, int mods)
 			{
 				WindowInfo& info = *(WindowInfo*)glfwGetWindowUserPointer(window);
@@ -166,7 +165,7 @@ namespace Wuya
 				}
 			});
 
-		// ÉèÖÃÊó±ê¹öÂÖ»Øµ÷
+		// è®¾ç½®é¼ æ ‡æ»šè½®å›è°ƒ
 		glfwSetScrollCallback(m_pGLFWWindow, [](GLFWwindow* window, double xoffset, double yoffset)
 			{
 				WindowInfo& info = *(WindowInfo*)glfwGetWindowUserPointer(window);
@@ -175,7 +174,7 @@ namespace Wuya
 				info.CallBackFunc(&event);
 			});
 
-		// ÉèÖÃÊó±ê¹â±ê»Øµ÷
+		// è®¾ç½®é¼ æ ‡å…‰æ ‡å›è°ƒ
 		glfwSetCursorPosCallback(m_pGLFWWindow, [](GLFWwindow* window, double xpos, double ypos)
 			{
 				WindowInfo& info = *(WindowInfo*)glfwGetWindowUserPointer(window);
@@ -185,7 +184,7 @@ namespace Wuya
 			});
 	}
 
-	/* Ïú»Ù´°¿Ú */
+	/* é”€æ¯çª—å£ */
 	void GLWindow::Destroy()
 	{
 		PROFILE_FUNCTION();

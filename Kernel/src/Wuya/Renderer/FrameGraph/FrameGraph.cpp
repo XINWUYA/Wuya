@@ -5,25 +5,25 @@
 
 namespace Wuya
 {
-	/* ¸ù¾İÃèÊö´´½¨Ò»¸öRenderPass */
+	/* æ ¹æ®æè¿°åˆ›å»ºä¸€ä¸ªRenderPass */
 	uint32_t FrameGraphBuilder::CreateRenderPass(const std::string& name, const FrameGraphPassInfo::Descriptor& desc)
 	{
 		return m_pRenderPassNode->CreateRenderPassData(name, desc);
 	}
 
-	/* ¸ù¾İÃèÊö´´½¨Ò»¸öÎÆÀí×ÊÔ´ */
+	/* æ ¹æ®æè¿°åˆ›å»ºä¸€ä¸ªçº¹ç†èµ„æº */
 	FrameGraphResourceHandleTyped<FrameGraphTexture> FrameGraphBuilder::CreateTexture(const std::string& name, const FrameGraphTexture::Descriptor& desc)
 	{
 		return m_FrameGraph.CreateResource<FrameGraphTexture>(name, desc);
 	}
 
-	/* Ê¹µ±Ç°½Úµã²»»á±»ÓÅ»¯µô£¬¼´Ê¹Ã»ÓĞÃ»Ê¹ÓÃµ½ */
+	/* ä½¿å½“å‰èŠ‚ç‚¹ä¸ä¼šè¢«ä¼˜åŒ–æ‰ï¼Œå³ä½¿æ²¡æœ‰æ²¡ä½¿ç”¨åˆ° */
 	void FrameGraphBuilder::AsSideEffect(bool value)
 	{
 		m_pRenderPassNode->IsTarget = value;
 	}
 
-	/* ¸ù¾İ×ÊÔ´HandleÔÚFrameGraphÖĞ»ñÈ¡×ÊÔ´Ãû */
+	/* æ ¹æ®èµ„æºHandleåœ¨FrameGraphä¸­è·å–èµ„æºå */
 	const std::string& FrameGraphBuilder::GetResourceName(FrameGraphResourceHandle handle) const
 	{
 		return m_FrameGraph.GetResource(handle)->GetName();
@@ -45,7 +45,7 @@ namespace Wuya
 		Destroy();
 	}
 
-	/* »ñÈ¡×ÊÔ´ */
+	/* è·å–èµ„æº */
 	SharedPtr<IResource> FrameGraph::GetResource(FrameGraphResourceHandle handle)
 	{
 		PROFILE_FUNCTION();
@@ -60,7 +60,7 @@ namespace Wuya
 		return nullptr;
 	}
 
-	/* »ñÈ¡×ÊÔ´½Úµã */
+	/* è·å–èµ„æºèŠ‚ç‚¹ */
 	SharedPtr<RenderResourceNode> FrameGraph::GetRenderResourceNode(FrameGraphResourceHandle handle)
 	{
 		const auto iter = m_ResourceToResourceNodeMap.find(handle.GetIndex());
@@ -70,42 +70,42 @@ namespace Wuya
 		return nullptr;
 	}
 
-	/* ¼ì²éÒ»¸ö×ÊÔ´½ÚµãÊÇ·ñÓĞĞ§ */
+	/* æ£€æŸ¥ä¸€ä¸ªèµ„æºèŠ‚ç‚¹æ˜¯å¦æœ‰æ•ˆ */
 	bool FrameGraph::IsHandleValid(FrameGraphResourceHandle handle) const
 	{
 		if (!handle.IsInitialized())
 			return false;
 
-		// todo: ¿¼ÂÇ×ÊÔ´µÄ°æ±¾
+		// todo: è€ƒè™‘èµ„æºçš„ç‰ˆæœ¬
 		return true;
 	}
 
-	/* ÅĞ¶ÏÒ»¸ö×ÊÔ´Á¬ÏßÊÇ·ñÓĞĞ§ */
+	/* åˆ¤æ–­ä¸€ä¸ªèµ„æºè¿çº¿æ˜¯å¦æœ‰æ•ˆ */
 	bool FrameGraph::IsConnectionValid(const SharedPtr<DependencyGraph::Connection>& connection) const
 	{
 		return m_DependencyGraph.IsConnectionValid(connection);
 	}
 
-	/* ¼ì²éÒ»¸öFrameGraphPass½ÚµãÊÇ·ñ±»ÓÅ»¯µô */
+	/* æ£€æŸ¥ä¸€ä¸ªFrameGraphPassèŠ‚ç‚¹æ˜¯å¦è¢«ä¼˜åŒ–æ‰ */
 	bool FrameGraph::IsPassCulled(const SharedPtr<IFrameGraphPass>& pass) const
 	{
 		return pass->GetRenderPassNode()->IsCulled();
 	}
 
-	/* ¹¹½¨FrameGraph */
+	/* æ„å»ºFrameGraph */
 	void FrameGraph::Build() noexcept
 	{
 		PROFILE_FUNCTION();
 
 		CullRenderPassNodes();
 
-		/* ½ö¶ÔÓĞĞ§µÄRenderPassNodeÖ´ĞĞ¹¹½¨ */
+		/* ä»…å¯¹æœ‰æ•ˆçš„RenderPassNodeæ‰§è¡Œæ„å»º */
 		auto iter_current = m_RenderPassNodes.begin();
 		while (iter_current != m_LastValidRenderPassNodeIter)
 		{
 			auto current_node = *iter_current;
 
-			/* ÊäÈëÉæ¼°×ÊÔ´ */
+			/* è¾“å…¥æ¶‰åŠèµ„æº */
 			auto incoming_connections = m_DependencyGraph.GetIncomingConnectionsOfNode(current_node);
 			for (const auto& connection : incoming_connections)
 			{
@@ -113,41 +113,41 @@ namespace Wuya
 				current_node->RegisterResourceHandle(from_node->GetResourceHandle());
 			}
 
-			/* Êä³öÉæ¼°×ÊÔ´ */
+			/* è¾“å‡ºæ¶‰åŠèµ„æº */
 			auto outgoing_connections = m_DependencyGraph.GetOutgoingConnectionsOfNode(current_node);
 			for (const auto& connection : outgoing_connections)
 			{
 				const auto to_node = DynamicPtrCast<const RenderResourceNode>(m_DependencyGraph.GetNode(connection->ToNodeIdx));
 				current_node->RegisterResourceHandle(to_node->GetResourceHandle());
 			}
-			/* ¹¹½¨µ±Ç°½Úµã */
+			/* æ„å»ºå½“å‰èŠ‚ç‚¹ */
 			current_node->Build();
 
-			/* ÏÂÒ»¸ö */
+			/* ä¸‹ä¸€ä¸ª */
 			++iter_current;
 		}
 
-		/* È·¶¨×ÊÔ´µÄ¹¹½¨ºÍÏú»ÙÊ±»ú */
+		/* ç¡®å®šèµ„æºçš„æ„å»ºå’Œé”€æ¯æ—¶æœº */
 		for (const auto& resource_item : m_ResourcesMap)
 		{
 			auto& resource = resource_item.second;
 			if (resource->GetRefCount() > 0)
 			{
-				auto& first_pass_node = resource->GetFirstPassNode();
-				auto& last_pass_node = resource->GetLastPassNode();
+				auto first_pass_node = resource->GetFirstPassNode();
+				auto last_pass_node = resource->GetLastPassNode();
 
 				if (first_pass_node && last_pass_node)
 				{
 					ASSERT(first_pass_node->IsValid() && last_pass_node->IsValid());
-					/* ×ÊÔ´ÒªÔÚµÚÒ»´ÎÊ¹ÓÃÊ±´´½¨ */
+					/* èµ„æºè¦åœ¨ç¬¬ä¸€æ¬¡ä½¿ç”¨æ—¶åˆ›å»º */
 					first_pass_node->GetResourcesNeedPrepared().emplace_back(resource);
-					/* ÔÚ×îºóÒ»´ÎÊ¹ÓÃÍêÊ±Ïú»Ù */
+					/* åœ¨æœ€åä¸€æ¬¡ä½¿ç”¨å®Œæ—¶é”€æ¯ */
 					last_pass_node->GetResourcesNeedDestroy().emplace_back(resource);
 				}
 			}
 		}
 
-		/* ÔÚCullÖ®ºóÔÙ¸üĞÂ×ÊÔ´µÄUsage */
+		/* åœ¨Cullä¹‹åå†æ›´æ–°èµ„æºçš„Usage */
 		for (auto& iter : m_ResourceToResourceNodeMap)
 		{
 			auto& resource_node = iter.second;
@@ -155,7 +155,7 @@ namespace Wuya
 		}
 	}
 
-	/* Ö´ĞĞFrameGraph */
+	/* æ‰§è¡ŒFrameGraph */
 	void FrameGraph::Execute() noexcept
 	{
 		PROFILE_FUNCTION();
@@ -163,38 +163,38 @@ namespace Wuya
 		if (m_RenderPassNodes.empty())
 			return;
 
-		/* ½öÖ´ĞĞÓĞĞ§µÄRenderPassNodes */
+		/* ä»…æ‰§è¡Œæœ‰æ•ˆçš„RenderPassNodes */
 		auto iter_current = m_RenderPassNodes.begin();
 		while (iter_current != m_LastValidRenderPassNodeIter)
 		{
 			auto& current_node = *iter_current;
 
-			/* ×¼±¸µ±Ç°½ÚµãËùĞèµÄ×ÊÔ´ */
+			/* å‡†å¤‡å½“å‰èŠ‚ç‚¹æ‰€éœ€çš„èµ„æº */
 			for (auto& resource : current_node->GetResourcesNeedPrepared())
 				resource->Create();
 
-			/* Ö´ĞĞPass */
+			/* æ‰§è¡ŒPass */
 			FrameGraphResources resources(*this, *current_node);
 			current_node->Execute(resources);
 
-			/* ¼°Ê±Ïú»Ù²»ÔÙÊ¹ÓÃµÄ×ÊÔ´, ×îºóTarget PassµÄ×ÊÔ´Ôİ²»ÊÍ·Å£¬ÒòÎªImGuiĞèÒªÓÃµ½£¬todo:Ö»ÓĞÊä³ö²»ÓÃÊÍ·Å£¬ÊäÈëÓ¦Õı³£ÊÍ·Å */
+			/* åŠæ—¶é”€æ¯ä¸å†ä½¿ç”¨çš„èµ„æº, æœ€åTarget Passçš„èµ„æºæš‚ä¸é‡Šæ”¾ï¼Œå› ä¸ºImGuiéœ€è¦ç”¨åˆ°ï¼Œtodo:åªæœ‰è¾“å‡ºä¸ç”¨é‡Šæ”¾ï¼Œè¾“å…¥åº”æ­£å¸¸é‡Šæ”¾ */
 			if (!current_node->IsTarget)
 			{
 				for (auto& resource : current_node->GetResourcesNeedDestroy())
 					resource->Destroy();
 			}
-			/* ÏÂÒ»¸ö */
+			/* ä¸‹ä¸€ä¸ª */
 			++iter_current;
 		}
 	}
 
-	/* ÖØÖÃ */
+	/* é‡ç½® */
 	void FrameGraph::Reset() noexcept
 	{
 		Destroy();
 	}
 
-	/* µ¼³öÒÀÀµÍ¼ */
+	/* å¯¼å‡ºä¾èµ–å›¾ */
 	void FrameGraph::ExportGraphviz(const std::string& path)
 	{
 		const std::string& str = m_DependencyGraph.Graphvizify("FrameGraph");
@@ -204,15 +204,15 @@ namespace Wuya
 		file_out.close();
 	}
 
-	/* ÌŞ³ıµôÎŞĞ§µÄRenderPassNode */
+	/* å‰”é™¤æ‰æ— æ•ˆçš„RenderPassNode */
 	void FrameGraph::CullRenderPassNodes()
 	{
 		PROFILE_FUNCTION();
 
-		/* ¸üĞÂÒÀÀµÍ¼ÖĞµÄÒıÓÃ¼ÆÊı */
+		/* æ›´æ–°ä¾èµ–å›¾ä¸­çš„å¼•ç”¨è®¡æ•° */
 		m_DependencyGraph.UpdateRefCount();
 
-		/* ÖØĞÂÅÅĞò²¢É¸Ñ¡³öÓĞĞ§µÄRenderPassNodes */
+		/* é‡æ–°æ’åºå¹¶ç­›é€‰å‡ºæœ‰æ•ˆçš„RenderPassNodes */
 		m_LastValidRenderPassNodeIter = std::stable_partition(m_RenderPassNodes.begin(), m_RenderPassNodes.end(),
 			[](auto const& render_pass_node)
 			{
@@ -220,22 +220,22 @@ namespace Wuya
 			});
 	}
 
-	/* Ìí¼Ó×ÊÔ´µ½m_ResourcesMap */
+	/* æ·»åŠ èµ„æºåˆ°m_ResourcesMap */
 	FrameGraphResourceHandle FrameGraph::AddResourceInternal(const SharedPtr<IResource>& resource)
 	{
 		const FrameGraphResourceHandle resource_handle(m_ResourcesMap.size());
 		m_ResourcesMap.insert({ resource_handle.GetIndex(), resource });
 
-		/* ĞÂÔöÒ»¸öRenderResourceNode */
+		/* æ–°å¢ä¸€ä¸ªRenderResourceNode */
 		auto resource_node = CreateSharedPtr<RenderResourceNode>(resource->GetName(), *this, resource_handle);
-		/* ½«×ÊÔ´½ÚµãÌí¼Óµ½ÒÀÀµÍ¼ */
+		/* å°†èµ„æºèŠ‚ç‚¹æ·»åŠ åˆ°ä¾èµ–å›¾ */
 		m_DependencyGraph.RegisterNode(resource_node);
 		m_ResourceToResourceNodeMap.insert({ resource_handle.GetIndex(), resource_node });
 
 		return resource_handle;
 	}
 
-	/* ÎªRenderPass°ó¶¨ÊäÈë×ÊÔ´ */
+	/* ä¸ºRenderPassç»‘å®šè¾“å…¥èµ„æº */
 	void FrameGraph::BindInputResourceInternal(const SharedPtr<RenderPassNode>& render_pass_node, FrameGraphResourceHandle handle,
 		const std::function<bool(const SharedPtr<IResource>&, const SharedPtr<RenderResourceNode>&)>& callback)
 	{
@@ -243,21 +243,21 @@ namespace Wuya
 			return;
 
 		const SharedPtr<IResource>& resource = GetResource(handle);
-		auto& resource_node = GetRenderResourceNode(handle);
+		auto resource_node = GetRenderResourceNode(handle);
 
 		if (!resource_node->HasOutgoingConnection())
 		{
 			//if (resource_node->)
 		}
 
-		/* Á¬½Ó½Úµã */
+		/* è¿æ¥èŠ‚ç‚¹ */
 		if (callback(resource, resource_node))
 		{
 
 		}
 	}
 
-	/* ÎªRenderPass°ó¶¨Êä³ö×ÊÔ´ */
+	/* ä¸ºRenderPassç»‘å®šè¾“å‡ºèµ„æº */
 	void FrameGraph::BindOutputResourceInternal(const SharedPtr<RenderPassNode>& render_pass_node, FrameGraphResourceHandle handle,
 		const std::function<bool(const SharedPtr<IResource>&, const SharedPtr<RenderResourceNode>&)>& callback)
 	{
@@ -265,28 +265,28 @@ namespace Wuya
 			return;
 
 		const SharedPtr<IResource>& resource = GetResource(handle);
-		auto& resource_node = GetRenderResourceNode(handle);
+		auto resource_node = GetRenderResourceNode(handle);
 
 		if (!resource_node->HasIncomingConnection())
 		{
 			//if (resource_node->)
 		}
 
-		/* Á¬½Ó½Úµã */
+		/* è¿æ¥èŠ‚ç‚¹ */
 		if (callback(resource, resource_node))
 		{
 			
 		}
 	}
 
-	/* ÊÍ·ÅFrameGraph */
+	/* é‡Šæ”¾FrameGraph */
 	void FrameGraph::Destroy()
 	{
 		for (const auto& render_pass_node: m_RenderPassNodes)
 			render_pass_node->Destroy();
 		m_RenderPassNodes.clear();
 
-		/* ±ØĞëÏÈÏú»ÙResourceNode£¬²ÅÄÜÏú»ÙResource */
+		/* å¿…é¡»å…ˆé”€æ¯ResourceNodeï¼Œæ‰èƒ½é”€æ¯Resource */
 		for (const auto& resource_node_itr : m_ResourceToResourceNodeMap)
 			resource_node_itr.second->Destroy();
 		m_ResourceToResourceNodeMap.clear();

@@ -22,14 +22,14 @@ namespace Wuya
 		ClearAllEntities();
 	}
 
-	/* ´´½¨Ò»¸öÊµÌå */
+	/* åˆ›å»ºä¸€ä¸ªå®ä½“ */
 	Entity Scene::CreateEntity(const std::string& name)
 	{
 		PROFILE_FUNCTION();
 
 		Entity entity = { m_Registry.create(), shared_from_this() };
 
-		/* Ä¬ÈÏÌí¼ÓÃû³Æ×é¼şºÍ±ä»»×é¼ş */
+		/* é»˜è®¤æ·»åŠ åç§°ç»„ä»¶å’Œå˜æ¢ç»„ä»¶ */
 		auto& name_component = entity.AddComponent<NameComponent>();
 		name_component.Name = name.empty() ? "Unnamed Entity" : name;
 
@@ -38,7 +38,7 @@ namespace Wuya
 		return entity;
 	}
 
-	/* Ïú»ÙÊµÌå */
+	/* é”€æ¯å®ä½“ */
 	void Scene::DestroyEntity(Entity& entity)
 	{
 		PROFILE_FUNCTION();
@@ -50,7 +50,7 @@ namespace Wuya
 	{
 		PROFILE_FUNCTION();
 
-		/* ¸üĞÂËùÓĞÊµÌåµÄ±ä»» */
+		/* æ›´æ–°æ‰€æœ‰å®ä½“çš„å˜æ¢ */
 		// auto entity_group = m_Registry.group<TransformComponent>(entt::get<>)
 	}
 
@@ -60,7 +60,7 @@ namespace Wuya
 
 		Renderer::Update();
 
-		/* todo: ÊÕ¼¯RenderView */
+		/* todo: æ”¶é›†RenderView */
 		m_RenderViews.clear();
 		const auto& camera_entities = m_Registry.view<CameraComponent>();
 		for (auto& entity : camera_entities)
@@ -71,7 +71,7 @@ namespace Wuya
 			m_RenderViews.emplace_back(render_view);
 		}
 
-		/* Editor Camera's RenderView, ×îºóÒ»¸öÊÇ±à¼­Æ÷RenderView */
+		/* Editor Camera's RenderView, æœ€åä¸€ä¸ªæ˜¯ç¼–è¾‘å™¨RenderView */
 		if (camera)
 		{
 			auto* render_view = camera->GetRenderView();
@@ -79,7 +79,7 @@ namespace Wuya
 			m_RenderViews.emplace_back(render_view);
 		}
 
-		/* »æÖÆËùÓĞView */
+		/* ç»˜åˆ¶æ‰€æœ‰View */
 		for (const auto& view : m_RenderViews)
 		{
 			Renderer::RenderAView(view);
@@ -112,7 +112,7 @@ namespace Wuya
 
 		tinyxml2::XMLElement* entities_root = scene_root->InsertNewChildElement("Entities");
 
-		/* ±éÀú³¡¾°ÖĞÊµÌå£¬½øĞĞĞòÁĞ»¯ */
+		/* éå†åœºæ™¯ä¸­å®ä½“ï¼Œè¿›è¡Œåºåˆ—åŒ– */
 		m_Registry.each(
 			[&](auto& entity_id)
 			{
@@ -124,7 +124,7 @@ namespace Wuya
 			}
 		);
 
-		/* ±£´æµ½ÎÄ±¾ */
+		/* ä¿å­˜åˆ°æ–‡æœ¬ */
 		doc->SaveFile(path.c_str());
 
 		delete doc;
@@ -195,7 +195,7 @@ namespace Wuya
 								const float fov = camera_root->FloatAttribute("Fov");
 								const float near_clip = camera_root->FloatAttribute("Near");
 								const float far_clip = camera_root->FloatAttribute("Far");
-								camera_component.Camera->SetPerspectiveCameraDesc({ fov, near_clip, far_clip });
+								camera_component.Camera->SetPerspectiveCameraDesc(CreateSharedPtr<PerspectiveCameraDesc>(fov, near_clip, far_clip));
 							}
 							break;
 						case SceneCamera::ProjectionType::Orthographic:
@@ -203,7 +203,7 @@ namespace Wuya
 								const float height_size = camera_root->FloatAttribute("HeightSize");
 								const float near_clip = camera_root->FloatAttribute("Near");
 								const float far_clip = camera_root->FloatAttribute("Far");
-								camera_component.Camera->SetOrthographicCameraDesc({ height_size, near_clip, far_clip });
+								camera_component.Camera->SetOrthographicCameraDesc(CreateSharedPtr<OrthographicCameraDesc>(height_size, near_clip, far_clip));
 							}
 							break;
 						}
@@ -220,7 +220,7 @@ namespace Wuya
 							model_component.Model = Model::Create(model_path);
 						
 
-						/* todo: ÄÚ½¨Ä£ĞÍ´¦Àí */
+						/* todo: å†…å»ºæ¨¡å‹å¤„ç† */
 
 					}
 
