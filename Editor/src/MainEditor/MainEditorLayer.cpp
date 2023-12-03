@@ -31,11 +31,11 @@ namespace Wuya
 	{
 		PROFILE_FUNCTION();
 
-		/* ²Ëµ¥ */
+		/* èœå• */
 		ShowMenuUI();
-		/* ³¡¾°¿ØÖÆUI */
+		/* åœºæ™¯æ§åˆ¶UI */
 		ShowSceneControllerUI();
-		/* ×ÊÔ´¹ÜÀí´°¿Ú */
+		/* èµ„æºç®¡ç†çª—å£ */
 		m_ResourceBrowser.OnImGuiRenderer();
 
 		// bool show = true;
@@ -67,13 +67,13 @@ namespace Wuya
 
 		switch (event->GetKeyCode())
 		{
-		case Key::N: /* Ctrl+N£ºĞÂ½¨Ò»¸ö³¡¾° */
+		case Key::N: /* Ctrl+Nï¼šæ–°å»ºä¸€ä¸ªåœºæ™¯ */
 			{
 				if (is_ctrl_pressed)
 					NewScene();
 			}
 			break;
-		case Key::S: /* Ctrl+S: ±£´æ³¡¾°; Ctrl+Shift+S: ³¡¾°Áí´æÎª */
+		case Key::S: /* Ctrl+S: ä¿å­˜åœºæ™¯; Ctrl+Shift+S: åœºæ™¯å¦å­˜ä¸º */
 			if (is_ctrl_pressed)
 			{
 				if (is_shift_pressed)
@@ -82,7 +82,7 @@ namespace Wuya
 					SaveScene();
 			}
 			break;
-		case Key::I: /* Ctrl+I£ºµ¼ÈëÒ»¸ö³¡¾° */
+		case Key::I: /* Ctrl+Iï¼šå¯¼å…¥ä¸€ä¸ªåœºæ™¯ */
 			{
 				if (is_ctrl_pressed)
 					ImportScene();
@@ -158,7 +158,7 @@ namespace Wuya
 		PROFILE_FUNCTION();
 	}
 
-	/* ±£´æ³¡¾°µ½Ö¸¶¨Â·¾¶ */
+	/* ä¿å­˜åœºæ™¯åˆ°æŒ‡å®šè·¯å¾„ */
 	void MainEditorLayer::SaveSceneAs()
 	{
 		PROFILE_FUNCTION();
@@ -226,7 +226,7 @@ namespace Wuya
 			ImGuiStyle& style = ImGui::GetStyle();
 			style.WindowMinSize.x = 200.0f;
 
-			/* ²Ëµ¥À¸ */
+			/* èœå•æ  */
 			if (ImGui::BeginMenuBar())
 			{
 				if (ImGui::BeginMenu("File"))
@@ -319,7 +319,7 @@ namespace Wuya
 		ImGui::End();
 	}
 
-	/* ÏÔÊ¾³¡¾°¿ØÖÆUI */
+	/* æ˜¾ç¤ºåœºæ™¯æ§åˆ¶UI */
 	void MainEditorLayer::ShowSceneControllerUI()
 	{
 		PROFILE_FUNCTION();
@@ -332,7 +332,7 @@ namespace Wuya
 		static auto stop_icon = TextureAssetManager::Instance().GetOrCreateTexture(ABSOLUTE_PATH("EditorRes/icons/stop.png"));
 		static auto menu_icon = TextureAssetManager::Instance().GetOrCreateTexture(ABSOLUTE_PATH("EditorRes/icons/menu.png"));
 
-		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 2)); /* Ö¸¶¨¼ä¸ô */
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 2)); /* æŒ‡å®šé—´éš” */
 		ImGui::PushStyleVar(ImGuiStyleVar_ItemInnerSpacing, ImVec2(0, 2));
 
 		ImGui::Begin("##Scene Controller", nullptr, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
@@ -343,7 +343,7 @@ namespace Wuya
 			START_TRANSPARENT_BUTTON;
 
 			constexpr float cursor_offset = 10.0f;
-			/* ±£´æ°´Å¥ */
+			/* ä¿å­˜æŒ‰é’® */
 			ImGui::SetCursorPosX(cursor_offset);
 			/*if (ImGui::ImageButton((ImTextureID)save_icon->GetTextureID(), ImVec2(icon_size, icon_size), ImVec2(0, 1), ImVec2(1, 0), 0))
 				SaveScene();*/
@@ -354,7 +354,7 @@ namespace Wuya
 					SaveScene();
 				});
 
-			/* ÒÆ¶¯/Ğı×ª/Æ½ÒÆ²Ù×÷ */
+			/* ç§»åŠ¨/æ—‹è½¬/å¹³ç§»æ“ä½œ */
 			{
 				/* translate */
 				ImGui::SameLine(cursor_offset + icon_size * 2);
@@ -388,7 +388,7 @@ namespace Wuya
 					});
 			}
 
-			/* ÇĞ»»Ö´ĞĞÄ£Ê½ */
+			/* åˆ‡æ¢æ‰§è¡Œæ¨¡å¼ */
 			{
 				ImGui::SameLine();
 				const SharedPtr<Texture> icon = (m_PlayMode == PlayMode::Edit) ? play_icon : stop_icon;
@@ -400,7 +400,7 @@ namespace Wuya
 				}
 			}
 
-			/* ÅäÖÃ */
+			/* é…ç½® */
 			{
 				ImGui::SameLine(panel_width - cursor_offset - 20);
 				START_STYLE_ALPHA(0.5f);
@@ -408,7 +408,7 @@ namespace Wuya
 					ImGui::OpenPopup("ConfigPopup");
 				END_STYLE_ALPHA;
 
-				/* Õ¹¿ªµ¯´°Ê±£¬ÏÔÊ¾¿Ø¼ş */
+				/* å±•å¼€å¼¹çª—æ—¶ï¼Œæ˜¾ç¤ºæ§ä»¶ */
 				// if (ImGui::BeginPopup("ConfigPopup"))
 				// {
 				// 	ImGui::PushItemWidth(200);
@@ -429,18 +429,18 @@ namespace Wuya
 		ImGui::PopStyleVar(2);
 	}
 
-	/* ÏÔÊ¾äÖÈ¾Í³¼ÆĞÅÏ¢ */
+	/* æ˜¾ç¤ºæ¸²æŸ“ç»Ÿè®¡ä¿¡æ¯ */
 	void MainEditorLayer::ShowStatisticInfoUI()
 	{
 		PROFILE_FUNCTION();
 
 		ImGui::Begin("Stat Info");
 		{
-			// todo: Ö¡ÂÊµÈ
+			// todo: å¸§ç‡ç­‰
 			// Renderer3D Stats
 			if (ImGui::CollapsingHeader("3D"))
 			{
-				// todo: Èı½ÇĞÎ¡¢Ä£ĞÍÊıÁ¿
+				// todo: ä¸‰è§’å½¢ã€æ¨¡å‹æ•°é‡
 			}
 		}
 		ImGui::End();

@@ -1,5 +1,6 @@
 #pragma once
 #include "RenderAPI.h"
+#include "RenderQuery.h"
 
 namespace Wuya
 {
@@ -21,7 +22,7 @@ namespace Wuya
 		static void SetClearColor(const glm::vec4& color);
 		static void Clear();
 
-		/* »æÖÆÒ»¸öÊÓÍ¼ */
+		/* ç»˜åˆ¶ä¸€ä¸ªè§†å›¾ */
 		static void RenderAView(RenderView* view);
 
 		static void Submit(const SharedPtr<Material>& material, const MeshPrimitive& mesh_primitive, uint32_t index_count = 0);
@@ -29,6 +30,8 @@ namespace Wuya
 		static int CurrentAPI() { return RenderAPI::GetAPI(); }
 
 		static const SharedPtr<RenderAPI>& GetRenderAPI() { return m_pRenderAPI; }
+
+		static const ResultGPUTimerNode& GetGPUTimerRoot() { return m_GPUTimerRoot; }
 
 		static SharedPtr<VertexArray> GetFullScreenVertexArray();
 
@@ -38,5 +41,6 @@ namespace Wuya
 
 	private:
 		static SharedPtr<RenderAPI> m_pRenderAPI;
+		static ResultGPUTimerNode m_GPUTimerRoot;
 	};
 }

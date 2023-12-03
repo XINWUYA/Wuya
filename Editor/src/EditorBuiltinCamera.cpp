@@ -45,7 +45,7 @@ namespace Wuya
 		{
 			if (Input::IsMouseButtonPressed(Mouse::ButtonRight))
 			{
-				/* ÏòÇ°/Ïòºó */
+				/* å‘å‰/å‘å */
 				if (Input::IsKeyPressed(Key::W))
 				{
 					m_Position -= m_ForwardDirection * m_MoveSpeed * delta_time;
@@ -57,7 +57,7 @@ namespace Wuya
 					m_IsDirty = true;
 				}
 
-				/* Ïò×ó/ÏòÓÒ */
+				/* å‘å·¦/å‘å³ */
 				if (Input::IsKeyPressed(Key::A))
 				{
 					m_Position -= m_RightDirection * m_MoveSpeed * delta_time;
@@ -69,7 +69,7 @@ namespace Wuya
 					m_IsDirty = true;
 				}
 
-				/* ÏòÉÏ/ÏòÏÂ */
+				/* å‘ä¸Š/å‘ä¸‹ */
 				if (Input::IsKeyPressed(Key::Q))
 				{
 					m_Position += m_UpDirection * m_MoveSpeed * delta_time;
@@ -86,7 +86,7 @@ namespace Wuya
 		UpdateViewMatrix();
 	}
 
-	/* ÉèÖÃÊÓ¿ÚÇøÓò */
+	/* è®¾ç½®è§†å£åŒºåŸŸ */
 	void EditorCamera::SetViewportRegion(const ViewportRegion& region)
 	{
 		PROFILE_FUNCTION();
@@ -97,11 +97,11 @@ namespace Wuya
 		m_AspectRatio = static_cast<float>(m_ViewportRegion.Width) / static_cast<float>(m_ViewportRegion.Height);
 		UpdateProjectionMatrix();
 
-		/* ¸üĞÂÊÓ¿ÚÇøÓòÊ±£¬ĞèÖØĞÂ¹¹½¨FrameGraph, ±£Ö¤RenderTargetµÄsizeÊÇÕıÈ·µÄ */
+		/* æ›´æ–°è§†å£åŒºåŸŸæ—¶ï¼Œéœ€é‡æ–°æ„å»ºFrameGraph, ä¿è¯RenderTargetçš„sizeæ˜¯æ­£ç¡®çš„ */
 		m_IsFrameGraphDirty = true;
 	}
 
-	/* ¹¹½¨ÄÚÖÃµÄFrameGraph */
+	/* æ„å»ºå†…ç½®çš„FrameGraph */
 	void EditorCamera::ConstructRenderView()
 	{
 		PROFILE_FUNCTION();
@@ -178,8 +178,6 @@ namespace Wuya
 			},
 			[&](const FrameGraphResources& resources, const GBufferPassData& data)
 			{
-				Renderer::GetRenderAPI()->PushDebugGroup("GBufferPass");
-
 				const auto render_pass_info = resources.GetPassRenderTarget();
 				m_pRenderView->EmplacePassFrameBuffer("GBufferPass", render_pass_info);
 
@@ -204,8 +202,6 @@ namespace Wuya
 				}
 				render_pass_info->Unbind();
 				Renderer::GetRenderAPI()->Flush();
-
-				Renderer::GetRenderAPI()->PopDebugGroup();
 			}
 			);
 
@@ -257,8 +253,6 @@ namespace Wuya
 			},
 			[&](const FrameGraphResources& resources, const LightingPassData& data)
 			{
-				Renderer::GetRenderAPI()->PushDebugGroup("LightingPass");
-
 				const auto render_pass_info = resources.GetPassRenderTarget();
 				m_pRenderView->EmplacePassFrameBuffer("LightingPass", render_pass_info);
 
@@ -292,15 +286,13 @@ namespace Wuya
 					}
 				}
 				render_pass_info->Unbind();
-
-				Renderer::GetRenderAPI()->PopDebugGroup();
 			}
 			);
 		frame_graph->GetBlackboard()["LightingPassOutput"] = lighting_pass->GetData().LightingResult;
 		frame_graph->ExportGraphviz("framegraph.txt");
 		m_pRenderView->Prepare();
 
-		/* Êä³ö */
+		/* è¾“å‡º */
 		m_pRenderView->SetRenderTargetHandle(lighting_pass->GetData().LightingResult);
 
 		m_IsFrameGraphDirty = false;
@@ -338,8 +330,8 @@ namespace Wuya
 		{
 			m_ViewMatrix = view_mat;
 
-			/* ¸ù¾İViewMatrix»Ö¸´PitchºÍYaw */
-			/* todo£º Êı¾İÎ´»Ö¸´È«£¬ÈÔ´æÔÚÎÊÌâ£¬ĞèÒªÖØĞÂÎ¬»¤Õâ²¿·Ö */
+			/* æ ¹æ®ViewMatrixæ¢å¤Pitchå’ŒYaw */
+			/* todoï¼š æ•°æ®æœªæ¢å¤å…¨ï¼Œä»å­˜åœ¨é—®é¢˜ï¼Œéœ€è¦é‡æ–°ç»´æŠ¤è¿™éƒ¨åˆ† */
 			const auto orientation = glm::toQuat(view_mat);
 			const glm::vec3 euler_angles = glm::eulerAngles(orientation);
 			m_Pitch = -euler_angles.x;
@@ -365,7 +357,7 @@ namespace Wuya
 		{
 			if (m_IsFocus)
 			{
-				m_Position = m_FocalPoint - m_ForwardDirection * m_Distance; /* Ïà»úÊ¼ÖÕÎ§ÈÆ¾Û½¹µã */
+				m_Position = m_FocalPoint - m_ForwardDirection * m_Distance; /* ç›¸æœºå§‹ç»ˆå›´ç»•èšç„¦ç‚¹ */
 				m_ViewMatrix = glm::translate(glm::mat4(1.0f), m_Position) * glm::toMat4(GetOrientation());
 				m_ViewMatrix = glm::inverse(m_ViewMatrix);
 			}

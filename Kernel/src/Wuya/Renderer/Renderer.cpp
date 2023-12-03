@@ -12,7 +12,7 @@
 namespace Wuya
 {
 	
-	/* GlobalUniformBufferµÄ°ó¶¨Î»ÖÃ */
+	/* GlobalUniformBufferçš„ç»‘å®šä½ç½® */
 	namespace UniformBufferBindingPoint
 	{
 		constexpr uint8_t View			= 0;
@@ -28,14 +28,14 @@ namespace Wuya
 		glm::mat4 ProjectionMatrix{ 1 };
 		glm::mat4 ViewProjectionMatrix{ 1 };
 		glm::vec3 ViewPos{ 0.0f };
-		uint32_t FrameCounter{ 0 }; /* µ±Ç°Ö¡Êı¼ÆÊı */
+		uint32_t FrameCounter{ 0 }; /* å½“å‰å¸§æ•°è®¡æ•° */
 	};
 
 	/* Per object uniform data */
 	struct ObjectUniformData
 	{
-		glm::mat4 LocalToWorldMat{ 1 };	/* Ä£ĞÍ¾ØÕó */
-		uint32_t ObjectId{ 0 };				/* Ä£ĞÍID£¬ÓÃÓÚPicking */
+		glm::mat4 LocalToWorldMat{ 1 };	/* æ¨¡å‹çŸ©é˜µ */
+		uint32_t ObjectId{ 0 };				/* æ¨¡å‹IDï¼Œç”¨äºPicking */
 	};
 
 	/* Per light uniform data */
@@ -50,7 +50,7 @@ namespace Wuya
 
 	struct RenderData
 	{
-		/* È«¾ÖUniformBuffers */
+		/* å…¨å±€UniformBuffers */
 		ViewUniformData ViewUniformData;
 		SharedPtr<UniformBuffer> pViewUniformBuffer;
 		SharedPtr<UniformBuffer> pObjectUniformBuffer;
@@ -60,6 +60,7 @@ namespace Wuya
 	static RenderData s_RenderData;
 
 	SharedPtr<RenderAPI> Renderer::m_pRenderAPI = RenderAPI::Create();
+	ResultGPUTimerNode Renderer::m_GPUTimerRoot{};
 
 	void Renderer::Init()
 	{
@@ -76,7 +77,11 @@ namespace Wuya
 	{
 		PROFILE_FUNCTION();
 
+		RenderQueryProfiler::Instance().EndFrame();
+		RenderQueryProfiler::Instance().PrepareQueryResult(m_GPUTimerRoot);
+
 		s_RenderData.ViewUniformData.FrameCounter++;
+		RenderQueryProfiler::Instance().BeginFrame(s_RenderData.ViewUniformData.FrameCounter);
 	}
 
 	void Renderer::Release()
@@ -105,7 +110,7 @@ namespace Wuya
 		m_pRenderAPI->Clear();
 	}
 
-	/* »æÖÆÒ»¸öÊÓÍ¼ */
+	/* ç»˜åˆ¶ä¸€ä¸ªè§†å›¾ */
 	void Renderer::RenderAView(RenderView* view)
 	{
 		PROFILE_FUNCTION();

@@ -6,10 +6,10 @@ namespace Wuya
 {
 	class RenderPassNode;
 
-	/* FrameGraphPass��Ϣ */
+	/* FrameGraphPass信息 */
 	struct FrameGraphPassInfo
 	{
-		static constexpr uint32_t MAX_ATTACHMENT_NUM = MAX_COLOR_ATTACHMENT_NUM + 2; /* ���������ֱ��ӦDepth��Stencil */
+		static constexpr uint32_t MAX_ATTACHMENT_NUM = MAX_COLOR_ATTACHMENT_NUM + 2; /* 后面两个分别对应Depth和Stencil */
 		struct TextureAttachments
 		{
 			union
@@ -33,36 +33,38 @@ namespace Wuya
 			glm::vec4 ClearColor{ 0.0f,0.0f,0.0f,0.0f };
 			/* Sample */
 			uint8_t Samples{ 1 };
-			/* �ӿ����� */
+			/* 视口区域 */
 			ViewportRegion ViewportRegion{ 0,0,1,1 };
 		};
 
-		/* Pass���� */
+		/* Pass索引 */
 		uint32_t Idx{ 0 };
 	};
 
-	/* FrameGraphPass����
-	 * һ��FrameGraphPass��Ӧһ��RenderPass��������RenderPass��˽�����ݺ�ִ�з���
+	/* FrameGraphPass基类
+	 * 一个FrameGraphPass对应一个RenderPass，包含该RenderPass的私有数据和执行方法
 	 */
 	class IFrameGraphPass
 	{
 	public:
 		virtual ~IFrameGraphPass() = default;
 
-		/* ����RenderPassNode */
+		/* 设置RenderPassNode */
 		void SetRenderPassNode(const SharedPtr<RenderPassNode>& node) { m_pRenderPassNode = node; }
-		/* ��ȡRenderPassNode */
+		/* 获取RenderPassNode */
 		[[nodiscard]] SharedPtr<RenderPassNode> GetRenderPassNode() const { return m_pRenderPassNode.lock(); }
 
-		/* ִ�н׶� */
+		/* 执行阶段 */
 		virtual void Execute(const FrameGraphResources& resources) = 0;
+		virtual void BeforeExecute();
+		virtual void AfterExecute();
 
 	protected:
-		/* ��Ӧ��RenderPassNode */
+		/* 对应的RenderPassNode */
 		WeakPtr<RenderPassNode> m_pRenderPassNode;
 	};
 
-	/* ��ִ�н׶ε�FrameGraphPass */
+	/* 带执行阶段的FrameGraphPass */
 	template<typename Data, typename ExecuteFunc>
 	class FrameGraphPass : public IFrameGraphPass
 	{
@@ -72,21 +74,23 @@ namespace Wuya
 		{}
 		~FrameGraphPass() override = default;
 
-		/* ���� */
+		/* 数据 */
 		void SetData(const Data& data) { m_Data = data; }
 		const Data& GetData() const { return m_Data; }
 
 
-		/* ִ�н׶� */
+		/* 执行阶段 */
 		void Execute(const FrameGraphResources& resources) override
 		{
+			BeforeExecute();
 			m_ExecuteFunc(resources, m_Data);
+			AfterExecute();
 		}
 
 	protected:
-		/* Pass�������� */
+		/* Pass所需数据 */
 		Data m_Data;
-		/* Passִ�н׶κ��� */
+		/* Pass执行阶段函数 */
 		ExecuteFunc m_ExecuteFunc;
 	};
 }

@@ -70,12 +70,12 @@ namespace Wuya
 		if (!m_IsActivated)
 			return;
 		
-		/* Í³¼ÆĞÅÏ¢ */
+		/* ç»Ÿè®¡ä¿¡æ¯ */
 		ShowStatisticInfoUI();
-		/* ³¡¾°¹ÜÀí¼°ÊôĞÔ´°¿Ú */
+		/* åœºæ™¯ç®¡ç†åŠå±æ€§çª—å£ */
 		m_SceneHierarchy.OnImGuiRender();
 
-		/* Ö÷´°¿Ú£¬ĞèÒª×îºóÔÙ»­£¬ÒÔÈ·±£ÄÜ¹»µÃµ½ÕıÈ·µÄ´°¿Ú¿í¸ß */
+		/* ä¸»çª—å£ï¼Œéœ€è¦æœ€åå†ç”»ï¼Œä»¥ç¡®ä¿èƒ½å¤Ÿå¾—åˆ°æ­£ç¡®çš„çª—å£å®½é«˜ */
 		ShowSceneViewportUI();
 	}
 
@@ -119,13 +119,13 @@ namespace Wuya
 
 		switch (event->GetKeyCode())
 		{
-		case Key::N: /* Ctrl+N£ºĞÂ½¨Ò»¸ö³¡¾° */
+		case Key::N: /* Ctrl+Nï¼šæ–°å»ºä¸€ä¸ªåœºæ™¯ */
 			{
 				if (is_ctrl_pressed)
 					NewScene();
 			}
 			return true;
-		case Key::S: /* Ctrl+S: ±£´æ³¡¾°; Ctrl+Shift+S: ³¡¾°Áí´æÎª */
+		case Key::S: /* Ctrl+S: ä¿å­˜åœºæ™¯; Ctrl+Shift+S: åœºæ™¯å¦å­˜ä¸º */
 			if (is_ctrl_pressed)
 			{
 				if (is_shift_pressed)
@@ -134,7 +134,7 @@ namespace Wuya
 					SaveScene();
 			}
 			return true;
-		case Key::I: /* Ctrl+I£ºµ¼ÈëÒ»¸ö³¡¾° */
+		case Key::I: /* Ctrl+Iï¼šå¯¼å…¥ä¸€ä¸ªåœºæ™¯ */
 			{
 				if (is_ctrl_pressed)
 					ImportScene();
@@ -159,14 +159,14 @@ namespace Wuya
 		return false;
 	}
 
-	/* ÏìÓ¦ÍÏ×§ÎÄ¼şµ½Ö÷´°¿Ú */
+	/* å“åº”æ‹–æ‹½æ–‡ä»¶åˆ°ä¸»çª—å£ */
 	void SceneEditorLayer::OnDragItemToScene(const std::filesystem::path& path)
 	{
 		PROFILE_FUNCTION();
 
 		const auto extension = path.extension().string();
 
-		/* ³¡¾°ÎÄ¼ş */
+		/* åœºæ™¯æ–‡ä»¶ */
 		if (extension == ".scn")
 		{
 			EDITOR_LOG_DEBUG("Import scene file: {}.", path.generic_string());
@@ -177,17 +177,17 @@ namespace Wuya
 				m_pMainScene = new_scene;
 				m_ActiveScenePath = path.generic_string();
 
-				/* ÉèÖÃ¶ÔÏó²ã´Î½á¹¹Ãæ°å¶ÔÓ¦µÄ³¡¾° */
+				/* è®¾ç½®å¯¹è±¡å±‚æ¬¡ç»“æ„é¢æ¿å¯¹åº”çš„åœºæ™¯ */
 				m_SceneHierarchy.SetOwnerScene(m_pMainScene);
 
-				/* ÇĞ»»³¡¾°Ê±£¬Ğè¸üĞÂEditor RenderViewµÄ³¡¾° */
+				/* åˆ‡æ¢åœºæ™¯æ—¶ï¼Œéœ€æ›´æ–°Editor RenderViewçš„åœºæ™¯ */
 				m_pEditorCamera->GetRenderView()->SetOwnerScene(m_pMainScene);
 			}
 
 			return;
 		}
 
-		/* Ä£ĞÍÎÄ¼ş */
+		/* æ¨¡å‹æ–‡ä»¶ */
 		if (extension == ".mesh")
 		{
 			EDITOR_LOG_DEBUG("Import model file: {}.", path.generic_string());
@@ -219,10 +219,10 @@ namespace Wuya
 			m_pMainScene->Deserializer(file_path);
 			m_ActiveScenePath = file_path;
 
-			/* ÉèÖÃ¶ÔÏó²ã´Î½á¹¹Ãæ°å¶ÔÓ¦µÄ³¡¾° */
+			/* è®¾ç½®å¯¹è±¡å±‚æ¬¡ç»“æ„é¢æ¿å¯¹åº”çš„åœºæ™¯ */
 			m_SceneHierarchy.SetOwnerScene(m_pMainScene);
 
-			/* ÇĞ»»³¡¾°Ê±£¬Ğè¸üĞÂEditor RenderViewµÄ³¡¾° */
+			/* åˆ‡æ¢åœºæ™¯æ—¶ï¼Œéœ€æ›´æ–°Editor RenderViewçš„åœºæ™¯ */
 			m_pEditorCamera->GetRenderView()->SetOwnerScene(m_pMainScene);
 		}
 	}
@@ -231,14 +231,14 @@ namespace Wuya
 	{
 		PROFILE_FUNCTION();
 
-		/* Èôµ±Ç°³¡¾°´ÓÎ´±£´æ¹ı£¬ĞèÒªÏÈÈ·¶¨Ò»¸ö±£´æÂ·¾¶ */
+		/* è‹¥å½“å‰åœºæ™¯ä»æœªä¿å­˜è¿‡ï¼Œéœ€è¦å…ˆç¡®å®šä¸€ä¸ªä¿å­˜è·¯å¾„ */
 		if (m_ActiveScenePath.empty())
 			m_ActiveScenePath = FileDialog::SaveFile("scene(*.scn)\0*.scn\0");
 
 		m_pMainScene->Serializer(m_ActiveScenePath);
 	}
 
-	/* ±£´æ³¡¾°µ½Ö¸¶¨Â·¾¶ */
+	/* ä¿å­˜åœºæ™¯åˆ°æŒ‡å®šè·¯å¾„ */
 	void SceneEditorLayer::SaveSceneAs()
 	{
 		PROFILE_FUNCTION();
@@ -247,7 +247,7 @@ namespace Wuya
 		if (!file_path.empty())
 			m_pMainScene->Serializer(file_path);
 
-		/* ÔÚ±£´æÖ®ºó£¬½«µ±Ç°³¡¾°Â·¾¶ÇĞ»»ÎªĞÂ´´½¨µÄÂ·¾¶ */
+		/* åœ¨ä¿å­˜ä¹‹åï¼Œå°†å½“å‰åœºæ™¯è·¯å¾„åˆ‡æ¢ä¸ºæ–°åˆ›å»ºçš„è·¯å¾„ */
 		m_ActiveScenePath = file_path;
 	}
 
@@ -261,7 +261,7 @@ namespace Wuya
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
 		ImGui::Begin("Scene", &m_IsActivated);
 		{
-			/* »ñÈ¡´°¿Ú·¶Î§ */
+			/* è·å–çª—å£èŒƒå›´ */
 			const auto viewport_region_min = ImGui::GetWindowContentRegionMin();
 			const auto viewport_region_max = ImGui::GetWindowContentRegionMax();
 			const auto viewport_offset = ImGui::GetWindowPos();
@@ -270,12 +270,12 @@ namespace Wuya
 			m_ViewportRegion.MinY = viewport_region_min.y + viewport_offset.y;
 			m_ViewportRegion.Height = viewport_region_max.y - viewport_region_min.x;
 
-			/* Èôµ±Ç°ImGui´°¿Ú²»ÊÇÖ÷´°¿Ú£¬Ó¦×èÈûÊÂ¼ş´«µİ */
+			/* è‹¥å½“å‰ImGuiçª—å£ä¸æ˜¯ä¸»çª—å£ï¼Œåº”é˜»å¡äº‹ä»¶ä¼ é€’ */
 			m_IsViewportFocused = ImGui::IsWindowFocused();
 			m_IsViewportHovered = ImGui::IsWindowHovered();
 			// Application::Instance()->GetImGuiLayer()->BlockEvents(!m_IsViewportFocused && !m_IsViewportHovered);
 
-			/* »æÖÆ³¡¾° */
+			/* ç»˜åˆ¶åœºæ™¯ */
 			auto output_rt = m_pEditorCamera->GetRenderView()->GetRenderTarget();
 			if (output_rt)
 			{
@@ -284,7 +284,7 @@ namespace Wuya
 				ImGui::Image((ImTextureID)texture_id, viewport_panel_size, ImVec2{ 0, 1 }, ImVec2{ 1, 0 });
 			}
 
-			/* ÍÏ¶¯×ÊÔ´µ½Ö÷´°¿Ú */
+			/* æ‹–åŠ¨èµ„æºåˆ°ä¸»çª—å£ */
 			if (ImGui::BeginDragDropTarget())
 			{
 				if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("RESOURCE_BROWSER_ITEM"))
@@ -309,10 +309,60 @@ namespace Wuya
 
 		ImGui::Begin("Stat Info");
 		{
+			if (ImGui::CollapsingHeader("GPU Stats"))
+			{
+				std::function<void(const ResultGPUTimerNode&)> ShowGPUTimeResultRecursively;
+				ShowGPUTimeResultRecursively = [&ShowGPUTimeResultRecursively](const ResultGPUTimerNode& timerNode)
+					{
+						if (timerNode.Label.empty())
+							return;
+						static constexpr int strLen = 40;
+						char labelStr[strLen];
+						snprintf(labelStr, strLen, "(%d)%s", timerNode.QueryIndex, timerNode.Label.c_str());
+						labelStr[strLen - 1] = 0;
+
+						ImGui::TableNextRow();
+						ImGui::TableNextColumn();
+						if (!timerNode.Children.empty())
+						{
+							static auto flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_SpanFullWidth;
+							const bool open = ImGui::TreeNodeEx((void*)(intptr_t)(timerNode.QueryIndex), flags, labelStr);
+							ImGui::TableNextColumn();
+							ImGui::Text("%.2f", timerNode.GPUTime);
+
+							if (open)
+							{
+								for (const auto& child : timerNode.Children)
+									ShowGPUTimeResultRecursively(child);
+
+								ImGui::TreePop();
+							}
+						}
+						else
+						{
+							static auto flags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_Bullet | ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_SpanFullWidth;
+							ImGui::TreeNodeEx((void*)(intptr_t)(timerNode.QueryIndex), flags, labelStr);
+							ImGui::TableNextColumn();
+							ImGui::Text("%.2f", timerNode.GPUTime);
+						}
+					};
+
+				static auto tableFlag = ImGuiTableFlags_BordersV | ImGuiTableFlags_BordersOuterH | ImGuiTableFlags_Resizable | ImGuiTableFlags_RowBg | ImGuiTableFlags_NoBordersInBody;
+				const auto& GPUTimerRoot = Renderer::GetGPUTimerRoot();
+				if (ImGui::BeginTable("2Columes", 2, tableFlag))
+				{
+					ImGui::TableSetupColumn("Scope", ImGuiTableColumnFlags_NoHide);
+					ImGui::TableSetupColumn("GPU-Times(us)", ImGuiTableColumnFlags_WidthFixed, ImGui::CalcTextSize("A").x);
+					ImGui::TableHeadersRow();
+					ShowGPUTimeResultRecursively(GPUTimerRoot);
+					ImGui::EndTable();
+				}
+			}
+
 			// Renderer3D Stats
 			if (ImGui::CollapsingHeader("3D"))
 			{
-				// todo: Èı½ÇĞÎ¡¢Ä£ĞÍÊıÁ¿
+				// todo: ä¸‰è§’å½¢ã€æ¨¡å‹æ•°é‡
 			}
 		}
 		ImGui::End();
@@ -352,11 +402,11 @@ namespace Wuya
 
 			if (ImGuizmo::IsUsing())
 			{
-				/* ´Ó±ä»»¾ØÕóÖĞ»Ö¸´ */
+				/* ä»å˜æ¢çŸ©é˜µä¸­æ¢å¤ */
 				glm::vec3 position, rotation, scale;
 				DecomposeTransform(transform_mat, position, rotation, scale);
 
-				/* ¸üĞÂ×é¼şĞÅÏ¢ */
+				/* æ›´æ–°ç»„ä»¶ä¿¡æ¯ */
 				glm::vec3 delta_rotation = rotation - transform_component.Rotation;
 				transform_component.Position = position;
 				transform_component.Rotation += delta_rotation;
@@ -364,14 +414,14 @@ namespace Wuya
 			}
 		}
 
-		/* ×ø±êÏß¿ò
+		/* åæ ‡çº¿æ¡†
 		 *
-		 * todo: ½«Ïß¿ò»®µ½³¡¾°ÎïÌåÖ®ºó
+		 * todo: å°†çº¿æ¡†åˆ’åˆ°åœºæ™¯ç‰©ä½“ä¹‹å
 		 */
 		//const auto identity_mat = glm::identity<glm::mat4>();
 		//ImGuizmo::DrawGrid(glm::value_ptr(view_mat), glm::value_ptr(projection_mat), glm::value_ptr(identity_mat), 100.f);
 
-		/* ÓÒÉÏ½Ç·½Î»ÊÓÍ¼ */
+		/* å³ä¸Šè§’æ–¹ä½è§†å›¾ */
 		/*if (!m_pEditorCamera->IsFocus())
 		{
 			ImGuizmo::ViewManipulate(glm::value_ptr(view_mat), m_pEditorCamera->GetDistance(), ImVec2(m_ViewportRegion.z - 128, ImGui::GetWindowPos().y), ImVec2(128, 128), 0x00000000);
@@ -419,17 +469,17 @@ namespace Wuya
 			switch (m_PlayMode)
 			{
 			case PlayMode::Edit:
-				/* ¸üĞÂÏà»úĞÅÏ¢ */
+				/* æ›´æ–°ç›¸æœºä¿¡æ¯ */
 				if (m_IsViewportFocused)
 				{
 					m_pEditorCamera->OnUpdate(delta_time);
 				}
 
-				/* ¸üĞÂ³¡¾°ÖĞµÄÊµÌå */
+				/* æ›´æ–°åœºæ™¯ä¸­çš„å®ä½“ */
 				m_pMainScene->OnUpdateEditor(m_pEditorCamera.get(), delta_time);
 				break;
 			case PlayMode::Runtime:
-				/* ¸üĞÂ³¡¾° */
+				/* æ›´æ–°åœºæ™¯ */
 				m_pMainScene->OnUpdateRuntime(delta_time);
 				break;
 			}
