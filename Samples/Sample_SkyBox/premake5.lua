@@ -17,8 +17,8 @@ project "Sample_SkyBox"
 	{
 		"src",
 		"%{wks.location}/Kernel/src",
-		"%{wks.location}/Kernel/third_party/spdlog/include",
-		"%{wks.location}/Kernel/third_party/debugbreak",
+		"%{IncludeDirs.spdlog}",
+		"%{IncludeDirs.debugbreak}",
 		"%{IncludeDirs.GLFW}",
 		"%{IncludeDirs.Glad}",
 		"%{IncludeDirs.ImGui}",

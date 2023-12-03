@@ -1,39 +1,39 @@
-[submodule "Kernel/third_party/spdlog"]
-	path = Kernel/third_party/spdlog
+[submodule "Libraries/ThirdParty/spdlog"]
+	path = Libraries/ThirdParty/spdlog
 	url = https://github.com/gabime/spdlog
-[submodule "Kernel/third_party/debugbreak"]
-	path = Kernel/third_party/debugbreak
+[submodule "Libraries/ThirdParty/debugbreak"]
+	path = Libraries/ThirdParty/debugbreak
 	url = https://github.com/scottt/debugbreak
-[submodule "Kernel/third_party/glfw"]
-	path = Kernel/third_party/glfw
+[submodule "Libraries/ThirdParty/glfw"]
+	path = Libraries/ThirdParty/glfw
 	url = https://github.com/glfw/glfw
-[submodule "Kernel/third_party/imgui"]
-	path = Kernel/third_party/imgui
+[submodule "Libraries/ThirdParty/imgui"]
+	path = Libraries/ThirdParty/imgui
 	url = https://github.com/ocornut/imgui
-[submodule "Kernel/third_party/glm"]
-	path = Kernel/third_party/glm
+[submodule "Libraries/ThirdParty/glm"]
+	path = Libraries/ThirdParty/glm
 	url = https://github.com/g-truc/glm
-[submodule "Kernel/third_party/stb"]
-	path = Kernel/third_party/stb
+[submodule "Libraries/ThirdParty/stb"]
+	path = Libraries/ThirdParty/stb
 	url = https://github.com/nothings/stb
-[submodule "Kernel/third_party/entt"]
-	path = Kernel/third_party/entt
+[submodule "Libraries/ThirdParty/entt"]
+	path = Libraries/ThirdParty/entt
 	url = https://github.com/skypjack/entt
-[submodule "Kernel/third_party/tinyxml2"]
-	path = Kernel/third_party/tinyxml2
+[submodule "Libraries/ThirdParty/tinyxml2"]
+	path = Libraries/ThirdParty/tinyxml2
 	url = https://github.com/leethomason/tinyxml2
-[submodule "Kernel/third_party/ImGuizmo"]
-	path = Kernel/third_party/ImGuizmo
+[submodule "Libraries/ThirdParty/ImGuizmo"]
+	path = Libraries/ThirdParty/ImGuizmo
 	url = https://github.com/CedricGuillemet/ImGuizmo
-[submodule "Kernel/third_party/xxHash"]
-	path = Kernel/third_party/xxHash
+[submodule "Libraries/ThirdParty/xxHash"]
+	path = Libraries/ThirdParty/xxHash
 	url = https://github.com/Cyan4973/xxHash
-[submodule "Kernel/third_party/tinyobjloader"]
-	path = Kernel/third_party/tinyobjloader
+[submodule "Libraries/ThirdParty/tinyobjloader"]
+	path = Libraries/ThirdParty/tinyobjloader
 	url = https://github.com/tinyobjloader/tinyobjloader
-[submodule "Kernel/third_party/magic_enum"]
-	path = Kernel/third_party/magic_enum
+[submodule "Libraries/ThirdParty/magic_enum"]
+	path = Libraries/ThirdParty/magic_enum
 	url = https://github.com/Neargye/magic_enum.git
-[submodule "Kernel/third_party/assimp"]
-	path = Kernel/third_party/assimp
+[submodule "Libraries/ThirdParty/assimp"]
+	path = Libraries/ThirdParty/assimp
 	url = https://github.com/assimp/assimp.git
