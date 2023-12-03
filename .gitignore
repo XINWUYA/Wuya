@@ -378,3 +378,4 @@ TimeCostProfiler-Runtime.json
 
 build/
 cache/
+/Kernel/src/Wuya/Tracy/TracyClient.cpp
