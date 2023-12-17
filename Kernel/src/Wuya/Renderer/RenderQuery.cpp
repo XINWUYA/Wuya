@@ -7,6 +7,8 @@ namespace Wuya
 {
 	void RenderQueryContext::Init()
 	{
+		PROFILE_FUNCTION();
+
 		switch (Renderer::CurrentAPI())
 		{
 		case RenderAPI::None:
@@ -25,6 +27,8 @@ namespace Wuya
 
 	void RenderQueryContext::Destroy()
 	{
+		PROFILE_FUNCTION();
+
 		for (auto& query : m_QueryNodes)
 			delete query;
 		
@@ -33,6 +37,8 @@ namespace Wuya
 
 	void RenderQueryContext::BeginFrame(uint32_t frame_id)
 	{
+		PROFILE_FUNCTION();
+
 		m_IsValid = true;
 		m_RootNodeIndex = INVALID_QUERY_NODE_INDEX;
 		m_CurrentNodeIndex = INVALID_QUERY_NODE_INDEX;
@@ -55,12 +61,16 @@ namespace Wuya
 
 	void RenderQueryContext::EndFrame()
 	{
+		PROFILE_FUNCTION();
+
 		while (m_CurrentNodeIndex ^ INVALID_QUERY_NODE_INDEX)
 			EndGPUScope();
 	}
 
 	void RenderQueryContext::BeginGPUScope(const char* label)
 	{
+		PROFILE_FUNCTION();
+
 		if (m_UsedNodeIndex >= DEFAULT_QUERY_COUNT)
 		{
 			m_QueryNodes.emplace_back(new OpenGLQueryNode);
@@ -89,6 +99,8 @@ namespace Wuya
 
 	void RenderQueryContext::EndGPUScope()
 	{
+		PROFILE_FUNCTION();
+
 		if (m_CurrentNodeIndex ^ INVALID_QUERY_NODE_INDEX)
 		{
 			auto* currentQueryNode = m_QueryNodes[m_CurrentNodeIndex];
@@ -99,6 +111,8 @@ namespace Wuya
 
 	bool RenderQueryContext::PrepareQueryResult()
 	{
+		PROFILE_FUNCTION();
+
 		if (m_RootNodeIndex == INVALID_QUERY_NODE_INDEX)
 			return false;
 
@@ -126,30 +140,40 @@ namespace Wuya
 
 	void RenderQueryProfiler::BeginFrame(uint32_t frame_id)
 	{
+		PROFILE_FUNCTION();
+
 		auto& currentContext = m_QueryContexts[m_WriteContextId];
 		currentContext.BeginFrame(frame_id);
 	}
 
 	void RenderQueryProfiler::EndFrame()
 	{
+		PROFILE_FUNCTION();
+
 		auto& currentContext = m_QueryContexts[m_WriteContextId];
 		currentContext.EndFrame();
 	}
 
 	void RenderQueryProfiler::BeginGPUScope(const char* label)
 	{
+		PROFILE_FUNCTION();
+
 		auto& currentContext = m_QueryContexts[m_WriteContextId];
 		currentContext.BeginGPUScope(label);
 	}
 
 	void RenderQueryProfiler::EndGPUScope()
 	{
+		PROFILE_FUNCTION();
+
 		auto& currentContext = m_QueryContexts[m_WriteContextId];
 		currentContext.EndGPUScope();
 	}
 
 	bool RenderQueryProfiler::PrepareQueryResult(ResultGPUTimerNode& root_node)
 	{
+		PROFILE_FUNCTION();
+
 		auto& readContext = m_QueryContexts[m_ReadContextId];
 
 		if (readContext.PrepareQueryResult())
@@ -190,6 +214,8 @@ namespace Wuya
 
 	RenderQueryProfiler::RenderQueryProfiler()
 	{
+		PROFILE_FUNCTION();
+
 		/* 初始化RenderQueryContext */
 		m_QueryContexts.resize(MAX_CONTEXTS);
 		for (auto& context : m_QueryContexts)

@@ -38,6 +38,7 @@ namespace Wuya
 		: m_DebugName(name)
 	{
 		PROFILE_FUNCTION();
+		m_RenderPassNodes.reserve(100);
 	}
 
 	FrameGraph::~FrameGraph()

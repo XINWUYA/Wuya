@@ -19,6 +19,8 @@ namespace Wuya
 
 	void OpenGLQueryNode::Begin()
 	{
+		PROFILE_FUNCTION();
+
 		CHECK_GL_ERROR;
 		glQueryCounter(m_TimestampQueries[0], GL_TIMESTAMP);
 		CHECK_GL_ERROR;
@@ -26,6 +28,8 @@ namespace Wuya
 
 	void OpenGLQueryNode::End()
 	{
+		PROFILE_FUNCTION();
+
 		CHECK_GL_ERROR;
 		glQueryCounter(m_TimestampQueries[1], GL_TIMESTAMP);
 		CHECK_GL_ERROR;
@@ -33,6 +37,8 @@ namespace Wuya
 
 	bool OpenGLQueryNode::GetQueryResult()
 	{
+		PROFILE_FUNCTION();
+
 		CHECK_GL_ERROR;
 		uint64_t timestampAvailable[2] = {0};
 		glGetQueryObjectui64v(m_TimestampQueries[0], GL_QUERY_RESULT_AVAILABLE, &timestampAvailable[0]);

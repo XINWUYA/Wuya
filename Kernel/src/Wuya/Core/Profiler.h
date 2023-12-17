@@ -102,6 +102,8 @@ namespace Wuya
 
 #if TRACY_ENABLE
 	#define PROFILE_SCOPE(name) ZoneScopedN(name)
+	#define PROFILE_SCOPE_ARGS_LINE(fmt, line, ...)  char label_##line[100]; snprintf(label_##line, 100, fmt, __VA_ARGS__); const char* label_##line##_const = label_##line; PROFILE_SCOPE(label_##line##_const);
+	#define PROFILE_SCOPE_ARGS(fmt, ...) PROFILE_SCOPE_ARGS_LINE(fmt, __LINE__, __VA_ARGS__)
 	#define PROFILE_FUNCTION() ZoneScoped
 
 #elif WUYA_PROFILE

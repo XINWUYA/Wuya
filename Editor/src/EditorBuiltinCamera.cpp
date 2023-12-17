@@ -289,7 +289,7 @@ namespace Wuya
 			}
 			);
 		frame_graph->GetBlackboard()["LightingPassOutput"] = lighting_pass->GetData().LightingResult;
-		frame_graph->ExportGraphviz("framegraph.txt");
+		// frame_graph->ExportGraphviz("framegraph.txt");
 		m_pRenderView->Prepare();
 
 		/* 输出 */

@@ -119,6 +119,8 @@ namespace Wuya
 		FrameGraphResourceHandle m_RenderTargetHandle{};
 		/* FrameGraph */
 		SharedPtr<FrameGraph> m_pFrameGraph{ nullptr };
+		/* 是否使用自定义的FrameGraph覆盖 */
+		bool m_IsOverrideFrameGraph{ false };
 		/* 收集当前RenderView对应的FrameGraph中各Pass阶段的FrameBuffer，用于ReadPixels<PassName, FrameBufferPtr> */
 		std::unordered_map<std::string, SharedPtr<FrameBuffer>> m_PassFrameBuffers{};
 
