@@ -17,7 +17,7 @@ namespace Wuya
 
 		glfwMakeContextCurrent(m_pGLFWWindow);
 
-		// 初始化Glad
+		// 鍒濆鍖朑lad
 		int status = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
 		ASSERT(status, "Failed to init Glad!");
 
@@ -26,11 +26,17 @@ namespace Wuya
 		CORE_LOG_INFO("    Renderer: {0}", glGetString(GL_RENDERER));
 		CORE_LOG_INFO("    Version: {0}", glGetString(GL_VERSION));
 
+#ifdef __APPLE__
+		// macOS only supports OpenGL 4.1
+		ASSERT((GLVersion.major > 4 || (GLVersion.major == 4 && GLVersion.minor >= 1)),
+			"OpenGL Version is too old(need >= 4.1 on macOS).");
+#else
 		ASSERT((GLVersion.major > 4 || (GLVersion.major == 4 && GLVersion.minor >= 5)),
 			"OpenGL Version is too old(need >= 4.5).");
+#endif
 
 
-		/* 设置DebugOutput回调 */
+		/* 鍒涘缓DebugOutput鍥炶皟 */
 #ifdef WUYA_DEBUG
 		int flags;
 		glGetIntegerv(GL_CONTEXT_FLAGS, &flags);

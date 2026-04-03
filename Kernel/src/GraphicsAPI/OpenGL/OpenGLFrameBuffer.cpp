@@ -14,11 +14,11 @@ namespace Wuya
 	{
 		PROFILE_FUNCTION();
 
-		/* 1. ´´½¨FrameBuffer */
+	/* 1. åˆ›å»ºFrameBuffer */
 		glGenFramebuffers(1, &m_FrameBufferId);
 		glBindFramebuffer(GL_FRAMEBUFFER, m_FrameBufferId);
 
-		/* 2. ¸½¼ÓColorAttachments */
+	/* 2. åˆ›å»ºColorAttachments */
 		if (!!(desc.Usage & RenderBufferUsage::ColorAll))
 		{
 			GLenum rbos[MAX_COLOR_ATTACHMENT_NUM] = { GL_NONE };
@@ -35,8 +35,8 @@ namespace Wuya
 			CHECK_GL_ERROR;
 		}
 
-		/* 3. ¸½¼ÓDepth/Stencil Attachment */
-		bool is_depth_stencil = false; /* DepthºÍStencil¸½¼Óµ½Í¬Ò»¸öRenderBuffer */
+		/* 3. åˆ›å»ºDepth/Stencil Attachment */
+		bool is_depth_stencil = false; /* Depthå’ŒStencilç»‘å®šåˆ°åŒä¸€ä¸ªRenderBuffer */
 		if ((desc.Usage & RenderBufferUsage::DepthStencil) == RenderBufferUsage::DepthStencil)
 		{
 			AttachARenderBuffer(desc.DepthRenderBuffer, GL_DEPTH_STENCIL_ATTACHMENT);
@@ -45,18 +45,18 @@ namespace Wuya
 		
 		if (!is_depth_stencil)
 		{
-			if (!!(desc.Usage & RenderBufferUsage::Depth)) /* ½ö¸½¼ÓDepth */
+			if (!!(desc.Usage & RenderBufferUsage::Depth)) /* ä»…ç»‘å®šDepth */
 			{
 				AttachARenderBuffer(desc.DepthRenderBuffer, GL_DEPTH_ATTACHMENT);
 			}
 
-			if (!!(desc.Usage & RenderBufferUsage::Stencil)) /* ½ö¸½¼ÓStencil */
+			if (!!(desc.Usage & RenderBufferUsage::Stencil)) /* ä»…ç»‘å®šStencil */
 			{
 				AttachARenderBuffer(desc.StencilRenderBuffer, GL_STENCIL_ATTACHMENT);
 			}
 		}
 
-		/* ÏÈ½â°ó */
+		/* è§£ç»‘ */
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		CHECK_GL_ERROR;
 	}
@@ -95,9 +95,9 @@ namespace Wuya
 		m_FrameBufferDesc.ViewportRegion.Height = height;
 	}
 
-	/* ¶ÁÈ¡Ö¸¶¨ÎÆÀí£¨x, y£©ÏñËØÎ»ÖÃµÄÑÕÉ«Öµ */
+	/* è·å–æŒ‡å®šé™„ä»¶x, yåƒç´ ä½ç½®çš„é¢œé¢œè‰²å€¼ */
 	void OpenGLFrameBuffer::ReadPixel(uint32_t attachment_index, int x, int y, const PixelDesc& pixel_desc, void* data)
-	{
+    {
 		PROFILE_FUNCTION();
 
 		ASSERT(attachment_index < m_FrameBufferDesc.ColorRenderBuffers.size());
@@ -110,7 +110,7 @@ namespace Wuya
 		CHECK_GL_ERROR;
 	}
 
-	/* Ö¸¶¨Êı¾İÇåÀíAttachment */
+	/* æŒ‡å®šæŸä¸ªColorAttachment */
 	void OpenGLFrameBuffer::ClearAttachment(uint32_t attachment_index, int level, const PixelDesc& pixel_desc, void* data)
 	{
 		PROFILE_FUNCTION();
@@ -120,17 +120,76 @@ namespace Wuya
 		const auto& render_buffer_info = m_FrameBufferDesc.ColorRenderBuffers[attachment_index];
 		const auto& texture = std::dynamic_pointer_cast<OpenGLTexture>(render_buffer_info.RenderTarget);
 		
+#ifdef __APPLE__
+		// macOS only supports OpenGL 4.1, glClearTexImage requires OpenGL 4.4+
+		// Use traditional approach: bind texture to FBO and clear
+		GLuint temp_fbo;
+		glGenFramebuffers(1, &temp_fbo);
+		glBindFramebuffer(GL_FRAMEBUFFER, temp_fbo);
+		
+		GLenum texture_target = texture->m_TextureTarget;
+		if (texture_target == GL_TEXTURE_CUBE_MAP)
+		{
+			texture_target = GL_TEXTURE_CUBE_MAP_POSITIVE_X + render_buffer_info.Layer;
+		}
+		
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, texture_target, texture->GetTextureID(), level);
+		
+		GLenum draw_buffers[] = { GL_COLOR_ATTACHMENT0 };
+		glDrawBuffers(1, draw_buffers);
+		
+		// Check framebuffer status before clearing
+		GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+		if (status != GL_FRAMEBUFFER_COMPLETE)
+		{
+			CORE_LOG_ERROR("ClearAttachment: Temporary FBO incomplete, status: 0x{:X}", status);
+			glBindFramebuffer(GL_FRAMEBUFFER, 0);
+			glDeleteFramebuffers(1, &temp_fbo);
+			CHECK_GL_ERROR;
+			return;
+		}
+		
+		// Use appropriate clear function based on pixel format (integer vs float)
+		GLenum gl_pixel_format = TranslateToOpenGLPixelFormat(pixel_desc.Format);
+		bool is_integer_format = (gl_pixel_format == GL_RED_INTEGER || 
+		                          gl_pixel_format == GL_RG_INTEGER || 
+		                          gl_pixel_format == GL_RGB_INTEGER || 
+		                          gl_pixel_format == GL_RGBA_INTEGER);
+		
+		if (is_integer_format)
+		{
+			GLint clear_value[4] = { 0, 0, 0, 1 };
+			if (data)
+			{
+				memcpy(clear_value, data, sizeof(clear_value));
+			}
+			glClearBufferiv(GL_COLOR, 0, clear_value);
+		}
+		else
+		{
+			GLfloat clear_color[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
+			if (data)
+			{
+				memcpy(clear_color, data, sizeof(clear_color));
+			}
+			glClearBufferfv(GL_COLOR, 0, clear_color);
+		}
+		
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		glDeleteFramebuffers(1, &temp_fbo);
+#else
+		// Windows/Linux: Use modern glClearTexImage (OpenGL 4.4+)
 		glClearTexImage(texture->GetTextureID(), level, TranslateToOpenGLPixelFormat(pixel_desc.Format), TranslateToOpenGLPixelType(pixel_desc.Type), data);
+#endif
 
 		CHECK_GL_ERROR;
 	}
-
-	/* ¸½¼ÓÒ»¸öRenderBufferµ½FrameBuffer */
+	/* ç»‘å®šä¸€ä¸ªRenderBufferåˆ°FrameBuffer */
 	void OpenGLFrameBuffer::AttachARenderBuffer(const RenderBufferInfo& render_buffer_info, GLenum attachment)
 	{
 		PROFILE_FUNCTION();
 
-		/* »ñÈ¡¸ÃRenderBufferµÄUsage */
+		/* è·å–æ­¤RenderBufferçš„Usage */
 		RenderBufferUsage render_buffer_usage{};
 		switch (attachment)
 		{
@@ -157,10 +216,10 @@ namespace Wuya
 			break;
 		}
 
-		/* 1. »ñÈ¡rtµÄ¸ñÊ½ */
+		/* 1. è·å–rtçš„æ ¼å¼ */
 		const auto& texture = std::dynamic_pointer_cast<OpenGLTexture>(render_buffer_info.RenderTarget);
 		GLenum texture_target = GL_TEXTURE_2D;
-		if (!!(texture->m_TextureDesc.Usage & TextureUsage::Sampleable)) /* ×÷ÎªÑÕÉ«rt */
+		if (!!(texture->m_TextureDesc.Usage & TextureUsage::Sampleable)) /* ä½œä¸ºé¢œè‰²rt */
 		{
 			switch (texture->m_TextureTarget)
 			{
@@ -176,18 +235,18 @@ namespace Wuya
 				break;
 			}
 		}
-		else /* ×÷ÎªRenderBuffer */
+		else /* ä½œä¸ºRenderBuffer */
 		{
 			texture_target = GL_RENDERBUFFER;
 		}
 
-		/* 2. ½«RenderBuffer¸½¼Óµ½FrameBuffer */
-		/* ²ÉÑù´ÎÊı*/
+		/* 2. æŠŠRenderBufferç»‘å®šåˆ°FrameBuffer */
+		/* éå¤šé‡é‡‡æ ·*/
 		if (texture->m_TextureDesc.Samples <= 1)
 		{
 			PROFILE_SCOPE("Attach RenderBuffer");
 			
-			/* ¸½¼Ó */
+			/* æ•°ç»„ */
 			if (texture_target == GL_TEXTURE_2D_ARRAY)
 			{
 				glFramebufferTextureLayer(GL_FRAMEBUFFER, attachment, texture->m_TextureId, render_buffer_info.Level, render_buffer_info.Layer);
@@ -211,17 +270,17 @@ namespace Wuya
 		}
 		else
 		{
-			/* todo: Ö§³ÖMultiSample */
-			if (!!(texture->m_TextureDesc.Usage & TextureUsage::Sampleable)) /* RenderBuffer²»ÊÇSampleable£¬Ö±½Ó¸½¼Ó */
+			/* todo: æ”¯æŒMultiSample */
+			if (!!(texture->m_TextureDesc.Usage & TextureUsage::Sampleable)) /* RenderBufferä¸”éSampleableï¼Œç›´æ¥ç»‘å®š */
 			{
 				glFramebufferRenderbuffer(GL_FRAMEBUFFER, attachment, GL_RENDERBUFFER, texture->m_TextureId);
 				render_buffer_usage = RenderBufferUsage::None;
 
 				CHECK_GL_ERROR;
 			}
-			else /* rtĞèÒªMultiSample */
+			else /* rtéœ€è¦MultiSample */
 			{
-				/* ĞèÒª¶îÍâ´´½¨Ò»¸öRenderBuffer, todo: ²»ĞèÒªÃ¿´Î¶¼´´½¨ */
+				/* éœ€è¦é¢å¤–åˆ›å»ºä¸€ä¸ªRenderBuffer, todo: ä¸éœ€è¦æ¯æ¬¡éƒ½åˆ›å»º */
 				GLuint rbo = 0;
 				glGenRenderbuffers(1, &rbo);
 				glBindRenderbuffer(GL_RENDERBUFFER, rbo);
@@ -239,7 +298,7 @@ namespace Wuya
 			glActiveTexture(GL_TEXTURE0);
 			glBindTexture(texture_target, render_buffer_info.RenderTarget->GetTextureID());
 
-			/* ÉèÖÃÊ¹ÓÃµÄLevel */
+			/* ï¿½ï¿½ï¿½ï¿½Ê¹ï¿½Ãµï¿½Level */
 			glTexParameteri(texture_target, GL_TEXTURE_BASE_LEVEL, render_buffer_info.Level);
 			glTexParameteri(texture_target, GL_TEXTURE_MAX_LEVEL, render_buffer_info.Level);
 		}

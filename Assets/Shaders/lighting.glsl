@@ -7,14 +7,14 @@ struct SVextex2Frag
 };
 
 layout(location = 0) in vec4 a_Position;
-layout(location = 0) out SVextex2Frag Output;
+layout(location = 0) out SVextex2Frag vert2frag;
 
 void main()
 {
 	gl_Position = a_Position; //vec4(a_Position.xy, a_Position.z * 0.5f + 0.5f, 1.0f);
 	gl_Position.z = a_Position.z * 0.5f + 0.5f;
 
-	Output.TexCoord = a_Position.xy * 0.5f + 0.5f;
+	vert2frag.TexCoord = a_Position.xy * 0.5f + 0.5f;
 }
 
 
@@ -32,12 +32,12 @@ struct SVextex2Frag
 };
 
 layout(location = 0) out vec4 OutFragColor;
-layout(location = 0) in SVextex2Frag Input;
+layout(location = 0) in SVextex2Frag vert2frag;
 
 void main()
 {
 	SGBufferData gbuffer;
-	CalculateGBuffer(gbuffer, Input.TexCoord);
+	CalculateGBuffer(gbuffer, vert2frag.TexCoord);
 	
 	vec3 l = -normalize(u_LightDir);
 	vec3 v = normalize(u_ViewPos - gbuffer.WorldPosition);

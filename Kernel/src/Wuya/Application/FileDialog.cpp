@@ -1,17 +1,24 @@
 #include "Pch.h"
 #include "FileDialog.h"
 #include "Application.h"
+#include "GLFW/glfw3.h"
+
+#ifdef PLATFORM_WINDOWS
 #include "commdlg.h"
 #include "shellapi.h"
-#include "GLFW/glfw3.h"
 #define GLFW_EXPOSE_NATIVE_WIN32
 #include <GLFW/glfw3native.h>
+#elif defined(PLATFORM_MACOS)
+#import <Cocoa/Cocoa.h>
+#define GLFW_EXPOSE_NATIVE_COCOA
+#include <GLFW/glfw3native.h>
+#endif
 
 namespace Wuya
 {
-	/* Í¨¹ýÎÄ¼þ´°¿ÚÑ¡È¡Ö¸¶¨ÀàÐÍÎÄ¼þÂ·¾¶ */
-	std::string FileDialog::OpenFile(const char* filter)
-	{
+	/* é€šè¿‡æ–‡ä»¶å¯¹è¯æ¡†é€‰å–æŒ‡å®šçš„æ–‡ä»¶è·¯å¾„ */
+	std::string FileDialog::OpenFile(const char* filter)	{
+#ifdef PLATFORM_WINDOWS
 		OPENFILENAMEA ofn;
 		CHAR szFile[260] = { 0 };
 		CHAR currentDir[256] = { 0 };
@@ -30,11 +37,32 @@ namespace Wuya
 			return ofn.lpstrFile;
 
 		return std::string();
+#elif defined(PLATFORM_MACOS)
+		@autoreleasepool {
+			NSOpenPanel* openPanel = [NSOpenPanel openPanel];
+			[openPanel setAllowsMultipleSelection:NO];
+			[openPanel setCanChooseDirectories:NO];
+			[openPanel setCanChooseFiles:YES];
+			
+			// Set parent window
+			NSWindow* nsWindow = glfwGetCocoaWindow((GLFWwindow*)Application::Instance()->GetWindow().GetNativeWindow());
+			[openPanel beginSheetModalForWindow:nsWindow completionHandler:nil];
+			
+			if ([openPanel runModal] == NSModalResponseOK) {
+				NSURL* url = [[openPanel URLs] objectAtIndex:0];
+				NSString* path = [url path];
+				return std::string([path UTF8String]);
+			}
+		}
+		return std::string();
+#else
+		return std::string();
+#endif
 	}
 
-	/* ±£´æÎÄ¼þµ½Ö¸¶¨Â·¾¶ */
-	std::string FileDialog::SaveFile(const char* filter)
-	{
+	/* ä¿å­˜æ–‡ä»¶åˆ°æŒ‡å®šè·¯å¾„ */
+	std::string FileDialog::SaveFile(const char* filter)	{
+#ifdef PLATFORM_WINDOWS
 		OPENFILENAMEA ofn;
 		CHAR szFile[260] = { 0 };
 		CHAR currentDir[256] = { 0 };
@@ -56,14 +84,34 @@ namespace Wuya
 			return ofn.lpstrFile;
 
 		return std::string();
+#elif defined(PLATFORM_MACOS)
+		@autoreleasepool {
+			NSSavePanel* savePanel = [NSSavePanel savePanel];
+			[savePanel setCanCreateDirectories:YES];
+			
+			// Set parent window
+			NSWindow* nsWindow = glfwGetCocoaWindow((GLFWwindow*)Application::Instance()->GetWindow().GetNativeWindow());
+			[savePanel beginSheetModalForWindow:nsWindow completionHandler:nil];
+			
+			if ([savePanel runModal] == NSModalResponseOK) {
+				NSURL* url = [savePanel URL];
+				NSString* path = [url path];
+				return std::string([path UTF8String]);
+			}
+		}
+		return std::string();
+#else
+		return std::string();
+#endif
 	}
 
-	/* ´ò¿ªµ½Ö¸¶¨ÎÄ¼þÄ¿Â¼ */
+	/* æ‰“å¼€åˆ°æŒ‡å®šçš„æ–‡ä»¶ç›®å½• */
 	bool OpenFileExplorer(const char* path)
 	{
 		if (!path || path == "")
 			return false;
 
+#ifdef PLATFORM_WINDOWS
 		auto select_params = " /select, " + std::string(path);
 		std::wstring select_params_ws;
 		select_params_ws.assign(select_params.begin(), select_params.end());
@@ -77,5 +125,18 @@ namespace Wuya
 		shex.lpDirectory = NULL;
 
 		return ShellExecuteEx(&shex);
+#elif defined(PLATFORM_MACOS)
+		@autoreleasepool {
+			NSString* nsPath = [NSString stringWithUTF8String:path];
+			NSURL* url = [NSURL fileURLWithPath:nsPath];
+			
+			// Open Finder and select the file
+			NSArray* fileURLs = [NSArray arrayWithObject:url];
+			[[NSWorkspace sharedWorkspace] activateFileViewerSelectingURLs:fileURLs];
+		}
+		return true;
+#else
+		return false;
+#endif
 	}
 }

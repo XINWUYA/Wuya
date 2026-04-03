@@ -9,7 +9,13 @@ namespace Wuya
 	{
 		PROFILE_FUNCTION();
 
+#ifdef __APPLE__
+		// macOS: Use traditional function (OpenGL 4.1 compatible)
+		glGenVertexArrays(1, &m_VertexArrayId);
+#else
+		// Windows/Linux: Use modern DSA function (OpenGL 4.5+)
 		glCreateVertexArrays(1, &m_VertexArrayId);
+#endif
 	}
 
 	OpenGLVertexArray::~OpenGLVertexArray()

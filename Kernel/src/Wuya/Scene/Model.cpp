@@ -255,10 +255,10 @@ namespace Wuya
 			const auto& material_group = model->GetMaterialGroup();
 
 			/* 直接从mesh文件加载 */
-			std::ifstream in_mesh_file(path, std::ios::in | std::ios::binary);
+			std::ifstream in_mesh_file(ABSOLUTE_PATH(path), std::ios::in | std::ios::binary);
 			if (!in_mesh_file)
 			{
-				CORE_LOG_ERROR("Failed to load file: {}.", path);
+				CORE_LOG_ERROR("Failed to load file: {}.", ABSOLUTE_PATH(path));
 				return nullptr;
 			}
 

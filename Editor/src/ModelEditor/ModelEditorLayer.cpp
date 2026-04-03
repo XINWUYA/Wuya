@@ -484,7 +484,7 @@ namespace Wuya
 			std::filesystem::path dst_item_path = dst_path / item.path().filename();
 			if (std::filesystem::is_directory(item.status()))
 			{
-				_mkdir(dst_item_path.string().c_str());
+				std::filesystem::create_directory(dst_item_path);
 				CopyFileFromTo(item.path(), dst_item_path, suffix);
 			}
 			else

@@ -45,7 +45,13 @@ namespace Wuya
 		// Setup Platform/Renderer bindings
 		auto* window = static_cast<GLFWwindow*>(Application::Instance()->GetWindow().GetNativeWindow());
 		ImGui_ImplGlfw_InitForOpenGL(window, true);
+#ifdef __APPLE__
+		// macOS only supports OpenGL 4.1 (GLSL 410)
+		ImGui_ImplOpenGL3_Init("#version 410");
+#else
+		// Windows/Linux use OpenGL 4.3+ (GLSL 430)
 		ImGui_ImplOpenGL3_Init("#version 430");
+#endif
 	}
 
 	void ImGuiLayer::OnDetached()
@@ -114,20 +120,20 @@ namespace Wuya
 		ImGuiStyle* style = &ImGui::GetStyle();
 		ImVec4* colors = style->Colors;
 
-		colors[ImGuiCol_Text]					= ImVec4(1.00f, 1.00f, 1.00f, 1.00f); /* ³£¹æ×ÖÌåÑÕÉ« */
-		colors[ImGuiCol_TextDisabled]			= ImVec4(0.50f, 0.50f, 0.50f, 1.00f); /* ±»½ûÓÃµÄ¿Ø¼ş×ÖÌåÑÕÉ« */
-		colors[ImGuiCol_WindowBg]				= ImVec4(0.12f, 0.12f, 0.12f, 1.00f); /* ´°¿Ú±³¾°É« */
+		colors[ImGuiCol_Text]					= ImVec4(1.00f, 1.00f, 1.00f, 1.00f); /* æ–‡å­—é»˜è®¤é¢œè‰² */
+		colors[ImGuiCol_TextDisabled]			= ImVec4(0.50f, 0.50f, 0.50f, 1.00f); /* ç¦ç”¨çš„æ§ä»¶æ–‡å­—é¢œè‰² */
+		colors[ImGuiCol_WindowBg]				= ImVec4(0.12f, 0.12f, 0.12f, 1.00f); /* çª—å£èƒŒæ™¯é¢œè‰² */
 		colors[ImGuiCol_ChildBg]				= ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
-		colors[ImGuiCol_PopupBg]				= ImVec4(0.12f, 0.12f, 0.12f, 0.94f); /* µ¯´°±³¾°É« */
+		colors[ImGuiCol_PopupBg]				= ImVec4(0.12f, 0.12f, 0.12f, 0.94f); /* å¼¹çª—èƒŒæ™¯é¢œè‰² */
 		colors[ImGuiCol_Border]					= ImVec4(0.43f, 0.43f, 0.50f, 0.50f);
 		colors[ImGuiCol_BorderShadow]			= ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
 		colors[ImGuiCol_FrameBg]				= ImVec4(0.08f, 0.08f, 0.08f, 0.74f);
 		colors[ImGuiCol_FrameBgHovered]			= ImVec4(0.43f, 0.40f, 0.35f, 0.40f);
 		colors[ImGuiCol_FrameBgActive]			= ImVec4(0.43f, 0.40f, 0.35f, 0.67f);
-		colors[ImGuiCol_TitleBg]				= ImVec4(0.18f, 0.18f, 0.18f, 1.00f); /* ´°¿Ú±êÌâ±³¾°É« */
-		colors[ImGuiCol_TitleBgActive]			= ImVec4(0.20f, 0.20f, 0.20f, 1.00f); /* ¼¤»î´°¿Ú±êÌâÀ¸±³¾°É« */
+		colors[ImGuiCol_TitleBg]				= ImVec4(0.18f, 0.18f, 0.18f, 1.00f); /* çª—å£æ ‡é¢˜èƒŒæ™¯é¢œè‰² */
+		colors[ImGuiCol_TitleBgActive]			= ImVec4(0.20f, 0.20f, 0.20f, 1.00f); /* æ´»åŠ¨çª—å£æ ‡é¢˜èƒŒæ™¯é¢œè‰² */
 		colors[ImGuiCol_TitleBgCollapsed]		= ImVec4(0.18f, 0.18f, 0.18f, 0.50f); /*  */
-		colors[ImGuiCol_MenuBarBg]				= ImVec4(0.14f, 0.14f, 0.14f, 1.00f); /* ²Ëµ¥À¸±³¾°É« */
+		colors[ImGuiCol_MenuBarBg]				= ImVec4(0.14f, 0.14f, 0.14f, 1.00f); /* èœå•æ èƒŒæ™¯é¢œè‰² */
 		colors[ImGuiCol_ScrollbarBg]			= ImVec4(0.02f, 0.02f, 0.02f, 0.53f);
 		colors[ImGuiCol_ScrollbarGrab]			= ImVec4(0.31f, 0.31f, 0.31f, 1.00f);
 		colors[ImGuiCol_ScrollbarGrabHovered]	= ImVec4(0.41f, 0.41f, 0.41f, 1.00f);
@@ -138,9 +144,9 @@ namespace Wuya
 		colors[ImGuiCol_Button]					= ImVec4(0.43f, 0.40f, 0.35f, 0.40f);
 		colors[ImGuiCol_ButtonHovered]			= ImVec4(0.43f, 0.40f, 0.35f, 1.00f);
 		colors[ImGuiCol_ButtonActive]			= ImVec4(0.56f, 0.53f, 0.35f, 1.00f);
-		colors[ImGuiCol_Header]					= ImVec4(0.43f, 0.40f, 0.35f, 0.31f); /* ´°¿Ú±êÌâÀ¸É« */
-		colors[ImGuiCol_HeaderHovered]			= ImVec4(0.43f, 0.40f, 0.35f, 0.80f); /* Êó±êÂÓ¹ı´°¿Ú±êÌâÀ¸É« */
-		colors[ImGuiCol_HeaderActive]			= ImVec4(0.43f, 0.40f, 0.35f, 1.00f); /* ¼¤»î´°¿Ú±êÌâÀ¸É« */
+		colors[ImGuiCol_Header]					= ImVec4(0.43f, 0.40f, 0.35f, 0.31f); /* çª—å£æ ‡é¢˜èƒŒæ™¯é¢œè‰² */
+		colors[ImGuiCol_HeaderHovered]			= ImVec4(0.43f, 0.40f, 0.35f, 0.80f); /* é¼ æ ‡æ‚¬åœçª—å£æ ‡é¢˜èƒŒæ™¯é¢œè‰² */
+		colors[ImGuiCol_HeaderActive]			= ImVec4(0.43f, 0.40f, 0.35f, 1.00f); /* æ´»åŠ¨çª—å£æ ‡é¢˜èƒŒæ™¯é¢œè‰² */
 		colors[ImGuiCol_Separator]				= colors[ImGuiCol_Border];
 		colors[ImGuiCol_SeparatorHovered]		= ImVec4(0.10f, 0.40f, 0.75f, 0.78f);
 		colors[ImGuiCol_SeparatorActive]		= ImVec4(0.10f, 0.40f, 0.75f, 1.00f);
@@ -151,7 +157,7 @@ namespace Wuya
 		colors[ImGuiCol_TabHovered]				= colors[ImGuiCol_HeaderHovered];
 		colors[ImGuiCol_TabActive]				= ImLerp(colors[ImGuiCol_HeaderActive], colors[ImGuiCol_TitleBgActive], 0.60f);
 		colors[ImGuiCol_TabUnfocused]			= ImLerp(colors[ImGuiCol_Tab], colors[ImGuiCol_TitleBg], 0.80f);
-		colors[ImGuiCol_TabUnfocusedActive]		= ImLerp(colors[ImGuiCol_TabActive], colors[ImGuiCol_TitleBg], 0.40f); /* ¼¤»î´°¿Ú±êÇ©ÑÕÉ« */
+		colors[ImGuiCol_TabUnfocusedActive]		= ImLerp(colors[ImGuiCol_TabActive], colors[ImGuiCol_TitleBg], 0.40f); /* æ´»åŠ¨çª—å£æ ‡ç­¾é¢œè‰² */
 		colors[ImGuiCol_DockingPreview]			= colors[ImGuiCol_HeaderActive]/* * ImVec4(1.0f, 1.0f, 1.0f, 0.7f)*/;
 		colors[ImGuiCol_DockingEmptyBg]			= ImVec4(0.20f, 0.20f, 0.20f, 1.00f);
 		colors[ImGuiCol_PlotLines]				= ImVec4(0.61f, 0.61f, 0.61f, 1.00f);

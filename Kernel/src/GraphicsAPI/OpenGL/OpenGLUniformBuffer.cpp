@@ -8,8 +8,9 @@ namespace Wuya
 	{
 		PROFILE_FUNCTION();
 
-		glCreateBuffers(1, &m_UniformBufferId);
-		glNamedBufferData(m_UniformBufferId, size, nullptr, GL_DYNAMIC_DRAW);
+		glGenBuffers(1, &m_UniformBufferId);
+		glBindBuffer(GL_UNIFORM_BUFFER, m_UniformBufferId);
+		glBufferData(GL_UNIFORM_BUFFER, size, nullptr, GL_DYNAMIC_DRAW);
 		glBindBufferBase(GL_UNIFORM_BUFFER, binding_point, m_UniformBufferId);
 	}
 
@@ -24,6 +25,7 @@ namespace Wuya
 	{
 		PROFILE_FUNCTION();
 
-		glNamedBufferSubData(m_UniformBufferId, offset, size, data);
+		glBindBuffer(GL_UNIFORM_BUFFER, m_UniformBufferId);
+		glBufferSubData(GL_UNIFORM_BUFFER, offset, size, data);
 	}
 }

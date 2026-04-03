@@ -1,0 +1,130 @@
+cmake_minimum_required(VERSION 3.20)
+
+project(Wuya VERSION 1.0.0 LANGUAGES C CXX)
+
+# Enable folder organization in IDEs (Xcode, Visual Studio, etc.)
+set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+
+# C++ standard
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
+# C standard
+set(CMAKE_C_STANDARD 11)
+set(CMAKE_C_STANDARD_REQUIRED ON)
+
+# Output directories
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+
+# Build configurations
+set(CMAKE_CONFIGURATION_TYPES "Debug;Release;Shipping" CACHE STRING "" FORCE)
+
+# Set default build type if not specified
+if(NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE "Debug" CACHE STRING "Build type" FORCE)
+endif()
+
+# Output directory format
+set(OUTPUT_DIR "${CMAKE_BUILD_TYPE}-${CMAKE_SYSTEM_NAME}-x64")
+
+# Vulkan SDK (Windows only)
+if(WIN32)
+    set(VULKAN_SDK $ENV{VULKAN_SDK})
+else()
+    set(VULKAN_SDK "")
+endif()
+
+# Include directories for third-party libraries
+set(INCLUDE_DIRS
+    spdlog        ${CMAKE_SOURCE_DIR}/Libraries/ThirdParty/spdlog/include
+    debugbreak    ${CMAKE_SOURCE_DIR}/Libraries/ThirdParty/debugbreak
+    GLFW          ${CMAKE_SOURCE_DIR}/Libraries/ThirdParty/glfw/include
+    Glad          ${CMAKE_SOURCE_DIR}/Libraries/ThirdParty/glad/include
+    ImGui         ${CMAKE_SOURCE_DIR}/Libraries/ThirdParty/imgui
+    glm           ${CMAKE_SOURCE_DIR}/Libraries/ThirdParty/glm
+    stb           ${CMAKE_SOURCE_DIR}/Libraries/ThirdParty/stb
+    entt          ${CMAKE_SOURCE_DIR}/Libraries/ThirdParty/entt/single_include
+    tinyxml2      ${CMAKE_SOURCE_DIR}/Libraries/ThirdParty/tinyxml2
+    ImGuizmo      ${CMAKE_SOURCE_DIR}/Libraries/ThirdParty/ImGuizmo
+    xxHash        ${CMAKE_SOURCE_DIR}/Libraries/ThirdParty/xxHash
+    tinyobjloader ${CMAKE_SOURCE_DIR}/Libraries/ThirdParty/tinyobjloader
+    magic_enum    ${CMAKE_SOURCE_DIR}/Libraries/ThirdParty/magic_enum/include
+    assimp        ${CMAKE_SOURCE_DIR}/Libraries/ThirdParty/assimp/include
+    tracy         ${CMAKE_SOURCE_DIR}/Libraries/ThirdParty/tracy/public
+)
+
+if(VULKAN_SDK)
+    list(APPEND INCLUDE_DIRS VulkanSDK ${VULKAN_SDK}/Include)
+endif()
+
+# Compiler-specific settings
+if(MSVC)
+    # Multi-processor compilation
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP")
+    
+    # Disable specific warnings
+    add_compile_options(
+        /wd4244
+        /wd4267
+        /wd4312
+        /wd4819
+    )
+    
+    # Static runtime library
+    set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang|AppleClang|GNU")
+    # Common GCC/Clang flags
+    add_compile_options(-Wall -Wextra)
+endif()
+
+# Platform-specific definitions
+if(WIN32)
+    add_compile_definitions(PLATFORM_WINDOWS)
+    add_compile_definitions(_CRT_SECURE_NO_WARNINGS)
+elseif(APPLE)
+    add_compile_definitions(PLATFORM_MACOS)
+    # Fix spdlog consteval issue on AppleClang
+    # AppleClang has incomplete support for consteval in C++20
+    # This forces fmt library to use constexpr instead of consteval
+    add_compile_definitions(FMT_CONSTEVAL=)
+elseif(UNIX)
+    add_compile_definitions(PLATFORM_LINUX)
+endif()
+
+# Assets path definition - generate config header
+set(ASSETS_PATH "${CMAKE_SOURCE_DIR}/Assets")
+configure_file(
+    "${CMAKE_SOURCE_DIR}/cmake/WuyaConfig.h.in"
+    "${CMAKE_BINARY_DIR}/WuyaConfig.h"
+    @ONLY
+)
+
+# Add third-party libraries
+add_subdirectory(Libraries/ThirdParty)
+
+# Add Kernel
+add_subdirectory(Kernel)
+
+# Add applications
+add_subdirectory(Editor)
+add_subdirectory(ModelEditor)
+
+# Add samples (optional)
+option(BUILD_SAMPLES "Build sample projects" ON)
+if(BUILD_SAMPLES)
+    add_subdirectory(Samples/Sample_SkyBox)
+    add_subdirectory(Samples/Sample_CSM)
+endif()
+
+# Print configuration summary
+message(STATUS "")
+message(STATUS "Wuya Build Configuration:")
+message(STATUS "  Build Type: ${CMAKE_BUILD_TYPE}")
+message(STATUS "  C++ Standard: ${CMAKE_CXX_STANDARD}")
+message(STATUS "  Platform: ${CMAKE_SYSTEM_NAME}")
+message(STATUS "  Generator: ${CMAKE_GENERATOR}")
+message(STATUS "  Vulkan SDK: ${VULKAN_SDK}")
+message(STATUS "")

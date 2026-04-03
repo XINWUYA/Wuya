@@ -31,10 +31,13 @@ namespace Wuya
 		PROFILE_FUNCTION();
 
 #ifdef WUYA_DEBUG
+#ifndef __APPLE__
+		// glDebugMessageCallback requires OpenGL 4.3+, macOS only supports 4.1
 		glEnable(GL_DEBUG_OUTPUT);
 		glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
 		glDebugMessageCallback(OpenGLMessageCallback, nullptr);
 		glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_NOTIFICATION, 0, nullptr, GL_FALSE);
+#endif
 #endif
 
 		// Blend
@@ -62,12 +65,12 @@ namespace Wuya
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	}
 
-	/* Ó¦ÓÃ¹âÕ¤»¯²ÎÊı */
+	/* åº”ç”¨å…‰æ …åŒ–çŠ¶æ€ */
 	void OpenGLRenderAPI::ApplyRasterState(RenderRasterState raster_state)
 	{
 		PROFILE_FUNCTION();
 
-		/* ÉèÖÃCullMode */
+		/* è®¾ç½®CullMode */
 		switch (raster_state.CullMode)
 		{
 		case CullMode::Cull_None:
@@ -87,7 +90,7 @@ namespace Wuya
 			break;
 		}
 
-		/* ÉèÖÃÕıÃæÅĞ¶¨·½Ê½ */
+		/* è®¾ç½®æ­£é¢é¡¶ç‚¹ç»•åºæ–¹å¼ */
 		switch (raster_state.FrontFaceType)
 		{
 		case FrontFaceType::CW:
@@ -98,7 +101,7 @@ namespace Wuya
 			break;
 		}
 
-		/* ÉèÖÃ»ìºÏÄ£Ê½ */
+		/* è®¾ç½®æ··åˆæ¨¡å¼ */
 		if (raster_state.EnableBlend)
 		{
 			glEnable(GL_BLEND);
@@ -116,7 +119,7 @@ namespace Wuya
 			glDisable(GL_BLEND);
 		}
 
-		/* ÉèÖÃÉî¶È²âÊÔ */
+		/* è®¾ç½®æ·±åº¦æµ‹è¯• */
 		if (raster_state.EnableDepthWrite)
 		{
 			glEnable(GL_DEPTH_TEST);
@@ -128,7 +131,7 @@ namespace Wuya
 			glDisable(GL_DEPTH_TEST);
 		}
 
-		/* ÉèÖÃÑÕÉ«Mask */
+		/* è®¾ç½®é¢œè‰²Mask */
 		glColorMask((GLboolean)raster_state.EnableColorWrite, (GLboolean)raster_state.EnableColorWrite, (GLboolean)raster_state.EnableColorWrite, (GLboolean)raster_state.EnableColorWrite);
 
 	}
@@ -172,15 +175,15 @@ namespace Wuya
 			glPopDebugGroup();
 	}
 
-	/* »ñÈ¡OpenGLÖ§³ÖµÄÀ©Õ¹ */
+	/* è·å–OpenGLæ”¯æŒçš„æ‰©å±• */
 	void OpenGLRenderAPI::InitOpenGLExtensions()
 	{
 		PROFILE_FUNCTION();
 
-		/* »ñÈ¡À©Õ¹Êı */
+		/* è·å–æ‰©å±•æ•° */
 		GLint num = 0;
 		glGetIntegerv(GL_NUM_EXTENSIONS, &num);
-		/* ÊÕ¼¯À©Õ¹ */
+		/* æ”¶é›†æ‰©å±• */
 		std::unordered_set<std::string_view> extensions;
 		for (auto i = 0; i < num; ++i)
 			extensions.emplace((const char*)glGetStringi(GL_EXTENSIONS, (GLuint)i));

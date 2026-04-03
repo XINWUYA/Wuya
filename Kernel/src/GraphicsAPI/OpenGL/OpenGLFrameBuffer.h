@@ -4,26 +4,26 @@
 
 namespace Wuya
 {
-	/* FrameBufferÀà */
+	/* FrameBufferç±» */
 	class OpenGLFrameBuffer : public FrameBuffer
 	{
 	public:
 		OpenGLFrameBuffer(const std::string& name, const FrameBufferDesc& desc);
 		~OpenGLFrameBuffer() override;
 
-		/* °ó¶¨ */
+		/* ç»‘å®š */
 		void Bind() override;
 		void Unbind() override;
 
 		void Resize(uint32_t width, uint32_t height) override;
 
-		/* ¶ÁÈ¡Ö¸¶¨ÎÆÀí£¨x, y£©ÏñËØÎ»ÖÃµÄÑÕÉ«Öµ */
+		/* è·å–æŒ‡å®šé™„ä»¶x, yåƒç´ ä½ç½®çš„é¢œé¢œè‰²å€¼ */
 		void ReadPixel(uint32_t attachment_index, int x, int y, const PixelDesc& pixel_desc, void* data) override;
-		/* Ö¸¶¨Êı¾İÇåÀíAttachment */
-		void ClearAttachment(uint32_t attachment_index, int level, const PixelDesc& pixel_desc, void* data) override;
+		/* æŒ‡å®šæŸä¸ªColorAttachment */
+        void ClearAttachment(uint32_t attachment_index, int level, const PixelDesc& pixel_desc, void* data) override;
 
 	private:
-		/* ¸½¼ÓÒ»¸öRenderBufferµ½FrameBuffer */
+		/* ç»‘å®šä¸€ä¸ªRenderBufferåˆ°FrameBuffer */
 		void AttachARenderBuffer(const RenderBufferInfo& render_buffer_info, GLenum attachment);
 
 		uint32_t m_FrameBufferId{ 0 };

@@ -7,36 +7,36 @@ namespace Wuya
 	{
 		PROFILE_FUNCTION();
 
-		/* ÖØĞÂÉú³ÉÎÄ¼şÄ¿Â¼½ÚµãÊ÷ */
+        /* åˆ›å»ºæ ¹æ–‡ä»¶ç›®å½•èŠ‚ç‚¹ */
 		if (m_IsDirty)
 		{
 			m_RootFileNodeTree = CreateSharedPtr<FileNode>(g_AssetsPath.string(), "", FileType::Folder, 0, -1);
 			BuildFileNodeTree(m_RootFileNodeTree);
 		}
 
-		/* ÎÄ¼şÄ¿Â¼ÁĞ±í´°¿Ú */
+		/* æ–‡ä»¶ç›®å½•åˆ—è¡¨çª—å£ */
 		ImGui::Begin("File List");
 		{
 			if (ImGui::CollapsingHeader(g_AssetsPath.string().c_str()))
 			{
-				/* ¸ù¾İÎÄ¼ş½ÚµãÊ÷Éú³ÉUI */
+				/* éå†æ–‡ä»¶èŠ‚ç‚¹æ„å»ºUI */
 				BuildFileUIListTreeSimple(m_RootFileNodeTree);
 			}
 		}
 		ImGui::End();
 
-		/* ÏêÏ¸×ÊÔ´ÁĞ±í´°¿Ú */
+		/* è¯¦ç»†èµ„æºåˆ—è¡¨çª—å£ */
 		ImGui::Begin("Resource Browser");
 		{
 			if (!m_CurrentFileNode)
-				m_CurrentFileNode = m_RootFileNodeTree; /* Ä¬ÈÏÎª¸ù½Úµã */
+				m_CurrentFileNode = m_RootFileNodeTree; /* é»˜è®¤ä¸ºæ ¹èŠ‚ç‚¹ */
 
-			/* ÉÏÒ»¼¶Ä¿Â¼Í¼±ê */
+			/* ä¸Šä¸€çº§ç›®å½•å›¾æ ‡ */
 			{
 				const bool disable_return_btn = (*m_CurrentFileNode) == (*m_RootFileNodeTree);
 
-				/* ButtonÑùÊ½ */
-				float button_alpha = 0.5f;
+                /* Buttonæ ·å¼ */
+                float button_alpha = 0.5f;
 				if (disable_return_btn)
 				{
 					ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
@@ -49,22 +49,22 @@ namespace Wuya
 					m_CurrentFileNode = m_CurrentFileNode->ParentNode.lock();
 				END_STYLE_ALPHA;
 
-				/* È¡Ïûµ±Ç°ÑùÊ½ */
+				/* å–æ¶ˆå½“å‰ç¦ç”¨æ ·å¼ */
 				if (disable_return_btn)
-					ImGui::PopItemFlag();
+                    ImGui::PopItemFlag();
 			}
 
-			/* ´°¿ÚÇøÓò¿í¶È */
+			/* è®¡ç®—é¢æ¿å®½åº¦ */
 			const float panel_width = ImGui::GetContentRegionAvail().x;
 
-			/* Í¼±ê´óĞ¡ºÍ¼ä¸ô */
+			/* å›¾æ ‡å¤§å°å›¾æ ‡ */
 			static float thumbnail_size = 64.0f;
 			static float padding = 32.0f;
 
-			/* Í¸Ã÷ButtonÑùÊ½ */
+			/* é€æ˜Buttonæ ·å¼ */
 			START_TRANSPARENT_BUTTON;
 
-			/* É¸Ñ¡´°¿Ú */
+			/* ç­›é€‰æ§ä»¶ */
 			static ImGuiTextFilter filter;
 			{
 				ImGui::SameLine(40, 20);
@@ -77,7 +77,7 @@ namespace Wuya
 				END_STYLE_ALPHA;
 			}
 
-			/* Í¼±ê´óĞ¡ºÍ¼ä¸ôµ÷½Ú¿Ø¼ş */
+			/* å›¾æ ‡å¤§å°å›¾æ ‡æ§ä»¶ */
 			{
 				ImGui::SameLine(panel_width - 15);
 				START_STYLE_ALPHA(0.5f);
@@ -86,9 +86,9 @@ namespace Wuya
 					ImGui::OpenPopup("SettingPopup");
 				END_STYLE_ALPHA;
 
-				/* Õ¹¿ªµ¯´°Ê±£¬ÏÔÊ¾¿Ø¼ş */
+				/* å±•å¼€èœå•æ—¶æ‰æ˜¾ç¤ºæ§ä»¶ */
 				if (ImGui::BeginPopup("SettingPopup"))
-				{
+                {
 					ImGui::PushItemWidth(120);
 
 					ImGui::SliderFloat("Size", &thumbnail_size, 16, 128);
@@ -100,13 +100,12 @@ namespace Wuya
 				}
 			}
 
-			/* È¡Ïûµ±Ç°ÑùÊ½ */
+			/* å–æ¶ˆå½“å‰é€æ˜æ ·å¼ */
 			END_TRANSPARENT_BUTTON;
-
-			/* ·Ö¸îÏß */
+			/* åˆ†éš”çº¿ */
 			ImGui::Separator();
 
-			/* ÎÄ¼şUI, ×ã¹»´óÊ±²ÅÏÔÊ¾Í¼Æ¬£¬·ñÔòÒÔÇåµ¥ĞÎÊ½ÏÔÊ¾ */
+			/* æ–‡ä»¶UI, è¶³å¤Ÿå¤§æ—¶æ˜¾ç¤ºå›¾æ ‡ï¼Œå¦åˆ™é‡‡ç”¨å•åˆ—è¡¨æ˜¾ç¤º */
 			if (thumbnail_size > 32)
 			{
 				const float cell_size = thumbnail_size + padding;
@@ -120,37 +119,37 @@ namespace Wuya
 				{
 					auto filepath = std::filesystem::path(child_node->FilePath);
 
-					/* Í¨¹ıÉ¸Ñ¡µÄ²ÅĞèÒªÏÔÊ¾ */
+					/* é€šè¿‡ç­›é€‰çš„æ‰éœ€è¦æ˜¾ç¤º */
 					if (filter.PassFilter(child_node->FilePath.c_str()))
 					{
 						ImGui::PushID(child_node->FileName.c_str());
 						{
 							ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
-							{
-								/* Í¼±ê */
-								ImGui::ImageButton((ImTextureID)child_node->Icon->GetTextureID(), ImVec2(thumbnail_size, thumbnail_size), ImVec2(0, 1), ImVec2(1, 0));
+                            {
+                                /* å›¾æ ‡ */
+                                ImGui::ImageButton((ImTextureID)child_node->Icon->GetTextureID(), ImVec2(thumbnail_size, thumbnail_size), ImVec2(0, 1), ImVec2(1, 0));
+                                
+                                /* æ‹–æ‹½ */
+                                if (ImGui::BeginDragDropSource())
+                                {
+                                    const char* item_path = child_node->FilePath.c_str();
+                                    ImGui::SetDragDropPayload("RESOURCE_BROWSER_ITEM", item_path, strlen(item_path) + 1);
+                                    ImGui::EndDragDropSource();
+                                }
+                            }
+                            ImGui::PopStyleColor();
 
-								/* ÍÏ¶¯ */
-								if (ImGui::BeginDragDropSource())
-								{
-									const wchar_t* item_path = filepath.c_str();
-									ImGui::SetDragDropPayload("RESOURCE_BROWSER_ITEM", item_path, (wcslen(item_path) + 1) * sizeof(wchar_t)); /* todo: */
-									ImGui::EndDragDropSource();
-								}
-							}
-							ImGui::PopStyleColor();
-
-							/* Ë«»÷´ò¿ª */
+							/* åŒå‡»å“åº” */
 							if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
 							{
-								if (child_node->FileType == FileType::Folder)
+                                if (child_node->Type == FileType::Folder)
 									m_CurrentFileNode = child_node;
 							}
 
-							/* ÓÒ¼üÑ¡Ïî²Ù×÷ */
+							/* å³é”®é€‰ä¸­èœå• */
 							if (ImGui::BeginPopupContextItem())
 							{
-								/* ÔÚÏµÍ³ÎÄ¼ş¼ĞÖĞÏÔÊ¾ */
+								/* åœ¨ç³»ç»Ÿæ–‡ä»¶å¤¹ä¸­æ˜¾ç¤º */
 								if (ImGui::MenuItem("Show in file explorer"))
 								{
 									auto path = g_AssetsPath / child_node->FilePath;
@@ -161,10 +160,10 @@ namespace Wuya
 								ImGui::EndPopup();
 							}
 
-							/* ÎÄ¼şÃû */
+							/* æ–‡ä»¶å */
 							ImGui::TextWrapped(child_node->FileName.c_str());
 
-							/* ÏÂÒ»¸öÎÄ¼ş */
+							/* ä¸‹ä¸€ä¸ªæ–‡ä»¶ */
 							ImGui::NextColumn();
 						}
 						ImGui::PopID();
@@ -172,7 +171,7 @@ namespace Wuya
 				}
 				ImGui::Columns(1);
 			}
-			else /* µ±Í¼±ê¹ıĞ¡Ê±£¬×ª»»ÎªÁĞ±íÄ£Ê½ */
+			else /* å½“å›¾æ ‡å¤§å°æ—¶ï¼Œè½¬æ¢ä¸ºåˆ—è¡¨æ¨¡å¼ */
 			{
 				ImGui::BeginTable("Assets List", 3);
 				{
@@ -181,7 +180,7 @@ namespace Wuya
 					ImGui::TableSetupColumn("Size", ImGuiTableColumnFlags_WidthFixed);
 					ImGui::TableHeadersRow();
 
-					/* ¸ù¾İÎÄ¼ş½ÚµãÊ÷Éú³ÉUI */
+					/* éå†æ–‡ä»¶èŠ‚ç‚¹æ„å»ºUI */
 					BuildFileUIListTreeDetail(m_CurrentFileNode);
 				}
 				ImGui::EndTable();
@@ -198,16 +197,16 @@ namespace Wuya
 			auto relative_path = GetRelativePath(g_AssetsPath, path);
 			auto filename = relative_path.filename();
 
-			/* ¹¹ÔìÒ»¸öÎÄ¼ş½Úµã */
+			/* åˆ›å»ºä¸€ä¸ªæ–‡ä»¶èŠ‚ç‚¹ */
 			auto file_node = CreateSharedPtr<FileNode>();
 			file_node->ParentNode = parent_node;
 			file_node->FileName = filename.string();
 			file_node->FilePath = relative_path.string();
 			file_node->Depth = parent_node->Depth + 1;
 
-			if (directory_entry.is_directory()) /* ÎÄ¼ş¼Ğ£¬µİ¹é×ÓÄ¿Â¼ */
+			if (directory_entry.is_directory()) /* æ–‡ä»¶å¤¹ï¼Œé€’å½’ç›®å½• */
 			{
-				file_node->FileType = FileType::Folder;
+                file_node->Type = FileType::Folder;
 				file_node->Icon = TextureAssetManager::Instance().GetOrCreateTexture(ABSOLUTE_PATH("EditorRes/icons/directory.png"));
 				parent_node->ChildNodes.emplace_back(file_node);
 				BuildFileNodeTree(file_node);
@@ -218,7 +217,7 @@ namespace Wuya
 				transform(ext.begin(), ext.end(), ext.begin(), ::toupper);
 				if (ext == ".JPG" || ext == ".PNG" || ext == ".DDS" || ext == ".TGA" || ext == ".BMP")
 				{
-					file_node->FileType = FileType::Image;
+                    file_node->Type = FileType::Image;
 
 					auto filepath = std::filesystem::path(file_node->FilePath);
 					auto relative_path = g_AssetsPath / filepath;
@@ -226,18 +225,18 @@ namespace Wuya
 				}
 				else if (ext == ".SCN")
 				{
-					file_node->FileType = FileType::Scene;
+                    file_node->Type = FileType::Scene;
 					file_node->Icon = TextureAssetManager::Instance().GetOrCreateTexture(ABSOLUTE_PATH("EditorRes/icons/file_scn.png"));
 
 				}
 				else if (ext == ".MTLGRAPH")
 				{
-					file_node->FileType = FileType::MtlGraph;
+                    file_node->Type = FileType::MtlGraph;
 					file_node->Icon = TextureAssetManager::Instance().GetOrCreateTexture(ABSOLUTE_PATH("EditorRes/icons/file_mtlgraph.png"));
 				}
 				else
 				{
-					file_node->FileType = FileType::Default;
+                    file_node->Type = FileType::Default;
 					file_node->Icon = TextureAssetManager::Instance().GetOrCreateTexture(ABSOLUTE_PATH("EditorRes/icons/file.png"));
 				}
 
@@ -257,22 +256,23 @@ namespace Wuya
 
 			const auto file_ext = ExtractFileSuffix(child_node->FileName);
 
-			if (child_node->FileType == FileType::Folder) /* ÎÄ¼ş¼Ğ */
-			{
-				/* ÎÄ¼ş½Úµã */
-				bool open = ImGui::TreeNodeEx(child_node->FileName.c_str(), ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanFullWidth);
+            if (child_node->Type == FileType::Folder) /* æ–‡ä»¶å¤¹ */
+            {
+                /* æ–‡ä»¶å¤¹èŠ‚ç‚¹ */
+                bool open = ImGui::TreeNodeEx(child_node->FileName.c_str(), ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanFullWidth);
 
-				/* ÎÄ¼şÀàĞÍ */
+                /* ç‚¹å‡»ç›®å½•æ—¶ï¼Œè®¾ç½®ä¸ºå½“å‰æ–‡ä»¶ç›®å½• */
+                /* æ–‡ä»¶ç±»å‹ */
 				ImGui::TableNextColumn();
 				ImGui::SetNextItemWidth(100);
 				ImGui::TextUnformatted(file_ext.c_str());
 
-				/* ÎÄ¼ş´óĞ¡ */
+                /* æ–‡ä»¶å¤§å° */
 				ImGui::TableNextColumn();
 				ImGui::SetNextItemWidth(300);
 				ImGui::TextUnformatted("");
 
-				/* Õ¹¿ªÎÄ¼ş¼Ğ½Úµã */
+				/* å±•å¼€æ–‡ä»¶å¤¹èŠ‚ç‚¹ */
 				if (open)
 				{
 					BuildFileUIListTreeDetail(child_node);
@@ -281,19 +281,19 @@ namespace Wuya
 			}
 			else
 			{
-				/* ÎÄ¼ş½Úµã */
-				ImGui::TreeNodeEx(child_node->FileName.c_str(), ImGuiTreeNodeFlags_SpanFullWidth | ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen);
+                /* æ–‡ä»¶èŠ‚ç‚¹ */
+                ImGui::TreeNodeEx(child_node->FileName.c_str(), ImGuiTreeNodeFlags_SpanFullWidth | ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen);
 
-				/* todo: µ¥»÷ÎÄ¼şÊ±µÄÏìÓ¦ */
-				if (ImGui::IsItemClicked() && ImGui::IsItemToggledOpen())
+                /* todo: ç‚¹å‡»æ–‡ä»¶æ—¶åšå“åº” */
+                if (ImGui::IsItemClicked() && ImGui::IsItemToggledOpen())
 				{
 					/**/
 				}
 
-				/* ÓÒ¼üÑ¡Ïî²Ù×÷ */
+				/* å³é”®é€‰ä¸­èœå• */
 				if (ImGui::BeginPopupContextItem())
 				{
-					/* ÔÚÏµÍ³ÎÄ¼ş¼ĞÖĞÏÔÊ¾ */
+					/* åœ¨ç³»ç»Ÿæ–‡ä»¶å¤¹ä¸­æ˜¾ç¤º */
 					if (ImGui::MenuItem("Show in file explorer"))
 					{
 						auto path = g_AssetsPath / child_node->FilePath;
@@ -304,12 +304,12 @@ namespace Wuya
 					ImGui::EndPopup();
 				}
 
-				/* ÎÄ¼şÀàĞÍ */
+				/* æ–‡ä»¶ç±»å‹ */
 				ImGui::TableNextColumn();
 				ImGui::SetNextItemWidth(160);
 				ImGui::TextUnformatted(file_ext.c_str());
 
-				/* ÎÄ¼ş´óĞ¡ */
+				/* æ–‡ä»¶å¤§å° */
 				ImGui::TableNextColumn();
 				ImGui::SetNextItemWidth(300);
 				ImGui::TextUnformatted((ToString(child_node->FileSize, 2) + "KB").c_str());
@@ -321,16 +321,16 @@ namespace Wuya
 	{
 		for (const auto& child_node : node->ChildNodes)
 		{
-			if (child_node->FileType == FileType::Folder) /* ÎÄ¼ş¼Ğ */
+			if (child_node->Type == FileType::Folder) /* æ–‡ä»¶å¤¹ */
 			{
-				/* ÎÄ¼ş½Úµã */
+				/* æ–‡ä»¶å¤¹èŠ‚ç‚¹ */
 				bool open = ImGui::TreeNodeEx(child_node->FileName.c_str(), ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanFullWidth);
 
-				/* µã»÷Ä¿Â¼Ê±£¬ÉèÖÃÎªµ±Ç°ÎÄ¼şÄ¿Â¼ */
+				/* ç‚¹å‡»ç›®å½•æ—¶ï¼Œè®¾ç½®ä¸ºå½“å‰æ–‡ä»¶ç›®å½• */
 				if (ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen())
 					m_CurrentFileNode = child_node;
 
-				/* Õ¹¿ªÎÄ¼ş¼Ğ½Úµã */
+				/* å±•å¼€æ–‡ä»¶å¤¹èŠ‚ç‚¹ */
 				if (open)
 				{
 					BuildFileUIListTreeSimple(child_node);
@@ -339,10 +339,10 @@ namespace Wuya
 			}
 			else
 			{
-				/* ÎÄ¼ş½Úµã */
+				/* æ–‡ä»¶èŠ‚ç‚¹ */
 				ImGui::TreeNodeEx(child_node->FileName.c_str(), ImGuiTreeNodeFlags_SpanFullWidth | ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen);
 
-				/* todo: µ¥»÷ÎÄ¼şÊ±µÄÏìÓ¦ */
+				/* todo: ç‚¹å‡»æ–‡ä»¶æ—¶åšå“åº” */
 				if (ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen())
 				{
 					/**/

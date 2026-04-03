@@ -49,15 +49,15 @@ namespace Wuya
 
 			if (!m_IsMinimized)
 			{
-				/* ÏÈ¸üĞÂÂß¼­²ãºÍäÖÈ¾²ã */
+				/* å…ˆæ›´æ–°é€»è¾‘ï¼Œå†æ¸²æŸ“ */
 				{
-					PROFILE_SCOPE("Update Layers");
+                    PROFILE_SCOPE("Update Layers");
 
 					for (const auto& layer : m_LayerStack)
 						layer->OnUpdate(delta_time);
 				}
 
-				/* ºó¸üĞÂUI */
+				/* æ›´æ–°UI */
 				m_pImGuiLayer->Begin();
 				{
 					PROFILE_SCOPE("Update ImGui Layers");
@@ -68,7 +68,7 @@ namespace Wuya
 				m_pImGuiLayer->End();
 			}
 
-			// äÖÈ¾Ò»Ö¡
+			// æ¸²æŸ“ä¸€å¸§
 			m_pWindow->OnUpdate();
 		}
 	}
@@ -104,10 +104,10 @@ namespace Wuya
 		dispatcher.Dispatch<WindowCloseEvent>(BIND_EVENT_FUNC(Application::OnHandleWindowCloseEvent));
 		dispatcher.Dispatch<WindowResizeEvent>(BIND_EVENT_FUNC(Application::OnHandleWindowResizeEvent));
 
-		// ´Ó×îÉÏ²ãLayerÏò×îÏÂ²ãLayer´«µİ
+		// ä»ä¸Šå±‚Layerå‘ä¸‹å±‚Layerä¼ é€’
 		for (auto it = m_LayerStack.rbegin(); it != m_LayerStack.rend(); ++it)
 		{
-			if (event->Handled) // ÊÂ¼şÍ£Ö¹´«µİ
+			if (event->Handled) // äº‹ä»¶åœæ­¢ä¼ é€’
 				break;
 			
 			(*it)->OnEvent(event);
@@ -134,7 +134,7 @@ namespace Wuya
 		m_IsMinimized = false;
 		Renderer::SetViewport(0, 0, resize_event->GetWidth(), resize_event->GetHeight());
 
-		// ÊÂ¼şÈÔĞèÏòÏÂ²ã´«µİ£¬Ó¦·µ»Øfalse
+		// äº‹ä»¶ç»§ç»­å‘ä¸‹å±‚ä¼ é€’ï¼Œåº”è¿”å›false
 		return false;
 	}
 }

@@ -10,27 +10,27 @@ namespace Wuya
 		OpenGLVertexBuffer(const void* vertices, uint32_t size);
 		~OpenGLVertexBuffer() override;
 
-		/* °ó¶¨ */
+		/* ç»‘å®š */
 		void Bind() const override;
 		void Unbind() const override;
 
-		/* ÉèÖÃ¶¥µãÊı¾İ */
+		/* è®¾ç½®é¡¶ç‚¹æ•°æ® */
 		void SetData(const void* data, uint32_t size) override;
 		[[nodiscard]] uint32_t GetDataSize() const override { return m_DataSize; }
 
-		/* ÉèÖÃ¶¥µã²¼¾Ö */
+		/* è®¾ç½®é¡¶ç‚¹å¸ƒå±€ */
 		void SetLayout(const VertexBufferLayout& layout) override { m_Layout = layout; }
 		[[nodiscard]] const VertexBufferLayout& GetLayout() const override { return m_Layout; }
 
-		/* »ñÈ¡¶¥µãÊıÁ¿ */
-		[[nodiscard]] uint32_t GetVertexCount() const override;
+		/* è·å–é¡¶ç‚¹æ•°é‡ */
+        [[nodiscard]] uint32_t GetVertexCount() const override;
 
 	private:
-		/* GPUÉÏ¶ÔÓ¦µÄBufferId */
+		/* GPUä¸Šå¯¹åº”çš„BufferId */
 		uint32_t m_VertexBufferId{ 0 };
-		/* ¶¥µãÊı¾İµÄ´óĞ¡ */
+		/* é¡¶ç‚¹æ•°æ®çš„å¤§å° */
 		uint32_t m_DataSize{ 0 };
-		/* ¶¥µã²¼¾Ö */
+		/* é¡¶ç‚¹å¸ƒå±€ */
 		VertexBufferLayout m_Layout{};
 	};
 
@@ -41,7 +41,7 @@ namespace Wuya
 		OpenGLIndexBuffer(const uint32_t* indices, uint32_t count);
 		~OpenGLIndexBuffer() override;
 
-		/* °ó¶¨ */
+		/* ç»‘å®š */
 		void Bind() const override;
 		void Unbind() const override;
 

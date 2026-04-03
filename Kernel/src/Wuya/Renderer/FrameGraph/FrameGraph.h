@@ -27,23 +27,7 @@ namespace Wuya
 		 * ExecuteFunc将在执行整个FrameGraph时才会执行；
 		 */
 		template<typename Data, typename SetupFunc, typename ExecuteFunc>
-		SharedPtr<FrameGraphPass<Data, ExecuteFunc>> AddPass(const std::string& name, SetupFunc setup_func, ExecuteFunc&& execute_func)
-		{
-			auto frame_graph_pass = CreateSharedPtr<FrameGraphPass<Data, ExecuteFunc>>(std::forward<ExecuteFunc>(execute_func));
-			auto render_pass_node = CreateSharedPtr<RenderPassNode>(name, *this, frame_graph_pass);
-			/* 将Pass节点注册到依赖图中 */
-			m_DependencyGraph.RegisterNode(render_pass_node);
-
-			frame_graph_pass->SetRenderPassNode(render_pass_node);
-			m_RenderPassNodes.emplace_back(render_pass_node);
-
-			FrameGraphBuilder builder(*this, render_pass_node);
-
-			/* 执行Setup阶段 */
-			setup_func(builder, const_cast<Data&>(frame_graph_pass->GetData()));
-
-			return frame_graph_pass;
-		}
+		SharedPtr<FrameGraphPass<Data, ExecuteFunc>> AddPass(const std::string& name, SetupFunc setup_func, ExecuteFunc&& execute_func);
 
 		/* 创建资源 */
 		template<typename ResourceType>
@@ -189,5 +173,25 @@ namespace Wuya
 
 		friend class FrameGraph;
 	};
+
+	/* FrameGraph::AddPass implementation */
+	template<typename Data, typename SetupFunc, typename ExecuteFunc>
+	SharedPtr<FrameGraphPass<Data, ExecuteFunc>> FrameGraph::AddPass(const std::string& name, SetupFunc setup_func, ExecuteFunc&& execute_func)
+	{
+		auto frame_graph_pass = CreateSharedPtr<FrameGraphPass<Data, ExecuteFunc>>(std::forward<ExecuteFunc>(execute_func));
+		auto render_pass_node = CreateSharedPtr<RenderPassNode>(name, *this, frame_graph_pass);
+		/* 将Pass节点注册到依赖图中 */
+		m_DependencyGraph.RegisterNode(render_pass_node);
+
+		frame_graph_pass->SetRenderPassNode(render_pass_node);
+		m_RenderPassNodes.emplace_back(render_pass_node);
+
+		FrameGraphBuilder builder(*this, render_pass_node);
+
+		/* 执行Setup阶段 */
+		setup_func(builder, const_cast<Data&>(frame_graph_pass->GetData()));
+
+		return frame_graph_pass;
+	}
 
 }

@@ -152,7 +152,7 @@ namespace Wuya
 		out_mtl_file->InsertEndChild(out_mtl_file->NewDeclaration());
 		auto* mtl_root = out_mtl_file->NewElement("Materials");
 		out_mtl_file->InsertEndChild(mtl_root);
-		mtl_root->SetAttribute("Count", m_Materials.size());
+		mtl_root->SetAttribute("Count", static_cast<unsigned int>(m_Materials.size()));
 
 		for (int i = 0; i < m_Materials.size(); ++i)
 		{
@@ -237,7 +237,7 @@ namespace Wuya
 	{
 		PROFILE_FUNCTION();
 
-		m_Path = path;
+		m_Path = ABSOLUTE_PATH(path);
 		ASSERT(!m_Path.empty());
 
 		/* 读取材质信息 */

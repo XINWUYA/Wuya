@@ -3,18 +3,44 @@
 ## 环境
 
 - 安装[VulkanSDK](https://vulkan.lunarg.com/sdk/home#windows)（主要用来编译shader cache）
-- CMake
-- Visual Studio 2022
+- CMake 3.20+
+- Visual Studio 2017/2019/2022/2026（Windows）或 Xcode（macOS）
 
 ## 生成工程
 
-- 使用git下载仓库，并更新所需的submodules；
-- assimp库中存在需要将`*.h.in`转换为`*.h`的情况，而premake并不支持类似于CMake的`CONFIGURE_FILE`功能，所以需要手动使用CMake生成assimp，build完成后，拷贝以下文件：
+### 方式一：CMake构建（推荐）
 
-  1. 将`"Wuya\Libraries\ThirdParty\assimp\build\include\assimp\config.h"`拷贝至`"Wuya\Libraries\ThirdParty\assimp\include\assimp\config.h"`
-  2. 将`"Wuya\Libraries\ThirdParty\assimp\build\contrib\zlib\zconf.h"`拷贝至`"Wuya\Libraries\ThirdParty\assimp\contrib\zlib\zconf.h"`
-  3. 将`"Wuya\Libraries\ThirdParty\assimp\build\revision.h"`拷贝至`"Wuya\Libraries\ThirdParty\assimp\revision.h"`
-- 执行`Win-GenProj.bat`来生成工程，打开`Wuya.sln`即可编译运行。
+使用CMake构建系统，自动处理所有依赖和配置文件：
+
+**Windows:**
+```bash
+# 自动检测已安装的Visual Studio
+Win-GenProj-CMake.bat
+
+# 或手动指定VS版本
+Win-GenProj-CMake.bat vs2022    # VS 2022
+Win-GenProj-CMake.bat vs2019    # VS 2019
+Win-GenProj-CMake.bat ninja     # Ninja
+```
+
+**macOS:**
+```bash
+chmod +x Mac-GenProj-CMake.sh
+./Mac-GenProj-CMake.sh          # 生成Xcode工程
+./Mac-GenProj-CMake.sh ninja    # 生成Ninja工程
+```
+
+**优势：**
+- ✅ 无需手动配置assimp库
+- ✅ 自动生成所需的config.h、revision.h、zconf.h等配置文件
+- ✅ 跨平台支持（Windows/macOS/Linux）
+- ✅ 支持多种生成器（Visual Studio、Xcode、Ninja、Makefiles等）
+
+构建完成后，打开生成的工程文件即可编译运行：
+- Windows: `build/Wuya.sln`
+- macOS: `build/Wuya.xcodeproj`
+
+
 
 ## 功能特性
 

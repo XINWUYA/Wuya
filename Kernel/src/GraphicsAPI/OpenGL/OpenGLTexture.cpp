@@ -14,7 +14,7 @@ namespace Wuya
 
 		if (!!(m_TextureDesc.Usage & TextureUsage::Sampleable))
 		{
-			/* ´´½¨Ò»¸öÆÕÍ¨ÎÆÀí»ò×÷ÎªÑÕÉ«rt */
+			/* åˆ›å»ºä¸€ä¸ªæ™®é€šçº¹ç†ï¼Œä½œä¸ºé¢œè‰²rt */
 
 			switch (m_TextureDesc.SamplerType)
 			{
@@ -32,21 +32,71 @@ namespace Wuya
 				break;
 			}
 
-			/* ´´½¨ÎÆÀí */
+			/* åˆ›å»ºçº¹ç† */
 			glGenTextures(1, &m_TextureId);
 			glBindTexture(m_TextureTarget, m_TextureId);
 			glActiveTexture(GL_TEXTURE0);
 
-			/* Ìî³ä¸ñÊ½ */
+			/* åˆ†é…å­˜å‚¨ */
 			switch (m_TextureTarget)
 			{
 			case GL_TEXTURE_2D:
 			case GL_TEXTURE_CUBE_MAP:
+#ifdef __APPLE__
+				// macOS only supports OpenGL 4.1, use glTexImage2D for compatibility
+				{
+					GLenum pixel_format = GetPixelFormatFromTextureFormat(m_TextureDesc.Format);
+					GLenum pixel_type = GetPixelTypeFromTextureFormat(m_TextureDesc.Format);
+					GLuint width = m_TextureDesc.Width;
+					GLuint height = m_TextureDesc.Height;
+					for (GLuint level = 0; level < m_TextureDesc.MipLevels; ++level)
+					{
+						if (m_TextureTarget == GL_TEXTURE_CUBE_MAP)
+						{
+							for (GLuint face = 0; face < 6; ++face)
+							{
+								glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, level, m_InternalFormat, 
+									width, height, 0, pixel_format, pixel_type, nullptr);
+							}
+						}
+						else
+						{
+							glTexImage2D(m_TextureTarget, level, m_InternalFormat, 
+								width, height, 0, pixel_format, pixel_type, nullptr);
+						}
+						width = std::max(1u, width / 2);
+						height = std::max(1u, height / 2);
+					}
+				}
+#else
+				// Windows/Linux: Use modern glTexStorage2D (OpenGL 4.2+)
 				glTexStorage2D(m_TextureTarget, (GLsizei)m_TextureDesc.MipLevels, m_InternalFormat, (GLsizei)m_TextureDesc.Width, (GLsizei)m_TextureDesc.Height);
+#endif
 				break;
 			case GL_TEXTURE_3D:
 			case GL_TEXTURE_2D_ARRAY:
+#ifdef __APPLE__
+				// macOS only supports OpenGL 4.1, use glTexImage3D for compatibility
+				{
+					GLenum pixel_format = GetPixelFormatFromTextureFormat(m_TextureDesc.Format);
+					GLenum pixel_type = GetPixelTypeFromTextureFormat(m_TextureDesc.Format);
+					GLuint width = m_TextureDesc.Width;
+					GLuint height = m_TextureDesc.Height;
+					GLuint depth = m_TextureDesc.Depth;
+					for (GLuint level = 0; level < m_TextureDesc.MipLevels; ++level)
+					{
+						glTexImage3D(m_TextureTarget, level, m_InternalFormat, 
+							width, height, depth, 0, pixel_format, pixel_type, nullptr);
+						width = std::max(1u, width / 2);
+						height = std::max(1u, height / 2);
+						if (m_TextureTarget == GL_TEXTURE_3D)
+							depth = std::max(1u, depth / 2);
+					}
+				}
+#else
+				// Windows/Linux: Use modern glTexStorage3D (OpenGL 4.2+)
 				glTexStorage3D(m_TextureTarget, (GLsizei)m_TextureDesc.MipLevels, m_InternalFormat, (GLsizei)m_TextureDesc.Width, (GLsizei)m_TextureDesc.Height, (GLsizei)m_TextureDesc.Depth);
+#endif
 				break;
 			case GL_TEXTURE_2D_MULTISAMPLE:
 				glTexImage2DMultisample(m_TextureTarget, m_TextureDesc.Samples, m_InternalFormat, (GLsizei)m_TextureDesc.Width, (GLsizei)m_TextureDesc.Height, GL_TRUE);
@@ -54,12 +104,11 @@ namespace Wuya
 			default:
 				break;
 			}
-
 			CHECK_GL_ERROR;
 		}
 		else
 		{
-			/* µ±×÷Îªrt£¬±£´æDepth/StencilµÈÐÅÏ¢Ê±£¬Ðè´´½¨Ò»¸öRenderBuffer */
+			/* ä½œä¸ºrtï¼ŒåŒ…å«Depth/Stencilä¿¡æ¯æ—¶ï¼Œéœ€åˆ›å»ºä¸€ä¸ªRenderBuffer */
 
 			ASSERT(m_TextureDesc.Usage & (TextureUsage::ColorAttachment | TextureUsage::DepthAttachment | TextureUsage::StencilAttachment));
 			ASSERT(m_TextureDesc.MipLevels == 1);
@@ -74,7 +123,7 @@ namespace Wuya
 			else
 				glRenderbufferStorage(GL_RENDERBUFFER, m_InternalFormat, (GLsizei)m_TextureDesc.Width, (GLsizei)m_TextureDesc.Height);
 
-			/* ·ÖÅäÄÚ´æºó£¬¼´¿É½â°ó¸ÃRenderBuffer */
+			/* è§£ç»‘ä»¥å…å‡ºé”™ï¼Œå¯é”€æ¯æ­¤RenderBuffer */
 			glBindRenderbuffer(GL_RENDERBUFFER, 0);
 
 			CHECK_GL_ERROR;
@@ -130,15 +179,15 @@ namespace Wuya
 					glBindTexture(m_TextureTarget, m_TextureId);
 					glTexImage2D(m_TextureTarget, 0, m_InternalFormat, width, height, 0, data_format, GL_UNSIGNED_BYTE, data);
 
-					if (load_config.IsGenMips)
+				if (load_config.IsGenMips)
 					{
 						glGenerateMipmap(m_TextureTarget);
 					}
 					
-					glTextureParameteri(m_TextureId, GL_TEXTURE_MIN_FILTER, TranslateToOpenGLSamplerMinFilter(load_config.SamplerMinFilter));
-					glTextureParameteri(m_TextureId, GL_TEXTURE_MAG_FILTER, TranslateToOpenGLSamplerMagFilter(load_config.SamplerMagFilter));
-					glTextureParameteri(m_TextureId, GL_TEXTURE_WRAP_S, TranslateToOpenGLSamplerWrapMode(load_config.SamplerWrapMode));
-					glTextureParameteri(m_TextureId, GL_TEXTURE_WRAP_T, TranslateToOpenGLSamplerWrapMode(load_config.SamplerWrapMode));
+					glTexParameteri(m_TextureTarget, GL_TEXTURE_MIN_FILTER, TranslateToOpenGLSamplerMinFilter(load_config.SamplerMinFilter));
+					glTexParameteri(m_TextureTarget, GL_TEXTURE_MAG_FILTER, TranslateToOpenGLSamplerMagFilter(load_config.SamplerMagFilter));
+					glTexParameteri(m_TextureTarget, GL_TEXTURE_WRAP_S, TranslateToOpenGLSamplerWrapMode(load_config.SamplerWrapMode));
+					glTexParameteri(m_TextureTarget, GL_TEXTURE_WRAP_T, TranslateToOpenGLSamplerWrapMode(load_config.SamplerWrapMode));
 
 					stbi_image_free(data);
 				}
@@ -169,26 +218,26 @@ namespace Wuya
 	{
 		PROFILE_FUNCTION();
 
-		if (!!(m_TextureDesc.Usage & TextureUsage::Sampleable)) /* ×÷ÎªÆÕÍ¨Texture */
+		if (!!(m_TextureDesc.Usage & TextureUsage::Sampleable)) /* ä½œä¸ºæ™®é€šTexture */
 		{
 			glDeleteTextures(1, &m_TextureId);
 		}
-		else /* ×÷ÎªRenderBuffer */
+		else /* ä½œä¸ºRenderBuffer */
 		{
 			ASSERT(m_TextureTarget == GL_RENDERBUFFER);
 			glDeleteRenderbuffers(1, &m_TextureId);
 		}
 	}
 
-	/* °ó¶¨µ±Ç°ÎÆÀí */
+	/* ç»‘å®šå½“å‰çº¹ç† */
 	void OpenGLTexture::Bind(uint32_t slot)
 	{
 		PROFILE_FUNCTION();
 
-		glBindTextureUnit(slot, m_TextureId);
+		glActiveTexture(GL_TEXTURE0 + slot);
+		glBindTexture(m_TextureTarget, m_TextureId);
 	}
-
-	/* ½â³ýÎÆÀí°ó¶¨ */
+	/* è§£ç»‘çº¹ç† */
 	void OpenGLTexture::Unbind()
 	{
 		PROFILE_FUNCTION();
@@ -202,11 +251,11 @@ namespace Wuya
 
 		glBindTexture(m_TextureTarget, m_TextureId);
 
-		/* Ìî³ä¸ñÊ½ */
+		/* è®¾ç½®æ ¼å¼ */
 		switch (m_TextureTarget)
 		{
 		case GL_TEXTURE_2D:
-			glTextureSubImage2D(m_TextureId, (GLint)level, (GLint)offset_x, (GLint)offset_y, (GLsizei)m_TextureDesc.Width, (GLsizei)m_TextureDesc.Height,
+			glTexSubImage2D(m_TextureTarget, (GLint)level, (GLint)offset_x, (GLint)offset_y, (GLsizei)m_TextureDesc.Width, (GLsizei)m_TextureDesc.Height,
 				TranslateToOpenGLPixelFormat(pixel_desc.Format), TranslateToOpenGLPixelType(pixel_desc.Type), data);
 			break;
 		case GL_TEXTURE_CUBE_MAP:
@@ -215,13 +264,13 @@ namespace Wuya
 			//const auto face_data_size = m_TextureDesc.Width * m_TextureDesc.Height * sizeof(float) * 4/*ChannelNum*/;
 			//for (auto i = 0; i < 6; ++i)
 			//{
-			//	glTextureSubImage2D(m_TextureId, (GLint)level, 0, 0, (GLsizei)m_TextureDesc.Width, (GLsizei)m_TextureDesc.Height,
+			//	glTexSubImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, (GLint)level, 0, 0, (GLsizei)m_TextureDesc.Width, (GLsizei)m_TextureDesc.Height,
 			//		TranslateToOpenGLPixelFormat(pixel_desc.Format), TranslateToOpenGLPixelType(pixel_desc.Type), static_cast<uint8_t const*>(data) + face_data_size * i);
 			//}
 			break;
 		case GL_TEXTURE_3D:
 		case GL_TEXTURE_2D_ARRAY:
-			glTextureSubImage3D(m_TextureId, (GLint)level, (GLint)offset_x, (GLint)offset_y, (GLint)offset_z, (GLsizei)m_TextureDesc.Width, (GLsizei)m_TextureDesc.Height, (GLsizei)m_TextureDesc.Depth,
+			glTexSubImage3D(m_TextureTarget, (GLint)level, (GLint)offset_x, (GLint)offset_y, (GLint)offset_z, (GLsizei)m_TextureDesc.Width, (GLsizei)m_TextureDesc.Height, (GLsizei)m_TextureDesc.Depth,
 				TranslateToOpenGLPixelFormat(pixel_desc.Format), TranslateToOpenGLPixelType(pixel_desc.Type), data);
 			break;
 		default:
@@ -229,5 +278,4 @@ namespace Wuya
 		}
 
 		CHECK_GL_ERROR;
-	}
-}
+	}}

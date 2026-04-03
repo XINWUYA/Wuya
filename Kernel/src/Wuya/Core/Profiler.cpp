@@ -13,7 +13,7 @@ namespace Wuya
 	{
 		std::lock_guard lock(m_Mutex);
 
-		if (m_pSessionInfo)  // ÈôÒÑÆô¶¯Ò»¸ö»á»°£¬ÔòÏÈ¹Ø±ÕÇ°Ò»¸ö
+		if (m_pSessionInfo)  // å¦‚æžœå·²æœ‰ä¸€æ¬¡ä¼šè¯ï¼Œå…ˆå…³é—­å‰ä¸€æ¬¡
 		{
 			if (Logger::GetCoreLogger()) // Edge case: BeginSession() might be before Logger::Init()
 				CORE_LOG_ERROR("TimeCostProfiler::BeginSession('{0}') when session '{1}' already open.", name, m_pSessionInfo->Name);

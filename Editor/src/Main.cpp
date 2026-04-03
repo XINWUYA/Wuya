@@ -1,19 +1,14 @@
 #include "Pch.h"
+
+#ifdef _WIN32
 #define _CRTDBG_MAP_ALLOC
 #include <crtdbg.h>
 
-/* ÆôÓÃÄÚ´æĞ¹Â©¼ì²â¹¤¾ß */
+/* Windowså†…å­˜æ³„æ¼æ£€æµ‹å·¥å…· */
 void StartMemoryLeakDetector()
 {
-	// Enable run-time memory check for debug builds.
 #ifdef WUYA_DEBUG
-	//_CRTDBG_LEAK_CHECK_DF: Perform automatic leak checking at program exit through a call to _CrtDumpMemoryLeaks and generate an error 
-	//report if the application failed to free all the memory it allocated. OFF: Do not automatically perform leak checking at program exit.
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
-
-	//the following statement is used to trigger a breakpoint when memory leak happens
-	//comment it out if there is no memory leak report;
-	//_crtBreakAlloc = 857;
 #endif
 }
 
@@ -23,12 +18,17 @@ void EndMemoryLeakDetector()
 	_CrtDumpMemoryLeaks();
 #endif
 }
+#else
+/* Mac/Linuxä¸‹æš‚æ— å†…å­˜æ³„æ¼æ£€æµ‹ */
+void StartMemoryLeakDetector() {}
+void EndMemoryLeakDetector() {}
+#endif
 
 int main(int argc, char** argv)
 {
 	StartMemoryLeakDetector();
 
-	/* todo: ¸ù¾İargc/argv»ñÈ¡¹¤³ÌÂ·¾¶ */
+	/* todo: ï¿½ï¿½ï¿½ï¿½argc/argvï¿½ï¿½È¡ï¿½ï¿½ï¿½ï¿½Â·ï¿½ï¿½ */
 
 	Wuya::Logger::Init();
 	EDITOR_LOG("Wuya Kernel 1.0.0");

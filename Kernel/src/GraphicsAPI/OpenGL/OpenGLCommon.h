@@ -4,7 +4,7 @@
 
 namespace Wuya
 {
-	/* ·­Òëµ½OpenGL¶ÔÓ¦µÄÍ¼ÔªÀàĞÍ */
+	/* æ˜ å°„åˆ°OpenGLå¯¹åº”çš„å›¾å…ƒç±»å‹ */
 	constexpr GLenum TranslateToOpenGLPrimitiveType(PrimitiveType type)
 	{
 		switch (type)
@@ -18,7 +18,7 @@ namespace Wuya
 		return 0;
 	}
 
-	/* ·­Òëµ½OpenGL¶ÔÓ¦µÄÎÆÀíÀàĞÍ */
+	/* æ˜ å°„åˆ°OpenGLå¯¹åº”çš„çº¹ç†æ ¼å¼ */
 	constexpr GLenum TranslateToOpenGLTextureFormat(TextureFormat format)
 	{
 		switch (format)
@@ -85,7 +85,7 @@ namespace Wuya
 		return 0;
 	}
 
-	/* ·­Òëµ½OpenGL¶ÔÓ¦µÄÏñËØ¸ñÊ½ */
+	/* æ˜ å°„åˆ°OpenGLå¯¹åº”çš„åƒç´ æ ¼å¼ */
 	constexpr GLenum TranslateToOpenGLPixelFormat(PixelFormat format)
 	{
 		switch (format)
@@ -105,7 +105,7 @@ namespace Wuya
 		return 0;
 	}
 
-	/* ·­Òëµ½OpenGL¶ÔÓ¦µÄÏñËØÊı¾İÀàĞÍ */
+	/* æ˜ å°„åˆ°OpenGLå¯¹åº”çš„åƒç´ æ•°æ®ç±»å‹ */
 	constexpr GLenum TranslateToOpenGLPixelType(PixelType type)
 	{
 		switch (type) {
@@ -121,7 +121,7 @@ namespace Wuya
 		return 0;
 	}
 
-	/* ·­Òëµ½OpenGL¶ÔÓ¦µÄ±È½Ï·½Ê½ */
+	/* æ˜ å°„åˆ°OpenGLå¯¹åº”çš„æ¯”è¾ƒæ–¹å¼ */
 	constexpr GLenum TranslateToOpenGLCompareFunc(CompareFunc func)
 	{
 		switch (func)
@@ -139,7 +139,7 @@ namespace Wuya
 	}
 
 
-	/* ·­Òëµ½OpenGL¶ÔÓ¦µÄ»ìºÏ·½³Ì */
+	/* æ˜ å°„åˆ°OpenGLå¯¹åº”çš„æ··åˆæ–¹ç¨‹ */
 	constexpr GLenum TranslateToOpenGLBlendEquation(BlendEquation equation)
 	{
 		switch (equation)
@@ -153,7 +153,7 @@ namespace Wuya
 		return 0;
 	}
 
-	/* ·­Òëµ½OpenGL¶ÔÓ¦µÄ»ìºÏ·½Ê½ */
+	/* æ˜ å°„åˆ°OpenGLå¯¹åº”çš„æ··åˆæ–¹å¼ */
 	constexpr GLenum TranslateToOpenGLBlendFunc(BlendFunc func)
 	{
 		switch (func)
@@ -173,7 +173,7 @@ namespace Wuya
 		return 0;
 	}
 
-	/* ·­Òëµ½OpenGL¶ÔÓ¦µÄÎÆÀí»·ÈÆ·½Ê½ */
+	/* æ˜ å°„åˆ°OpenGLå¯¹åº”çš„çº¹ç†å¯»å€æ–¹å¼ */
 	constexpr GLint TranslateToOpenGLSamplerWrapMode(SamplerWrapMode mode)
 	{
 		switch (mode)
@@ -185,7 +185,7 @@ namespace Wuya
 		return 0;
 	}
 
-	/* ·­Òëµ½OpenGL¶ÔÓ¦µÄÎÆÀíËõĞ¡¹ıÂË·½Ê½ */
+	/* æ˜ å°„åˆ°OpenGLå¯¹åº”çš„çº¹ç†ç¼©å°è¿‡æ»¤æ–¹å¼ */
 	constexpr GLint TranslateToOpenGLSamplerMinFilter(SamplerMinFilter mode)
 	{
 		switch (mode)
@@ -200,7 +200,7 @@ namespace Wuya
 		return 0;
 	}
 
-	/* ·­Òëµ½OpenGL¶ÔÓ¦µÄÎÆÀí·Å´ó¹ıÂË·½Ê½ */
+	/* æ˜ å°„åˆ°OpenGLå¯¹åº”çš„çº¹ç†æ”¾å¤§è¿‡æ»¤æ–¹å¼ */
 	constexpr GLint TranslateToOpenGLSamplerMagFilter(SamplerMagFilter mode)
 	{
 		switch (mode)
@@ -211,8 +211,134 @@ namespace Wuya
 		return 0;
 	}
 
-	/* OpenGL ´íÎó¼ì²é */
-#if WUYA_DEBUG
+	/* æ ¹æ®çº¹ç†æ ¼å¼æ¨å¯¼åƒç´ æ ¼å¼ï¼ˆç”¨äºglTexImage2Dï¼‰ */
+	constexpr GLenum GetPixelFormatFromTextureFormat(TextureFormat format)
+	{
+		switch (format)
+		{
+		case TextureFormat::R8:
+		case TextureFormat::R8_SNorm:
+		case TextureFormat::R16F:
+		case TextureFormat::R32F:
+			return GL_RED;
+		case TextureFormat::R8I:
+		case TextureFormat::R16I:
+		case TextureFormat::R32I:
+			return GL_RED_INTEGER;
+		case TextureFormat::R8UI:
+		case TextureFormat::R16UI:
+		case TextureFormat::R32UI:
+			return GL_RED_INTEGER;
+		case TextureFormat::RG8:
+		case TextureFormat::RG8_SNorm:
+		case TextureFormat::RG16F:
+			return GL_RG;
+		case TextureFormat::RG8I:
+		case TextureFormat::RG16I:
+			return GL_RG_INTEGER;
+		case TextureFormat::RG8UI:
+		case TextureFormat::RG16UI:
+			return GL_RG_INTEGER;
+		case TextureFormat::RGB8:
+		case TextureFormat::RGB8_SNorm:
+		case TextureFormat::s_RGB8:
+		case TextureFormat::RGB565:
+		case TextureFormat::RGB9_E5:
+		case TextureFormat::R11G11B10F:
+		case TextureFormat::RGB32F:
+			return GL_RGB;
+		case TextureFormat::RGB8I:
+			return GL_RGB_INTEGER;
+		case TextureFormat::RGB8UI:
+			return GL_RGB_INTEGER;
+		case TextureFormat::RGBA8:
+		case TextureFormat::RGBA8_SNorm:
+		case TextureFormat::s_RGBA8:
+		case TextureFormat::RGBA4:
+		case TextureFormat::R10G10B10A2:
+		case TextureFormat::RGBA16F:
+		case TextureFormat::RGBA32F:
+			return GL_RGBA;
+		case TextureFormat::Depth16:
+		case TextureFormat::Depth24:
+		case TextureFormat::Depth32:
+			return GL_DEPTH_COMPONENT;
+		case TextureFormat::Depth24Stencil8:
+			return GL_DEPTH_STENCIL;
+		case TextureFormat::Stencil8:
+			return GL_STENCIL_INDEX;
+		default:
+			return GL_RGBA;
+		}
+	}
+
+	/* æ ¹æ®çº¹ç†æ ¼å¼æ¨å¯¼åƒç´ æ•°æ®ç±»å‹ï¼ˆç”¨äºglTexImage2Dï¼‰ */
+	constexpr GLenum GetPixelTypeFromTextureFormat(TextureFormat format)
+	{
+		switch (format)
+		{
+		case TextureFormat::R8:
+		case TextureFormat::RG8:
+		case TextureFormat::RGB8:
+		case TextureFormat::RGBA8:
+		case TextureFormat::R8UI:
+		case TextureFormat::RG8UI:
+		case TextureFormat::RGB8UI:
+		case TextureFormat::s_RGB8:
+		case TextureFormat::s_RGBA8:
+			return GL_UNSIGNED_BYTE;
+		case TextureFormat::R8_SNorm:
+		case TextureFormat::RG8_SNorm:
+		case TextureFormat::RGB8_SNorm:
+		case TextureFormat::RGBA8_SNorm:
+			return GL_BYTE;
+		case TextureFormat::R8I:
+		case TextureFormat::RG8I:
+		case TextureFormat::RGB8I:
+			return GL_BYTE;
+		case TextureFormat::R16I:
+		case TextureFormat::RG16I:
+			return GL_SHORT;
+		case TextureFormat::R16UI:
+		case TextureFormat::RG16UI:
+			return GL_UNSIGNED_SHORT;
+		case TextureFormat::R16F:
+		case TextureFormat::RG16F:
+		case TextureFormat::RGBA16F:
+			return GL_HALF_FLOAT;
+		case TextureFormat::R32F:
+		case TextureFormat::RGB32F:
+		case TextureFormat::RGBA32F:
+			return GL_FLOAT;
+		case TextureFormat::R32I:
+			return GL_INT;
+		case TextureFormat::R32UI:
+			return GL_UNSIGNED_INT;
+		case TextureFormat::RGB565:
+			return GL_UNSIGNED_SHORT_5_6_5;
+		case TextureFormat::RGBA4:
+			return GL_UNSIGNED_SHORT_4_4_4_4;
+		case TextureFormat::R10G10B10A2:
+			return GL_UNSIGNED_INT_2_10_10_10_REV;
+		case TextureFormat::R11G11B10F:
+			return GL_UNSIGNED_INT_10F_11F_11F_REV;
+		case TextureFormat::RGB9_E5:
+			return GL_UNSIGNED_INT_5_9_9_9_REV;
+		case TextureFormat::Depth16:
+			return GL_UNSIGNED_SHORT;
+		case TextureFormat::Depth24:
+		case TextureFormat::Depth32:
+			return GL_UNSIGNED_INT;
+		case TextureFormat::Depth24Stencil8:
+			return GL_UNSIGNED_INT_24_8;
+		case TextureFormat::Stencil8:
+			return GL_UNSIGNED_BYTE;
+		default:
+			return GL_UNSIGNED_BYTE;
+		}
+	}
+
+	/* OpenGL é”™è¯¯æ£€æŸ¥ */#if WUYA_DEBUG
 	void CheckGLError(const char* file, const char* func_name, uint32_t line) noexcept;
 	void CheckGLFrameBufferStatus(GLenum target, const char* func_name, uint32_t line) noexcept;
 	#define CHECK_GL_ERROR { CheckGLError(__FILE__, __func__, __LINE__); }

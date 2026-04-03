@@ -3,7 +3,10 @@
 
 #include <fstream>
 #include <glm/gtc/type_ptr.hpp>
+
+#ifdef PLATFORM_WINDOWS
 #include <shaderc/shaderc.hpp>
+#endif
 
 #include "Wuya/Scene/SceneCommon.h"
 
@@ -29,6 +32,8 @@ namespace Wuya
 			return ".cached_opengl_vert.bin";
 		case GL_FRAGMENT_SHADER:
 			return ".cached_opengl_frag.bin";
+		case GL_COMPUTE_SHADER:
+			return ".cached_opengl_comp.bin";
 		default:
 			CORE_LOG_ERROR("Unsupported shader type to cache: {}.", STRINGIFY(shader_type));
 			ASSERT(false);
@@ -150,10 +155,10 @@ namespace Wuya
 		PROFILE_FUNCTION();
 
 		std::string result;
-		std::ifstream in(filepath, std::ios::in | std::ios::binary); // ifstream closes itself due to RAII
+	std::ifstream in(filepath, std::ios::in | std::ios::binary); // ifstream closes itself due to RAII
 		if (in)
 		{
-			/* ¥¶¿Ì #include
+			/* Â§ÑÁêÜ #include
 			 * Ref: https://community.khronos.org/t/include-in-glsl/59203
 			 */
 			static const std::regex regex("^[ ]*#[ ]*include[ ]+[\"<](.*)[\">].*");
@@ -161,19 +166,19 @@ namespace Wuya
 			std::string line_str;
 			while (std::getline(in, line_str))
 			{
-				/* ’“µΩ#includeÀ˘‘⁄–– */
+				/* ÊâæÂà∞#includeÊåá‰ª§Ë°å */
 				if (line_str.find("#include") != line_str.npos)
 				{
 					if (std::regex_search(line_str, matches, regex))
 					{
-						/* ªÒ»°includeŒƒº˛¬∑æ∂≤¢∂¡»° */
+						/* Ëé∑ÂèñincludeÊñá‰ª∂Ë∑ØÂæÑÔºåÈÄíÂΩíËØªÂèñ */
 						std::string base_dir = ExtractFileBaseDir(filepath);
 						result += ReadFile(base_dir + matches.str(1)) + '\n';
 					}
 				}
 				else
 				{
-					result += line_str;
+					result += line_str + '\n';
 				}
 			}
 		}
@@ -192,10 +197,46 @@ namespace Wuya
 			return GL_VERTEX_SHADER;
 		if (type == "fragment" || type == "pixel")
 			return GL_FRAGMENT_SHADER;
+		if (type == "compute")
+		{
+#ifdef __APPLE__
+			CORE_LOG_ERROR("Compute shader is not supported on macOS (OpenGL 4.1). Consider using Metal instead.");
+			ASSERT(false, "Compute shader not supported on macOS!");
+			return 0;
+#else
+			return GL_COMPUTE_SHADER;
+#endif
+		}
 
 		ASSERT(false, "Unknown shader type!");
 		return 0;
 	}
+
+#ifdef __APPLE__
+	/* macOS only supports OpenGL 4.1 (GLSL 4.10), need to convert GLSL version and features */
+	static std::string ConvertGLSLToMacOSCompatible(const std::string& source)
+	{
+		std::string result = source;
+
+		/* Replace version: 450/440/430/420 -> 410 */
+		static const std::regex version_regex("#version\\s+4[542][0-9]\\s+core");
+		result = std::regex_replace(result, version_regex, "#version 410 core");
+
+		/* Remove layout(binding = X) for sampler uniforms (GLSL 4.20+ feature)
+		 * e.g., "layout(binding = 0) uniform sampler2D u_Texture;" -> "uniform sampler2D u_Texture;"
+		 */
+		static const std::regex binding_regex("layout\\s*\\(\\s*binding\\s*=\\s*[0-9]+\\s*\\)\\s*(uniform)");
+		result = std::regex_replace(result, binding_regex, "$1");
+
+		/* Remove layout(std140, binding = X) for uniform blocks
+		 * e.g., "layout(std140, binding = 0) uniform CameraData" -> "layout(std140) uniform CameraData"
+		 */
+		static const std::regex block_binding_regex("layout\\s*\\(\\s*std140\\s*,\\s*binding\\s*=\\s*[0-9]+\\s*\\)\\s*(uniform)");
+		result = std::regex_replace(result, block_binding_regex, "layout(std140) $1");
+
+		return result;
+	}
+#endif
 
 	void OpenGLShader::PreProcessShaderSrc(const std::string& source, std::unordered_map<GLenum, std::string>& shader_sources)
 	{
@@ -220,6 +261,7 @@ namespace Wuya
 		}
 	}
 
+#ifdef PLATFORM_WINDOWS
 	static shaderc_shader_kind ShaderTypeToOpenGLShaderCKind(GLenum shader_type)
 	{
 		switch (shader_type)
@@ -256,7 +298,7 @@ namespace Wuya
 			std::filesystem::path cache_path = cache_dir / (shader_path.filename().string() + GetOpenGLShaderCacheFileExtension(shader_type));
 
 			std::ifstream in(cache_path, std::ios::in | std::ios::binary);
-			if (false/*in.is_open()*/) /* ‘› ±πÿ±’ShaderCache */
+			if (false/*in.is_open()*/) /* ÊöÇÊó∂ÂÖ≥Èó≠ShaderCache */
 			{
 				// Cache existed
 				in.seekg(0, std::ios::end);
@@ -296,40 +338,8 @@ namespace Wuya
 		{
 			//
 		}
-
-		//std::vector<GLuint> compiled_shaders;
-		//for (auto& source_code : m_OpenGLSourceCodes)
-		//{
-		//	// Create shader
-		//	GLuint shader = glCreateShader(source_code.first);
-		//	const auto* code = (const GLchar*)source_code.second.c_str();
-		//	glShaderSource(shader, 1, &code, 0);
-
-		//	// Compile Shader
-		//	glCompileShader(shader);
-
-		//	GLint is_compiled = 0;
-		//	glGetShaderiv(shader, GL_COMPILE_STATUS, &is_compiled);
-		//	if (is_compiled == GL_FALSE)
-		//	{
-		//		GLint max_length = 0;
-		//		glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &max_length);
-		//		std::vector<GLchar> info_log(max_length);
-		//		glGetShaderInfoLog(shader, max_length, &max_length, &info_log[0]);
-
-		//		// Delete current shader
-		//		glDeleteShader(shader);
-
-		//		// Delete compiled shaders
-		//		for(auto it : compiled_shaders)
-		//			glDeleteShader(it);
-
-		//		break;
-		//	}
-		//	compiled_shaders.emplace_back(shader);
-		//}
 	}
-
+#endif
 	void OpenGLShader::CreateShaderProgram()
 	{
 		PROFILE_FUNCTION();
@@ -339,12 +349,34 @@ namespace Wuya
 
 		// Compile shaders
 		std::vector<GLuint> compiled_shaders;
-#if 0
+		
+#ifdef PLATFORM_WINDOWS
+		// Use shaderc to compile GLSL to SPIR-V on Windows
+		CompileShadersToOpenGL();
+
+		for (auto&& [shader_type, shader_data] : m_OpenGLSPIRVs)
+		{
+			GLuint shader = glCreateShader(shader_type);
+			glShaderBinary(1, &shader, GL_SHADER_BINARY_FORMAT_SPIR_V, shader_data.data(), shader_data.size() * sizeof(uint32_t));
+			glSpecializeShader(shader, "main", 0, nullptr, nullptr);
+			glAttachShader(program, shader);
+
+			compiled_shaders.emplace_back(shader);
+		}
+#else
+		// Use traditional GLSL compilation on macOS/Linux
 		for (auto& source_code : m_OpenGLSourceCodes)
 		{
 			// Create shader
 			GLuint shader = glCreateShader(source_code.first);
+			
+#ifdef __APPLE__
+			// Convert GLSL to macOS compatible version (4.10)
+			std::string compatible_source = ConvertGLSLToMacOSCompatible(source_code.second);
+			const auto* code = (const GLchar*)compatible_source.c_str();
+#else
 			const auto* code = (const GLchar*)source_code.second.c_str();
+#endif
 			glShaderSource(shader, 1, &code, 0);
 
 			// Compile shader
@@ -378,19 +410,8 @@ namespace Wuya
 		{
 			glAttachShader(program, shader);
 		}
-#else
-		CompileShadersToOpenGL();
-
-		for (auto&& [shader_type, shader_data] : m_OpenGLSPIRVs)
-		{
-			GLuint shader = glCreateShader(shader_type);
-			glShaderBinary(1, &shader, GL_SHADER_BINARY_FORMAT_SPIR_V, shader_data.data(), shader_data.size() * sizeof(uint32_t));
-			glSpecializeShader(shader, "main", 0, nullptr, nullptr);
-			glAttachShader(program, shader);
-
-			compiled_shaders.emplace_back(shader);
-		}
 #endif
+
 		// Link program
 		glLinkProgram(program);
 
@@ -413,6 +434,29 @@ namespace Wuya
 			for (const auto shader : compiled_shaders)
 				glDeleteShader(shader);
 		}
+
+#ifdef __APPLE__
+		// On macOS, we need to manually bind uniform blocks since layout(binding=X) is not supported
+		// Uniform Block bindings: View=0, Object=1, Material=2, Light=3
+		{
+			GLuint block_index;
+			block_index = glGetUniformBlockIndex(program, "ViewUniformBuffer");
+			if (block_index != GL_INVALID_INDEX)
+				glUniformBlockBinding(program, block_index, 0);
+
+			block_index = glGetUniformBlockIndex(program, "ObjectUniformBuffer");
+			if (block_index != GL_INVALID_INDEX)
+				glUniformBlockBinding(program, block_index, 1);
+
+			block_index = glGetUniformBlockIndex(program, "MaterialUniformBuffer");
+			if (block_index != GL_INVALID_INDEX)
+				glUniformBlockBinding(program, block_index, 2);
+
+			block_index = glGetUniformBlockIndex(program, "LightUniformBuffer");
+			if (block_index != GL_INVALID_INDEX)
+				glUniformBlockBinding(program, block_index, 3);
+		}
+#endif
 
 		// Always detach shaders after a successful link.
 		for (const auto shader : compiled_shaders)

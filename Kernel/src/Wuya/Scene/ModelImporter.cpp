@@ -9,7 +9,7 @@
 
 namespace Wuya
 {
-	/* µ¼ÈëObjÄ£ĞÍ£¬ÔÚÄ£ĞÍËùÔÚÂ·¾¶ÖĞÉú³É¶ÔÓ¦µÄ.meshºÍ.mtlÎÄ¼ş */
+	/* å¯¼å…¥Objæ¨¡å‹ï¼Œä»æ¨¡å‹è·¯å¾„ç”Ÿæˆå¯¹åº”çš„.meshå’Œ.mtlæ–‡ä»¶ */
 	void ImportObj(const std::string& filepath)
 	{
 		if (filepath.empty())
@@ -18,14 +18,14 @@ namespace Wuya
 		}
 
 		const size_t pos = filepath.find_last_of("/\\");
-		const std::string basedir = pos != std::string::npos ? filepath.substr(0, pos + 1) : ""; /* Ä£ĞÍËùÔÚÂ·¾¶ */
-		const std::string basename = filepath.substr(pos + 1); /* Ä£ĞÍÃû */
+		const std::string basedir = pos != std::string::npos ? filepath.substr(0, pos + 1) : ""; /* æ¨¡å‹æ‰€åœ¨è·¯å¾„ */
+		const std::string basename = filepath.substr(pos + 1); /* æ¨¡å‹å */
 
-		tinyobj::attrib_t in_attribs; /* °üº¬ËùÓĞµÄvertex¡¢normal¡¢texcoords */
-		std::vector<tinyobj::shape_t> in_shapes; /* °üº¬Ã¿¸öÍø¸ñÊı¾İ¶ÎµÄindices¡¢faces¡¢material_idx */
+		tinyobj::attrib_t in_attribs; /* åŒ…å«æ‰€æœ‰çš„vertexã€normalã€texcoords */
+		std::vector<tinyobj::shape_t> in_shapes; /* åŒ…å«æ¯ä¸ªshapeçš„æ•°æ®ã€indicesã€facesã€material_idx */
 		std::vector<tinyobj::material_t> in_materials; /* textures */
 
-		/* ¼ÓÔØÄ£ĞÍÊı¾İ */
+		/* åŠ è½½æ¨¡å‹æ•°æ® */
 		std::string warn, err;
 		bool ret = tinyobj::LoadObj(&in_attribs, &in_shapes, &in_materials, &warn, &err, filepath.c_str(), basedir.c_str());
 
@@ -36,7 +36,7 @@ namespace Wuya
 			CORE_LOG_ERROR("Load Obj Error: {}.", err);
 
 #if WUYA_DEBUG
-		/* ´òÓ¡Ä£ĞÍĞÅÏ¢ */
+		/* æ‰“å°æ¨¡å‹ä¿¡æ¯ */
 		CORE_LOG_DEBUG("Loading Obj: {}", filepath);
 		CORE_LOG_DEBUG("Vertices  : {}", in_attribs.vertices.size() / 3);
 		CORE_LOG_DEBUG("Normals   : {}", in_attribs.normals.size() / 3);
@@ -45,18 +45,18 @@ namespace Wuya
 		CORE_LOG_DEBUG("Materials : {}", in_materials.size());
 #endif
 
-		/* 1. Êä³öÄ£ĞÍ¶¥µãĞÅÏ¢µ½.meshÎÄ¼ş */
+		/* 1. å¯¼å‡ºæ¨¡å‹å¯¹è±¡ä¿¡æ¯åˆ°.meshæ–‡ä»¶ */
 		{
 			std::ofstream out_mesh_file(filepath + ".mesh", std::ios::out | std::ios::binary);
 			size_t shape_count = in_shapes.size();
-			out_mesh_file.write((char*)&(shape_count), sizeof(size_t)); /* */
+			out_mesh_file.write((char*)&(shape_count), sizeof(size_t)); /* shapeæ•°é‡ */
 
 			for (size_t shape_idx = 0; shape_idx < in_shapes.size(); ++shape_idx)
 			{
-				/* Ìî³äVertexData */
+				/* æ„å»ºVertexData */
 				std::vector<float> data;
 
-				/* ¼ÇÂ¼AABBĞÅÏ¢ */
+				/* è®°å½•AABBä¿¡æ¯ */
 				glm::vec3 aabb_min = glm::vec3(std::numeric_limits<float>::max());
 				glm::vec3 aabb_max = glm::vec3(-std::numeric_limits<float>::max());
 
@@ -64,22 +64,22 @@ namespace Wuya
 				const uint32_t face_count = shape_data.mesh.indices.size() / 3;
 				for (size_t face_idx = 0; face_idx < face_count; ++face_idx)
 				{
-					/* Èı½ÇĞÎÃæÆ¬µÄ3¸ö¶¥µãË÷Òı */
+					/* éå†ä¸‰è§’å½¢ç‰‡3ä¸ªé¡¶ç‚¹ç´¢å¼• */
 					auto index0 = shape_data.mesh.indices[face_idx * 3 + 0];
 					auto index1 = shape_data.mesh.indices[face_idx * 3 + 1];
 					auto index2 = shape_data.mesh.indices[face_idx * 3 + 2];
 
-					/* ÊÕ¼¯3¸ö¶¥µã×ø±ê */
+					/* ï¿½Õ¼ï¿½3ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ */
 					ASSERT(index0.vertex_index >= 0 && index1.vertex_index >= 0 && index2.vertex_index >= 0);
 					float vertex[3][3];
 					for (int i = 0; i < 3; ++i)
 					{
-						/* x->y->zÖµÒÀ´Î»ñÈ¡ */
+						/* x->y->zå€¼ï¼Œä¾æ¬¡ä½å– */
 						vertex[0][i] = in_attribs.vertices[index0.vertex_index * 3 + i];
 						vertex[1][i] = in_attribs.vertices[index1.vertex_index * 3 + i];
 						vertex[2][i] = in_attribs.vertices[index2.vertex_index * 3 + i];
 
-						/* ¼ÇÂ¼AABB */
+						/* è®°å½•AABB */
 						aabb_min[i] = std::min(vertex[0][i], aabb_min[i]);
 						aabb_min[i] = std::min(vertex[1][i], aabb_min[i]);
 						aabb_min[i] = std::min(vertex[2][i], aabb_min[i]);
@@ -88,7 +88,7 @@ namespace Wuya
 						aabb_max[i] = std::max(vertex[2][i], aabb_max[i]);
 					}
 
-					/* ÊÕ¼¯3¸ö¶¥µã·¨Ïß */
+					/* æ”¶é›†3ä¸ªé¡¶ç‚¹æ³•çº¿ */
 					float normal[3][3];
 					bool invalid_normal = false;
 					if (!in_attribs.normals.empty())
@@ -101,7 +101,7 @@ namespace Wuya
 						{
 							for (int i = 0; i < 3; ++i)
 							{
-								/* x->y->zÖµÒÀ´Î»ñÈ¡ */
+								/* x->y->zå€¼ï¼Œä¾æ¬¡ä½å– */
 								normal[0][i] = in_attribs.normals[index0.normal_index * 3 + i];
 								normal[1][i] = in_attribs.normals[index1.normal_index * 3 + i];
 								normal[2][i] = in_attribs.normals[index2.normal_index * 3 + i];
@@ -111,26 +111,25 @@ namespace Wuya
 
 					if (invalid_normal)
 					{
-						/* todo: Éú³É·¨Ïß */
+						/* todo: ç”Ÿæˆæ³•çº¿ */
 					}
 
-					/* ÊÕ¼¯3¸ö¶¥µãÑÕÉ« */
+					/* æ”¶é›†3ä¸ªé¡¶ç‚¹é¢œè‰² */
 					float color[3][3];
-					memset(color, 1.0f, 9 * sizeof(float)); /* Ä¬ÈÏÎª°×É« */
+					memset(color, 1.0f, 9 * sizeof(float)); /* é»˜è®¤ä¸ºç™½è‰² */
 					if (!in_attribs.colors.empty())
 					{
 						for (int i = 0; i < 3; ++i)
 						{
-							/* x->y->zÖµÒÀ´Î»ñÈ¡ */
+							/* x->y->zå€¼ï¼Œä¾æ¬¡ä½å– */
 							color[0][i] = in_attribs.colors[index0.vertex_index * 3 + i];
 							color[1][i] = in_attribs.colors[index1.vertex_index * 3 + i];
 							color[2][i] = in_attribs.colors[index2.vertex_index * 3 + i];
 						}
 					}
 
-					/* ÊÕ¼¯3¸ö¶¥µãuv */
-					float uv[3][2];
-					memset(uv, 0.0f, 6 * sizeof(float));
+					/* æ”¶é›†3ä¸ªé¡¶ç‚¹uv */
+					float uv[3][2];					memset(uv, 0.0f, 6 * sizeof(float));
 					if (!in_attribs.texcoords.empty())
 					{
 						if (index0.texcoord_index >= 0 && index1.texcoord_index >= 0 && index2.texcoord_index >= 0)
@@ -170,33 +169,32 @@ namespace Wuya
 
 				int shape_material_id = shape_data.mesh.material_ids[0];
 				if (shape_material_id < 0 || shape_material_id >= in_materials.size())
-					shape_material_id = in_materials.size() - 1; /* Ê¹ÓÃÄ¬ÈÏ²ÄÖÊ */
+					shape_material_id = in_materials.size() - 1; /* ä½¿ç”¨é»˜è®¤æè´¨ */
 				out_mesh_file.write((char*)&shape_material_id, sizeof(int));
 
 				out_mesh_file.write((char*)&aabb_min, sizeof(glm::vec3));
 				out_mesh_file.write((char*)&aabb_max, sizeof(glm::vec3));
 			}
 
-			/* ±£´æMeshÎÄ¼ş */
-			out_mesh_file.close();
-		}
+			/* å…³é—­Meshæ–‡ä»¶ */
+			out_mesh_file.close();		}
 
-		/* 2. Êä³ö²ÄÖÊµ½.mtlÎÄ¼ş */
+		/* 2. å¯¼å‡ºæè´¨åˆ°.mtlæ–‡ä»¶ */
 		{
 			auto* out_mtl_file = new tinyxml2::XMLDocument();
 			out_mtl_file->InsertEndChild(out_mtl_file->NewDeclaration());
-			tinyxml2::XMLElement* mtl_root = out_mtl_file->NewElement("Materials");
-			mtl_root->SetAttribute("Count", in_materials.size());
-			out_mtl_file->InsertEndChild(mtl_root);
+		tinyxml2::XMLElement* mtl_root = out_mtl_file->NewElement("Materials");
+		mtl_root->SetAttribute("Count", static_cast<unsigned int>(in_materials.size()));
+		out_mtl_file->InsertEndChild(mtl_root);
 
 			for (size_t material_idx = 0; material_idx < in_materials.size(); ++material_idx)
 			{
 				const auto& material_data = in_materials[material_idx];
 
 				tinyxml2::XMLElement* mtl_inst = mtl_root->InsertNewChildElement("Material");
-				mtl_inst->SetAttribute("ID", material_idx);
+				mtl_inst->SetAttribute("ID", static_cast<unsigned int>(material_idx));
 				mtl_inst->SetAttribute("Name", material_data.name.c_str());
-				mtl_inst->SetAttribute("Shader", ABSOLUTE_PATH("Shaders/default.glsl").c_str()); /* Ê×´Îµ¼ÈëÊ¹ÓÃÄ¬ÈÏ²ÄÖÊ */
+				mtl_inst->SetAttribute("Shader", ABSOLUTE_PATH("Shaders/default.glsl").c_str()); /* é¦–æ¬¡åŠ è½½ä½¿ç”¨é»˜è®¤æè´¨ */
 
 				if (!material_data.diffuse_texname.empty())
 					mtl_inst->SetAttribute("AlbedoTex", (basedir + material_data.diffuse_texname).c_str());
@@ -222,7 +220,7 @@ namespace Wuya
 				mtl_inst->SetAttribute("Specular", ToString(specular).c_str());
 			}
 
-			/* ±£´æ²ÄÖÊÎÄ¼ş */
+			/* ä¿å­˜æè´¨æ–‡ä»¶ */
 			auto out_mtl_path = filepath + ".mtl";
 			out_mtl_file->SaveFile(out_mtl_path.c_str());
 			delete out_mtl_file;

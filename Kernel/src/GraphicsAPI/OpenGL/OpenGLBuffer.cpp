@@ -9,9 +9,16 @@ namespace Wuya
 	{
 		PROFILE_FUNCTION();
 
-		glCreateBuffers(1, &m_VertexBufferId);
+#ifdef __APPLE__
+		// macOS: Use traditional functions (OpenGL 4.1 compatible)
+		glGenBuffers(1, &m_VertexBufferId);
 		glBindBuffer(GL_ARRAY_BUFFER, m_VertexBufferId);
-		glBufferData(GL_ARRAY_BUFFER, size, nullptr, GL_DYNAMIC_DRAW); // Init only, update data later
+		glBufferData(GL_ARRAY_BUFFER, size, nullptr, GL_DYNAMIC_DRAW);
+#else
+		// Windows/Linux: Use modern DSA functions (OpenGL 4.5+)
+		glCreateBuffers(1, &m_VertexBufferId);
+		glNamedBufferData(m_VertexBufferId, size, nullptr, GL_DYNAMIC_DRAW);
+#endif
 	}
 
 	OpenGLVertexBuffer::OpenGLVertexBuffer(const void* vertices, uint32_t size)
@@ -19,9 +26,16 @@ namespace Wuya
 	{
 		PROFILE_FUNCTION();
 
-		glCreateBuffers(1, &m_VertexBufferId);
+#ifdef __APPLE__
+		// macOS: Use traditional functions (OpenGL 4.1 compatible)
+		glGenBuffers(1, &m_VertexBufferId);
 		glBindBuffer(GL_ARRAY_BUFFER, m_VertexBufferId);
 		glBufferData(GL_ARRAY_BUFFER, size, vertices, GL_STATIC_DRAW);
+#else
+		// Windows/Linux: Use modern DSA functions (OpenGL 4.5+)
+		glCreateBuffers(1, &m_VertexBufferId);
+		glNamedBufferData(m_VertexBufferId, size, vertices, GL_STATIC_DRAW);
+#endif
 	}
 
 	OpenGLVertexBuffer::~OpenGLVertexBuffer()
@@ -52,8 +66,14 @@ namespace Wuya
 	{
 		PROFILE_FUNCTION();
 
+#ifdef __APPLE__
+		// macOS: Use traditional functions
 		glBindBuffer(GL_ARRAY_BUFFER, m_VertexBufferId);
 		glBufferSubData(GL_ARRAY_BUFFER, 0, size, data);
+#else
+		// Windows/Linux: Use modern DSA function
+		glNamedBufferSubData(m_VertexBufferId, 0, size, data);
+#endif
 
 		m_DataSize = size;
 	}
@@ -72,12 +92,18 @@ namespace Wuya
 	{
 		PROFILE_FUNCTION();
 
-		glCreateBuffers(1, &m_IndexBufferId);
-
+#ifdef __APPLE__
+		// macOS: Use traditional functions (OpenGL 4.1 compatible)
+		glGenBuffers(1, &m_IndexBufferId);
 		// GL_ELEMENT_ARRAY_BUFFER is not valid without an actively bound VAO
-		// Binding with GL_ARRAY_BUFFER allows the data to be loaded regardless of VAO state. 
+		// Binding with GL_ARRAY_BUFFER allows the data to be loaded regardless of VAO state.
 		glBindBuffer(GL_ARRAY_BUFFER, m_IndexBufferId);
 		glBufferData(GL_ARRAY_BUFFER, count * sizeof(uint32_t), indices, GL_STATIC_DRAW);
+#else
+		// Windows/Linux: Use modern DSA functions (OpenGL 4.5+)
+		glCreateBuffers(1, &m_IndexBufferId);
+		glNamedBufferData(m_IndexBufferId, count * sizeof(uint32_t), indices, GL_STATIC_DRAW);
+#endif
 	}
 
 	OpenGLIndexBuffer::~OpenGLIndexBuffer()

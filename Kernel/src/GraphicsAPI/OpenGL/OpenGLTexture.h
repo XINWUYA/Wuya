@@ -6,7 +6,7 @@
 namespace Wuya
 {
 	/**
-	 * \brief 根据描述创建纹理，可能是普通纹理，也可能是RenderBuffer
+	 * \brief 绾圭悊绫伙細鍙互鏄櫘閫氱殑绾圭悊锛屼篃鍙互浣滀负RenderBuffer
 	 */
 	class OpenGLTexture : public Texture
 	{
@@ -15,38 +15,38 @@ namespace Wuya
 		OpenGLTexture(const std::string& path, const TextureLoadConfig& load_config);
 		~OpenGLTexture() override;
 
-		/* 绑定当前纹理 */
+		/* 缁戝畾褰撳墠绾圭悊 */
 		void Bind(uint32_t slot = 0) override;
-		/* 解除纹理绑定 */
+		/* 瑙ｇ粦绾圭悊 */
 		void Unbind() override;
-		/* 填充纹理数据 */
+		/* 璁剧疆绾圭悊鏁版嵁 */
 		void SetData(void* data, const PixelDesc& pixel_desc, uint32_t level = 0,
 			uint32_t offset_x = 0, uint32_t offset_y = 0, uint32_t offset_z = 0) override;
 		
-		/* 获取纹理所在路径 */
+		/* 鑾峰彇绾圭悊璺緞 */
 		const std::string& GetPath() const override { return m_Path; }
 
-		/* 纹理ID */
+		/* 绾圭悊ID */
 		uint32_t GetTextureID() const override { return m_TextureId; }
-		/* 纹理是否成功加载 */
+		/* 绾圭悊鏄惁鎴愬姛鍔犺浇 */
 		bool IsLoaded() const override { return m_IsLoaded; }
 
-		/* 重载operators */
+		/* 锟斤拷锟斤拷operators */
 		bool operator==(const Texture& other) const override
 		{
 			return ((OpenGLTexture&)other).GetTextureID() == m_TextureId;
 		}
 
 	private:
-		/* 硬件层TextureId */
+		/* 纭欢灞俆extureId */
 		uint32_t m_TextureId{ 0 };
-		/* 硬件层TextureFormat */
+		/* 纭欢灞俆extureFormat */
 		GLenum m_InternalFormat{};
-		/* 硬件层Target */
+		/* 纭欢灞俆arget */
 		GLenum m_TextureTarget{};
-		/* 纹理所在路径，仅在由文件加载时有用 */
+		/* 绾圭悊璺緞锛堜粠鏂囦欢鍔犺浇鏃舵湁鏁堬級 */
 		std::string m_Path{};
-		/* 纹理是否加载完成，仅在由文件加载时有用 */
+		/* 绾圭悊鏄惁鍔犺浇瀹屾垚锛堜粠鏂囦欢鍔犺浇鏃舵湁鏁堬級 */
 		bool m_IsLoaded{ false };
 
 		friend class OpenGLFrameBuffer;

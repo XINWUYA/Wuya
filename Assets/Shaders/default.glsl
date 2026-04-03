@@ -18,19 +18,19 @@ struct SVextex2Frag
 	vec3 Tangent;
 };
 
-layout (location = 0) out SVextex2Frag Output;
+layout (location = 0) out SVextex2Frag vert2frag;
 
 void main()
 {
 	gl_Position = u_ViewProjectionMat * u_Local2WorldMat * vec4(a_Position, 1.0f);
 
-	Output.Position = vec3(u_Local2WorldMat * vec4(a_Position, 1.0f));
-	Output.BaseColor = a_Color;
-	Output.TexCoord = a_TexCoord.xy;
+	vert2frag.Position = vec3(u_Local2WorldMat * vec4(a_Position, 1.0f));
+	vert2frag.BaseColor = a_Color;
+	vert2frag.TexCoord = a_TexCoord.xy;
 	
 	mat3 normalMat = transpose(inverse(mat3(u_Local2WorldMat)));
-	Output.Normal = normalize(normalMat *a_Normal);
-	Output.Tangent = normalize(normalMat * a_Tangent);
+	vert2frag.Normal = normalize(normalMat *a_Normal);
+	vert2frag.Tangent = normalize(normalMat * a_Tangent);
 	/* Gram-Schmidt process:
 	 * Re-orthogonalize T with respect to N
 	 */
@@ -63,7 +63,7 @@ struct SVextex2Frag
 	vec3 Tangent;
 };
 
-layout (location = 0) in SVextex2Frag Input;
+layout (location = 0) in SVextex2Frag vert2frag;
 
 layout(binding = 0) uniform sampler2D u_AlbedoTexture;
 layout(binding = 1) uniform sampler2D u_SpecularTexture;
@@ -78,19 +78,19 @@ layout(binding = 8) uniform sampler2D u_AmbientTexture;
 void CalculateMaterial(inout SMaterialInput mtl)
 {
 	
-	mtl.Albedo = texture(u_AlbedoTexture, Input.TexCoord).rgb;
+	mtl.Albedo = texture(u_AlbedoTexture, vert2frag.TexCoord).rgb;
 
 	/* TBN */
-	vec3 T = normalize(Input.Tangent);
-	vec3 N = normalize(Input.Normal);
+	vec3 T = normalize(vert2frag.Tangent);
+	vec3 N = normalize(vert2frag.Normal);
 	vec3 B = cross(T, N);
 	mat3 TBN = mat3(T, B, N);
 
 	/* Calculate Parallax Mapping */
-	vec3 view_dir = u_ViewPos - Input.Position;
+	vec3 view_dir = u_ViewPos - vert2frag.Position;
 	view_dir = normalize(TBN * view_dir);
-	float height = texture(u_BumpTexture, Input.TexCoord).x;
-	vec2 uv = Input.TexCoord - view_dir.xy / view_dir.z * height;
+	float height = texture(u_BumpTexture, vert2frag.TexCoord).x;
+	vec2 uv = vert2frag.TexCoord - view_dir.xy / view_dir.z * height;
 
 	vec3 normal = texture(u_NormalTexture, uv).xyz * 2.0f - 1.0f;
 	//normal.z = sqrt(max(1.0f - normal.x * normal.x - normal.y * normal.y, 0.0f));
@@ -119,7 +119,7 @@ void main()
 	GBufferTexture2 = vec4(mtl.Specular, mtl.AO);
 	GBufferTexture3 = vec4(mtl.Emission, mtl.IOR);
 	GBufferTexture4 = vec4(mtl.Ambient, mtl.Anisotropy);
-	GBufferTexture5 = vec4(Input.Position, 1.0f);
+	GBufferTexture5 = vec4(vert2frag.Position, 1.0f);
 	
 	ObjectId = u_ObjectId;
 }

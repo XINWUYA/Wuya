@@ -14,24 +14,24 @@ namespace Wuya
 		void SetClearColor(const glm::vec4& color) override;
 		void Clear() override;
 
-		/* Ó¦ÓÃ¹âÕ¤»¯²ÎÊı */
+		/* åº”ç”¨å…‰æ …åŒ–çŠ¶æ€ */
 		void ApplyRasterState(RenderRasterState raster_state) override;
 
-		/* µ÷ÓÃ»æÖÆÃüÁî */
+		/* ç»˜åˆ¶è°ƒç”¨ */
 		void DrawIndexed(PrimitiveType type, const SharedPtr<VertexArray>& vertex_array, uint32_t index_count = 0) override;
 		void DrawArrays(PrimitiveType type, const SharedPtr<VertexArray>& vertex_array) override;
 
 		void Flush() override;
 
-		/* Ìí¼ÓDebugGroup£¬ÒÔ±ãÔÚRenderDocµÈ×¥Ö¡Ê±Ê¹Pipeline½á¹¹¸üÇåÎú */
+		/* å‹å…¥DebugGroupï¼Œä»¥ä¾¿åœ¨RenderDocæŠ“å¸§æ—¶ä½¿ç”¨Pipelineç»“æ„ç»„ç»‡ */
 		void PushDebugGroup(const char* name) override;
-		void PopDebugGroup() override;
+        void PopDebugGroup() override;
 
 	private:
-		/* »ñÈ¡OpenGLÖ§³ÖµÄÀ©Õ¹ */
+		/* è·å–OpenGLæ”¯æŒçš„æ‰©å±• */
 		void InitOpenGLExtensions();
 
-		/* À©Õ¹Ö§³ÖÇé¿ö */
+		/* æ‰©å±•æ”¯æŒæ ‡è®° */
 		struct
 		{
 			bool KHR_debug{ false };

@@ -1,5 +1,8 @@
 #pragma once
 
+#include "WuyaConfig.h"
+#include <filesystem>
+
 namespace Wuya
 {
 #define COMPONENT_CLASS(type)													\

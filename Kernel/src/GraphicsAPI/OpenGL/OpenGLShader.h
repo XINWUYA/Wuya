@@ -27,13 +27,17 @@ namespace Wuya
 	private:
 		std::string ReadFile(const std::string& filepath);
 		void PreProcessShaderSrc(const std::string& source, std::unordered_map<GLenum, std::string>& shader_sources /*<ShaderStage, ShaderSrc>*/);
+#ifdef PLATFORM_WINDOWS
 		void CompileShadersToOpenGL();
+#endif
 		void CreateShaderProgram();
 
 		std::string m_DebugName{"Unnamed Shader"};
 		uint32_t m_ProgramID{ 0 };
 
+#ifdef PLATFORM_WINDOWS
 		std::unordered_map<GLenum, std::vector<uint32_t>> m_OpenGLSPIRVs{};
+#endif
 		std::unordered_map<GLenum, std::string> m_OpenGLSourceCodes{};
 	};
 }

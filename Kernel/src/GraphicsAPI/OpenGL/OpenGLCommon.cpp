@@ -3,7 +3,7 @@
 
 namespace Wuya
 {
-	/* ºÏ≤ÈGLError –≈œ¢ */
+	/* Ê£ÄÊü•GLError‰ø°ÊÅØ */
 	void CheckGLError(const char* file, const char* func_name, uint32_t line) noexcept
 	{
 		PROFILE_FUNCTION();
@@ -15,7 +15,7 @@ namespace Wuya
 		}
 	}
 
-	/* ºÏ≤ÈFrameBuffer◊¥Ã¨ */
+	/* Ê£ÄÊü•FrameBufferÁä∂ÊÄÅ */
 	void CheckGLFrameBufferStatus(GLenum target, const char* func_name, uint32_t line) noexcept
 	{
 		PROFILE_FUNCTION();
@@ -23,7 +23,18 @@ namespace Wuya
 		GLenum status = glCheckFramebufferStatus(target);
 		if (status != GL_FRAMEBUFFER_COMPLETE)
 		{
-			CORE_LOG_ERROR("OpenGLFrameBufferError: {} in {}():{}.", STRINGIFY(status), func_name, line);
+			const char* status_str = "UNKNOWN";
+			switch (status)
+			{
+			case GL_FRAMEBUFFER_UNDEFINED: status_str = "GL_FRAMEBUFFER_UNDEFINED"; break;
+			case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT: status_str = "GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT"; break;
+			case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT: status_str = "GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT"; break;
+			case GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER: status_str = "GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER"; break;
+			case GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER: status_str = "GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER"; break;
+			case GL_FRAMEBUFFER_UNSUPPORTED: status_str = "GL_FRAMEBUFFER_UNSUPPORTED"; break;
+			case GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE: status_str = "GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE"; break;
+			case GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS: status_str = "GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS"; break;
+			}
+			CORE_LOG_ERROR("OpenGLFrameBufferError: {} (0x{:X}) in {}():{}.", status_str, status, func_name, line);
 		}
-	}
-}
+	}}

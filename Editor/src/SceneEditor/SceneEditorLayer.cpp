@@ -289,7 +289,7 @@ namespace Wuya
 			{
 				if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("RESOURCE_BROWSER_ITEM"))
 				{
-					const wchar_t* path = (const wchar_t*)payload->Data;
+					const auto path = static_cast<const char *>(payload->Data);
 					OnDragItemToScene(g_AssetsPath / path);
 				}
 				ImGui::EndDragDropTarget();

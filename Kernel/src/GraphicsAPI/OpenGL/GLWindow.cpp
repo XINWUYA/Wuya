@@ -71,6 +71,14 @@ namespace Wuya
 			glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);
 #endif
 
+		// macOS only supports OpenGL 4.1 core profile
+#ifdef __APPLE__
+		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
+		glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+		glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE);
+#endif
+
 		// 创建GLFW窗口
 		{
 			PROFILE_SCOPE("glfwCreateWindow");
