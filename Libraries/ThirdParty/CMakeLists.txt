@@ -262,11 +262,8 @@ configure_file(
 
 add_library(assimp STATIC)
 
-# Define Z_HAVE_UNISTD_H on Unix/macOS to include unistd.h
-# This provides declarations for write(), read(), close() etc.
-if(UNIX OR APPLE)
-    target_compile_definitions(assimp PRIVATE Z_HAVE_UNISTD_H)
-endif()
+# Use system zlib instead of built-in zlib to avoid fdopen macro conflicts on macOS
+find_package(ZLIB REQUIRED)
 
 file(GLOB_RECURSE ASSIMP_SOURCES
     "${CMAKE_CURRENT_SOURCE_DIR}/assimp/code/*.cpp"
@@ -276,14 +273,11 @@ file(GLOB_RECURSE ASSIMP_SOURCES
     "${CMAKE_CURRENT_SOURCE_DIR}/assimp/contrib/Open3DGC/*.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/assimp/contrib/openddlparser/code/*.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/assimp/contrib/unzip/*.c"
-    "${CMAKE_CURRENT_SOURCE_DIR}/assimp/contrib/zlib/*.c"
-    "${CMAKE_CURRENT_SOURCE_DIR}/assimp/contrib/zlib/*.h"
 )
 
-# Exclude zlib example/test programs that are not needed for the library
-list(FILTER ASSIMP_SOURCES EXCLUDE REGEX ".*/contrib/zlib/contrib/.*")
-list(FILTER ASSIMP_SOURCES EXCLUDE REGEX ".*/contrib/zlib/test.*")
-list(FILTER ASSIMP_SOURCES EXCLUDE REGEX ".*/contrib/zlib/examples/.*")
+# Exclude built-in zlib sources - use system zlib instead
+# This avoids fdopen macro redefinition issues on macOS
+list(FILTER ASSIMP_SOURCES EXCLUDE REGEX ".*/contrib/zlib/.*")
 
 target_sources(assimp PRIVATE ${ASSIMP_SOURCES})
 
@@ -296,8 +290,6 @@ target_include_directories(assimp
         ${CMAKE_CURRENT_SOURCE_DIR}/assimp/code
         ${CMAKE_CURRENT_SOURCE_DIR}/assimp/contrib
         ${CMAKE_CURRENT_SOURCE_DIR}/assimp/contrib/pugixml/src
-        ${CMAKE_CURRENT_SOURCE_DIR}/assimp/contrib/zlib
-        ${CMAKE_CURRENT_BINARY_DIR}/assimp/contrib/zlib
         ${CMAKE_CURRENT_SOURCE_DIR}/assimp/contrib/rapidjson/include
         ${CMAKE_CURRENT_SOURCE_DIR}/assimp/contrib/unzip
         ${CMAKE_CURRENT_SOURCE_DIR}/assimp/contrib/openddlparser/include
@@ -309,6 +301,7 @@ target_compile_definitions(assimp PRIVATE
     ASSIMP_BUILD_NO_M3D_EXPORTER
     ASSIMP_BUILD_NO_C4D_IMPORTER
     ASSIMP_BUILD_NO_IFC_IMPORTER
+    ASSIMP_BUILD_NO_OWN_ZLIB
     MINIZ_USE_UNALIGNED_LOADS_AND_STORES=0
     ASSIMP_IMPORTER_GLTF_USE_OPEN3DGC=1
     RAPIDJSON_HAS_STDSTRING=1
@@ -318,13 +311,8 @@ target_compile_definitions(assimp PRIVATE
     _CRT_SECURE_NO_WARNINGS
 )
 
-# Fix fdopen redefinition issue on macOS
-# zutil.h incorrectly defines fdopen as NULL on Unix systems that do have fdopen
-# Solution: Pre-define fdopen as a function-like macro before zutil.h is included
-# This makes the #ifndef fdopen check fail, preventing the incorrect NULL definition
-if(APPLE)
-    target_compile_definitions(assimp PRIVATE "fdopen(fd,mode)=fdopen(fd,mode)")
-endif()
+# Link system zlib
+target_link_libraries(assimp PUBLIC ZLIB::ZLIB)
 
 set_target_properties(assimp PROPERTIES 
     ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib/${OUTPUT_DIR}"

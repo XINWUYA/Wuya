@@ -33,6 +33,11 @@ namespace Wuya
 		io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;			// Enable Multi-Viewport / Platform Windows
 		//io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
 
+		// Set ini file path to absolute path for consistent layout persistence
+		// Use the same directory as ASSETS_PATH (project root)
+		std::string ini_path = std::string(ASSETS_PATH) + "/../imgui.ini";
+		io.IniFilename = strdup(ini_path.c_str());  // Note: memory leak is acceptable here for small string
+
 		const float fontSize = 18.0f;// *2.0f;
 		io.Fonts->AddFontFromFileTTF(ABSOLUTE_PATH("EditorRes/fonts/msyh.ttf").c_str(), fontSize);
 		//io.Fonts->AddFontFromFileTTF(RELATIVE_PATH("EditorRes/fonts/opensans/OpenSans-Bold.ttf").c_str(), fontSize, nullptr, io.Fonts->GetGlyphRangesChineseSimplifiedCommon());

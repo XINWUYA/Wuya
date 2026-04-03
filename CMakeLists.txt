@@ -110,12 +110,11 @@ add_subdirectory(Kernel)
 
 # Add applications
 add_subdirectory(Editor)
-add_subdirectory(ModelEditor)
+# add_subdirectory(ModelEditor)  # Temporarily disabled for macOS compatibility
 
 # Add samples (optional)
-option(BUILD_SAMPLES "Build sample projects" ON)
+option(BUILD_SAMPLES "Build sample projects" OFF)  # Disabled for macOS compatibility
 if(BUILD_SAMPLES)
-    add_subdirectory(Samples/Sample_SkyBox)
     add_subdirectory(Samples/Sample_CSM)
 endif()
 

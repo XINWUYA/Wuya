@@ -124,7 +124,9 @@ elseif(APPLE)
     # Compile FileDialog.cpp as Objective-C++ on macOS using compiler flags
     set_source_files_properties(
         "${CMAKE_CURRENT_SOURCE_DIR}/src/Wuya/Application/FileDialog.cpp"
-        PROPERTIES COMPILE_FLAGS "-x objective-c++"
+        PROPERTIES 
+            COMPILE_FLAGS "-x objective-c++"
+            SKIP_PRECOMPILE_HEADERS ON
     )
 elseif(UNIX)
     target_compile_definitions(Kernel PRIVATE PLATFORM_LINUX)
