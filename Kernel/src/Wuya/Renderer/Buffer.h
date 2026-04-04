@@ -3,6 +3,13 @@
 
 namespace Wuya
 {
+	/* ç´¢å¼•ç¼“å†²åŒºæ”¯æŒçš„æ•°æ®ç±»å‹ */
+	enum class IndexType : uint8_t
+	{
+		UInt16 = 0,  // 16-bit indices (unsigned short)
+		UInt32       // 32-bit indices (unsigned int)
+	};
+
 	enum class BufferDataType : uint8_t
 	{
 		None = 0,
@@ -16,7 +23,8 @@ namespace Wuya
 		Float3,
 		Float4,
 		Mat3,
-		Mat4
+		Mat4,
+		UByte4    // 4 bytes, normalized unsigned byte [0, 255] -> [0.0, 1.0]
 	};
 
 	struct BufferElement
@@ -42,7 +50,7 @@ namespace Wuya
 		uint32_t GetStride() const { return m_Stride; }
 		const std::vector<BufferElement>& GetElements() const { return m_Elements; }
 
-		/* Ôö¼ÓElement */
+		/* æ·»åŠ Element */
 		void EmplaceElement(const BufferElement& element);
 
 		std::vector<BufferElement>::iterator begin() { return m_Elements.begin(); }
@@ -67,15 +75,15 @@ namespace Wuya
 		virtual void Bind() const = 0;
 		virtual void Unbind() const = 0;
 
-		/* ÉèÖÃ¶¥µãÊı¾İ */
+		/* è®¾ç½®é¡¶ç‚¹æ•°æ® */
 		virtual void SetData(const void* data, uint32_t size) = 0;
 		[[nodiscard]] virtual uint32_t GetDataSize() const = 0;
 
-		/* ÉèÖÃ¶¥µã²¼¾Ö */
+		/* è®¾ç½®é¡¶ç‚¹å¸ƒå±€ */
 		virtual void SetLayout(const VertexBufferLayout& layout) = 0;
 		[[nodiscard]] virtual const VertexBufferLayout& GetLayout() const = 0;
 
-		/* »ñÈ¡¶¥µãÊıÁ¿ */
+		/* è·å–é¡¶ç‚¹æ•°é‡ */
 		[[nodiscard]] virtual uint32_t GetVertexCount() const = 0;
 
 		static SharedPtr<VertexBuffer> Create(uint32_t size);
@@ -93,7 +101,11 @@ namespace Wuya
 		virtual void Unbind() const = 0;
 
 		virtual uint32_t GetCount() const = 0;
+		virtual IndexType GetIndexType() const = 0;
 
+		/* åˆ›å»º16ä½ç´¢å¼•ç¼“å†²åŒº */
+		static SharedPtr<IndexBuffer> Create(const uint16_t* indices, uint32_t count);
+		/* åˆ›å»º32ä½ç´¢å¼•ç¼“å†²åŒº */
 		static SharedPtr<IndexBuffer> Create(const uint32_t* indices, uint32_t count);
 	};
 }

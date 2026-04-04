@@ -2,6 +2,9 @@
 #include "Shader.h"
 #include "Renderer.h"
 #include "GraphicsAPI/OpenGL/OpenGLShader.h"
+#ifdef PLATFORM_MACOS
+#include "GraphicsAPI/Metal/MetalShader.h"
+#endif
 
 namespace Wuya
 {
@@ -10,7 +13,7 @@ namespace Wuya
 	{
 	}
 
-	/* 创建Shader */
+	/* 鍒涘缓Shader */
 	SharedPtr<Shader> Shader::Create(const std::string& filepath)
 	{
 		switch(Renderer::CurrentAPI())
@@ -20,13 +23,17 @@ namespace Wuya
 			return nullptr;
 		case RenderAPI::OpenGL:
 			return CreateSharedPtr<OpenGLShader>(filepath);
+#ifdef PLATFORM_MACOS
+		case RenderAPI::Metal:
+			return CreateSharedPtr<MetalShader>(filepath);
+#endif
 		default: 
 			CORE_LOG_ERROR("Unknown RenderAPI is unsupported!");
 			return nullptr;
 		}
 	}
 
-	/* 创建Shader */
+	/* 鍒涘缓Shader */
 	SharedPtr<Shader> Shader::Create(const std::string& name, const std::string& vertex_src, const std::string& pixel_src)
 	{
 		switch (Renderer::CurrentAPI())
@@ -36,9 +43,12 @@ namespace Wuya
 			return nullptr;
 		case RenderAPI::OpenGL:
 			return CreateSharedPtr<OpenGLShader>(name, vertex_src, pixel_src);
+#ifdef PLATFORM_MACOS
+		case RenderAPI::Metal:
+			return CreateSharedPtr<MetalShader>(name, vertex_src, pixel_src);
+#endif
 		default:
 			CORE_LOG_ERROR("Unknown RenderAPI is unsupported!");
 			return nullptr;
 		}
-	}
-}
+	}}

@@ -5,6 +5,10 @@
 #include "Wuya/ImGui/ImGuiLayer.h"
 #include "Wuya/Renderer/Renderer.h"
 
+#ifdef PLATFORM_MACOS
+#include "GraphicsAPI/Metal/MetalRenderAPI.h"
+#endif
+
 namespace Wuya 
 {
 	Application* Application::s_pInstance = nullptr;
@@ -15,6 +19,7 @@ namespace Wuya
 
 		ASSERT(!s_pInstance, "Application already exist!");
 		s_pInstance = this;
+		Renderer::Init();
 
 		m_pWindow = IWindow::Create({ window_title, width, height });
 		m_pWindow->SetEventCallback(BIND_EVENT_FUNC(Application::OnEvent));
@@ -49,6 +54,15 @@ namespace Wuya
 
 			if (!m_IsMinimized)
 			{
+#ifdef PLATFORM_MACOS
+				/* Metal: 在帧开始时准备下一帧的drawable */
+				auto metalRenderAPI = std::dynamic_pointer_cast<MetalRenderAPI>(Renderer::GetRenderAPI());
+				if (metalRenderAPI)
+				{
+					metalRenderAPI->PrepareNextDrawable();
+				}
+#endif
+
 				/* 先更新逻辑，再渲染 */
 				{
                     PROFILE_SCOPE("Update Layers");

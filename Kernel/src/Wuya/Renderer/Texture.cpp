@@ -2,6 +2,9 @@
 #include "Texture.h"
 #include "Renderer.h"
 #include "GraphicsAPI/OpenGL/OpenGLTexture.h"
+#ifdef PLATFORM_MACOS
+#include "GraphicsAPI/Metal/MetalTexture.h"
+#endif
 
 namespace Wuya
 {
@@ -10,7 +13,7 @@ namespace Wuya
 	{
 	}
 
-	/* 创建纹理 */
+	/* 鍒涘缓绾圭悊 */
 	SharedPtr<Texture> Texture::Create(const std::string& name, const TextureDesc& texture_desc)
 	{
 		switch (Renderer::CurrentAPI())
@@ -20,13 +23,17 @@ namespace Wuya
 			return nullptr;
 		case RenderAPI::OpenGL:
 			return CreateSharedPtr<OpenGLTexture>(name, texture_desc);
+#ifdef PLATFORM_MACOS
+		case RenderAPI::Metal:
+			return CreateSharedPtr<MetalTexture>(name, texture_desc);
+#endif
 		default:
 			CORE_LOG_ERROR("Unknown RenderAPI is unsupported!");
 			return nullptr;
 		}
 	}
 
-	/* 创建纹理 */
+	/* 鍒涘缓绾圭悊 */
 	SharedPtr<Texture> Texture::Create(const std::string& path, const TextureLoadConfig& load_config)
 	{
 		switch (Renderer::CurrentAPI())
@@ -36,13 +43,16 @@ namespace Wuya
 			return nullptr;
 		case RenderAPI::OpenGL:
 			return CreateSharedPtr<OpenGLTexture>(path, load_config);
+#ifdef PLATFORM_MACOS
+		case RenderAPI::Metal:
+			return CreateSharedPtr<MetalTexture>(path, load_config);
+#endif
 		default:
 			CORE_LOG_ERROR("Unknown RenderAPI is unsupported!");
 			return nullptr;
 		}
 	}
-
-	/* 默认纹理 */
+	/* 榛樿绾圭悊 */
 	SharedPtr<Texture> Texture::White()
 	{
 		SharedPtr<Texture> texture;

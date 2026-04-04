@@ -2,6 +2,9 @@
 #include "FrameBuffer.h"
 #include "Renderer.h"
 #include "GraphicsAPI/OpenGL/OpenGLFrameBuffer.h"
+#ifdef PLATFORM_MACOS
+#include "GraphicsAPI/Metal/MetalFrameBuffer.h"
+#endif
 
 namespace Wuya
 {
@@ -10,7 +13,7 @@ namespace Wuya
 	{
 	}
 
-	/* ´´½¨FrameBuffer */
+	/* åˆ›å»ºFrameBuffer */
 	SharedPtr<FrameBuffer> FrameBuffer::Create(const std::string& name, const FrameBufferDesc& desc)
 	{
 		switch (Renderer::CurrentAPI())
@@ -20,9 +23,12 @@ namespace Wuya
 			return nullptr;
 		case RenderAPI::OpenGL:
 			return CreateSharedPtr<OpenGLFrameBuffer>(name, desc);
+#ifdef PLATFORM_MACOS
+		case RenderAPI::Metal:
+			return CreateSharedPtr<MetalFrameBuffer>(name, desc);
+#endif
 		default:
 			CORE_LOG_ERROR("Unknown RenderAPI is unsupported!");
 			return nullptr;
 		}
-	}
-}
+	}}

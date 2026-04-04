@@ -40,3 +40,6 @@
 [submodule "Libraries/ThirdParty/tracy"]
 	path = Libraries/ThirdParty/tracy
 	url = https://github.com/wolfpld/tracy.git
+[submodule "Libraries/ThirdParty/metal-cpp"]
+	path = Libraries/ThirdParty/metal-cpp
+	url = https://github.com/bkaradzic/metal-cpp.git

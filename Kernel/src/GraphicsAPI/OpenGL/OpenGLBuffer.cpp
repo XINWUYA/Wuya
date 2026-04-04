@@ -87,8 +87,25 @@ namespace Wuya
 		return m_DataSize / m_Layout.GetStride();
 	}
 
+	OpenGLIndexBuffer::OpenGLIndexBuffer(const uint16_t* indices, uint32_t count)
+		: m_Count(count), m_IndexType(IndexType::UInt16)
+	{
+		PROFILE_FUNCTION();
+
+#ifdef __APPLE__
+		// macOS: Use traditional functions (OpenGL 4.1 compatible)
+		glGenBuffers(1, &m_IndexBufferId);
+		glBindBuffer(GL_ARRAY_BUFFER, m_IndexBufferId);
+		glBufferData(GL_ARRAY_BUFFER, count * sizeof(uint16_t), indices, GL_STATIC_DRAW);
+#else
+		// Windows/Linux: Use modern DSA functions (OpenGL 4.5+)
+		glCreateBuffers(1, &m_IndexBufferId);
+		glNamedBufferData(m_IndexBufferId, count * sizeof(uint16_t), indices, GL_STATIC_DRAW);
+#endif
+	}
+
 	OpenGLIndexBuffer::OpenGLIndexBuffer(const uint32_t* indices, uint32_t count)
-		: m_Count(count)
+		: m_Count(count), m_IndexType(IndexType::UInt32)
 	{
 		PROFILE_FUNCTION();
 

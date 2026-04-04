@@ -2,6 +2,9 @@
 #include "UniformBuffer.h"
 #include "Renderer.h"
 #include "GraphicsAPI/OpenGL/OpenGLUniformBuffer.h"
+#ifdef PLATFORM_MACOS
+#include "GraphicsAPI/Metal/MetalUniformBuffer.h"
+#endif
 
 namespace Wuya
 {
@@ -14,6 +17,10 @@ namespace Wuya
 			return nullptr;
 		case RenderAPI::OpenGL:
 			return CreateSharedPtr<OpenGLUniformBuffer>(size, binding_point);
+#ifdef PLATFORM_MACOS
+		case RenderAPI::Metal:
+			return CreateSharedPtr<MetalUniformBuffer>(size, binding_point);
+#endif
 		default:
 			CORE_LOG_ERROR("Unknown RenderAPI is unsupported!");
 			return nullptr;

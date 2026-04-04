@@ -128,8 +128,14 @@ set(IMGUI_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/imgui/imgui_demo.cpp
 )
 
+# Note: We use custom ImGuiRenderer through Wuya's RHI abstraction layer,
+
 target_sources(ImGui PRIVATE ${IMGUI_SOURCES})
-target_include_directories(ImGui PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/imgui)
+target_include_directories(ImGui PUBLIC 
+    ${CMAKE_CURRENT_SOURCE_DIR}/imgui
+    ${CMAKE_CURRENT_SOURCE_DIR}/imgui/backends
+)
+target_link_libraries(ImGui PUBLIC GLFW)
 set_target_properties(ImGui PROPERTIES 
     ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib/${OUTPUT_DIR}"
     FOLDER "Libraries/ThirdParty"

@@ -13,7 +13,6 @@ namespace Wuya
 {
 	Scene::Scene()
 	{
-		Renderer::Init();
 	}
 
 	Scene::~Scene()

@@ -38,6 +38,7 @@ namespace Wuya
 	class OpenGLIndexBuffer : public IndexBuffer
 	{
 	public:
+		OpenGLIndexBuffer(const uint16_t* indices, uint32_t count);
 		OpenGLIndexBuffer(const uint32_t* indices, uint32_t count);
 		~OpenGLIndexBuffer() override;
 
@@ -46,10 +47,12 @@ namespace Wuya
 		void Unbind() const override;
 
 		uint32_t GetCount() const override { return m_Count; }
+		IndexType GetIndexType() const override { return m_IndexType; }
 
 	private:
 		uint32_t m_IndexBufferId{ 0 };
 		uint32_t m_Count{ 0 };
+		IndexType m_IndexType{ IndexType::UInt32 };
 	};
 }
 

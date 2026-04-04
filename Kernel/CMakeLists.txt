@@ -63,6 +63,7 @@ target_include_directories(Kernel
         ${CMAKE_SOURCE_DIR}/Libraries/ThirdParty/magic_enum/include
         ${CMAKE_SOURCE_DIR}/Libraries/ThirdParty/assimp/include
         ${CMAKE_SOURCE_DIR}/Libraries/ThirdParty/tracy/public
+        ${CMAKE_SOURCE_DIR}/Libraries/ThirdParty/metal-cpp  # Metal C++ wrapper
 )
 
 if(VULKAN_SDK)
@@ -97,7 +98,9 @@ if(WIN32)
 elseif(APPLE)
     find_library(OPENGL_FRAMEWORK OpenGL REQUIRED)
     find_library(COCOA_FRAMEWORK Cocoa REQUIRED)
-    target_link_libraries(Kernel PRIVATE ${OPENGL_FRAMEWORK} ${COCOA_FRAMEWORK})
+    find_library(METAL_FRAMEWORK Metal REQUIRED)
+    find_library(QUARTZCORE_FRAMEWORK QuartzCore REQUIRED)
+    target_link_libraries(Kernel PRIVATE ${OPENGL_FRAMEWORK} ${COCOA_FRAMEWORK} ${METAL_FRAMEWORK} ${QUARTZCORE_FRAMEWORK})
 elseif(UNIX)
     target_link_libraries(Kernel PRIVATE OpenGL::GL)
 endif()
@@ -124,6 +127,20 @@ elseif(APPLE)
     # Compile FileDialog.cpp as Objective-C++ on macOS using compiler flags
     set_source_files_properties(
         "${CMAKE_CURRENT_SOURCE_DIR}/src/Wuya/Application/FileDialog.cpp"
+        PROPERTIES 
+            COMPILE_FLAGS "-x objective-c++"
+            SKIP_PRECOMPILE_HEADERS ON
+    )
+    # Compile ImGuiLayer.cpp as Objective-C++ on macOS for Metal support
+    set_source_files_properties(
+        "${CMAKE_CURRENT_SOURCE_DIR}/src/Wuya/ImGui/ImGuiLayer.cpp"
+        PROPERTIES 
+            COMPILE_FLAGS "-x objective-c++"
+            SKIP_PRECOMPILE_HEADERS ON
+    )
+    # Compile MetalQuery.cpp as Objective-C++ on macOS
+    set_source_files_properties(
+        "${CMAKE_CURRENT_SOURCE_DIR}/src/GraphicsAPI/Metal/MetalQuery.cpp"
         PROPERTIES 
             COMPILE_FLAGS "-x objective-c++"
             SKIP_PRECOMPILE_HEADERS ON

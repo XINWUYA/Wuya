@@ -2,6 +2,9 @@
 #include "Buffer.h"
 #include "Renderer.h"
 #include "GraphicsAPI/OpenGL/OpenGLBuffer.h"
+#ifdef PLATFORM_MACOS
+#include "GraphicsAPI/Metal/MetalBuffer.h"
+#endif
 
 namespace Wuya
 {
@@ -20,6 +23,7 @@ namespace Wuya
 		case BufferDataType::Float4:	return 4 * 4;
 		case BufferDataType::Mat3:		return 4 * 3 * 3;
 		case BufferDataType::Mat4:		return 4 * 4 * 4;
+		case BufferDataType::UByte4:	return 4;  // 4 bytes, normalized [0,255] -> [0.0,1.0]
 		default:
 			ASSERT(false, "Unknown BufferDataType!");
 			return 0;
@@ -45,6 +49,7 @@ namespace Wuya
 		case BufferDataType::Float4:	return 4;
 		case BufferDataType::Mat3:		return 3; // Mat need process specially
 		case BufferDataType::Mat4:		return 4; // Mat need process specially
+		case BufferDataType::UByte4:	return 4;  // 4 components (RGBA)
 		default: 
 			ASSERT(false, "Unknown BufferDataType!");
 			return 0;
@@ -84,6 +89,10 @@ namespace Wuya
 			return nullptr;
 		case RenderAPI::OpenGL:
 			return CreateSharedPtr<OpenGLVertexBuffer>(size);
+#ifdef PLATFORM_MACOS
+		case RenderAPI::Metal:
+			return CreateSharedPtr<MetalVertexBuffer>(size);
+#endif
 		default:
 			CORE_LOG_ERROR("Unknown RenderAPI is unsupported!");
 			return nullptr;
@@ -99,6 +108,29 @@ namespace Wuya
 			return nullptr;
 		case RenderAPI::OpenGL:
 			return CreateSharedPtr<OpenGLVertexBuffer>(vertices, size);
+#ifdef PLATFORM_MACOS
+		case RenderAPI::Metal:
+			return CreateSharedPtr<MetalVertexBuffer>(vertices, size);
+#endif
+		default:
+			CORE_LOG_ERROR("Unknown RenderAPI is unsupported!");
+			return nullptr;
+		}
+	}
+
+	SharedPtr<IndexBuffer> IndexBuffer::Create(const uint16_t* indices, uint32_t count)
+	{
+		switch (Renderer::CurrentAPI())
+		{
+		case RenderAPI::None:
+			CORE_LOG_ERROR("RenderAPI can't be None!");
+			return nullptr;
+		case RenderAPI::OpenGL:
+			return CreateSharedPtr<OpenGLIndexBuffer>(indices, count);
+#ifdef PLATFORM_MACOS
+		case RenderAPI::Metal:
+			return CreateSharedPtr<MetalIndexBuffer>(indices, count);
+#endif
 		default:
 			CORE_LOG_ERROR("Unknown RenderAPI is unsupported!");
 			return nullptr;
@@ -114,6 +146,10 @@ namespace Wuya
 			return nullptr;
 		case RenderAPI::OpenGL:
 			return CreateSharedPtr<OpenGLIndexBuffer>(indices, count);
+#ifdef PLATFORM_MACOS
+		case RenderAPI::Metal:
+			return CreateSharedPtr<MetalIndexBuffer>(indices, count);
+#endif
 		default:
 			CORE_LOG_ERROR("Unknown RenderAPI is unsupported!");
 			return nullptr;

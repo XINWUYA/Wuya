@@ -54,6 +54,7 @@ namespace Wuya
 		case BufferDataType::Float4:   return GL_FLOAT;
 		case BufferDataType::Mat3:     return GL_FLOAT;
 		case BufferDataType::Mat4:     return GL_FLOAT;
+		case BufferDataType::UByte4:   return GL_UNSIGNED_BYTE;
 		default:
 			ASSERT(false, "Unknown BufferDataType!");
 			return 0;
@@ -108,6 +109,20 @@ namespace Wuya
 				m_VertexBufferIdx++;
 				break;
 			}
+			case BufferDataType::UByte4:
+			{
+				glEnableVertexAttribArray(m_VertexBufferIdx);
+				glVertexAttribPointer(m_VertexBufferIdx,
+					element.GetComponentCount(),
+					TranslateBufferDataTypeToOpenGLBaseType(element.Type),
+					GL_TRUE,  // Always normalize UByte4 [0,255] -> [0.0,1.0]
+					layout.GetStride(),
+					(const void*)element.Offset
+				);
+
+				m_VertexBufferIdx++;
+				break;
+			}
 			case BufferDataType::Mat3:
 			case BufferDataType::Mat4:
 			{
@@ -147,7 +162,7 @@ namespace Wuya
 		m_IndexBuffer = index_buffer;
 	}
 
-	const uint32_t OpenGLVertexArray::GetVertexCount() const
+	uint32_t OpenGLVertexArray::GetVertexCount() const
 	{
 		return m_IndexBuffer ? m_IndexBuffer->GetCount() : m_VertexCount;
 	}

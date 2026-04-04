@@ -55,6 +55,12 @@ namespace Wuya
 		glViewport((GLint)x_start, (GLint)y_start, (GLsizei)width, (GLsizei)height);
 	}
 
+	void OpenGLRenderAPI::SetScissor(uint32_t x, uint32_t y, uint32_t width, uint32_t height)
+	{
+		glEnable(GL_SCISSOR_TEST);
+		glScissor((GLint)x, (GLint)y, (GLsizei)width, (GLsizei)height);
+	}
+
 	void OpenGLRenderAPI::SetClearColor(const glm::vec4& color)
 	{
 		glClearColor(color.r, color.b, color.b, color.a);
@@ -136,12 +142,12 @@ namespace Wuya
 
 	}
 
-	void OpenGLRenderAPI::DrawIndexed(PrimitiveType type, const SharedPtr<VertexArray>& vertex_array, uint32_t index_count)
+	void OpenGLRenderAPI::DrawIndexed(PrimitiveType type, const SharedPtr<VertexArray>& vertex_array, uint32_t index_count, uint32_t index_offset)
 	{
 		PROFILE_FUNCTION();
 
 		const uint32_t count = index_count ? index_count : vertex_array->GetVertexCount();
-		glDrawElements(TranslateToOpenGLPrimitiveType(type), (GLsizei)count, GL_UNSIGNED_INT, nullptr);
+		glDrawElements(TranslateToOpenGLPrimitiveType(type), (GLsizei)count, GL_UNSIGNED_INT, reinterpret_cast<const void*>(index_offset * sizeof(uint32_t)));
 	}
 
 	void OpenGLRenderAPI::DrawArrays(PrimitiveType type, const SharedPtr<VertexArray>& vertex_array)

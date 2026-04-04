@@ -242,7 +242,7 @@ namespace Wuya
 				builder.BindInputResource(data.GBufferTexture3, FrameGraphTexture::Usage::Sampleable);
 				builder.BindInputResource(data.GBufferTexture4, FrameGraphTexture::Usage::Sampleable);
 				builder.BindInputResource(data.GBufferTexture5, FrameGraphTexture::Usage::Sampleable);
-				builder.BindOutputResource(data.LightingResult, FrameGraphTexture::Usage::Sampleable);
+				builder.BindOutputResource(data.LightingResult, FrameGraphTexture::Usage::ColorAttachment | FrameGraphTexture::Usage::Sampleable);
 
 				FrameGraphPassInfo::Descriptor pass_desc;
 				pass_desc.Attachments.ColorAttachments[0] = data.LightingResult;

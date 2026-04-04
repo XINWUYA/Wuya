@@ -59,13 +59,14 @@ namespace Wuya
 
 	static RenderData s_RenderData;
 
-	SharedPtr<RenderAPI> Renderer::m_pRenderAPI = RenderAPI::Create();
+	SharedPtr<RenderAPI> Renderer::m_pRenderAPI = nullptr;
 	ResultGPUTimerNode Renderer::m_GPUTimerRoot{};
 
 	void Renderer::Init()
 	{
 		PROFILE_FUNCTION();
 
+		m_pRenderAPI = RenderAPI::Create();
 		m_pRenderAPI->Init();
 
 		s_RenderData.pViewUniformBuffer = UniformBuffer::Create(sizeof(ViewUniformData), UniformBufferBindingPoint::View);

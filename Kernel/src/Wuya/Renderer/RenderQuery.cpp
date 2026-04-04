@@ -2,6 +2,9 @@
 #include "RenderQuery.h"
 #include "Renderer.h"
 #include "GraphicsAPI/OpenGL/OpenGLQuery.h"
+#ifdef PLATFORM_MACOS
+#include "GraphicsAPI/Metal/MetalQuery.h"
+#endif
 
 namespace Wuya
 {
@@ -19,6 +22,13 @@ namespace Wuya
 			for (uint8_t index = 0; index < DEFAULT_QUERY_COUNT; ++index)
 				m_QueryNodes.emplace_back(new OpenGLQueryNode);
 			break;
+#ifdef PLATFORM_MACOS
+		case RenderAPI::Metal:
+			m_QueryNodes.reserve(DEFAULT_QUERY_COUNT);
+			for (uint8_t index = 0; index < DEFAULT_QUERY_COUNT; ++index)
+				m_QueryNodes.emplace_back(new MetalQueryNode);
+			break;
+#endif
 		default:
 			CORE_LOG_ERROR("Unknown RenderAPI is unsupported!");
 			break;
@@ -73,7 +83,20 @@ namespace Wuya
 
 		if (m_UsedNodeIndex >= DEFAULT_QUERY_COUNT)
 		{
-			m_QueryNodes.emplace_back(new OpenGLQueryNode);
+			switch (Renderer::CurrentAPI())
+			{
+			case RenderAPI::OpenGL:
+				m_QueryNodes.emplace_back(new OpenGLQueryNode);
+				break;
+#ifdef PLATFORM_MACOS
+			case RenderAPI::Metal:
+				m_QueryNodes.emplace_back(new MetalQueryNode);
+				break;
+#endif
+			default:
+				CORE_LOG_ERROR("Unsupported RenderAPI for query!");
+				return;
+			}
 		}
 
 		auto& newQueryNode = m_QueryNodes[m_UsedNodeIndex];

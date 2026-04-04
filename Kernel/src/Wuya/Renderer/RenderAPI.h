@@ -12,22 +12,22 @@ namespace Wuya
 		{
 			None = 0,
 			OpenGL = 1,
+			Metal = 2,
 		};
 
 		virtual ~RenderAPI() = default;
 
 		virtual void Init() = 0;
 		virtual void SetViewport(uint32_t x_start, uint32_t y_start, uint32_t width, uint32_t height) = 0;
+		virtual void SetScissor(uint32_t x, uint32_t y, uint32_t width, uint32_t height) = 0;
 		virtual void SetClearColor(const glm::vec4& color) = 0;
 		virtual void Clear() = 0;
 
-		/* Ó¦ÓÃ¹âÕ¤»¯²ÎÊı */
+		/* åº”ç”¨å…‰æ …åŒ–çŠ¶æ€ */
 		virtual void ApplyRasterState(RenderRasterState raster_state) = 0;
-
-		/* µ÷ÓÃ»æÖÆÃüÁî */
-		virtual void DrawIndexed(PrimitiveType type, const SharedPtr<VertexArray>& vertex_array, uint32_t index_count = 0) = 0;
+		/* ç»˜åˆ¶è°ƒç”¨ */
+		virtual void DrawIndexed(PrimitiveType type, const SharedPtr<VertexArray>& vertex_array, uint32_t index_count = 0, uint32_t index_offset = 0) = 0;
 		virtual void DrawArrays(PrimitiveType type, const SharedPtr<VertexArray>& vertex_array) = 0;
-
 		/* Flush */
 		virtual void Flush() = 0;
 
@@ -35,9 +35,9 @@ namespace Wuya
 		virtual void PushDebugGroup(const char* name) = 0;
 		virtual void PopDebugGroup() = 0;
 
-		/* Ê¹ÓÃÆ½Ì¨ */
+		/* ä½¿ç”¨å¹³å° */
 		static int GetAPI() { return m_API; }
-		/* ´´½¨µ±Ç°API */
+		/* åˆ›å»ºå½“å‰API */
 		static SharedPtr<RenderAPI> Create();
 
 	private:

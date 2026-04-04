@@ -1,9 +1,9 @@
 #include "Pch.h"
 #include "ImGuiLayer.h"
+#include "ImGuiRenderer.h"
 #include <imgui.h>
 #include <imgui_internal.h>
 #include <backends/imgui_impl_glfw.h>
-#include <backends/imgui_impl_opengl3.h>
 #include <GLFW/glfw3.h>
 #include "Wuya/Application/Application.h"
 #include "Wuya/Renderer/Renderer.h"
@@ -38,32 +38,31 @@ namespace Wuya
 		std::string ini_path = std::string(ASSETS_PATH) + "/../imgui.ini";
 		io.IniFilename = strdup(ini_path.c_str());  // Note: memory leak is acceptable here for small string
 
-		const float fontSize = 18.0f;// *2.0f;
+		const float fontSize = 18.0f;
 		io.Fonts->AddFontFromFileTTF(ABSOLUTE_PATH("EditorRes/fonts/msyh.ttf").c_str(), fontSize);
-		//io.Fonts->AddFontFromFileTTF(RELATIVE_PATH("EditorRes/fonts/opensans/OpenSans-Bold.ttf").c_str(), fontSize, nullptr, io.Fonts->GetGlyphRangesChineseSimplifiedCommon());
-		//io.FontDefault = io.Fonts->AddFontFromFileTTF(RELATIVE_PATH("EditorRes/fonts/opensans/OpenSans-Regular.ttf").c_str(), fontSize, nullptr, io.Fonts->GetGlyphRangesChineseSimplifiedCommon());
 
 		// Setup Dear ImGui style
 		SetDefaultStyle();
 		SetDarkThemeColors();
 
-		// Setup Platform/Renderer bindings
+		// Setup Platform bindings (GLFW only, no renderer backend)
 		auto* window = static_cast<GLFWwindow*>(Application::Instance()->GetWindow().GetNativeWindow());
 		ImGui_ImplGlfw_InitForOpenGL(window, true);
-#ifdef __APPLE__
-		// macOS only supports OpenGL 4.1 (GLSL 410)
-		ImGui_ImplOpenGL3_Init("#version 410");
-#else
-		// Windows/Linux use OpenGL 4.3+ (GLSL 430)
-		ImGui_ImplOpenGL3_Init("#version 430");
-#endif
+
+		// Create our custom renderer
+		m_Renderer = std::make_unique<ImGuiRenderer>();
+		m_Renderer->Init();
+
+		CORE_LOG_INFO("ImGuiLayer initialized with custom ImGuiRenderer");
 	}
 
 	void ImGuiLayer::OnDetached()
 	{
 		PROFILE_FUNCTION();
 
-		ImGui_ImplOpenGL3_Shutdown();
+		m_Renderer->Cleanup();
+		m_Renderer.reset();
+
 		ImGui_ImplGlfw_Shutdown();
 		ImGui::DestroyContext();
 	}
@@ -91,7 +90,18 @@ namespace Wuya
 
 		Renderer::GetRenderAPI()->PushDebugGroup("ImGuiPass");
 
-		ImGui_ImplOpenGL3_NewFrame();
+		// Update display size
+		ImGuiIO& io = ImGui::GetIO();
+		io.DisplaySize = ImVec2(
+			(float)Application::Instance()->GetWindow().GetWidth(),
+			(float)Application::Instance()->GetWindow().GetHeight()
+		);
+		io.DisplayFramebufferScale = ImVec2(1.0f, 1.0f);
+
+		// New frame for renderer
+		m_Renderer->NewFrame(1.0f / 60.0f);
+
+		// Platform new frame
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
 	}
@@ -101,11 +111,11 @@ namespace Wuya
 		PROFILE_FUNCTION();
 
 		ImGui::Render();
-		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+		
+		// Use our custom renderer to draw
+		m_Renderer->RenderDrawData(ImGui::GetDrawData());
 
 		ImGuiIO& io = ImGui::GetIO();
-		io.DisplaySize = ImVec2((float)Application::Instance()->GetWindow().GetWidth(), (float)Application::Instance()->GetWindow().GetHeight());
-
 		if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
 		{
 			GLFWwindow* backup_current_context = glfwGetCurrentContext();

@@ -10,6 +10,7 @@ namespace Wuya
 
 		void Init() override;
 		void SetViewport(uint32_t x_start, uint32_t y_start, uint32_t width, uint32_t height) override;
+		void SetScissor(uint32_t x, uint32_t y, uint32_t width, uint32_t height) override;
 
 		void SetClearColor(const glm::vec4& color) override;
 		void Clear() override;
@@ -18,7 +19,7 @@ namespace Wuya
 		void ApplyRasterState(RenderRasterState raster_state) override;
 
 		/* 绘制调用 */
-		void DrawIndexed(PrimitiveType type, const SharedPtr<VertexArray>& vertex_array, uint32_t index_count = 0) override;
+		void DrawIndexed(PrimitiveType type, const SharedPtr<VertexArray>& vertex_array, uint32_t index_count = 0, uint32_t index_offset = 0) override;
 		void DrawArrays(PrimitiveType type, const SharedPtr<VertexArray>& vertex_array) override;
 
 		void Flush() override;

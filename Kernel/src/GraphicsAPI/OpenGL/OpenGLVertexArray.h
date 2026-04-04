@@ -17,7 +17,7 @@ namespace Wuya
 
 		const std::vector<SharedPtr<VertexBuffer>>& GetVertexBuffers() const override { return m_VertexBuffers; }
 		const SharedPtr<IndexBuffer>& GetIndexBuffer() const override { return m_IndexBuffer; }
-		const uint32_t GetVertexCount() const override;
+		uint32_t GetVertexCount() const override;
 
 	private:
 		uint32_t m_VertexArrayId{ 0 };
