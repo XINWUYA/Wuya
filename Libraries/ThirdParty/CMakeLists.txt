@@ -268,8 +268,15 @@ configure_file(
 
 add_library(assimp STATIC)
 
-# Use system zlib instead of built-in zlib to avoid fdopen macro conflicts on macOS
-find_package(ZLIB REQUIRED)
+# zlib strategy:
+# - Windows: use assimp's built-in zlib (system usually has no ZLIB dev package)
+# - macOS/Linux: use system zlib to avoid fdopen macro redefinition issues
+if(WIN32)
+    set(ASSIMP_USE_SYSTEM_ZLIB OFF)
+else()
+    set(ASSIMP_USE_SYSTEM_ZLIB ON)
+    find_package(ZLIB REQUIRED)
+endif()
 
 file(GLOB_RECURSE ASSIMP_SOURCES
     "${CMAKE_CURRENT_SOURCE_DIR}/assimp/code/*.cpp"
@@ -281,9 +288,18 @@ file(GLOB_RECURSE ASSIMP_SOURCES
     "${CMAKE_CURRENT_SOURCE_DIR}/assimp/contrib/unzip/*.c"
 )
 
-# Exclude built-in zlib sources - use system zlib instead
-# This avoids fdopen macro redefinition issues on macOS
-list(FILTER ASSIMP_SOURCES EXCLUDE REGEX ".*/contrib/zlib/.*")
+if(ASSIMP_USE_SYSTEM_ZLIB)
+    # Exclude built-in zlib sources - use system zlib instead
+    # This avoids fdopen macro redefinition issues on macOS
+    list(FILTER ASSIMP_SOURCES EXCLUDE REGEX ".*/contrib/zlib/.*")
+else()
+    # Include built-in zlib top-level sources (exclude contrib/ subdirectory)
+    file(GLOB ASSIMP_ZLIB_SOURCES
+        "${CMAKE_CURRENT_SOURCE_DIR}/assimp/contrib/zlib/*.c"
+        "${CMAKE_CURRENT_SOURCE_DIR}/assimp/contrib/zlib/*.h"
+    )
+    list(APPEND ASSIMP_SOURCES ${ASSIMP_ZLIB_SOURCES})
+endif()
 
 target_sources(assimp PRIVATE ${ASSIMP_SOURCES})
 
@@ -302,12 +318,20 @@ target_include_directories(assimp
         ${CMAKE_CURRENT_BINARY_DIR}/assimp
 )
 
+if(NOT ASSIMP_USE_SYSTEM_ZLIB)
+    # Built-in zlib needs its headers visible (source dir + generated zconf.h in binary dir)
+    target_include_directories(assimp
+        PRIVATE
+            ${CMAKE_CURRENT_SOURCE_DIR}/assimp/contrib/zlib
+            ${CMAKE_CURRENT_BINARY_DIR}/assimp/contrib/zlib
+    )
+endif()
+
 target_compile_definitions(assimp PRIVATE
     ASSIMP_BUILD_NO_M3D_IMPORTER
     ASSIMP_BUILD_NO_M3D_EXPORTER
     ASSIMP_BUILD_NO_C4D_IMPORTER
     ASSIMP_BUILD_NO_IFC_IMPORTER
-    ASSIMP_BUILD_NO_OWN_ZLIB
     MINIZ_USE_UNALIGNED_LOADS_AND_STORES=0
     ASSIMP_IMPORTER_GLTF_USE_OPEN3DGC=1
     RAPIDJSON_HAS_STDSTRING=1
@@ -317,8 +341,11 @@ target_compile_definitions(assimp PRIVATE
     _CRT_SECURE_NO_WARNINGS
 )
 
-# Link system zlib
-target_link_libraries(assimp PUBLIC ZLIB::ZLIB)
+if(ASSIMP_USE_SYSTEM_ZLIB)
+    # Tell assimp not to build its own zlib; link system zlib instead
+    target_compile_definitions(assimp PRIVATE ASSIMP_BUILD_NO_OWN_ZLIB)
+    target_link_libraries(assimp PUBLIC ZLIB::ZLIB)
+endif()
 
 set_target_properties(assimp PROPERTIES 
     ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib/${OUTPUT_DIR}"
