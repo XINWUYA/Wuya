@@ -147,7 +147,18 @@ namespace Wuya
 		PROFILE_FUNCTION();
 
 		const uint32_t count = index_count ? index_count : vertex_array->GetVertexCount();
-		glDrawElements(TranslateToOpenGLPrimitiveType(type), (GLsizei)count, GL_UNSIGNED_INT, reinterpret_cast<const void*>(index_offset * sizeof(uint32_t)));
+
+		/* 根据索引缓冲区的类型选择对应的GL枚举和字节偏移 */
+		GLenum index_gl_type = GL_UNSIGNED_INT;
+		size_t index_size = sizeof(uint32_t);
+		const auto& index_buffer = vertex_array->GetIndexBuffer();
+		if (index_buffer && index_buffer->GetIndexType() == IndexType::UInt16)
+		{
+			index_gl_type = GL_UNSIGNED_SHORT;
+			index_size = sizeof(uint16_t);
+		}
+
+		glDrawElements(TranslateToOpenGLPrimitiveType(type), (GLsizei)count, index_gl_type, reinterpret_cast<const void*>(index_offset * index_size));
 	}
 
 	void OpenGLRenderAPI::DrawArrays(PrimitiveType type, const SharedPtr<VertexArray>& vertex_array)

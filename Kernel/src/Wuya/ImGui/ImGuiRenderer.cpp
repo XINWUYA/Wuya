@@ -18,9 +18,8 @@
 
 namespace Wuya
 {
-    /* UI着色器源码 - 使用Wuya的#pragma格式 */
-    static const char* UI_SHADER_GLSL = R"(
-#pragma vertex
+    /* UI顶点着色器源码 */
+    static const char* UI_VERTEX_SHADER_GLSL = R"(
 #version 410 core
 layout(location = 0) in vec2 a_Position;
 layout(location = 1) in vec2 a_TexCoord;
@@ -37,8 +36,10 @@ void main()
     v_TexCoord = a_TexCoord;
     v_Color = a_Color;
 }
+)";
 
-#pragma fragment
+    /* UI片段着色器源码 */
+    static const char* UI_FRAGMENT_SHADER_GLSL = R"(
 #version 410 core
 in vec2 v_TexCoord;
 in vec4 v_Color;
@@ -209,27 +210,19 @@ void main()
 
             /* 绑定着色器 */
             auto metalShader = std::dynamic_pointer_cast<MetalShader>(m_UIShader);
-            if (metalShader)
+            if (!metalShader)
             {
-                /* 直接在渲染编码器上绑定着色器 */
-                renderEncoder->setRenderPipelineState(metalShader->GetPipelineState());
-                
-                /* 设置投影矩阵 - 使用glm::value_ptr获取数据指针，绑定到buffer(1) */
-                renderEncoder->setVertexBytes(glm::value_ptr(m_ProjectionMatrix), sizeof(glm::mat4), 1);
-                
-                /* 绑定字体纹理和采样器 */
-                auto metalTexture = std::dynamic_pointer_cast<MetalTexture>(m_FontTexture);
-                
-                if (metalTexture)
-                {
-                    renderEncoder->setFragmentTexture(metalTexture->GetMetalTexture(), 0);
-                    /* 使用纹理自带的采样器状态 */
-                    if (metalTexture->GetSamplerState())
-                    {
-                        renderEncoder->setFragmentSamplerState(metalTexture->GetSamplerState(), 0);
-                    }
-                }
+                CORE_LOG_ERROR("Failed to get Metal shader for ImGui rendering");
+                renderEncoder->endEncoding();
+                renderPassDescriptor->release();
+                return;
             }
+            
+            /* 直接在渲染编码器上绑定着色器 */
+            renderEncoder->setRenderPipelineState(metalShader->GetPipelineState());
+            
+            /* 设置投影矩阵 - 使用glm::value_ptr获取数据指针，绑定到buffer(1) */
+            renderEncoder->setVertexBytes(glm::value_ptr(m_ProjectionMatrix), sizeof(glm::mat4), 1);
 
             /* 设置渲染状态 */
             /* ImGui是2D UI，不需要深度测试 - 不设置深度模板状态，使用默认值（禁用深度测试） */
@@ -244,71 +237,152 @@ void main()
                 metalVertexArray->Bind(renderEncoder);
             }
             
-            vertex_offset = 0;
+            /* 获取索引缓冲区 */
+            auto metalIndexBuffer = std::dynamic_pointer_cast<MetalIndexBuffer>(m_IndexBuffer);
+            if (!metalIndexBuffer)
+            {
+                CORE_LOG_ERROR("Failed to get Metal index buffer for ImGui rendering");
+                renderEncoder->endEncoding();
+                renderPassDescriptor->release();
+                return;
+            }
+            
+            /* 遍历所有DrawList和DrawCmd，分批次渲染 */
             index_offset = 0;
+            ImTextureID lastTextureId = nullptr;
+            
             for (int n = 0; n < draw_data->CmdListsCount; n++)
             {
                 const ImDrawList* draw_list = draw_data->CmdLists[n];
                 
-                /* 绑定索引缓冲区 */
-                auto metalIndexBuffer = std::dynamic_pointer_cast<MetalIndexBuffer>(m_IndexBuffer);
-                if (metalIndexBuffer)
+                /* 遍历命令 */
+                for (int cmd_i = 0; cmd_i < draw_list->CmdBuffer.Size; cmd_i++)
                 {
-                    /* 遍历命令 */
-                    for (int cmd_i = 0; cmd_i < draw_list->CmdBuffer.Size; cmd_i++)
+                    const ImDrawCmd* pcmd = &draw_list->CmdBuffer[cmd_i];
+                    
+                    if (pcmd->UserCallback)
                     {
-                        const ImDrawCmd* pcmd = &draw_list->CmdBuffer[cmd_i];
-                        
-                        if (pcmd->UserCallback)
-                        {
-                            pcmd->UserCallback(draw_list, pcmd);
-                        }
-                        else
-                        {
-                            /* 设置裁剪区域 */
-                            ImVec2 clip_off = draw_data->DisplayPos;
-                            ImVec2 clip_scale = draw_data->FramebufferScale;
-                            
-                            ImVec2 clip_min(
-                                (pcmd->ClipRect.x - clip_off.x) * clip_scale.x,
-                                (pcmd->ClipRect.y - clip_off.y) * clip_scale.y
-                            );
-                            ImVec2 clip_max(
-                                (pcmd->ClipRect.z - clip_off.x) * clip_scale.x,
-                                (pcmd->ClipRect.w - clip_off.y) * clip_scale.y
-                            );
-                            
-                            if (clip_max.x <= clip_min.x || clip_max.y <= clip_min.y)
-                                continue;
-                            
-                            /* Metal坐标系Y轴向上，需要转换 */
-                            MTL::ScissorRect scissorRect;
-                            scissorRect.x = static_cast<NS::UInteger>(clip_min.x);
-                            scissorRect.y = static_cast<NS::UInteger>(m_DisplayHeight - clip_max.y);
-                            scissorRect.width = static_cast<NS::UInteger>(clip_max.x - clip_min.x);
-                            scissorRect.height = static_cast<NS::UInteger>(clip_max.y - clip_min.y);
-                            renderEncoder->setScissorRect(scissorRect);
-                            
-                            /* 绘制 - 根据索引类型选择正确的IndexType和偏移计算 */
-                            MTL::IndexType metalIndexType = metalIndexBuffer->GetIndexType() == IndexType::UInt16 
-                                ? MTL::IndexTypeUInt16 : MTL::IndexTypeUInt32;
-                            size_t indexSize = metalIndexBuffer->GetIndexType() == IndexType::UInt16 
-                                ? sizeof(uint16_t) : sizeof(uint32_t);
-                            
-                            renderEncoder->drawIndexedPrimitives(
-                                MTL::PrimitiveTypeTriangle,
-                                pcmd->ElemCount,
-                                metalIndexType,
-                                metalIndexBuffer->GetMetalBuffer(),
-                                index_offset * indexSize  /* 索引数量转换为字节偏移 */
-                            );
-                        }
-                        
-                        index_offset += pcmd->ElemCount;
+                        /* 用户回调 */
+                        pcmd->UserCallback(draw_list, pcmd);
                     }
+                    else
+                    {
+                        /* 设置裁剪区域 */
+                        ImVec2 clip_off = draw_data->DisplayPos;
+                        ImVec2 clip_scale = draw_data->FramebufferScale;
+                        
+                        ImVec2 clip_min(
+                            (pcmd->ClipRect.x - clip_off.x) * clip_scale.x,
+                            (pcmd->ClipRect.y - clip_off.y) * clip_scale.y
+                        );
+                        ImVec2 clip_max(
+                            (pcmd->ClipRect.z - clip_off.x) * clip_scale.x,
+                            (pcmd->ClipRect.w - clip_off.y) * clip_scale.y
+                        );
+                        
+                        if (clip_max.x <= clip_min.x || clip_max.y <= clip_min.y)
+                        {
+                            index_offset += pcmd->ElemCount;
+                            continue;
+                        }
+                        
+                        /* Metal坐标系Y轴向上，需要转换 */
+                        MTL::ScissorRect scissorRect;
+                        scissorRect.x = static_cast<NS::UInteger>(clip_min.x);
+                        scissorRect.y = static_cast<NS::UInteger>(m_DisplayHeight - clip_max.y);
+                        scissorRect.width = static_cast<NS::UInteger>(clip_max.x - clip_min.x);
+                        scissorRect.height = static_cast<NS::UInteger>(clip_max.y - clip_min.y);
+                        renderEncoder->setScissorRect(scissorRect);
+                        
+                        /* 根据TextureId绑定纹理 - 每个DrawCmd可能使用不同的纹理 */
+                        if (pcmd->TextureId != lastTextureId)
+                        {
+                            MetalTexture* metalTexture = nullptr;
+                            
+                            /* TextureId可能存储两种类型：
+                             * 1. Texture* 指针（字体纹理）
+                             * 2. uint32_t 纹理ID（用户图片，从MTL::Texture*转换而来）
+                             * 需要尝试两种转换方式
+                             */
+                            
+                            /* 方式1：尝试作为Texture*指针转换（字体纹理） */
+                            Texture* texture = reinterpret_cast<Texture*>(pcmd->TextureId);
+                            metalTexture = dynamic_cast<MetalTexture*>(texture);
+                            
+                            /* 方式2：如果不是MetalTexture，尝试作为uint32_t纹理ID（用户图片） */
+                            if (!metalTexture)
+                            {
+                                /* TextureId可能是uint32_t，代表MTL::Texture*指针 */
+                                uint32_t textureId = reinterpret_cast<uintptr_t>(pcmd->TextureId);
+                                if (textureId != 0)
+                                {
+                                    MTL::Texture* metalTexturePtr = reinterpret_cast<MTL::Texture*>(static_cast<uintptr_t>(textureId));
+                                    if (metalTexturePtr)
+                                    {
+                                        /* 创建临时MetalTexture包装器来获取采样器状态 */
+                                        /* 注意：这里无法获取原始的MetalTexture对象，所以使用默认采样器 */
+                                        renderEncoder->setFragmentTexture(metalTexturePtr, 0);
+                                        
+                                        /* 使用默认采样器状态 - 需要从字体纹理获取 */
+                                        auto defaultFontTexture = std::dynamic_pointer_cast<MetalTexture>(m_FontTexture);
+                                        if (defaultFontTexture && defaultFontTexture->GetSamplerState())
+                                        {
+                                            renderEncoder->setFragmentSamplerState(defaultFontTexture->GetSamplerState(), 0);
+                                        }
+                                        lastTextureId = pcmd->TextureId;
+                                        continue; /* 已经绑定纹理，跳过后续检查 */
+                                    }
+                                }
+                            }
+                            
+                            /* 方式1成功：使用Texture*指针 */
+                            if (metalTexture && metalTexture->GetMetalTexture())
+                            {
+                                renderEncoder->setFragmentTexture(metalTexture->GetMetalTexture(), 0);
+                                if (metalTexture->GetSamplerState())
+                                {
+                                    renderEncoder->setFragmentSamplerState(metalTexture->GetSamplerState(), 0);
+                                }
+                                lastTextureId = pcmd->TextureId;
+                            }
+                            else
+                            {
+                                /* 所有方式都失败，使用默认字体纹理作为fallback */
+                                auto defaultFontTexture = std::dynamic_pointer_cast<MetalTexture>(m_FontTexture);
+                                if (defaultFontTexture && defaultFontTexture->GetMetalTexture())
+                                {
+                                    CORE_LOG_WARN("Unknown texture ID format, using default font texture");
+                                    renderEncoder->setFragmentTexture(defaultFontTexture->GetMetalTexture(), 0);
+                                    if (defaultFontTexture->GetSamplerState())
+                                    {
+                                        renderEncoder->setFragmentSamplerState(defaultFontTexture->GetSamplerState(), 0);
+                                    }
+                                    lastTextureId = pcmd->TextureId;
+                                }
+                                else
+                                {
+                                    CORE_LOG_ERROR("Failed to bind texture in ImGui rendering: texture is null or invalid");
+                                }
+                            }
+                        }
+                        
+                        /* 绘制 - 根据索引类型选择正确的IndexType和偏移计算 */
+                        MTL::IndexType metalIndexType = metalIndexBuffer->GetIndexType() == IndexType::UInt16 
+                            ? MTL::IndexTypeUInt16 : MTL::IndexTypeUInt32;
+                        size_t indexSize = metalIndexBuffer->GetIndexType() == IndexType::UInt16 
+                            ? sizeof(uint16_t) : sizeof(uint32_t);
+                        
+                        renderEncoder->drawIndexedPrimitives(
+                            MTL::PrimitiveTypeTriangle,
+                            pcmd->ElemCount,
+                            metalIndexType,
+                            metalIndexBuffer->GetMetalBuffer(),
+                            index_offset * indexSize  /* 索引数量转换为字节偏移 */
+                        );
+                    }
+                    
+                    index_offset += pcmd->ElemCount;
                 }
-                
-                vertex_offset += draw_list->VtxBuffer.Size;
             }
 
             /* 结束渲染编码器 */
@@ -323,6 +397,126 @@ void main()
             /* 释放渲染通道描述符 */
             renderPassDescriptor->release();
         }
+#else
+        /* 非Mac平台：使用通用RenderAPI进行渲染（默认OpenGL） */
+        auto renderAPI = Renderer::GetRenderAPI();
+        if (!renderAPI)
+        {
+            CORE_LOG_ERROR("RenderAPI is not available for ImGui rendering");
+            return;
+        }
+
+        /* 保存并配置渲染状态：ImGui需要的渲染状态（开启混合，关闭深度，关闭剔除） */
+        RenderRasterState raster_state;
+        raster_state.CullMode = CullMode::Cull_None;
+        raster_state.EnableBlend = true;
+        raster_state.BlendEquationRGB = BlendEquation::Add;
+        raster_state.BlendEquationA = BlendEquation::Add;
+        raster_state.BlendFuncSrcRGB = BlendFunc::SrcAlpha;
+        raster_state.BlendFuncSrcA = BlendFunc::One;
+        raster_state.BlendFuncDstRGB = BlendFunc::OneMinusSrcAlpha;
+        raster_state.BlendFuncDstA = BlendFunc::OneMinusSrcAlpha;
+        raster_state.EnableDepthWrite = false;
+        raster_state.EnableColorWrite = true;
+        renderAPI->ApplyRasterState(raster_state);
+
+        /* 设置视口为整个窗口，保证ImGui能绘制到屏幕 */
+        renderAPI->SetViewport(0, 0, static_cast<uint32_t>(m_DisplayWidth), static_cast<uint32_t>(m_DisplayHeight));
+
+        /* 绑定着色器并设置投影矩阵 */
+        m_UIShader->Bind();
+        m_UIShader->SetMat4("u_Projection", m_ProjectionMatrix);
+        /* 字体纹理绑定到纹理单元0（与shader里sampler2D u_FontTexture对应） */
+        m_UIShader->SetInt("u_FontTexture", 0);
+
+        /* 绑定VAO（顶点/索引缓冲已在上面填充好） */
+        m_VertexArray->Bind();
+
+        /* 遍历所有DrawList和DrawCmd，分批次渲染 */
+        int local_index_offset = 0;
+        ImTextureID last_texture_id = nullptr;
+
+        for (int n = 0; n < draw_data->CmdListsCount; n++)
+        {
+            const ImDrawList* draw_list = draw_data->CmdLists[n];
+
+            for (int cmd_i = 0; cmd_i < draw_list->CmdBuffer.Size; cmd_i++)
+            {
+                const ImDrawCmd* pcmd = &draw_list->CmdBuffer[cmd_i];
+
+                if (pcmd->UserCallback)
+                {
+                    /* 用户回调 */
+                    pcmd->UserCallback(draw_list, pcmd);
+                }
+                else
+                {
+                    /* 计算裁剪区域 */
+                    ImVec2 clip_off = draw_data->DisplayPos;
+                    ImVec2 clip_scale = draw_data->FramebufferScale;
+
+                    ImVec2 clip_min(
+                        (pcmd->ClipRect.x - clip_off.x) * clip_scale.x,
+                        (pcmd->ClipRect.y - clip_off.y) * clip_scale.y
+                    );
+                    ImVec2 clip_max(
+                        (pcmd->ClipRect.z - clip_off.x) * clip_scale.x,
+                        (pcmd->ClipRect.w - clip_off.y) * clip_scale.y
+                    );
+
+                    if (clip_max.x <= clip_min.x || clip_max.y <= clip_min.y)
+                    {
+                        local_index_offset += pcmd->ElemCount;
+                        continue;
+                    }
+
+                    /* OpenGL/通用后端：Y轴向上，需要翻转 */
+                    uint32_t scissor_x = static_cast<uint32_t>(clip_min.x);
+                    uint32_t scissor_y = static_cast<uint32_t>(m_DisplayHeight - clip_max.y);
+                    uint32_t scissor_w = static_cast<uint32_t>(clip_max.x - clip_min.x);
+                    uint32_t scissor_h = static_cast<uint32_t>(clip_max.y - clip_min.y);
+                    renderAPI->SetScissor(scissor_x, scissor_y, scissor_w, scissor_h);
+
+                    /* 绑定纹理：TextureId可能是 Texture* 指针，也可能是裸纹理ID（uintptr_t） */
+                    if (pcmd->TextureId != last_texture_id)
+                    {
+                        bool bound = false;
+                        /* 先尝试作为Texture*指针（字体纹理使用这种方式） */
+                        if (pcmd->TextureId)
+                        {
+                            Texture* texture = reinterpret_cast<Texture*>(pcmd->TextureId);
+                            /* 简单健壮性处理：只要指针非空就尝试调用Bind */
+                            if (texture)
+                            {
+                                texture->Bind(0);
+                                bound = true;
+                            }
+                        }
+
+                        /* fallback：使用字体纹理 */
+                        if (!bound && m_FontTexture)
+                        {
+                            m_FontTexture->Bind(0);
+                        }
+
+                        last_texture_id = pcmd->TextureId;
+                    }
+
+                    /* 执行绘制 */
+                    renderAPI->DrawIndexed(
+                        PrimitiveType::Triangles,
+                        m_VertexArray,
+                        pcmd->ElemCount,
+                        static_cast<uint32_t>(local_index_offset)
+                    );
+                }
+
+                local_index_offset += pcmd->ElemCount;
+            }
+        }
+
+        m_VertexArray->Unbind();
+        m_UIShader->Unbind();
 #endif
     }
 
@@ -389,7 +583,7 @@ void main()
 
     void ImGuiRenderer::CreateUIShader()
     {
-        m_UIShader = Shader::Create("ImGuiUIShader", UI_SHADER_GLSL, UI_SHADER_GLSL);
+        m_UIShader = Shader::Create("ImGuiUIShader", UI_VERTEX_SHADER_GLSL, UI_FRAGMENT_SHADER_GLSL);
         
 #ifdef PLATFORM_MACOS
         /* 对于Metal后端，需要设置VertexDescriptor */
