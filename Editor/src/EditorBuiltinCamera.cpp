@@ -165,14 +165,14 @@ namespace Wuya
 				builder.BindOutputResource(data.Depth, FrameGraphTexture::Usage::DepthAttachment);
 
 				FrameGraphPassInfo::Descriptor pass_desc;
-				pass_desc.Attachments.ColorAttachments[0] = data.GBufferTexture0;
-				pass_desc.Attachments.ColorAttachments[1] = data.GBufferTexture1;
-				pass_desc.Attachments.ColorAttachments[2] = data.GBufferTexture2;
-				pass_desc.Attachments.ColorAttachments[3] = data.GBufferTexture3;
-				pass_desc.Attachments.ColorAttachments[4] = data.GBufferTexture4;
-				pass_desc.Attachments.ColorAttachments[5] = data.GBufferTexture5;
-				pass_desc.Attachments.ColorAttachments[6] = data.ObjectId;
-				pass_desc.Attachments.DepthAttachment = data.Depth;
+				pass_desc.Attachments.ColorAttachments(0) = data.GBufferTexture0;
+				pass_desc.Attachments.ColorAttachments(1) = data.GBufferTexture1;
+				pass_desc.Attachments.ColorAttachments(2) = data.GBufferTexture2;
+				pass_desc.Attachments.ColorAttachments(3) = data.GBufferTexture3;
+				pass_desc.Attachments.ColorAttachments(4) = data.GBufferTexture4;
+				pass_desc.Attachments.ColorAttachments(5) = data.GBufferTexture5;
+				pass_desc.Attachments.ColorAttachments(6) = data.ObjectId;
+				pass_desc.Attachments.DepthAttachment() = data.Depth;
 				pass_desc.ViewportRegion = m_ViewportRegion;
 				builder.CreateRenderPass("GBufferPassRenderTarget", pass_desc);
 			},
@@ -245,7 +245,7 @@ namespace Wuya
 				builder.BindOutputResource(data.LightingResult, FrameGraphTexture::Usage::ColorAttachment | FrameGraphTexture::Usage::Sampleable);
 
 				FrameGraphPassInfo::Descriptor pass_desc;
-				pass_desc.Attachments.ColorAttachments[0] = data.LightingResult;
+				pass_desc.Attachments.ColorAttachments(0) = data.LightingResult;
 				pass_desc.ViewportRegion = m_ViewportRegion;
 				builder.CreateRenderPass("LightingPassRenderTarget", pass_desc);
 

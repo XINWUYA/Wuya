@@ -10,19 +10,28 @@ namespace Wuya
 	struct FrameGraphPassInfo
 	{
 		static constexpr uint32_t MAX_ATTACHMENT_NUM = MAX_COLOR_ATTACHMENT_NUM + 2; /* 后面两个分别对应Depth和Stencil */
+		static constexpr uint32_t DEPTH_ATTACHMENT_IDX = MAX_COLOR_ATTACHMENT_NUM;
+		static constexpr uint32_t STENCIL_ATTACHMENT_IDX = MAX_COLOR_ATTACHMENT_NUM + 1;
+
+		/* Attachments使用统一数组存储，通过具名访问函数提供Color/Depth/Stencil语义。
+		 * 不使用匿名union的原因：FrameGraphResourceHandleTyped为非平凡类型，
+		 * g++严格遵守标准，不允许匿名聚合体中包含带构造函数的成员。
+		 */
 		struct TextureAttachments
 		{
-			union
-			{
-				FrameGraphResourceHandleTyped<FrameGraphTexture> AttachmentArray[MAX_ATTACHMENT_NUM] = {};
+			FrameGraphResourceHandleTyped<FrameGraphTexture> AttachmentArray[MAX_ATTACHMENT_NUM] = {};
 
-				struct
-				{
-					FrameGraphResourceHandleTyped<FrameGraphTexture> ColorAttachments[MAX_COLOR_ATTACHMENT_NUM];
-					FrameGraphResourceHandleTyped<FrameGraphTexture> DepthAttachment;
-					FrameGraphResourceHandleTyped<FrameGraphTexture> StencilAttachment;
-				};
-			};
+			/* Color Attachments访问 */
+			FrameGraphResourceHandleTyped<FrameGraphTexture>& ColorAttachments(const int colorIdx = 0) { return AttachmentArray[colorIdx]; }
+			const FrameGraphResourceHandleTyped<FrameGraphTexture>& ColorAttachments(const int colorIdx = 0) const { return AttachmentArray[colorIdx]; }
+
+			/* Depth Attachment访问 */
+			FrameGraphResourceHandleTyped<FrameGraphTexture>& DepthAttachment() { return AttachmentArray[DEPTH_ATTACHMENT_IDX]; }
+			const FrameGraphResourceHandleTyped<FrameGraphTexture>& DepthAttachment() const { return AttachmentArray[DEPTH_ATTACHMENT_IDX]; }
+
+			/* Stencil Attachment访问 */
+			FrameGraphResourceHandleTyped<FrameGraphTexture>& StencilAttachment() { return AttachmentArray[STENCIL_ATTACHMENT_IDX]; }
+			const FrameGraphResourceHandleTyped<FrameGraphTexture>& StencilAttachment() const { return AttachmentArray[STENCIL_ATTACHMENT_IDX]; }
 		};
 
 		struct Descriptor

@@ -92,6 +92,16 @@ target_link_libraries(Kernel
 # Platform-specific linking
 if(WIN32)
     target_link_libraries(Kernel PRIVATE opengl32)
+    # System libraries required on Windows:
+    #   - ws2_32 : Winsock2, used by Tracy (closesocket / WSAStartup / ...)
+    #   - dbghelp: Tracy callstack capture (SymFromAddr / StackWalk64 / ...)
+    #   - imm32  : Win32 IME API, used by ImGui GLFW/Win32 backends
+    #              (ImmGetContext / ImmSetCompositionWindow / ...)
+    # MSVC auto-links these via `#pragma comment(lib, ...)`, but MinGW/g++
+    # doesn't recognize those pragmas, leading to errors like
+    # "undefined reference to __imp_closesocket" or "ImmSetCompositionWindow".
+    # Link them explicitly to support both MSVC and MinGW.
+    target_link_libraries(Kernel PRIVATE ws2_32 dbghelp imm32)
     if(VULKAN_SDK)
         target_link_libraries(Kernel PRIVATE ${VULKAN_SDK}/Lib/shaderc_shared.lib)
     endif()
@@ -124,26 +134,16 @@ if(WIN32)
     target_compile_definitions(Kernel PRIVATE PLATFORM_WINDOWS)
 elseif(APPLE)
     target_compile_definitions(Kernel PRIVATE PLATFORM_MACOS)
-    # Compile FileDialog.cpp as Objective-C++ on macOS using compiler flags
-    set_source_files_properties(
+    # Files that need to be compiled as Objective-C++ on macOS
+    # (FileDialog uses Cocoa NSOpenPanel; ImGuiLayer/MetalQuery use Metal APIs)
+    set(KERNEL_OBJCXX_SOURCES
         "${CMAKE_CURRENT_SOURCE_DIR}/src/Wuya/Application/FileDialog.cpp"
-        PROPERTIES 
-            COMPILE_FLAGS "-x objective-c++"
-            SKIP_PRECOMPILE_HEADERS ON
-    )
-    # Compile ImGuiLayer.cpp as Objective-C++ on macOS for Metal support
-    set_source_files_properties(
         "${CMAKE_CURRENT_SOURCE_DIR}/src/Wuya/ImGui/ImGuiLayer.cpp"
-        PROPERTIES 
-            COMPILE_FLAGS "-x objective-c++"
-            SKIP_PRECOMPILE_HEADERS ON
-    )
-    # Compile MetalQuery.cpp as Objective-C++ on macOS
-    set_source_files_properties(
         "${CMAKE_CURRENT_SOURCE_DIR}/src/GraphicsAPI/Metal/MetalQuery.cpp"
-        PROPERTIES 
-            COMPILE_FLAGS "-x objective-c++"
-            SKIP_PRECOMPILE_HEADERS ON
+    )
+    set_source_files_properties(${KERNEL_OBJCXX_SOURCES} PROPERTIES
+        COMPILE_FLAGS "-x objective-c++"
+        SKIP_PRECOMPILE_HEADERS ON
     )
 elseif(UNIX)
     target_compile_definitions(Kernel PRIVATE PLATFORM_LINUX)
