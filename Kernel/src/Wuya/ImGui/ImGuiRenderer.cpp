@@ -18,43 +18,6 @@
 
 namespace Wuya
 {
-    /* UI顶点着色器源码 */
-    static const char* UI_VERTEX_SHADER_GLSL = R"(
-#version 410 core
-layout(location = 0) in vec2 a_Position;
-layout(location = 1) in vec2 a_TexCoord;
-layout(location = 2) in vec4 a_Color;
-
-out vec2 v_TexCoord;
-out vec4 v_Color;
-
-uniform mat4 u_Projection;
-
-void main()
-{
-    gl_Position = u_Projection * vec4(a_Position, 0.0, 1.0);
-    v_TexCoord = a_TexCoord;
-    v_Color = a_Color;
-}
-)";
-
-    /* UI片段着色器源码 */
-    static const char* UI_FRAGMENT_SHADER_GLSL = R"(
-#version 410 core
-in vec2 v_TexCoord;
-in vec4 v_Color;
-
-out vec4 FragColor;
-
-uniform sampler2D u_FontTexture;
-
-void main()
-{
-    vec4 texColor = texture(u_FontTexture, v_TexCoord);
-    FragColor = v_Color * texColor;
-}
-)";
-
     ImGuiRenderer::ImGuiRenderer()
     {
     }
@@ -583,7 +546,7 @@ void main()
 
     void ImGuiRenderer::CreateUIShader()
     {
-        m_UIShader = Shader::Create("ImGuiUIShader", UI_VERTEX_SHADER_GLSL, UI_FRAGMENT_SHADER_GLSL);
+        m_UIShader = Shader::Create("Assets/Shaders/ImGuiUI.glsl");
         
 #ifdef PLATFORM_MACOS
         /* 对于Metal后端，需要设置VertexDescriptor */
