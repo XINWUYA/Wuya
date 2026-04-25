@@ -452,6 +452,10 @@ namespace Wuya
 			block_index = glGetUniformBlockIndex(program, "LightUniformBuffer");
 			if (block_index != GL_INVALID_INDEX)
 				glUniformBlockBinding(program, block_index, 3);
+
+			block_index = glGetUniformBlockIndex(program, "UIUniformBuffer");
+			if (block_index != GL_INVALID_INDEX)
+				glUniformBlockBinding(program, block_index, 4);
 		}
 #endif
 

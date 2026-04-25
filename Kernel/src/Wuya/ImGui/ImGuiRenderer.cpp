@@ -11,6 +11,7 @@
 #include "GraphicsAPI/Metal/MetalTexture.h"
 #include "GraphicsAPI/Metal/MetalBuffer.h"
 #include "GraphicsAPI/Metal/MetalVertexArray.h"
+#include "GraphicsAPI/Metal/MetalUniformBuffer.h"
 #include "GraphicsAPI/Metal/MetalRenderAPI.h"
 #include <Metal/Metal.hpp>
 #include <QuartzCore/CAMetalLayer.hpp>
@@ -18,6 +19,12 @@
 
 namespace Wuya
 {
+    /* UI uniform data for UBO */
+    struct ImGuiUniformData
+    {
+        glm::mat4 ProjectionMatrix{ 1.0f };
+    };
+
     ImGuiRenderer::ImGuiRenderer()
     {
     }
@@ -41,6 +48,9 @@ namespace Wuya
         /* 创建字体纹理 */
         CreateFontTexture();
 
+        /* 创建UI uniform buffer */
+        m_UIUniformBuffer = UniformBuffer::Create(sizeof(ImGuiUniformData), 4);
+
         CORE_LOG_INFO("ImGuiRenderer initialized successfully");
     }
 
@@ -51,6 +61,7 @@ namespace Wuya
         m_IndexBuffer.reset();
         m_UIShader.reset();
         m_FontTexture.reset();
+        m_UIUniformBuffer.reset();
     }
 
     void ImGuiRenderer::NewFrame(float delta_time)
@@ -184,8 +195,15 @@ namespace Wuya
             /* 直接在渲染编码器上绑定着色器 */
             renderEncoder->setRenderPipelineState(metalShader->GetPipelineState());
             
-            /* 设置投影矩阵 - 使用glm::value_ptr获取数据指针，绑定到buffer(1) */
-            renderEncoder->setVertexBytes(glm::value_ptr(m_ProjectionMatrix), sizeof(glm::mat4), 1);
+            /* 绑定UI uniform buffer */
+            if (m_UIUniformBuffer)
+            {
+                auto metalUniformBuffer = std::dynamic_pointer_cast<MetalUniformBuffer>(m_UIUniformBuffer);
+                if (metalUniformBuffer && metalUniformBuffer->GetMetalBuffer())
+                {
+                    renderEncoder->setVertexBuffer(metalUniformBuffer->GetMetalBuffer(), 0, 4);
+                }
+            }
 
             /* 设置渲染状态 */
             /* ImGui是2D UI，不需要深度测试 - 不设置深度模板状态，使用默认值（禁用深度测试） */
@@ -386,9 +404,8 @@ namespace Wuya
         /* 设置视口为整个窗口，保证ImGui能绘制到屏幕 */
         renderAPI->SetViewport(0, 0, static_cast<uint32_t>(m_DisplayWidth), static_cast<uint32_t>(m_DisplayHeight));
 
-        /* 绑定着色器并设置投影矩阵 */
+        /* 绑定着色器和UI uniform buffer */
         m_UIShader->Bind();
-        m_UIShader->SetMat4("u_Projection", m_ProjectionMatrix);
         /* 字体纹理绑定到纹理单元0（与shader里sampler2D u_FontTexture对应） */
         m_UIShader->SetInt("u_FontTexture", 0);
 
@@ -511,6 +528,14 @@ namespace Wuya
             m_ProjectionMatrix[3][0] = (R + L) / (L - R);
             m_ProjectionMatrix[3][1] = (T + B) / (B - T);
             m_ProjectionMatrix[3][3] = 1.0f;
+
+            /* 更新UBO数据 */
+            if (m_UIUniformBuffer)
+            {
+                ImGuiUniformData data;
+                data.ProjectionMatrix = m_ProjectionMatrix;
+                m_UIUniformBuffer->SetData(&data, sizeof(ImGuiUniformData));
+            }
         }
     }
 
@@ -546,7 +571,7 @@ namespace Wuya
 
     void ImGuiRenderer::CreateUIShader()
     {
-        m_UIShader = Shader::Create("Assets/Shaders/ImGuiUI.glsl");
+        m_UIShader = Shader::CreateFromResource("ImGuiUI");
         
 #ifdef PLATFORM_MACOS
         /* 对于Metal后端，需要设置VertexDescriptor */
@@ -561,7 +586,7 @@ namespace Wuya
         }
 #endif
         
-        CORE_LOG_INFO("ImGui UI shader created");
+        CORE_LOG_INFO("ImGui UI shader created from embedded resource");
     }
 
     void ImGuiRenderer::EnsureBuffersCapacity(int vertex_count, int index_count)

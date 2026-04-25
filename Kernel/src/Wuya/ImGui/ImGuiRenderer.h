@@ -4,6 +4,7 @@
 #include "Wuya/Renderer/Texture.h"
 #include "Wuya/Renderer/Buffer.h"
 #include "Wuya/Renderer/VertexArray.h"
+#include "Wuya/Renderer/UniformBuffer.h"
 #include <glm/glm.hpp>
 #include <vector>
 
@@ -79,6 +80,9 @@ namespace Wuya
         /* 缓冲区容量 */
         int m_VertexBufferSize{ 0 };
         int m_IndexBufferSize{ 0 };
+
+        /* UI uniform buffer */
+        SharedPtr<UniformBuffer> m_UIUniformBuffer{ nullptr };
 
         /* 投影矩阵 */
         glm::mat4 m_ProjectionMatrix{ 1.0f };

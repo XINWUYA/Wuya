@@ -7,7 +7,10 @@ layout(location = 2) in vec4 a_Color;
 layout(location = 0) out vec2 v_TexCoord;
 layout(location = 1) out vec4 v_Color;
 
-uniform mat4 u_Projection;
+layout(std140, binding = 4) uniform UIUniformBuffer
+{
+    mat4 u_Projection;
+};
 
 void main()
 {
