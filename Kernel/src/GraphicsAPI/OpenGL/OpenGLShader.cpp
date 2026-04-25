@@ -1,9 +1,6 @@
 #include "Pch.h"
 #include "OpenGLShader.h"
 
-#include <fstream>
-#include <glm/gtc/type_ptr.hpp>
-
 #ifdef PLATFORM_WINDOWS
 #include <shaderc/shaderc.hpp>
 #endif

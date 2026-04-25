@@ -1,6 +1,6 @@
 #include "Pch.h"
 #include "SceneEditorLayer.h"
-#include <glm/gtc/type_ptr.inl>
+#include <glm/gtc/type_ptr.hpp>
 #include "EditorBuiltinCamera.h"
 #include "ImGuizmo.h"
 

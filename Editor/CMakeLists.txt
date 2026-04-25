@@ -13,12 +13,11 @@ file(GLOB_RECURSE EDITOR_SOURCES
 
 target_sources(Editor PRIVATE ${EDITOR_SOURCES})
 
-# Precompiled header
+# Precompiled header (CMake 3.20+ handles /Yc automatically)
 if(MSVC)
     target_precompile_headers(Editor PRIVATE
         <Pch.h>
     )
-    set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/src/Pch.cpp PROPERTIES COMPILE_FLAGS "/YcPch.h")
 elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang|AppleClang|GNU")
     target_precompile_headers(Editor PRIVATE
         <Pch.h>

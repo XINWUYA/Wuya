@@ -1,11 +1,19 @@
 #pragma once
 
-/* 确保Windows Visual Studio正确处理UTF-8编码的源文件 */
+/* Ensure Windows Visual Studio correctly handles UTF-8 encoded source files */
 #ifdef _MSC_VER
 #pragma execution_character_set("utf-8")
 #endif
 
+/* === Third-party UI (stable, very large) === */
 #include <imgui.h>
 #include <imgui_internal.h>
 
+/* === Engine umbrella header (pre-compiled by Kernel) === */
+/*
+ * Note: We only include the lightweight WuyaCore.h rather than the full Wuya.h.
+ * Wuya.h pulls in heavy headers (Renderer, Scene, FrameGraph, etc.)
+ * which may not be needed by every source file and can cause excessive
+ * symbol bloat in the precompiled header.
+ */
 #include <Wuya.h>

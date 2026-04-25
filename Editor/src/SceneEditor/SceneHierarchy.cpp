@@ -1,6 +1,5 @@
 #include "Pch.h"
 #include "SceneHierarchy.h"
-#include <glm/gtc/type_ptr.hpp>
 
 namespace Wuya
 {

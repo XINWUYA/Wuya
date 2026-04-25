@@ -11,9 +11,8 @@ file(GLOB_RECURSE KERNEL_SOURCES
     "${CMAKE_CURRENT_SOURCE_DIR}/src/*.h"
 )
 
-# Precompiled header
+# Precompiled header header path
 set(PCH_HEADER "${CMAKE_CURRENT_SOURCE_DIR}/src/Pch.h")
-set(PCH_SOURCE "${CMAKE_CURRENT_SOURCE_DIR}/src/Pch.cpp")
 
 # Copy TracyClient.cpp before build and insert Pch.h
 set(TRACY_CLIENT_SRC "${CMAKE_SOURCE_DIR}/Libraries/ThirdParty/tracy/public/TracyClient.cpp")
@@ -31,12 +30,11 @@ target_sources(Kernel PRIVATE
     ${TRACY_CLIENT_DST}
 )
 
-# Precompiled header
+# Precompiled header (CMake 3.20+ handles /Yc automatically)
 if(MSVC)
     target_precompile_headers(Kernel PRIVATE
         <Pch.h>
     )
-    set_source_files_properties(${PCH_SOURCE} PROPERTIES COMPILE_FLAGS "/YcPch.h")
 elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang|AppleClang|GNU")
     target_precompile_headers(Kernel PRIVATE
         <Pch.h>

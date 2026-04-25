@@ -1,8 +1,6 @@
 #include "Pch.h"
 #include "DependencyGraph.h"
 
-#include <algorithm>
-
 namespace Wuya
 {
 	DependencyGraph::Node::Node(std::string name, DependencyGraph& graph)

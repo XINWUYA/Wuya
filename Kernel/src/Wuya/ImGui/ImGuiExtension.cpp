@@ -1,11 +1,7 @@
 #include "Pch.h"
 
-#include <filesystem>
-#include <imgui_internal.h>
-#include <glm/gtc/type_ptr.hpp>
-#include <glm/gtx/quaternion.hpp>
-
 #include "ImGuiExtensions.h"
+#include <imgui_internal.h>
 #include "Wuya/Application/AssetManager.h"
 #include "Wuya/Common/Math.h"
 #include "Wuya/Renderer/Texture.h"
@@ -481,7 +477,7 @@ namespace Wuya::ImGuiExt
 		ImGui::PushMultiItemsWidths(2, ImGui::CalcItemWidth());
 		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2{ 0, 0 });
 
-		const float line_height = GImGui->Font->FontSize + GImGui->Style.FramePadding.y * 2.0f;
+		const float line_height = ImGui::GetCurrentContext()->Font->FontSize + ImGui::GetCurrentContext()->Style.FramePadding.y * 2.0f;
 		const ImVec2 button_size = { line_height + 3.0f, line_height };
 
 		/* X */
@@ -537,7 +533,7 @@ namespace Wuya::ImGuiExt
 		ImGui::PushMultiItemsWidths(3, ImGui::CalcItemWidth());
 		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2{ 0, 0 });
 
-		const float line_height = GImGui->Font->FontSize + GImGui->Style.FramePadding.y * 2.0f;
+		const float line_height = ImGui::GetCurrentContext()->Font->FontSize + ImGui::GetCurrentContext()->Style.FramePadding.y * 2.0f;
 		const ImVec2 button_size = { line_height + 3.0f, line_height };
 
 		/* X */
@@ -608,7 +604,7 @@ namespace Wuya::ImGuiExt
 		ImGui::PushMultiItemsWidths(4, ImGui::CalcItemWidth());
 		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2{ 0, 0 });
 
-		const float line_height = GImGui->Font->FontSize + GImGui->Style.FramePadding.y * 2.0f;
+		const float line_height = ImGui::GetCurrentContext()->Font->FontSize + ImGui::GetCurrentContext()->Style.FramePadding.y * 2.0f;
 		const ImVec2 button_size = { line_height + 3.0f, line_height };
 
 		/* X */
@@ -694,7 +690,7 @@ namespace Wuya::ImGuiExt
 		ImGui::PushMultiItemsWidths(3, ImGui::CalcItemWidth());
 		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2{ 0, 0 });
 
-		const float line_height = GImGui->Font->FontSize + GImGui->Style.FramePadding.y * 2.0f;
+		const float line_height = ImGui::GetCurrentContext()->Font->FontSize + ImGui::GetCurrentContext()->Style.FramePadding.y * 2.0f;
 		const ImVec2 button_size = { line_height + 3.0f, line_height };
 
 		/* X */

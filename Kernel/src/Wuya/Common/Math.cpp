@@ -1,7 +1,5 @@
 ﻿#include "Pch.h"
 #include "Math.h"
-#define GLM_ENABLE_EXPERIMENTAL
-#include <glm/gtx/matrix_decompose.hpp>
 
 namespace Wuya
 {
@@ -43,11 +41,11 @@ bool DecomposeTransform(const glm::mat4& transform, glm::vec3& translation, glm:
 
 	/* 获取scale */
 	scale.x = glm::length(row[0]);
-	row[0] = glm::detail::scale(row[0], 1.0f);
+	row[0] = glm::normalize(row[0]);
 	scale.y = glm::length(row[1]);
-	row[1] = glm::detail::scale(row[1], 1.0f);
+	row[1] = glm::normalize(row[1]);
 	scale.z = glm::length(row[2]);
-	row[2] = glm::detail::scale(row[2], 1.0f);
+	row[2] = glm::normalize(row[2]);
 
 	/* 获取rotation */
 	rotation.y = asin(-row[0][2]);

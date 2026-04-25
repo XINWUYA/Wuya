@@ -1,7 +1,6 @@
 #include "Pch.h"
 #include "ModelImporter.h"
 #include <tiny_obj_loader.h>
-#include <glm/glm.hpp>
 #include <tinyxml2.h>
 
 #include "SceneCommon.h"

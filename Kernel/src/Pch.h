@@ -1,21 +1,46 @@
 #pragma once
 
-/* 确保Windows Visual Studio正确处理UTF-8编码的源文件 */
+/* Ensure Windows Visual Studio correctly handles UTF-8 encoded source files */
 #ifdef _MSC_VER
 #pragma execution_character_set("utf-8")
 #endif
 
-#include "WuyaConfig.h"
-
+/* === Standard Library (stable, frequently used) === */
 #include <cstdint>
 #include <string>
+#include <memory>
+#include <vector>
+#include <array>
+#include <map>
+#include <unordered_map>
+#include <set>
+#include <unordered_set>
 #include <sstream>
+#include <fstream>
+#include <iostream>
 #include <filesystem>
 #include <algorithm>
+#include <functional>
+#include <utility>
+#include <optional>
+#include <tuple>
+#include <chrono>
+#include <thread>
+#include <mutex>
+#include <atomic>
 
+/* === Third-party libraries (stable, large headers) === */
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+#include <glm/gtx/quaternion.hpp>
+
+#include <entt/entt.hpp>
+
+/* === Engine Common (included by almost every module) === */
+#include "WuyaConfig.h"
 #include "Wuya/Common/Utils.h"
 #include "Wuya/Common/Common.h"
 #include "Wuya/Common/Assert.h"
 #include "Wuya/Core/Logger.h"
-
 #include "Wuya/Core/Profiler.h"
