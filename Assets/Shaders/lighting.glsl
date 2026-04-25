@@ -1,5 +1,5 @@
 #type vertex
-#version 450 core
+#version 410 core
 
 struct SVextex2Frag
 {
@@ -19,7 +19,7 @@ void main()
 
 
 #type fragment
-#version 450 core
+#version 410 core
 
 #include "builtin/Uniforms.glsl"
 #include "builtin/GBuffer.glsl"

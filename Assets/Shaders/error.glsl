@@ -1,5 +1,5 @@
 #type vertex
-#version 450 core
+#version 410 core
 
 layout(location = 0) in vec3 a_Position;
 
@@ -12,7 +12,7 @@ void main()
 
 
 #type fragment
-#version 450 core
+#version 410 core
 
 layout(location = 0) out vec4 OutColor;
 layout(location = 5) out int  OutObjectId;

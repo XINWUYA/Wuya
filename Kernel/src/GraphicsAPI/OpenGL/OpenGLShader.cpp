@@ -276,15 +276,36 @@ namespace Wuya
 		}
 	}
 
+	/* Convert GLSL source for SPIR-V compilation on Windows.
+	 *  - Upgrades #version 410 core -> 450 core (required for SPIR-V)
+	 *  - shaderc will auto-generate bindings for uniforms without explicit layout(binding)
+	 */
+	static std::string ConvertGLSLForSPIRV(const std::string& source)
+	{
+		std::string result = source;
+
+		/* Upgrade version: 410 -> 450 */
+		static const std::regex version_regex("#version\\s+410\\s+core");
+		result = std::regex_replace(result, version_regex, "#version 450 core");
+
+		return result;
+	}
+
 	void OpenGLShader::CompileShadersToOpenGL()
 	{
 		shaderc::Compiler compiler;
 		shaderc::CompileOptions options;
 		options.SetTargetEnvironment(shaderc_target_env_opengl, shaderc_env_version_opengl_4_5);
+
+		/* Auto-generate binding decorations for uniforms that lack explicit layout(binding=X).
+		 * This allows us to share 410-style shaders (without binding on samplers) with macOS. */
+		options.SetAutoBindUniforms(true);
+		/* Preserve explicit layout(binding=X) and layout(location=X) from source */
+		options.SetPreserveBindings(true);
+
 		const bool optimize = false;
 		if (optimize)
 			options.SetOptimizationLevel(shaderc_optimization_level_performance);
-		// todo: macros
 
 		m_OpenGLSPIRVs.clear();
 
@@ -308,8 +329,11 @@ namespace Wuya
 			}
 			else
 			{
+				// Convert source for SPIR-V (upgrade version, etc.)
+				std::string spirv_source = ConvertGLSLForSPIRV(source);
+
 				// Compile cache
-				shaderc::SpvCompilationResult result = compiler.CompileGlslToSpv(source, ShaderTypeToOpenGLShaderCKind(shader_type), m_Path.c_str(), options);
+				shaderc::SpvCompilationResult result = compiler.CompileGlslToSpv(spirv_source, ShaderTypeToOpenGLShaderCKind(shader_type), m_Path.c_str(), options);
 				if (result.GetCompilationStatus() != shaderc_compilation_status_success)
 				{
 					CORE_LOG_ERROR(result.GetErrorMessage());

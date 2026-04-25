@@ -1,5 +1,5 @@
 #type vertex
-#version 450 core
+#version 410 core
 
 layout(location = 0) in vec3 a_Position;
 layout(location = 1) in vec3 a_Normal;
@@ -25,7 +25,7 @@ void main()
 
 
 #type fragment
-#version 450 core
+#version 410 core
 
 layout(location = 0) out vec4 OutFragColor;
 
