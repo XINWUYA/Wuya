@@ -151,14 +151,19 @@ namespace Wuya
 
 	RenderQueryProfiler::~RenderQueryProfiler()
 	{
-		for (auto& context : m_QueryContexts)
-			context.Destroy();
+		Release();
 	}
 
 	RenderQueryProfiler& RenderQueryProfiler::Instance()
 	{
 		static RenderQueryProfiler instance;
 		return instance;
+	}
+
+	void RenderQueryProfiler::Release()
+	{
+		for (auto& context : m_QueryContexts)
+			context.Destroy();
 	}
 
 	void RenderQueryProfiler::BeginFrame(uint32_t frame_id)

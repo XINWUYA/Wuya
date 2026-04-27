@@ -75,6 +75,8 @@ namespace Wuya
 		/* 单例 */
 		static RenderQueryProfiler& Instance();
 
+		void Release();
+
 		void BeginFrame(uint32_t frame_id);
 		void EndFrame();
 

@@ -88,6 +88,7 @@ namespace Wuya
 	void Renderer::Release()
 	{
 		PROFILE_FUNCTION();
+		RenderQueryProfiler::Instance().Release();
 	}
 
 	void Renderer::SetViewport(uint32_t x_start, uint32_t y_start, uint32_t width, uint32_t height)
@@ -163,7 +164,7 @@ namespace Wuya
 		vertex_buffer->SetLayout(vertex_buffer_layout);
 
 		/* Indices */
-		static constexpr uint32_t indices[3] = 
+		static constexpr uint16_t indices[3] = 
 		{
 			0, 1, 2
 		};

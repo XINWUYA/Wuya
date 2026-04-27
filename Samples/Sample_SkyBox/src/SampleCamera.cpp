@@ -142,10 +142,13 @@ namespace Wuya
 			},
 			[&](const FrameGraphResources& resources, const ScenePassData& data)
 			{
-				Renderer::GetRenderAPI()->PushDebugGroup("ScenePass");
+				auto render_api = Renderer::GetRenderAPI();
+				render_api->PushDebugGroup("ScenePass");
 
 				{
-					Renderer::GetRenderAPI()->Clear();
+					render_api->Clear();
+					render_api->SetViewport(0, 0, m_ViewportRegion.Width, m_ViewportRegion.Height);
+					render_api->SetScissor(0, 0, m_ViewportRegion.Width, m_ViewportRegion.Height);
 
 					for (const auto& mesh_object : m_pRenderView->GetVisibleMeshObjects())
 					{
@@ -157,9 +160,8 @@ namespace Wuya
 					}
 				}
 
-				Renderer::GetRenderAPI()->PopDebugGroup();
-			}
-			);
+				render_api->PopDebugGroup();
+			});
 
 		/* å°ImGuiæ¸²æä½ä¸ºFrameGraphçæåä¸ä¸ªPass */
 		if (const auto& imgui_layer = Application::Instance()->GetImGuiLayer())

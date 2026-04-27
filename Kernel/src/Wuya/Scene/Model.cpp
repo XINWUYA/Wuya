@@ -91,8 +91,8 @@ namespace Wuya
 	{
 		auto model = CreateSharedPtr<Model>("BuiltinSphere");
 
-		constexpr int32_t segments_x = 32;
-		constexpr int32_t segments_y = 32;
+		constexpr int16_t segments_x = 32;
+		constexpr int16_t segments_y = 32;
 
 		/* Calculate vertices, normals, uvs */
 		std::vector<glm::vec3> vertices;
@@ -124,13 +124,13 @@ namespace Wuya
 		}
 
 		/* Calculate indices */
-		std::vector<uint32_t> indices;
+		std::vector<uint16_t> indices;
 		bool odd_row = false;
-		for (int32_t y = 0; y < segments_y; ++y)
+		for (int16_t y = 0; y < segments_y; ++y)
 		{
 			if (!odd_row) // even rows: y == 0, y == 2; and so on
 			{
-				for (int32_t x = 0; x <= segments_x; ++x)
+				for (int16_t x = 0; x <= segments_x; ++x)
 				{
 					indices.emplace_back(y * (segments_x + 1) + x);
 					indices.emplace_back((y + 1) * (segments_x + 1) + x);
@@ -138,7 +138,7 @@ namespace Wuya
 			}
 			else
 			{
-				for (int32_t x = segments_x; x >= 0; --x)
+				for (int16_t x = segments_x; x >= 0; --x)
 				{
 					indices.emplace_back((y + 1) * (segments_x + 1) + x);
 					indices.emplace_back(y * (segments_x + 1) + x);
@@ -169,8 +169,7 @@ namespace Wuya
 		}
 		/* indices */
 		{
-			auto index_type = indices.size() > UINT16_MAX ? IndexType::UInt32 : IndexType::UInt16;
-			auto index_buffer = IndexBuffer::Create(indices.data(), indices.size(), index_type);
+			auto index_buffer = IndexBuffer::Create(indices.data(), indices.size(), IndexType::UInt16);
 			vertex_array->SetIndexBuffer(index_buffer);
 		}
 
