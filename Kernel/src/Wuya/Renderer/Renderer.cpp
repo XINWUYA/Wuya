@@ -167,7 +167,7 @@ namespace Wuya
 		{
 			0, 1, 2
 		};
-		const auto index_buffer = IndexBuffer::Create(indices, 3);
+		const auto index_buffer = IndexBuffer::Create(indices, 3, IndexType::UInt16);
 
 		auto vertex_array = VertexArray::Create();
 		vertex_array->AddVertexBuffer(vertex_buffer);

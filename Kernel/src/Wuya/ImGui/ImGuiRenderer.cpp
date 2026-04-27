@@ -16,6 +16,7 @@
 #include <Metal/Metal.hpp>
 #include <QuartzCore/CAMetalLayer.hpp>
 #endif
+#include <Wuya/Scene/SceneCommon.h>
 
 namespace Wuya
 {
@@ -529,7 +530,7 @@ namespace Wuya
 
     void ImGuiRenderer::CreateUIShader()
     {
-        m_UIShader = Shader::CreateFromResource("ImGuiUI");
+        m_UIShader = Shader::Create(ABSOLUTE_PATH("Shaders/ImGuiUI.glsl"));
         
 #ifdef PLATFORM_MACOS
         /* 对于Metal后端，需要设置VertexDescriptor */
@@ -626,7 +627,7 @@ namespace Wuya
 
                 /* 应用裁剪区域 - Metal坐标系Y轴向上，需要转换 */
                 uint32_t scissor_x = static_cast<uint32_t>(clip_min.x);
-                uint32_t scissor_y = static_cast<uint32_t>(m_DisplayHeight - clip_max.y);  // 翻转Y轴
+                uint32_t scissor_y = static_cast<uint32_t>(m_DisplayHeight - clip_max.y);
                 uint32_t scissor_width = static_cast<uint32_t>(clip_max.x - clip_min.x);
                 uint32_t scissor_height = static_cast<uint32_t>(clip_max.y - clip_min.y);
                 

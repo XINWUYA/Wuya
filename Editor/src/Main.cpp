@@ -28,7 +28,7 @@ int main(int argc, char** argv)
 {
 	StartMemoryLeakDetector();
 
-	/* todo: ����argc/argv��ȡ����·�� */
+	/* todo: 根据argc/argv获取工程路径 */
 
 	Wuya::Logger::Init();
 	EDITOR_LOG("Wuya Kernel 1.0.0");

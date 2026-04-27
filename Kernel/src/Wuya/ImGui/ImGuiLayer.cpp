@@ -48,11 +48,14 @@ namespace Wuya
 
 		// Set ini file path to absolute path for consistent layout persistence
 		// Use the same directory as ASSETS_PATH (project root)
-		std::string ini_path = std::string(ASSETS_PATH) + "/../imgui.ini";
-		io.IniFilename = strdup(ini_path.c_str());  // Note: memory leak is acceptable here for small string
+		const static std::string ini_path = std::string(ASSETS_PATH) + "/../imgui.ini";
+		io.IniFilename = ini_path.c_str();
 
 		const float fontSize = 18.0f;
-		io.Fonts->AddFontFromFileTTF(ABSOLUTE_PATH("EditorRes/fonts/msyh.ttf").c_str(), fontSize);
+		if (!io.Fonts->AddFontFromFileTTF(ABSOLUTE_PATH("EditorRes/fonts/msyh.ttf").c_str(), fontSize))
+		{
+			CORE_LOG_ERROR("Failed to load font: EditorRes/fonts/msyh.ttf");
+		}
 
 		// Setup Dear ImGui style
 		SetDefaultStyle();

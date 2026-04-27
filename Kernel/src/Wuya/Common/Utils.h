@@ -1,7 +1,6 @@
 #pragma once
 #include <regex>
 #include <string>
-#include <glm/glm.hpp>
 #include <magic_enum.hpp>
 
 namespace Wuya

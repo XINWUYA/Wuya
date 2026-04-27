@@ -87,7 +87,7 @@ namespace Wuya
 
 		if (width == 0 || height == 0 || width > MAX_FRAME_TARGET_SIZE || height > MAX_FRAME_TARGET_SIZE)
 		{
-			CORE_LOG_WARN("Attempted to rezize framebuffer to { 0 }, { 1 }, but not supported!", width, height);
+			CORE_LOG_WARN("Attempted to resize framebuffer to {0}, {1}, but not supported!", width, height);
 			return;
 		}
 
@@ -241,7 +241,7 @@ namespace Wuya
 		}
 
 		/* 2. 把RenderBuffer绑定到FrameBuffer */
-		/* 非多重采样*/
+		/* 非多重采样 */
 		if (texture->m_TextureDesc.Samples <= 1)
 		{
 			PROFILE_SCOPE("Attach RenderBuffer");
@@ -298,7 +298,7 @@ namespace Wuya
 			glActiveTexture(GL_TEXTURE0);
 			glBindTexture(texture_target, render_buffer_info.RenderTarget->GetTextureID());
 
-			/* ����ʹ�õ�Level */
+			/* 限制实际使用的Mipmap Level */
 			glTexParameteri(texture_target, GL_TEXTURE_BASE_LEVEL, render_buffer_info.Level);
 			glTexParameteri(texture_target, GL_TEXTURE_MAX_LEVEL, render_buffer_info.Level);
 		}

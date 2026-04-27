@@ -108,8 +108,8 @@ namespace Wuya
 		virtual void SetData(const void* data, uint32_t size) = 0;
 
 		/* 创建带初始数据的索引缓冲区（STATIC_DRAW，用于静态数据） */
-		static SharedPtr<IndexBuffer> Create(const void* indices, uint32_t count, IndexType type);
+		static SharedPtr<IndexBuffer> Create(const void* indices, uint32_t count, IndexType type = IndexType::UInt32);
 		/* 创建空容量的索引缓冲区（DYNAMIC_DRAW，预分配后由 SetData 动态更新） */
-		static SharedPtr<IndexBuffer> Create(uint32_t count, IndexType type);
+		static SharedPtr<IndexBuffer> Create(uint32_t count, IndexType type = IndexType::UInt32);
 	};
 }

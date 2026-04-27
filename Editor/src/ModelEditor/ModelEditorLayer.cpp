@@ -633,7 +633,7 @@ namespace Wuya
 		const auto& aabb_min = m_pModel->GetAABBMin();
 		const auto& aabb_max = m_pModel->GetAABBMax();
 		const auto aabb_height = aabb_max.y - aabb_min.y;
-		const auto distance = (aabb_height) / std::tanf(m_pEditorCamera->GetFov() / 2.0f);
+		const auto distance = (aabb_height) / std::tan(m_pEditorCamera->GetFov() / 2.0f);
 		m_pEditorCamera->SetDistance(distance);
 		m_pEditorCamera->SetFocalPoint((aabb_min + aabb_max) * 0.5f);
 	}

@@ -169,7 +169,8 @@ namespace Wuya
 		}
 		/* indices */
 		{
-			auto index_buffer = IndexBuffer::Create(indices.data(), indices.size());
+			auto index_type = indices.size() > UINT16_MAX ? IndexType::UInt32 : IndexType::UInt16;
+			auto index_buffer = IndexBuffer::Create(indices.data(), indices.size(), index_type);
 			vertex_array->SetIndexBuffer(index_buffer);
 		}
 
@@ -289,7 +290,8 @@ namespace Wuya
 				in_mesh_file.read((char*)indices, index_count * sizeof(uint32_t));
 
 				/* Index Buffer */
-				auto index_buffer = IndexBuffer::Create(indices, index_count);
+				auto index_type = index_count > UINT16_MAX ? IndexType::UInt32 : IndexType::UInt16;
+				auto index_buffer = IndexBuffer::Create(indices, index_count, index_type);
 				vertex_array->SetIndexBuffer(index_buffer);
 				delete[] indices;
 

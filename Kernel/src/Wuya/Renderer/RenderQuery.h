@@ -45,7 +45,7 @@ namespace Wuya
 		bool PrepareQueryResult();
 
 	private:
-		static constexpr uint8_t DEFAULT_QUERY_COUNT = 200;
+		static constexpr uint8_t DEFAULT_QUERY_COUNT = 32; // 预留32个QuaryNode
 		std::vector<RenderQueryNode*> m_QueryNodes{};
 		uint32_t m_RootNodeIndex{ INVALID_QUERY_NODE_INDEX };
 		uint32_t m_CurrentNodeIndex{ INVALID_QUERY_NODE_INDEX };

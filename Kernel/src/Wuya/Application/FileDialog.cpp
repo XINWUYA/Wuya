@@ -118,9 +118,9 @@ namespace Wuya
 
 		SHELLEXECUTEINFO shex = { 0 };
 		shex.cbSize = sizeof(SHELLEXECUTEINFO);
-		shex.lpFile = L"explorer";
-		shex.lpParameters = select_params_ws.c_str();
-		shex.lpVerb = L"open";
+		shex.lpFile = static_cast<LPCSTR>("explorer");
+		shex.lpParameters = reinterpret_cast<LPCSTR>(select_params_ws.c_str());
+		shex.lpVerb = static_cast<LPCSTR>("open");
 		shex.nShow = SW_SHOWDEFAULT;
 		shex.lpDirectory = NULL;
 

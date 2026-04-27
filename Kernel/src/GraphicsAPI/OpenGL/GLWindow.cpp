@@ -202,6 +202,9 @@ namespace Wuya
 		--s_GLFWWindowCnt;
 
 		if (s_GLFWWindowCnt == 0)
+		{
+			glfwSetErrorCallback(nullptr);
 			glfwTerminate();
+		}
 	}
 }

@@ -19,10 +19,10 @@ namespace Wuya
 
 		ASSERT(!s_pInstance, "Application already exist!");
 		s_pInstance = this;
-		Renderer::Init();
 
 		m_pWindow = IWindow::Create({ window_title, width, height });
 		m_pWindow->SetEventCallback(BIND_EVENT_FUNC(Application::OnEvent));
+		Renderer::Init();
 
 		m_pImGuiLayer = CreateSharedPtr<ImGuiLayer>();
 		PushOverlay(m_pImGuiLayer);
