@@ -104,8 +104,11 @@ namespace Wuya
         int vertex_offset = 0;
         int index_offset = 0;
 
-        auto* vtx_data = new ImDrawVert[total_vertex_count];
-        auto* idx_data = new ImDrawIdx[total_index_count];
+        /* 复用成员级暂存缓冲，避免每帧 new/delete 造成的堆碎片与内存抖动 */
+        m_VtxScratch.resize(static_cast<size_t>(total_vertex_count) * sizeof(ImDrawVert));
+        m_IdxScratch.resize(static_cast<size_t>(total_index_count) * sizeof(ImDrawIdx));
+        auto* vtx_data = reinterpret_cast<ImDrawVert*>(m_VtxScratch.data());
+        auto* idx_data = reinterpret_cast<ImDrawIdx*>(m_IdxScratch.data());
 
         for (int n = 0; n < draw_data->CmdListsCount; n++)
         {
@@ -129,9 +132,6 @@ namespace Wuya
 
         /* 上传索引数据 - 容量已在 EnsureBuffersCapacity 中保证足够 */
         m_IndexBuffer->SetData(idx_data, total_index_count * sizeof(ImDrawIdx));
-
-        delete[] vtx_data;
-        delete[] idx_data;
 
 #ifdef PLATFORM_MACOS
         /* Metal后端：直接使用当前已激活的RenderCommandEncoder（由外部的FrameGraph Pass驱动创建），
@@ -550,10 +550,13 @@ namespace Wuya
 
     void ImGuiRenderer::EnsureBuffersCapacity(int vertex_count, int index_count)
     {
-        /* 顶点缓冲区 */
+        /* 顶点缓冲区：几何增长扩容，避免UI抖动导致频繁重建GPU buffer */
         if (!m_VertexBuffer || m_VertexBufferSize < vertex_count)
         {
-            m_VertexBufferSize = vertex_count;
+            int new_size = m_VertexBufferSize > 0 ? m_VertexBufferSize : 1000;
+            while (new_size < vertex_count)
+                new_size = new_size + new_size / 2; /* 1.5x growth */
+            m_VertexBufferSize = new_size;
             m_VertexBuffer = VertexBuffer::Create(m_VertexBufferSize * sizeof(ImDrawVert));
 
             /* 设置顶点布局 */
@@ -566,6 +569,9 @@ namespace Wuya
             /* 重新创建顶点数组并添加顶点缓冲区 */
             m_VertexArray = VertexArray::Create();
             m_VertexArray->AddVertexBuffer(m_VertexBuffer);
+            /* 若已有IndexBuffer，重新挂回VAO，保持索引绑定一致 */
+            if (m_IndexBuffer)
+                m_VertexArray->SetIndexBuffer(m_IndexBuffer);
             
 #ifdef PLATFORM_MACOS
             /* 对于Metal后端，需要更新VertexDescriptor */
@@ -581,10 +587,13 @@ namespace Wuya
 #endif
         }
 
-        /* 索引缓冲区：容量不够时预分配空容量，后续使用 SetData 动态更新 */
+        /* 索引缓冲区：几何增长扩容，避免频繁重建 */
         if (!m_IndexBuffer || m_IndexBufferSize < index_count)
         {
-            m_IndexBufferSize = index_count;
+            int new_size = m_IndexBufferSize > 0 ? m_IndexBufferSize : 2000;
+            while (new_size < index_count)
+                new_size = new_size + new_size / 2; /* 1.5x growth */
+            m_IndexBufferSize = new_size;
             /* ImGui 缺省 ImDrawIdx 为 unsigned short，对应 UInt16 */
             const IndexType index_type = (sizeof(ImDrawIdx) == 2) ? IndexType::UInt16 : IndexType::UInt32;
             m_IndexBuffer = IndexBuffer::Create(static_cast<uint32_t>(m_IndexBufferSize), index_type);

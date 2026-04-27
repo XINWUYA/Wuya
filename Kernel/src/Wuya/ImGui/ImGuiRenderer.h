@@ -7,6 +7,7 @@
 #include "Wuya/Renderer/UniformBuffer.h"
 #include <glm/glm.hpp>
 #include <vector>
+#include <cstdint>
 
 // Forward declarations for ImGui types
 struct ImDrawData;
@@ -80,6 +81,10 @@ namespace Wuya
         /* 缓冲区容量 */
         int m_VertexBufferSize{ 0 };
         int m_IndexBufferSize{ 0 };
+
+        /* 每帧复用的CPU暂存缓冲（以字节为单位，避免依赖ImGui类型前向声明） */
+        std::vector<uint8_t> m_VtxScratch;
+        std::vector<uint8_t> m_IdxScratch;
 
         /* UI uniform buffer */
         SharedPtr<UniformBuffer> m_UIUniformBuffer{ nullptr };
