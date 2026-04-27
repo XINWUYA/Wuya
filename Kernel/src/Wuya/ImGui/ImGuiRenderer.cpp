@@ -125,18 +125,9 @@ namespace Wuya
 
         /* 上传顶点数据 */
         m_VertexBuffer->SetData(vtx_data, total_vertex_count * sizeof(ImDrawVert));
-        
-        /* 上传索引数据 - 只在容量变化时重新创建索引缓冲区 */
-        if (total_index_count > m_IndexBufferSize)
-        {
-            m_IndexBufferSize = total_index_count;
-            m_IndexBuffer = IndexBuffer::Create(idx_data, total_index_count);
-            m_VertexArray->SetIndexBuffer(m_IndexBuffer);
-        }
-        else
-        {
-            m_IndexBuffer->SetData(idx_data, total_index_count * sizeof(ImDrawIdx));
-        }
+
+        /* 上传索引数据 - 容量已在 EnsureBuffersCapacity 中保证足够 */
+        m_IndexBuffer->SetData(idx_data, total_index_count * sizeof(ImDrawIdx));
 
         delete[] vtx_data;
         delete[] idx_data;
@@ -589,10 +580,15 @@ namespace Wuya
 #endif
         }
 
-        /* 索引缓冲区 - 每次渲染时重新创建以适应不同大小 */
+        /* 索引缓冲区：容量不够时预分配空容量，后续使用 SetData 动态更新 */
         if (!m_IndexBuffer || m_IndexBufferSize < index_count)
         {
             m_IndexBufferSize = index_count;
+            /* ImGui 缺省 ImDrawIdx 为 unsigned short，对应 UInt16 */
+            const IndexType index_type = (sizeof(ImDrawIdx) == 2) ? IndexType::UInt16 : IndexType::UInt32;
+            m_IndexBuffer = IndexBuffer::Create(static_cast<uint32_t>(m_IndexBufferSize), index_type);
+            if (m_VertexArray)
+                m_VertexArray->SetIndexBuffer(m_IndexBuffer);
         }
     }
 

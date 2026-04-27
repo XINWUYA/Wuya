@@ -107,9 +107,9 @@ namespace Wuya
 		 * 仅更新数据内容，不改变索引数量/类型，也不会重建底层GPU缓冲区。 */
 		virtual void SetData(const void* data, uint32_t size) = 0;
 
-		/* 创建16位索引缓冲区 */
-		static SharedPtr<IndexBuffer> Create(const uint16_t* indices, uint32_t count);
-		/* 创建32位索引缓冲区 */
-		static SharedPtr<IndexBuffer> Create(const uint32_t* indices, uint32_t count);
+		/* 创建带初始数据的索引缓冲区（STATIC_DRAW，用于静态数据） */
+		static SharedPtr<IndexBuffer> Create(const void* indices, uint32_t count, IndexType type);
+		/* 创建空容量的索引缓冲区（DYNAMIC_DRAW，预分配后由 SetData 动态更新） */
+		static SharedPtr<IndexBuffer> Create(uint32_t count, IndexType type);
 	};
 }

@@ -36,8 +36,10 @@ namespace Wuya
     class MetalIndexBuffer : public IndexBuffer
     {
     public:
-        MetalIndexBuffer(const uint16_t* indices, uint32_t count);
-        MetalIndexBuffer(const uint32_t* indices, uint32_t count);
+        /* 创建带初始数据的索引缓冲区 */
+        MetalIndexBuffer(const void* indices, uint32_t count, IndexType type);
+        /* 创建空容量的索引缓冲区（预分配） */
+        MetalIndexBuffer(uint32_t count, IndexType type);
         ~MetalIndexBuffer() override;
 
         void Bind() const override;

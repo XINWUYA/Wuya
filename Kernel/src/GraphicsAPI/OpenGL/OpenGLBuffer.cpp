@@ -87,27 +87,13 @@ namespace Wuya
 		return m_DataSize / m_Layout.GetStride();
 	}
 
-	OpenGLIndexBuffer::OpenGLIndexBuffer(const uint16_t* indices, uint32_t count)
-		: m_Count(count), m_IndexType(IndexType::UInt16)
+	OpenGLIndexBuffer::OpenGLIndexBuffer(const void* indices, uint32_t count, IndexType type)
+		: m_Count(count), m_IndexType(type)
 	{
 		PROFILE_FUNCTION();
 
-#ifdef __APPLE__
-		// macOS: Use traditional functions (OpenGL 4.1 compatible)
-		glGenBuffers(1, &m_IndexBufferId);
-		glBindBuffer(GL_ARRAY_BUFFER, m_IndexBufferId);
-		glBufferData(GL_ARRAY_BUFFER, count * sizeof(uint16_t), indices, GL_STATIC_DRAW);
-#else
-		// Windows/Linux: Use modern DSA functions (OpenGL 4.5+)
-		glCreateBuffers(1, &m_IndexBufferId);
-		glNamedBufferData(m_IndexBufferId, count * sizeof(uint16_t), indices, GL_STATIC_DRAW);
-#endif
-	}
-
-	OpenGLIndexBuffer::OpenGLIndexBuffer(const uint32_t* indices, uint32_t count)
-		: m_Count(count), m_IndexType(IndexType::UInt32)
-	{
-		PROFILE_FUNCTION();
+		const uint32_t index_size = (type == IndexType::UInt16) ? sizeof(uint16_t) : sizeof(uint32_t);
+		const uint32_t size_in_bytes = count * index_size;
 
 #ifdef __APPLE__
 		// macOS: Use traditional functions (OpenGL 4.1 compatible)
@@ -115,11 +101,31 @@ namespace Wuya
 		// GL_ELEMENT_ARRAY_BUFFER is not valid without an actively bound VAO
 		// Binding with GL_ARRAY_BUFFER allows the data to be loaded regardless of VAO state.
 		glBindBuffer(GL_ARRAY_BUFFER, m_IndexBufferId);
-		glBufferData(GL_ARRAY_BUFFER, count * sizeof(uint32_t), indices, GL_STATIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, size_in_bytes, indices, GL_STATIC_DRAW);
 #else
 		// Windows/Linux: Use modern DSA functions (OpenGL 4.5+)
 		glCreateBuffers(1, &m_IndexBufferId);
-		glNamedBufferData(m_IndexBufferId, count * sizeof(uint32_t), indices, GL_STATIC_DRAW);
+		glNamedBufferData(m_IndexBufferId, size_in_bytes, indices, GL_STATIC_DRAW);
+#endif
+	}
+
+	/* 预分配空索引缓冲区（用于后续 SetData 动态更新，如ImGui） */
+	OpenGLIndexBuffer::OpenGLIndexBuffer(uint32_t count, IndexType type)
+		: m_Count(count), m_IndexType(type)
+	{
+		PROFILE_FUNCTION();
+
+		const uint32_t index_size = (type == IndexType::UInt16) ? sizeof(uint16_t) : sizeof(uint32_t);
+		const uint32_t size_in_bytes = count * index_size;
+
+#ifdef __APPLE__
+		glGenBuffers(1, &m_IndexBufferId);
+		// 与其他构造保持一致，绑定到 GL_ARRAY_BUFFER 避免对VAO的依赖
+		glBindBuffer(GL_ARRAY_BUFFER, m_IndexBufferId);
+		glBufferData(GL_ARRAY_BUFFER, size_in_bytes, nullptr, GL_DYNAMIC_DRAW);
+#else
+		glCreateBuffers(1, &m_IndexBufferId);
+		glNamedBufferData(m_IndexBufferId, size_in_bytes, nullptr, GL_DYNAMIC_DRAW);
 #endif
 	}
 

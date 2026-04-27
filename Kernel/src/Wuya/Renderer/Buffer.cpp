@@ -118,7 +118,7 @@ namespace Wuya
 		}
 	}
 
-	SharedPtr<IndexBuffer> IndexBuffer::Create(const uint16_t* indices, uint32_t count)
+	SharedPtr<IndexBuffer> IndexBuffer::Create(const void* indices, uint32_t count, IndexType type)
 	{
 		switch (Renderer::CurrentAPI())
 		{
@@ -126,10 +126,10 @@ namespace Wuya
 			CORE_LOG_ERROR("RenderAPI can't be None!");
 			return nullptr;
 		case RenderAPI::OpenGL:
-			return CreateSharedPtr<OpenGLIndexBuffer>(indices, count);
+			return CreateSharedPtr<OpenGLIndexBuffer>(indices, count, type);
 #ifdef PLATFORM_MACOS
 		case RenderAPI::Metal:
-			return CreateSharedPtr<MetalIndexBuffer>(indices, count);
+			return CreateSharedPtr<MetalIndexBuffer>(indices, count, type);
 #endif
 		default:
 			CORE_LOG_ERROR("Unknown RenderAPI is unsupported!");
@@ -137,7 +137,7 @@ namespace Wuya
 		}
 	}
 
-	SharedPtr<IndexBuffer> IndexBuffer::Create(const uint32_t* indices, uint32_t count)
+	SharedPtr<IndexBuffer> IndexBuffer::Create(uint32_t count, IndexType type)
 	{
 		switch (Renderer::CurrentAPI())
 		{
@@ -145,10 +145,10 @@ namespace Wuya
 			CORE_LOG_ERROR("RenderAPI can't be None!");
 			return nullptr;
 		case RenderAPI::OpenGL:
-			return CreateSharedPtr<OpenGLIndexBuffer>(indices, count);
+			return CreateSharedPtr<OpenGLIndexBuffer>(count, type);
 #ifdef PLATFORM_MACOS
 		case RenderAPI::Metal:
-			return CreateSharedPtr<MetalIndexBuffer>(indices, count);
+			return CreateSharedPtr<MetalIndexBuffer>(count, type);
 #endif
 		default:
 			CORE_LOG_ERROR("Unknown RenderAPI is unsupported!");

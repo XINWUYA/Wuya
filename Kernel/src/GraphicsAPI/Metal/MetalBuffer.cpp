@@ -78,27 +78,33 @@ namespace Wuya
     }
 
     /* MetalIndexBuffer实现 */
-    /* MetalIndexBuffer实现 - uint16版本 */
-    MetalIndexBuffer::MetalIndexBuffer(const uint16_t* indices, uint32_t count)
-        : m_Count(count), m_IndexType(IndexType::UInt16)
+    /* MetalIndexBuffer实现 - 带初始数据 */
+    MetalIndexBuffer::MetalIndexBuffer(const void* indices, uint32_t count, IndexType type)
+        : m_Count(count), m_IndexType(type)
     {
+        const uint32_t index_size = (type == IndexType::UInt16) ? sizeof(uint16_t) : sizeof(uint32_t);
+        const uint32_t size_in_bytes = count * index_size;
+
         auto device = dynamic_cast<MetalRenderAPI*>(Renderer::GetRenderAPI().get())->GetDevice();
-        m_Buffer = device->newBuffer(indices, count * sizeof(uint16_t), MTL::ResourceOptionCPUCacheModeDefault);
+        m_Buffer = device->newBuffer(indices, size_in_bytes, MTL::ResourceOptionCPUCacheModeDefault);
         if (!m_Buffer)
         {
-            CORE_LOG_ERROR("Failed to create Metal index buffer (uint16)!");
+            CORE_LOG_ERROR("Failed to create Metal index buffer!");
         }
     }
 
-    /* MetalIndexBuffer实现 - uint32版本 */
-    MetalIndexBuffer::MetalIndexBuffer(const uint32_t* indices, uint32_t count)
-        : m_Count(count), m_IndexType(IndexType::UInt32)
+    /* MetalIndexBuffer实现 - 预分配空容量 */
+    MetalIndexBuffer::MetalIndexBuffer(uint32_t count, IndexType type)
+        : m_Count(count), m_IndexType(type)
     {
+        const uint32_t index_size = (type == IndexType::UInt16) ? sizeof(uint16_t) : sizeof(uint32_t);
+        const uint32_t size_in_bytes = count * index_size;
+
         auto device = dynamic_cast<MetalRenderAPI*>(Renderer::GetRenderAPI().get())->GetDevice();
-        m_Buffer = device->newBuffer(indices, count * sizeof(uint32_t), MTL::ResourceOptionCPUCacheModeDefault);
+        m_Buffer = device->newBuffer(size_in_bytes, MTL::ResourceOptionCPUCacheModeDefault);
         if (!m_Buffer)
         {
-            CORE_LOG_ERROR("Failed to create Metal index buffer (uint32)!");
+            CORE_LOG_ERROR("Failed to create empty Metal index buffer!");
         }
     }
 

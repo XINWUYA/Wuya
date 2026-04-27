@@ -38,8 +38,10 @@ namespace Wuya
 	class OpenGLIndexBuffer : public IndexBuffer
 	{
 	public:
-		OpenGLIndexBuffer(const uint16_t* indices, uint32_t count);
-		OpenGLIndexBuffer(const uint32_t* indices, uint32_t count);
+		/* 创建带初始数据的索引缓冲区（STATIC_DRAW） */
+		OpenGLIndexBuffer(const void* indices, uint32_t count, IndexType type);
+		/* 创建空容量的索引缓冲区（预分配，DYNAMIC_DRAW） */
+		OpenGLIndexBuffer(uint32_t count, IndexType type);
 		~OpenGLIndexBuffer() override;
 
 		/* 绑定 */
