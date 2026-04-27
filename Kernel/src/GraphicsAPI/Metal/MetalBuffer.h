@@ -46,6 +46,9 @@ namespace Wuya
         uint32_t GetCount() const override { return m_Count; }
         IndexType GetIndexType() const override { return m_IndexType; }
 
+        /* 更新索引缓冲区数据 */
+        void SetData(const void* data, uint32_t size) override;
+
         MTL::Buffer* GetMetalBuffer() const { return m_Buffer; }
 
     private:

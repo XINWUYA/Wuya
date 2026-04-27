@@ -49,6 +49,9 @@ namespace Wuya
 		uint32_t GetCount() const override { return m_Count; }
 		IndexType GetIndexType() const override { return m_IndexType; }
 
+		/* 更新索引缓冲区数据 */
+		void SetData(const void* data, uint32_t size) override;
+
 	private:
 		uint32_t m_IndexBufferId{ 0 };
 		uint32_t m_Count{ 0 };

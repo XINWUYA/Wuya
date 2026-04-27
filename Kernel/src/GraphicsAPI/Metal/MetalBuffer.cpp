@@ -117,6 +117,31 @@ namespace Wuya
     {
         /* Metal中无需解绑 */
     }
+
+    void MetalIndexBuffer::SetData(const void* data, uint32_t size)
+    {
+        if (!m_Buffer)
+        {
+            CORE_LOG_ERROR("MetalIndexBuffer::SetData: invalid buffer!");
+            return;
+        }
+        if (size > m_Buffer->length())
+        {
+            CORE_LOG_ERROR("MetalIndexBuffer::SetData: size ({}) exceeds buffer capacity ({})", size, (uint32_t)m_Buffer->length());
+            return;
+        }
+
+        void* buffer_data = m_Buffer->contents();
+        if (buffer_data)
+        {
+            memcpy(buffer_data, data, size);
+            /* 共享存储模式下不需didModifyRange，数据会自动同步到GPU */
+        }
+
+        /* 根据字节数重新计算索引数量 */
+        const uint32_t index_size = (m_IndexType == IndexType::UInt16) ? sizeof(uint16_t) : sizeof(uint32_t);
+        m_Count = size / index_size;
+    }
 }
 
 #endif /* PLATFORM_MACOS */

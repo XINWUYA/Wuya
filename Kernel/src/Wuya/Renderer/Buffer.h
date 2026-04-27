@@ -103,6 +103,10 @@ namespace Wuya
 		virtual uint32_t GetCount() const = 0;
 		virtual IndexType GetIndexType() const = 0;
 
+		/* 更新索引缓冲区数据。size单位为字节，且必须小于等于缓冲区创建时的总容量。
+		 * 仅更新数据内容，不改变索引数量/类型，也不会重建底层GPU缓冲区。 */
+		virtual void SetData(const void* data, uint32_t size) = 0;
+
 		/* 创建16位索引缓冲区 */
 		static SharedPtr<IndexBuffer> Create(const uint16_t* indices, uint32_t count);
 		/* 创建32位索引缓冲区 */

@@ -145,4 +145,24 @@ namespace Wuya
 
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 	}
+
+	/* 更新索引数据 */
+	void OpenGLIndexBuffer::SetData(const void* data, uint32_t size)
+	{
+		PROFILE_FUNCTION();
+
+#ifdef __APPLE__
+		// macOS: Use traditional functions
+		// 与构造时保持一致，先用 GL_ARRAY_BUFFER 更新数据（不依赖VAO绑定）
+		glBindBuffer(GL_ARRAY_BUFFER, m_IndexBufferId);
+		glBufferSubData(GL_ARRAY_BUFFER, 0, size, data);
+#else
+		// Windows/Linux: Use modern DSA function
+		glNamedBufferSubData(m_IndexBufferId, 0, size, data);
+#endif
+
+		/* 根据新写入的字节数重新计算索引数量 */
+		const uint32_t index_size = (m_IndexType == IndexType::UInt16) ? sizeof(uint16_t) : sizeof(uint32_t);
+		m_Count = size / index_size;
+	}
 }
