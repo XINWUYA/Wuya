@@ -168,6 +168,9 @@ namespace Wuya
 
 	void RenderQueryProfiler::BeginFrame(uint32_t frame_id)
 	{
+		if (!m_IsEnabled)
+			return;
+
 		PROFILE_FUNCTION();
 
 		auto& currentContext = m_QueryContexts[m_WriteContextId];
@@ -176,6 +179,9 @@ namespace Wuya
 
 	void RenderQueryProfiler::EndFrame()
 	{
+		if (!m_IsEnabled)
+			return;
+
 		PROFILE_FUNCTION();
 
 		auto& currentContext = m_QueryContexts[m_WriteContextId];
@@ -184,6 +190,9 @@ namespace Wuya
 
 	void RenderQueryProfiler::BeginGPUScope(const char* label)
 	{
+		if (!m_IsEnabled)
+			return;
+
 		PROFILE_FUNCTION();
 
 		auto& currentContext = m_QueryContexts[m_WriteContextId];
@@ -192,6 +201,9 @@ namespace Wuya
 
 	void RenderQueryProfiler::EndGPUScope()
 	{
+		if (!m_IsEnabled)
+			return;
+
 		PROFILE_FUNCTION();
 
 		auto& currentContext = m_QueryContexts[m_WriteContextId];
@@ -201,6 +213,13 @@ namespace Wuya
 	bool RenderQueryProfiler::PrepareQueryResult(ResultGPUTimerNode& root_node)
 	{
 		PROFILE_FUNCTION();
+
+		if (!m_IsEnabled)
+		{
+			/* 关闭时清空结果，避免UI显示旧数据 */
+			root_node = ResultGPUTimerNode{};
+			return false;
+		}
 
 		auto& readContext = m_QueryContexts[m_ReadContextId];
 

@@ -311,6 +311,11 @@ namespace Wuya
 		{
 			if (ImGui::CollapsingHeader("GPU Stats"))
 			{
+				/* GPU Timer开关 */
+				bool enableGPUTimer = RenderQueryProfiler::Instance().IsEnabled();
+				if (ImGui::Checkbox("Enable GPU Timer", &enableGPUTimer))
+					RenderQueryProfiler::Instance().SetEnabled(enableGPUTimer);
+
 				std::function<void(const ResultGPUTimerNode&)> ShowGPUTimeResultRecursively;
 				ShowGPUTimeResultRecursively = [&ShowGPUTimeResultRecursively](const ResultGPUTimerNode& timerNode)
 					{

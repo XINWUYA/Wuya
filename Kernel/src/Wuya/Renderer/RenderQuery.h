@@ -85,6 +85,10 @@ namespace Wuya
 
 		bool PrepareQueryResult(ResultGPUTimerNode& root_node);
 
+		/* 开关：控制RenderQuery是否工作 */
+		void SetEnabled(bool enabled) { m_IsEnabled = enabled; }
+		bool IsEnabled() const { return m_IsEnabled; }
+
 	private:
 		RenderQueryProfiler();
 
@@ -92,6 +96,7 @@ namespace Wuya
 		std::vector<RenderQueryContext> m_QueryContexts;
 		uint8_t m_ReadContextId{ 0 };
 		uint8_t m_WriteContextId{ 1 };
+		bool m_IsEnabled{ true }; /* 是否启用GPU耗时统计 */
 
 	};
 
