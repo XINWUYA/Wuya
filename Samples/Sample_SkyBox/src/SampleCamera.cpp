@@ -2,6 +2,9 @@
 #include "SampleCamera.h"
 #include <glm/gtx/quaternion.hpp>
 
+#include "Wuya/Application/Application.h"
+#include "Wuya/ImGui/ImGuiLayer.h"
+
 namespace Wuya
 {
 	SampleCamera::SampleCamera(const std::string& name, float fov, float aspect_ratio, float near_clip, float far_clip)
@@ -157,6 +160,13 @@ namespace Wuya
 				Renderer::GetRenderAPI()->PopDebugGroup();
 			}
 			);
+
+		/* å°ImGuiæ¸²æä½ä¸ºFrameGraphçæåä¸ä¸ªPass */
+		if (const auto& imgui_layer = Application::Instance()->GetImGuiLayer())
+		{
+			imgui_layer->AddFrameGraphPass(*frame_graph);
+		}
+
 		// frame_graph->ExportGraphviz("framegraph.txt");
 		m_pRenderView->Prepare();
 

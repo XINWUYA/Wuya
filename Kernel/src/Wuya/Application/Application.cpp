@@ -63,15 +63,9 @@ namespace Wuya
 				}
 #endif
 
-				/* 先更新逻辑，再渲染 */
-				{
-                    PROFILE_SCOPE("Update Layers");
-
-					for (const auto& layer : m_LayerStack)
-						layer->OnUpdate(delta_time);
-				}
-
-				/* 更新UI */
+				/* 1. 先构建ImGui帧和UI内容，使得ImGuiDrawData在本帧场景渲染前就绪，
+				 *    以便将ImGui作为FrameGraph中最后一个Pass执行时直接使用。
+				 *    注意：此时UI面板里引用的场景RT内容为上一帧结果，视觉上无感知差异。 */
 				m_pImGuiLayer->Begin();
 				{
 					PROFILE_SCOPE("Update ImGui Layers");
@@ -79,7 +73,19 @@ namespace Wuya
 					for (const auto& layer : m_LayerStack)
 						layer->OnImGuiRender();
 				}
-				m_pImGuiLayer->End();
+				m_pImGuiLayer->PrepareRenderData();
+
+				/* 2. 执行场景FrameGraph：其末尾的ImGuiPass会消费DrawData，
+				 *    并渲染到主窗口默认RT（Metal drawable / OpenGL default FBO）。 */
+				{
+                    PROFILE_SCOPE("Update Layers");
+
+					for (const auto& layer : m_LayerStack)
+						layer->OnUpdate(delta_time);
+				}
+
+				/* 3. 多视口副窗口渲染（当前仅走ImGui PlatformIO默认后端实现，不渲染ImGui内容）。 */
+				m_pImGuiLayer->RenderPlatformWindows();
 			}
 
 			// 渲染一帧

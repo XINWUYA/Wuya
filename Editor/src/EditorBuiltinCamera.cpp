@@ -2,6 +2,9 @@
 #include "EditorBuiltinCamera.h"
 #include <glm/gtx/quaternion.hpp>
 
+#include "Wuya/Application/Application.h"
+#include "Wuya/ImGui/ImGuiLayer.h"
+
 namespace Wuya
 {
 	EditorCamera::EditorCamera(const std::string& name, float fov, float aspect_ratio, float near_clip, float far_clip)
@@ -289,6 +292,13 @@ namespace Wuya
 			}
 			);
 		frame_graph->GetBlackboard()["LightingPassOutput"] = lighting_pass->GetData().LightingResult;
+
+		/* 将ImGui渲染作为FrameGraph的最后一个Pass */
+		if (const auto& imgui_layer = Application::Instance()->GetImGuiLayer())
+		{
+			imgui_layer->AddFrameGraphPass(*frame_graph);
+		}
+
 		// frame_graph->ExportGraphviz("framegraph.txt");
 		m_pRenderView->Prepare();
 

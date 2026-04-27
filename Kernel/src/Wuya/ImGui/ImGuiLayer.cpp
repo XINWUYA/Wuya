@@ -6,11 +6,24 @@
 #include <backends/imgui_impl_glfw.h>
 #include <GLFW/glfw3.h>
 #include "Wuya/Application/Application.h"
+#include "Wuya/Core/Window.h"
 #include "Wuya/Renderer/Renderer.h"
+#include "Wuya/Renderer/RenderAPI.h"
+#include "Wuya/Renderer/FrameGraph/FrameGraph.h"
 #include "Wuya/Scene/SceneCommon.h"
+
+#ifdef PLATFORM_MACOS
+#include "GraphicsAPI/Metal/MetalRenderAPI.h"
+#include <Metal/Metal.hpp>
+#include <QuartzCore/CAMetalLayer.hpp>
+#endif
 
 namespace Wuya
 {
+	/* ImGuiPass Payload：此Pass不依赖任何FrameGraph资源 */
+	struct ImGuiPassData
+	{};
+
 	ImGuiLayer::ImGuiLayer()
 		: ILayer("ImGuiLayer")
 	{
@@ -88,8 +101,6 @@ namespace Wuya
 	{
 		PROFILE_FUNCTION();
 
-		Renderer::GetRenderAPI()->PushDebugGroup("ImGuiPass");
-
 		// Update display size
 		ImGuiIO& io = ImGui::GetIO();
 		io.DisplaySize = ImVec2(
@@ -106,14 +117,17 @@ namespace Wuya
 		ImGui::NewFrame();
 	}
 
-	void ImGuiLayer::End()
+	void ImGuiLayer::PrepareRenderData()
 	{
 		PROFILE_FUNCTION();
 
+		/* 仅生成DrawData，实际提交绘制由FrameGraph中的ImGuiPass负责执行 */
 		ImGui::Render();
-		
-		// Use our custom renderer to draw
-		m_Renderer->RenderDrawData(ImGui::GetDrawData());
+	}
+
+	void ImGuiLayer::RenderPlatformWindows()
+	{
+		PROFILE_FUNCTION();
 
 		ImGuiIO& io = ImGui::GetIO();
 		if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
@@ -123,8 +137,83 @@ namespace Wuya
 			ImGui::RenderPlatformWindowsDefault();
 			glfwMakeContextCurrent(backup_current_context);
 		}
+	}
 
-		Renderer::GetRenderAPI()->PopDebugGroup();
+	void ImGuiLayer::AddFrameGraphPass(FrameGraph& frame_graph)
+	{
+		PROFILE_FUNCTION();
+
+		auto* imgui_renderer = m_Renderer.get();
+		if (!imgui_renderer)
+			return;
+
+		auto& window = Application::Instance()->GetWindow();
+		const uint32_t target_width = window.GetWidth();
+		const uint32_t target_height = window.GetHeight();
+
+		frame_graph.AddPass<ImGuiPassData>("ImGuiPass",
+			/* Setup */
+			[](FrameGraphBuilder& builder, ImGuiPassData&)
+			{
+				/* ImGuiPass不通过FrameGraph管理其Attachments（它直接渲染到主窗口默认RT），
+				 * 因此标记为SideEffect，避免被Cull。 */
+				builder.AsSideEffect(true);
+			},
+			/* Execute */
+			[imgui_renderer, target_width, target_height](const FrameGraphResources&, const ImGuiPassData&)
+			{
+				ImDrawData* draw_data = ImGui::GetDrawData();
+				if (!draw_data)
+					return;
+
+				auto render_api = Renderer::GetRenderAPI();
+				if (!render_api)
+					return;
+
+#ifdef PLATFORM_MACOS
+				/* Metal：直接绑定主窗口drawable作为ColorAttachment，LoadActionLoad保留前序Pass的结果，
+				 * 并复用当前CommandBuffer（不在ImGui内部创建/提交CommandBuffer）。 */
+				auto metal_render_api = std::dynamic_pointer_cast<MetalRenderAPI>(render_api);
+				if (metal_render_api)
+				{
+					auto* drawable = metal_render_api->GetCurrentDrawable();
+					if (!drawable)
+					{
+						CORE_LOG_ERROR("ImGuiPass: no valid drawable available");
+						return;
+					}
+
+					/* 若仍有上一Pass未结束的encoder，先结束 */
+					if (metal_render_api->GetCurrentRenderEncoder())
+						metal_render_api->EndRenderPass();
+
+					/* 构造ImGuiPass专用的RenderPassDescriptor（不清除drawable内容） */
+					MTL::RenderPassDescriptor* pass_desc = MTL::RenderPassDescriptor::alloc()->init();
+					auto* color_attachment = pass_desc->colorAttachments()->object(0);
+					color_attachment->setTexture(drawable->texture());
+					color_attachment->setLoadAction(MTL::LoadActionLoad);
+					color_attachment->setStoreAction(MTL::StoreActionStore);
+
+					/* 使用统一的BeginRenderPass以复用当前CommandBuffer */
+					metal_render_api->BeginRenderPass(pass_desc);
+
+					/* 设置视口为整个主窗口 */
+					render_api->SetViewport(0, 0, target_width, target_height);
+
+					/* 提交ImGui绘制 */
+					imgui_renderer->RenderDrawData(draw_data);
+
+					metal_render_api->EndRenderPass();
+
+					pass_desc->release();
+					return;
+				}
+#endif
+				/* OpenGL/其他：绑定默认FBO，ImGuiRenderer会处理状态、投影、裁剪等 */
+				render_api->SetViewport(0, 0, target_width, target_height);
+				imgui_renderer->RenderDrawData(draw_data);
+			}
+		);
 	}
 
 	void ImGuiLayer::SetDefaultStyle()

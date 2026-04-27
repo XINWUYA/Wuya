@@ -126,52 +126,34 @@ namespace Wuya
         /* 上传顶点数据 */
         m_VertexBuffer->SetData(vtx_data, total_vertex_count * sizeof(ImDrawVert));
         
-        /* 上传索引数据 - ImDrawIdx是uint16，直接使用uint16索引缓冲区 */
-        m_IndexBuffer = IndexBuffer::Create(idx_data, total_index_count);
-        m_VertexArray->SetIndexBuffer(m_IndexBuffer);
+        /* 上传索引数据 - 只在容量变化时重新创建索引缓冲区 */
+        if (total_index_count > m_IndexBufferSize)
+        {
+            m_IndexBufferSize = total_index_count;
+            m_IndexBuffer = IndexBuffer::Create(idx_data, total_index_count);
+            m_VertexArray->SetIndexBuffer(m_IndexBuffer);
+        }
+        else
+        {
+            m_IndexBuffer->SetData(idx_data, total_index_count * sizeof(ImDrawIdx));
+        }
 
         delete[] vtx_data;
         delete[] idx_data;
 
 #ifdef PLATFORM_MACOS
-        /* 对于Metal后端，复用已有的CommandBuffer，创建独立的渲染通道 */
+        /* Metal后端：直接使用当前已激活的RenderCommandEncoder（由外部的FrameGraph Pass驱动创建），
+         * ImGuiRenderer不再自行创建CommandBuffer/RenderPassDescriptor，也不负责commit。 */
         auto metalRenderAPI = dynamic_cast<MetalRenderAPI*>(Renderer::GetRenderAPI().get());
         if (metalRenderAPI)
         {
-            bool createdNewCommandBuffer = false;
-            
-            /* 使用已有的命令缓冲区，如果没有则创建新的 */
-            MTL::CommandBuffer* commandBuffer = metalRenderAPI->GetCurrentCommandBuffer();
-            if (!commandBuffer)
+            MTL::RenderCommandEncoder* renderEncoder = metalRenderAPI->GetCurrentRenderEncoder();
+            if (!renderEncoder)
             {
-                /* 创建新的命令缓冲区 */
-                MTL::CommandQueue* commandQueue = metalRenderAPI->GetCommandQueue();
-                if (!commandQueue)
-                {
-                    CORE_LOG_ERROR("No command queue available for ImGui rendering");
-                    return;
-                }
-                commandBuffer = commandQueue->commandBuffer();
-                if (!commandBuffer)
-                {
-                    CORE_LOG_ERROR("Failed to create command buffer for ImGui rendering");
-                    return;
-                }
-                createdNewCommandBuffer = true;
+                CORE_LOG_ERROR("ImGuiRenderer::RenderDrawData requires an active Metal RenderCommandEncoder (should be driven by ImGuiPass).");
+                return;
             }
-            
-            /* 创建ImGui专用的渲染通道描述符 */
-            MTL::RenderPassDescriptor* renderPassDescriptor = MTL::RenderPassDescriptor::alloc()->init();
-            auto colorAttachment = renderPassDescriptor->colorAttachments()->object(0);
-            colorAttachment->setTexture(metalRenderAPI->GetCurrentDrawable()->texture());
-            colorAttachment->setLoadAction(MTL::LoadActionLoad);  // 加载已有内容
-            colorAttachment->setStoreAction(MTL::StoreActionStore);
-            
-            /* 注意：ImGui是2D UI，不需要深度附件，所以不设置depthAttachment */
-            
-            /* 创建渲染命令编码器 */
-            MTL::RenderCommandEncoder* renderEncoder = commandBuffer->renderCommandEncoder(renderPassDescriptor);
-            
+
             /* 设置视口 */
             MTL::Viewport viewport;
             viewport.originX = 0.0;
@@ -187,8 +169,6 @@ namespace Wuya
             if (!metalShader)
             {
                 CORE_LOG_ERROR("Failed to get Metal shader for ImGui rendering");
-                renderEncoder->endEncoding();
-                renderPassDescriptor->release();
                 return;
             }
             
@@ -223,8 +203,6 @@ namespace Wuya
             if (!metalIndexBuffer)
             {
                 CORE_LOG_ERROR("Failed to get Metal index buffer for ImGui rendering");
-                renderEncoder->endEncoding();
-                renderPassDescriptor->release();
                 return;
             }
             
@@ -365,18 +343,6 @@ namespace Wuya
                     index_offset += pcmd->ElemCount;
                 }
             }
-
-            /* 结束渲染编码器 */
-            renderEncoder->endEncoding();
-            
-            /* 如果创建了新的命令缓冲区，需要提交它 */
-            if (createdNewCommandBuffer && commandBuffer)
-            {
-                commandBuffer->commit();
-            }
-            
-            /* 释放渲染通道描述符 */
-            renderPassDescriptor->release();
         }
 #else
         /* 非Mac平台：使用通用RenderAPI进行渲染（默认OpenGL） */
@@ -516,18 +482,19 @@ namespace Wuya
         /* 更新投影矩阵 - 使用正交投影 */
         if (m_DisplayWidth > 0 && m_DisplayHeight > 0)
         {
-            float L = 0.0f;
-            float R = static_cast<float>(m_DisplayWidth) / m_ScaleX;
-            float T = 0.0f;
-            float B = static_cast<float>(m_DisplayHeight) / m_ScaleY;
+            /* 
+             * ImGui uses coordinate system: origin at top-left, Y grows downward
+             * NDC/OpenGL expects: origin at center, Y grows upward
+             * We need to flip Y axis to correctly map ImGui coordinates to NDC
+             */
+            float left = 0.0f;
+            float right = static_cast<float>(m_DisplayWidth) / m_ScaleX;
+            float bottom = static_cast<float>(m_DisplayHeight) / m_ScaleY;
+            float top = 0.0f;
 
-            m_ProjectionMatrix = glm::mat4(1.0f);
-            m_ProjectionMatrix[0][0] = 2.0f / (R - L);
-            m_ProjectionMatrix[1][1] = 2.0f / (T - B);
-            m_ProjectionMatrix[2][2] = -1.0f;
-            m_ProjectionMatrix[3][0] = (R + L) / (L - R);
-            m_ProjectionMatrix[3][1] = (T + B) / (B - T);
-            m_ProjectionMatrix[3][3] = 1.0f;
+            /* Use glm::ortho which handles the Y-flip correctly for ImGui */
+            /* Note: glm::ortho(left, right, bottom, top) where bottom > top flips Y */
+            m_ProjectionMatrix = glm::ortho(left, right, bottom, top, -1.0f, 1.0f);
 
             /* 更新UBO数据 */
             if (m_UIUniformBuffer)
