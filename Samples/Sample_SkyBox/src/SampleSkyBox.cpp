@@ -68,20 +68,20 @@ void SampleSkyBox::OnAttached()
 	vertex_array->AddVertexBuffer(vertex_buffer);
 
 	TextureLoadConfig load_config{
-		true,
-		false,
-		true,
-		false,
-		SamplerType::Sampler2D,
-		SamplerWrapMode::ClampToEdge,
-		SamplerMinFilter::Linear,
-		SamplerMagFilter::Linear
+		.IsFlipV=true,
+		.IsGenMips=false,
+		.IsHdr=true,
+		.IsSrgb=false,
+		.SamplerType=SamplerType::Sampler2D,
+		.SamplerWrapMode=SamplerWrapMode::ClampToEdge,
+		.SamplerMinFilter=SamplerMinFilter::Linear,
+		.SamplerMagFilter=SamplerMagFilter::Linear
 	};
 	auto sky_texture = Texture::Create(ABSOLUTE_PATH("Textures/drakensberg_solitary_mountain_4k.hdr"), load_config);
 
 	auto shader = ShaderAssetManager::Instance().GetOrLoad(ABSOLUTE_PATH("Shaders/SkyBox.glsl"));
 	auto material = Material::Create(shader);
-	material->SetTexture("u_SkyTex", sky_texture);
+	material->SetTexture("u_SkyTex", sky_texture, 0);
 	RenderRasterState raster_state;
 	raster_state.EnableDepthWrite = true;
 	raster_state.DepthCompareFunc = CompareFunc::LessEqual;
@@ -124,5 +124,8 @@ void SampleSkyBox::OnImGuiRender()
 	ImGui::Text("Sample SkyBox: Show SkyBox.");
 	ImGui::Text("- Alt + Mouse Left: Rotate.");
 	ImGui::End();
+
+	/* 若当前ImGui窗口不是主窗口，应阻塞事件传递 */
+	Application::Instance()->GetImGuiLayer()->BlockEvents(!ImGui::IsWindowFocused() && !ImGui::IsWindowHovered());
 }
 }

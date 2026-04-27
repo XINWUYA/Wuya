@@ -1,6 +1,9 @@
 @echo off
 REM Generate CMake project files for Windows
 
+REM Enable delayed expansion
+setlocal enabledelayedexpansion
+
 echo ========================================
 echo Wuya CMake Project Generator (Windows)
 echo ========================================
@@ -11,27 +14,33 @@ if not exist "build" mkdir build
 
 REM Function to detect installed Visual Studio
 set DETECTED_VS=
+set VS_NAME=
+set VS_PATH=
+set VS_LINE_VER=
 
 REM Try using vswhere (recommended method)
 set VSWHERE="%ProgramFiles(x86)%\Microsoft Visual Studio\Installer\vswhere.exe"
 if exist %VSWHERE% (
-    for /f "usebackq tokens=*" %%i in (`%VSWHERE% -latest -property displayName`) do set VS_NAME=%%i
-    for /f "usebackq tokens=*" %%i in (`%VSWHERE% -latest -property installationPath`) do set VS_PATH=%%i
-    
-    REM Detect VS version from path
-    echo %VS_PATH% | find "2026" >nul 2>&1
-    if %errorlevel% equ 0 set DETECTED_VS=vs2026
-    
-    echo %VS_PATH% | find "2022" >nul 2>&1
-    if %errorlevel% equ 0 set DETECTED_VS=vs2022
-    
-    echo %VS_PATH% | find "2019" >nul 2>&1
-    if %errorlevel% equ 0 set DETECTED_VS=vs2019
-    
-    echo %VS_PATH% | find "2017" >nul 2>&1
-    if %errorlevel% equ 0 set DETECTED_VS=vs2017
+    for /f "usebackq tokens=*" %%i in (`%VSWHERE% -latest -property displayName 2^>null`) do set VS_NAME=%%i
+    for /f "usebackq tokens=*" %%i in (`%VSWHERE% -latest -property installationPath 2^>null`) do set VS_PATH=%%i
+    for /f "usebackq tokens=*" %%i in (`%VSWHERE% -latest -property catalog_productLineVersion 2^>null`) do set VS_LINE_VER=%%i
     
     if defined VS_NAME echo Detected: %VS_NAME%
+    if defined VS_PATH echo InstallationPath: %VS_PATH%
+    if defined VS_LINE_VER echo Version: %VS_LINE_VER%
+    
+    REM Detect VS version from path
+    if !VS_LINE_VER!=="18" set DETECTED_VS=vs2026
+    if !VS_LINE_VER!=="2022" set DETECTED_VS=vs2022
+    if !VS_LINE_VER!=="2019" set DETECTED_VS=vs2019
+    if !VS_LINE_VER!=="2017" set DETECTED_VS=vs2017
+
+    if not defined DETECTED_VS (
+        echo !VS_NAME! | find "2026" >nul 2>&1 && set DETECTED_VS=vs2026
+        echo !VS_NAME! | find "2022" >nul 2>&1 && set DETECTED_VS=vs2022
+        echo !VS_NAME! | find "2019" >nul 2>&1 && set DETECTED_VS=vs2019
+        echo !VS_NAME! | find "2017" >nul 2>&1 && set DETECTED_VS=vs2017
+    )
 )
 
 REM Fallback: Check registry for VS installations

@@ -1,8 +1,10 @@
 #include "Pch.h"
-#define _CRTDBG_MAP_ALLOC
-#include <crtdbg.h>
-
 #include "TestApp.h"
+
+#ifdef _WIN32
+#define _CRTDBG_MAP_ALLOC
+#include <stdlib.h>
+#include <crtdbg.h>
 
 /* 启用内存泄漏检测工具 */
 void StartMemoryLeakDetector()
@@ -15,7 +17,7 @@ void StartMemoryLeakDetector()
 
 	//the following statement is used to trigger a breakpoint when memory leak happens
 	//comment it out if there is no memory leak report;
-	//_crtBreakAlloc = 857;
+	//_CrtSetBreakAlloc(2499);
 #endif
 }
 
@@ -25,6 +27,10 @@ void EndMemoryLeakDetector()
 	_CrtDumpMemoryLeaks();
 #endif
 }
+#else
+void StartMemoryLeakDetector() {}
+void EndMemoryLeakDetector() {}
+#endif
 
 int main(int argc, char** argv)
 {

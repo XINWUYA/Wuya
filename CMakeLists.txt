@@ -113,9 +113,9 @@ add_subdirectory(Editor)
 # add_subdirectory(ModelEditor)  # Temporarily disabled for macOS compatibility
 
 # Add samples (optional)
-option(BUILD_SAMPLES "Build sample projects" OFF)  # Disabled for macOS compatibility
+option(BUILD_SAMPLES "Build sample projects" ON)  # Disabled for macOS compatibility
 if(BUILD_SAMPLES)
-    add_subdirectory(Samples/Sample_CSM)
+    add_subdirectory(Samples/Sample_SkyBox)
 endif()
 
 # Print configuration summary
