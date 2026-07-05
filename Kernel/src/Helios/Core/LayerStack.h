@@ -8,6 +8,7 @@ namespace Helios
 	public:
 		LayerStack() = default;
 		~LayerStack();
+		void Release();
 
 		void PushLayer(const SharedPtr<ILayer>& layer);
 		void PushOverlay(const SharedPtr<ILayer>& layer);

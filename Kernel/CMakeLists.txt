@@ -30,6 +30,10 @@ target_sources(Kernel PRIVATE
     ${TRACY_CLIENT_DST}
 )
 
+# Organize source files in Visual Studio by directory structure
+source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}/src" FILES ${KERNEL_SOURCES} ${TRACY_CLIENT_DST})
+
+
 # Precompiled header (CMake 3.20+ handles /Yc automatically)
 if(MSVC)
     target_precompile_headers(Kernel PRIVATE
@@ -130,6 +134,7 @@ target_compile_definitions(Kernel
 set_target_properties(Kernel PROPERTIES
     ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib/${OUTPUT_DIR}"
     LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib/${OUTPUT_DIR}"
+    FOLDER "Engine"
 )
 
 # Platform-specific settings

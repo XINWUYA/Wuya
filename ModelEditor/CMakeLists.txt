@@ -13,6 +13,10 @@ file(GLOB_RECURSE MODELEDITOR_SOURCES
 
 target_sources(ModelEditor PRIVATE ${MODELEDITOR_SOURCES})
 
+# Organize source files in Visual Studio by directory structure
+source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}/src" FILES ${MODELEDITOR_SOURCES})
+
+
 # Precompiled header
 if(MSVC)
     target_precompile_headers(ModelEditor PRIVATE

@@ -13,6 +13,10 @@ file(GLOB_RECURSE EDITOR_SOURCES
 
 target_sources(Editor PRIVATE ${EDITOR_SOURCES})
 
+# Organize source files in Visual Studio by directory structure
+source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}/src" FILES ${EDITOR_SOURCES})
+
+
 # Precompiled header (CMake 3.20+ handles /Yc automatically)
 if(MSVC)
     target_precompile_headers(Editor PRIVATE

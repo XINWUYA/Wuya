@@ -81,7 +81,7 @@ namespace Helios
 	{
 		PROFILE_FUNCTION();
 
-		if (m_UsedNodeIndex >= DEFAULT_QUERY_COUNT)
+		if (m_UsedNodeIndex >= m_QueryNodes.size())
 		{
 			switch (Renderer::CurrentAPI())
 			{

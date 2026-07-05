@@ -9,7 +9,7 @@ namespace Helios
 
 void SampleSkyBox::OnAttached()
 {
-	Renderer::Init();
+	/* Application 构造函数已调用 Renderer::Init()，这里无需再次初始化。 */
 
 	// Cube vertices
 	const float vertices[] = {

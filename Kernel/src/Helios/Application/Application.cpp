@@ -32,6 +32,7 @@ namespace Helios
 	{
 		PROFILE_FUNCTION();
 
+		m_LayerStack.Release();
 		Renderer::Release();
 	}
 
@@ -103,7 +104,6 @@ namespace Helios
 		PROFILE_FUNCTION();
 
 		m_LayerStack.PushLayer(layer);
-		layer->OnAttached();
 	}
 
 	void Application::PushOverlay(const SharedPtr<ILayer>& layer)
@@ -111,7 +111,6 @@ namespace Helios
 		PROFILE_FUNCTION();
 
 		m_LayerStack.PushOverlay(layer);
-		layer->OnAttached();
 	}
 
 	void Application::OnEvent(IEvent* event)
