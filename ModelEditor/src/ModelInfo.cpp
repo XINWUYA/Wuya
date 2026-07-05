@@ -1,10 +1,10 @@
-#include "Pch.h"
+ï»¿#include "Pch.h"
 #include "ModelInfo.h"
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
-namespace Wuya
+namespace Helios
 {
 	SubModelInfo::~SubModelInfo()
 	{
@@ -14,7 +14,7 @@ namespace Wuya
 		}
 	}
 
-	/* ¼ÓÔØObjÄ£ĞÍĞÅÏ¢ */
+	/* åŠ è½½Objæ¨¡å‹ä¿¡æ¯ */
 	void ModelInfo::LoadFromObj(const std::string& filepath)
 	{
 		if (filepath.empty())
@@ -23,9 +23,9 @@ namespace Wuya
 		}
 
 		m_Path = filepath;
-		const std::string basedir = ExtractFileBaseDir(filepath); /* Ä£ĞÍËùÔÚÂ·¾¶ */
+		const std::string basedir = ExtractFileBaseDir(filepath); /* æ¨¡å‹æ‰€åœ¨è·¯å¾„ */
 
-		/* ¼ÓÔØÄ£ĞÍÊı¾İ */
+		/* åŠ è½½æ¨¡å‹æ•°æ® */
 		std::string warn, err;
 		bool ret = tinyobj::LoadObj(&m_Attributes, &m_Shapes, &m_Materials, &warn, &err, filepath.c_str(), basedir.c_str());
 
@@ -35,8 +35,8 @@ namespace Wuya
 		if (!err.empty())
 			EDITOR_LOG_ERROR("Load Obj Error: {}.", err);
 
-#if WUYA_DEBUG
-		/* ´òÓ¡Ä£ĞÍĞÅÏ¢ */
+#if HELIOS_DEBUG
+		/* æ‰“å°æ¨¡å‹ä¿¡æ¯ */
 		EDITOR_LOG_DEBUG("Loading Obj: {}", filepath);
 		EDITOR_LOG_DEBUG("Vertices  : {}", m_Attributes.vertices.size() / 3);
 		EDITOR_LOG_DEBUG("Normals   : {}", m_Attributes.normals.size() / 3);
@@ -45,7 +45,7 @@ namespace Wuya
 		EDITOR_LOG_DEBUG("Materials : {}", m_Materials.size());
 #endif
 
-		/* ÇĞÏßºÍ¸±ÇĞÏßµÄ¼ÆËã°´Õû¸öÄ£ĞÍÎª»ù´¡ */
+		/* åˆ‡çº¿å’Œå‰¯åˆ‡çº¿çš„è®¡ç®—æŒ‰æ•´ä¸ªæ¨¡å‹ä¸ºåŸºç¡€ */
 		const auto total_vertex_count = m_Attributes.vertices.size();
 		std::vector<glm::vec3> tangents;
 		tangents.resize(total_vertex_count, glm::vec3(0));
@@ -59,12 +59,12 @@ namespace Wuya
 		std::vector<std::vector<glm::vec2>> all_shape_uvs;
 		std::vector<std::pair<glm::vec3, glm::vec3>> all_shape_aabbs;
 
-		/* Ã¿¸öShape¶ÔÓ¦Ò»¸öMeshSegment */
+		/* æ¯ä¸ªShapeå¯¹åº”ä¸€ä¸ªMeshSegment */
 		for (size_t shape_idx = 0; shape_idx < m_Shapes.size(); ++shape_idx)
 		{
 			const auto& shape_data = m_Shapes[shape_idx];
 
-			/* ¼ÇÂ¼AABBĞÅÏ¢ */
+			/* è®°å½•AABBä¿¡æ¯ */
 			auto aabb_min = glm::vec3(std::numeric_limits<float>::max());
 			auto aabb_max = glm::vec3(-std::numeric_limits<float>::max());
 
@@ -83,14 +83,14 @@ namespace Wuya
 			const auto face_count = indices_count / 3;
 			for (size_t face_idx = 0; face_idx < face_count; ++face_idx)
 			{
-				/* Èı½ÇĞÎÃæÆ¬µÄ3¸ö¶¥µãË÷Òı */
+				/* ä¸‰è§’å½¢é¢ç‰‡çš„3ä¸ªé¡¶ç‚¹ç´¢å¼• */
 				tinyobj::index_t vertex_indices[3] = {
 					shape_data.mesh.indices[face_idx * 3 + 0],
 					shape_data.mesh.indices[face_idx * 3 + 1],
 					shape_data.mesh.indices[face_idx * 3 + 2]
 				};
 
-				/* ÊÕ¼¯3¸ö¶¥µã×ø±ê */
+				/* æ”¶é›†3ä¸ªé¡¶ç‚¹åæ ‡ */
 				ASSERT(vertex_indices[0].vertex_index >= 0 && vertex_indices[1].vertex_index >= 0 && vertex_indices[2].vertex_index >= 0);
 
 				for (int i = 0; i < 3; ++i)
@@ -102,7 +102,7 @@ namespace Wuya
 					indices.emplace_back(vertex_indices[i].vertex_index);
 				}
 
-				/* ÊÕ¼¯3¸ö¶¥µã·¨Ïß */
+				/* æ”¶é›†3ä¸ªé¡¶ç‚¹æ³•çº¿ */
 				bool invalid_normal = false;
 				if (!m_Attributes.normals.empty())
 				{
@@ -121,12 +121,12 @@ namespace Wuya
 
 				if (invalid_normal)
 				{
-					/* todo: Éú³É·¨Ïß */
+					/* todo: ç”Ÿæˆæ³•çº¿ */
 				}
 
-				/* ÊÕ¼¯3¸ö¶¥µãÑÕÉ« */
+				/* æ”¶é›†3ä¸ªé¡¶ç‚¹é¢œè‰² */
 				float color[3][3];
-				memset(color, 1.0f, 9 * sizeof(float)); /* Ä¬ÈÏÎª°×É« */
+				memset(color, 1.0f, 9 * sizeof(float)); /* é»˜è®¤ä¸ºç™½è‰² */
 				if (!m_Attributes.colors.empty())
 				{
 					for (int i = 0; i < 3; ++i)
@@ -135,7 +135,7 @@ namespace Wuya
 					}
 				}
 
-				/* ÊÕ¼¯3¸ö¶¥µãuv */
+				/* æ”¶é›†3ä¸ªé¡¶ç‚¹uv */
 				float uv[3][2];
 				memset(uv, 0.0f, 6 * sizeof(float));
 				if (!m_Attributes.texcoords.empty())
@@ -147,8 +147,8 @@ namespace Wuya
 					}
 				}
 
-				/* ¼ÆËãTangentºÍBiTangent */
-				if (!m_Attributes.texcoords.empty()) /* È·±£´æÔÚuvÊı¾İ */
+				/* è®¡ç®—Tangentå’ŒBiTangent */
+				if (!m_Attributes.texcoords.empty()) /* ç¡®ä¿å­˜åœ¨uvæ•°æ® */
 				{
 					// Ref: https://learnopengl-cn.github.io/05%20Advanced%20Lighting/04%20Normal%20Mapping/#_3
 					glm::vec3& v0 = vertices[face_idx * 3 + 0];
@@ -324,7 +324,7 @@ namespace Wuya
 
 			m_SubModelInfos.emplace_back(sub_model_info);
 
-			/* ¸üĞÂÄ£ĞÍÕûÌåµÄAABB */
+			/* æ›´æ–°æ¨¡å‹æ•´ä½“çš„AABB */
 			m_AABB.first = min(m_AABB.first, sub_model_info->AABB.first);
 			m_AABB.second = max(m_AABB.second, sub_model_info->AABB.second);
 		}
@@ -351,7 +351,7 @@ namespace Wuya
 		LoadNode(scene->mRootNode, scene);
 	}
 
-	/* ÖØÖÃÊı¾İ */
+	/* é‡ç½®æ•°æ® */
 	void ModelInfo::Reset()
 	{
 		m_Shapes.clear();
@@ -362,11 +362,11 @@ namespace Wuya
 
 	void ModelInfo::LoadNode(const aiNode* node, const aiScene* scene)
 	{
-		/* Loadµ±Ç°½ÚµãµÄMesh */
+		/* Loadå½“å‰èŠ‚ç‚¹çš„Mesh */
 		for (uint32_t i = 0; i < node->mNumMeshes; ++i)
 			LoadMesh(scene->mMeshes[node->mMeshes[i]], scene);
 
-		/* µİ¹éLoadËùÓĞ×Ó½Úµã */
+		/* é€’å½’Loadæ‰€æœ‰å­èŠ‚ç‚¹ */
 		for (uint32_t i = 0; i < node->mNumChildren; ++i)
 			LoadNode(node->mChildren[i], scene);
 	}
@@ -493,7 +493,7 @@ namespace Wuya
 			memcpy(data, mesh->mTangents, mesh->mNumVertices * sizeof(glm::vec3));
 		}
 
-		/* ÊÕ¼¯indices */
+		/* æ”¶é›†indices */
 		for (uint32_t face_idx = 0; face_idx < mesh->mNumFaces; ++face_idx)
 		{
 			auto& face = mesh->mFaces[face_idx];
@@ -562,7 +562,7 @@ namespace Wuya
 
 		m_SubModelInfos.emplace_back(sub_model_info);
 
-		/* ¸üĞÂÄ£ĞÍÕûÌåµÄAABB */
+		/* æ›´æ–°æ¨¡å‹æ•´ä½“çš„AABB */
 		for (uint32_t i = 0; i < mesh->mNumVertices; ++i)
 		{
 			auto vertex = glm::vec3(mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z);

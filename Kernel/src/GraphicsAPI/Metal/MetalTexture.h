@@ -1,11 +1,11 @@
-#pragma once
+﻿#pragma once
 
 #ifdef PLATFORM_MACOS
 
-#include "Wuya/Renderer/Texture.h"
+#include "Helios/Renderer/Texture.h"
 #include <Metal/Metal.hpp>
 
-namespace Wuya
+namespace Helios
 {
     class MetalTexture : public Texture
     {

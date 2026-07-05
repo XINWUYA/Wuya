@@ -1,11 +1,11 @@
-#include "Pch.h"
+﻿#include "Pch.h"
 #include "OpenGLFrameBuffer.h"
 #include "OpenGLCommon.h"
 #include <glad/glad.h>
 
 #include "OpenGLTexture.h"
 
-namespace Wuya
+namespace Helios
 {
 	constexpr uint32_t MAX_FRAME_TARGET_SIZE = 8192;
 

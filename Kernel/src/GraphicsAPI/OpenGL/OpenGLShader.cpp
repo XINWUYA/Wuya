@@ -1,13 +1,13 @@
-#include "Pch.h"
+﻿#include "Pch.h"
 #include "OpenGLShader.h"
 
 #ifdef PLATFORM_WINDOWS
 #include <shaderc/shaderc.hpp>
 #endif
 
-#include "Wuya/Scene/SceneCommon.h"
+#include "Helios/Scene/SceneCommon.h"
 
-namespace Wuya
+namespace Helios
 {
 	static std::filesystem::path GetShaderCacheDirectory()
 	{

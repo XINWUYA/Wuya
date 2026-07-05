@@ -1,7 +1,7 @@
-#include "Pch.h"
+﻿#include "Pch.h"
 #include "EditorResourceBrowser.h"
 
-namespace Wuya
+namespace Helios
 {
 	void EditorResourceBrowser::OnImGuiRenderer()
 	{

@@ -1,24 +1,24 @@
-#include "Pch.h"
+ï»¿#include "Pch.h"
 #include "MaterialGraphEditor.h"
 #include <tinyxml2.h>
 
-namespace Wuya
+namespace Helios
 {
 	MaterialGraphEditor::MaterialGraphEditor()
 	{
-		/* Ä¬ÈÏÏÔÊ¾ËùÓĞ¶Ë¿ÚÃû */
+		/* é»˜è®¤æ˜¾ç¤ºæ‰€æœ‰ç«¯å£å */
 		m_Options.mDrawIONameOnHover = false;
-		m_Options.mLineThickness = 2.0f; /* Á¬Ïß´ÖÏ¸ */
-		m_Options.mNodeSlotRadius = 6.0f; /* Á¬½ÓµãµÄ°ë¾¶ */
+		m_Options.mLineThickness = 2.0f; /* è¿çº¿ç²—ç»† */
+		m_Options.mNodeSlotRadius = 6.0f; /* è¿æ¥ç‚¹çš„åŠå¾„ */
 	}
 
-	/* ÏÔÊ¾/Òş²Ø±à¼­Æ÷ */
+	/* æ˜¾ç¤º/éšè—ç¼–è¾‘å™¨ */
 	void MaterialGraphEditor::ShowOrHide()
 	{
 		m_IsShow = !m_IsShow;
 	}
 
-	/* »æÖÆÏà¹ØUI */
+	/* ç»˜åˆ¶ç›¸å…³UI */
 	void MaterialGraphEditor::OnImGuiRenderer()
 	{
 		PROFILE_FUNCTION();
@@ -33,7 +33,7 @@ namespace Wuya
 			ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
 			const float icon_size = 24.0f;
 			constexpr float cursor_offset = 10.0f;
-			/* ±£´æ³¡¾°°´Å¥ */
+			/* ä¿å­˜åœºæ™¯æŒ‰é’® */
 			ImGui::SetCursorPosX(cursor_offset);
 			static auto save_icon = TextureAssetManager::Instance().GetOrCreateTexture(ABSOLUTE_PATH("EditorRes/icons/save.png"));
 			if (ImGui::ImageButton((ImTextureID)save_icon->GetTextureID(), ImVec2(icon_size, icon_size), ImVec2(0, 1), ImVec2(1, 0), 0))
@@ -64,14 +64,14 @@ namespace Wuya
 				m_Delegate.ClearAll();
 			}
 
-			/* ÏÔÊ¾½ÚµãÍ¼ */
+			/* æ˜¾ç¤ºèŠ‚ç‚¹å›¾ */
 			GraphEditor::Show(m_Delegate, m_Options, m_ViewState, true, &m_FitMode);
 
-			/* ¿Õ°×´¦ÓÒ¼ü£¬»½³öĞÂ½¨ */
+			/* ç©ºç™½å¤„å³é”®ï¼Œå”¤å‡ºæ–°å»º */
 			if (m_Delegate.m_IsRightClickEmpty)
 				ImGui::OpenPopup("CreateNodePopup");
 
-			/* ÏÔÊ¾ */
+			/* æ˜¾ç¤º */
 			auto ShowCreateNodeButton = [&](const char* label, MaterialGraphNodeType node_type)
 			{
 				ImGui::PushItemWidth(160);
@@ -85,7 +85,7 @@ namespace Wuya
 				ImGui::PopItemWidth();
 			};
 
-			/* Õ¹¿ªµ¯´°Ê±£¬ÏÔÊ¾¿Ø¼ş */
+			/* å±•å¼€å¼¹çª—æ—¶ï¼Œæ˜¾ç¤ºæ§ä»¶ */
 			if (ImGui::BeginPopup("CreateNodePopup"))
 			{
 				ShowCreateNodeButton("Texture2D", MaterialGraphNodeType::Texture2D);
@@ -102,12 +102,12 @@ namespace Wuya
 		}
 		ImGui::End();
 
-		/* ÏÔÊ¾Ñ¡ÖĞ½ÚµãµÄÊôĞÔ£¬±ãÓÚ±à¼­ */
+		/* æ˜¾ç¤ºé€‰ä¸­èŠ‚ç‚¹çš„å±æ€§ï¼Œä¾¿äºç¼–è¾‘ */
 		ImGui::Begin("Properties");
 		{
 			PROFILE_SCOPE("Show Material Graph Node's Properties")
 
-			/* ¼´Ê¹¶àÑ¡£¬Ò²Ö»ÏÔÊ¾µÚÒ»¸ö½ÚµãµÄÊôĞÔ */
+			/* å³ä½¿å¤šé€‰ï¼Œä¹Ÿåªæ˜¾ç¤ºç¬¬ä¸€ä¸ªèŠ‚ç‚¹çš„å±æ€§ */
 			int selected_node_idx = -1;
 			for (size_t i = 0; i < m_Delegate.GetNodeCount(); ++i)
 			{
@@ -119,7 +119,7 @@ namespace Wuya
 				}
 			}
 
-			/* ´æÔÚÑ¡ÖĞ½Úµã */
+			/* å­˜åœ¨é€‰ä¸­èŠ‚ç‚¹ */
 			if (selected_node_idx > 0)
 			{
 				auto& node = m_Delegate.NodeArray[selected_node_idx];
@@ -128,7 +128,7 @@ namespace Wuya
 				case MaterialGraphNodeType::PBRMaterial: break;
 				case MaterialGraphNodeType::Texture2D:
 					{
-						/* ÏÔÊ¾×é¼ş */
+						/* æ˜¾ç¤ºç»„ä»¶ */
 						auto& component = m_Delegate.Registry.get_or_emplace<MGTexture2DComponent>(node.EntityHandle);
 						ImGuiExt::DrawTextureUI("Texture", component.Texture, component.TilingFactor);
 					}
@@ -187,10 +187,10 @@ namespace Wuya
 						ImGuiExt::DrawComboUI("OperatorType", GetEnumNames<MGNodeOperatorType>(), operator_type_idx);
 						component.OperatorType = static_cast<MGNodeOperatorType>(operator_type_idx);
 
-						/* Ôİ²»Ö§³Ö¶àÔª²Ù×÷·û£¬Âé·³Ì«¶à */
+						/* æš‚ä¸æ”¯æŒå¤šå…ƒæ“ä½œç¬¦ï¼Œéº»çƒ¦å¤ªå¤š */
 						//int element_cnt_index = component.ElementCnt - 2;
 						//PackedUIFuncs::DrawComboUI("ElementCnt", {"2", "3", "4"}, element_cnt_index);
-						///* µ±ÔªËØÊıÁ¿·¢Éú¸Ä±äÊ± */
+						///* å½“å…ƒç´ æ•°é‡å‘ç”Ÿæ”¹å˜æ—¶ */
 						//if (element_cnt_index != component.ElementCnt - 2)
 						//{
 						//	component.ElementCnt = element_cnt_index + 2;
@@ -204,25 +204,25 @@ namespace Wuya
 		}
 		ImGui::End();
 
-		/* ImGuiÊÂ¼şÏìÓ¦ */
+		/* ImGuiäº‹ä»¶å“åº” */
 		if (io.KeysDown[Key::Delete])
 			m_Delegate.DeleteSelectedNodes();
 
 		if (io.KeyCtrl)
 		{
-			if (io.KeysDown[Key::A]) /* Ctrl + A: È«Ñ¡ËùÓĞ½Úµã */
+			if (io.KeysDown[Key::A]) /* Ctrl + A: å…¨é€‰æ‰€æœ‰èŠ‚ç‚¹ */
 				m_Delegate.SelectAllNodes();
 		}
 	}
 
-	/* ĞòÁĞ»¯ */
+	/* åºåˆ—åŒ– */
 	void MaterialGraphEditor::Serializer(const std::string& path)
 	{
 		m_Path = path;
 
 		ASSERT(!m_Path.empty());
 
-		/* Ğ´Èë²ÄÖÊÍ¼ĞÅÏ¢ */
+		/* å†™å…¥æè´¨å›¾ä¿¡æ¯ */
 		auto* out_mtl_graph_file = new tinyxml2::XMLDocument();
 		out_mtl_graph_file->InsertEndChild(out_mtl_graph_file->NewDeclaration());
 		auto* mtl_graph_root = out_mtl_graph_file->NewElement("MaterialGraph");
@@ -230,18 +230,18 @@ namespace Wuya
 		mtl_graph_root->SetAttribute("NodeCount", m_Delegate.GetNodeCount());
 		mtl_graph_root->SetAttribute("LinkCount", m_Delegate.GetLinkCount());
 
-		/* ËùÓĞ½Úµã */
+		/* æ‰€æœ‰èŠ‚ç‚¹ */
 		auto* all_nodes_root = mtl_graph_root->InsertNewChildElement("Nodes");
 		for (size_t i = 0; i < m_Delegate.GetNodeCount(); ++i)
 		{
 			const auto& node = m_Delegate.NodeArray[i];
 			auto* node_doc = all_nodes_root->InsertNewChildElement("Node");
 			node_doc->SetAttribute("NodeIndex", i);
-			node_doc->SetAttribute("NodeType", static_cast<int>(node.NodeType)); // ÒÑÖªNodeTypeµÄÇé¿öÏÂ£¬Name¡¢TemplateIndex¡¢Width¡¢Height¡¢IsSelected³õÊ¼Öµ¶¼ÊÇ¹Ì¶¨µÄ£¬Òò´Ë²»±Ø±£´æ
+			node_doc->SetAttribute("NodeType", static_cast<int>(node.NodeType)); // å·²çŸ¥NodeTypeçš„æƒ…å†µä¸‹ï¼ŒNameã€TemplateIndexã€Widthã€Heightã€IsSelectedåˆå§‹å€¼éƒ½æ˜¯å›ºå®šçš„ï¼Œå› æ­¤ä¸å¿…ä¿å­˜
 			node_doc->SetAttribute("ScreenPosX", node.ScreenPosX);
 			node_doc->SetAttribute("ScreenPosY", node.ScreenPosY);
 
-			/* ¸÷ÀàĞÍ½Úµã¶ÀÓĞµÄÊôĞÔ */
+			/* å„ç±»å‹èŠ‚ç‚¹ç‹¬æœ‰çš„å±æ€§ */
 			switch (node.NodeType)
 			{
 			case MaterialGraphNodeType::PBRMaterial:break;
@@ -308,23 +308,23 @@ namespace Wuya
 			}
 		}
 
-		/* ËùÓĞÁ¬Ïß */
+		/* æ‰€æœ‰è¿çº¿ */
 		auto* all_links_root = mtl_graph_root->InsertNewChildElement("Links");
 		for (const auto& link : m_Delegate.LinkArray)
 		{
 			auto* link_doc = all_links_root->InsertNewChildElement("Link");
 			link_doc->SetAttribute("InputNodeIndex", link.mInputNodeIndex);
 			link_doc->SetAttribute("InputSlotIndex", link.mInputSlotIndex);
-			link_doc->SetAttribute("OutputNodeIndex", link.mOutputNodeIndex); // OutputNode±íÊ¾µ±Ç°Á¬ÏßµÄÊä³ö¶Ë£¬ÈçÁ¬Ïßa->b£¬Ôò¸ÃOutputNodeIndexÎªb
+			link_doc->SetAttribute("OutputNodeIndex", link.mOutputNodeIndex); // OutputNodeè¡¨ç¤ºå½“å‰è¿çº¿çš„è¾“å‡ºç«¯ï¼Œå¦‚è¿çº¿a->bï¼Œåˆ™è¯¥OutputNodeIndexä¸ºb
 			link_doc->SetAttribute("OutputSlotIndex", link.mOutputSlotIndex);
 		}
 
-		/* ±£´æµ½ÎÄ±¾ */
+		/* ä¿å­˜åˆ°æ–‡æœ¬ */
 		out_mtl_graph_file->SaveFile(path.c_str());
 		delete out_mtl_graph_file;
 	}
 
-	/* ·´ĞòÁĞ»¯ */
+	/* ååºåˆ—åŒ– */
 	void MaterialGraphEditor::Deserializer(const std::string& path)
 	{
 		PROFILE_FUNCTION();
@@ -332,7 +332,7 @@ namespace Wuya
 		m_Path = path;
 		ASSERT(!m_Path.empty());
 
-		/* ¶ÁÈ¡²ÄÖÊĞÅÏ¢ */
+		/* è¯»å–æè´¨ä¿¡æ¯ */
 		auto* in_mtl_graph_file = new tinyxml2::XMLDocument();
 		tinyxml2::XMLError error = in_mtl_graph_file->LoadFile(m_Path.c_str());
 		if (error != tinyxml2::XML_SUCCESS)
@@ -357,7 +357,7 @@ namespace Wuya
 				const auto screen_pos_y = node_doc->FloatAttribute("ScreenPosY");
 				node = m_Delegate.CreateNode(node_type, ImVec2(screen_pos_x, screen_pos_y));
 
-				/* ¸÷ÀàĞÍ½Úµã¶ÀÓĞµÄÊôĞÔ */
+				/* å„ç±»å‹èŠ‚ç‚¹ç‹¬æœ‰çš„å±æ€§ */
 				switch (node.NodeType)
 				{
 				case MaterialGraphNodeType::PBRMaterial:break;
@@ -441,31 +441,31 @@ namespace Wuya
 		m_IsShow = true;
 	}
 
-	/* ±£´æ²ÄÖÊ */
+	/* ä¿å­˜æè´¨ */
 	void MaterialGraphEditor::SaveMaterial()
 	{
 		// todo
 	}
 
-	/* ¹¹ÔìÊ±£¬Ä¬ÈÏÔö¼ÓÒ»¸öPBR½Úµã */
+	/* æ„é€ æ—¶ï¼Œé»˜è®¤å¢åŠ ä¸€ä¸ªPBRèŠ‚ç‚¹ */
 	MaterialGraphEditor::MaterialGraphEditorDelegate::MaterialGraphEditorDelegate()
 	{
 		NodeArray.emplace_back(CreateNode(MaterialGraphNodeType::PBRMaterial));
 	}
 
-	/* Ö§³ÖÁ¬Ïß */
+	/* æ”¯æŒè¿çº¿ */
 	bool MaterialGraphEditor::MaterialGraphEditorDelegate::AllowedLink(GraphEditor::NodeIndex from, GraphEditor::NodeIndex to)
 	{
 		return true;
 	}
 
-	/* Ñ¡ÖĞ½Úµã */
+	/* é€‰ä¸­èŠ‚ç‚¹ */
 	void MaterialGraphEditor::MaterialGraphEditorDelegate::SelectNode(GraphEditor::NodeIndex node_index, bool selected)
 	{
 		NodeArray[node_index].IsSelected = selected;
 	}
 
-	/* ÒÆ¶¯Ñ¡ÖĞ½Úµã */
+	/* ç§»åŠ¨é€‰ä¸­èŠ‚ç‚¹ */
 	void MaterialGraphEditor::MaterialGraphEditorDelegate::MoveSelectedNodes(const ImVec2 delta)
 	{
 		for (auto& node : NodeArray)
@@ -478,19 +478,19 @@ namespace Wuya
 		}
 	}
 
-	/* Á¬Ïß */
+	/* è¿çº¿ */
 	void MaterialGraphEditor::MaterialGraphEditorDelegate::AddLink(GraphEditor::NodeIndex input_node_index, GraphEditor::SlotIndex input_slot_index, GraphEditor::NodeIndex output_node_index, GraphEditor::SlotIndex output_slot_index)
 	{
 		LinkArray.push_back({ input_node_index, input_slot_index, output_node_index, output_slot_index });
 	}
 
-	/* É¾³ıÁ¬Ïß */
+	/* åˆ é™¤è¿çº¿ */
 	void MaterialGraphEditor::MaterialGraphEditorDelegate::DelLink(GraphEditor::LinkIndex link_index)
 	{
 		LinkArray.erase(LinkArray.begin() + link_index);
 	}
 
-	/* ×Ô¶¨Òå»æÖÆ */
+	/* è‡ªå®šä¹‰ç»˜åˆ¶ */
 	void MaterialGraphEditor::MaterialGraphEditorDelegate::CustomDraw(ImDrawList* draw_list, ImRect rectangle, GraphEditor::NodeIndex node_index)
 	{
 		PROFILE_FUNCTION();
@@ -514,7 +514,7 @@ namespace Wuya
 					ImGui::EndDragDropTarget();
 				}
 
-				/* Êó±êÂÓ¹ıÊ±ÏÔÊ¾Í¼Æ¬Â·¾¶ */
+				/* é¼ æ ‡æ è¿‡æ—¶æ˜¾ç¤ºå›¾ç‰‡è·¯å¾„ */
 				if (ImGui::IsItemHovered())
 					draw_list->AddText(rectangle.Min, IM_COL32(255, 128, 64, 255), RELATIVE_PATH(component.Texture->GetPath()).c_str());
 			}
@@ -567,7 +567,7 @@ namespace Wuya
 		}
 	}
 
-	/* ÓÒ¼üÏìÓ¦£¬Ö»ÔÚÓÒ¼üµ½½ÚµãµÄ¶Ë¿ÚÊ±²ÅÉúĞ§ */
+	/* å³é”®å“åº”ï¼Œåªåœ¨å³é”®åˆ°èŠ‚ç‚¹çš„ç«¯å£æ—¶æ‰ç”Ÿæ•ˆ */
 	void MaterialGraphEditor::MaterialGraphEditorDelegate::RightClick(GraphEditor::NodeIndex node_index, GraphEditor::SlotIndex slot_index_input, GraphEditor::SlotIndex slot_index_output)
 	{
 		if (node_index != -1)
@@ -580,13 +580,13 @@ namespace Wuya
 		m_IsRightClickEmpty = true;
 	}
 
-	/* »ñÈ¡½ÚµãÄ£°åÊıÁ¿ */
+	/* è·å–èŠ‚ç‚¹æ¨¡æ¿æ•°é‡ */
 	const size_t MaterialGraphEditor::MaterialGraphEditorDelegate::GetTemplateCount()
 	{
 		return s_Templates.size();
 	}
 
-	/* »ñÈ¡Ö¸¶¨½ÚµãÄ£°å */
+	/* è·å–æŒ‡å®šèŠ‚ç‚¹æ¨¡æ¿ */
 	const GraphEditor::Template MaterialGraphEditor::MaterialGraphEditorDelegate::GetTemplate(GraphEditor::TemplateIndex index)
 	{
 		ASSERT(index < s_Templates.size());
@@ -594,13 +594,13 @@ namespace Wuya
 		return s_Templates[index];
 	}
 
-	/* »ñÈ¡½ÚµãÊıÁ¿ */
+	/* è·å–èŠ‚ç‚¹æ•°é‡ */
 	const size_t MaterialGraphEditor::MaterialGraphEditorDelegate::GetNodeCount()
 	{
 		return NodeArray.size();
 	}
 
-	/* »ñÈ¡Ö¸¶¨½Úµã */
+	/* è·å–æŒ‡å®šèŠ‚ç‚¹ */
 	const GraphEditor::Node MaterialGraphEditor::MaterialGraphEditorDelegate::GetNode(GraphEditor::NodeIndex index)
 	{
 		ASSERT(index < NodeArray.size());
@@ -614,13 +614,13 @@ namespace Wuya
 		};
 	}
 
-	/* »ñÈ¡Á¬ÏßÊıÁ¿ */
+	/* è·å–è¿çº¿æ•°é‡ */
 	const size_t MaterialGraphEditor::MaterialGraphEditorDelegate::GetLinkCount()
 	{
 		return LinkArray.size();
 	}
 
-	/* »ñÈ¡Ö¸¶¨Á¬Ïß */
+	/* è·å–æŒ‡å®šè¿çº¿ */
 	const GraphEditor::Link MaterialGraphEditor::MaterialGraphEditorDelegate::GetLink(GraphEditor::LinkIndex index)
 	{
 		ASSERT(index < LinkArray.size());
@@ -628,7 +628,7 @@ namespace Wuya
 		return LinkArray[index];
 	}
 
-	/* ´´½¨Ò»¸öÖ¸¶¨ÀàĞÍµÄNode */
+	/* åˆ›å»ºä¸€ä¸ªæŒ‡å®šç±»å‹çš„Node */
 	MaterialGraphNode MaterialGraphEditor::MaterialGraphEditorDelegate::CreateNode(MaterialGraphNodeType node_type, const ImVec2& ScreenPos)
 	{
 		PROFILE_FUNCTION();
@@ -657,7 +657,7 @@ namespace Wuya
 				node_inst.Height = 180;
 				node_inst.IsSelected = false;
 
-				/* ¹ÒÔØÏà¹Ø×é¼ş */
+				/* æŒ‚è½½ç›¸å…³ç»„ä»¶ */
 				node_inst.EntityHandle = Registry.create();
 				auto& component = Registry.emplace<MGTexture2DComponent>(node_inst.EntityHandle);
 				component.Texture = TextureAssetManager::Instance().GetOrCreateTexture(ABSOLUTE_PATH("Textures/Default.png"));
@@ -671,7 +671,7 @@ namespace Wuya
 				node_inst.Height = 300;
 				node_inst.IsSelected = false;
 
-				/* ¹ÒÔØÏà¹Ø×é¼ş */
+				/* æŒ‚è½½ç›¸å…³ç»„ä»¶ */
 				node_inst.EntityHandle = Registry.create();
 				auto& component = Registry.emplace<MGSamplerStateComponent>(node_inst.EntityHandle);
 			}
@@ -684,7 +684,7 @@ namespace Wuya
 				node_inst.Height = 70;
 				node_inst.IsSelected = false;
 
-				/* ¹ÒÔØÏà¹Ø×é¼ş */
+				/* æŒ‚è½½ç›¸å…³ç»„ä»¶ */
 				node_inst.EntityHandle = Registry.create();
 				auto& component = Registry.emplace<MGFloatComponent>(node_inst.EntityHandle);
 			}
@@ -697,7 +697,7 @@ namespace Wuya
 				node_inst.Height = 70;
 				node_inst.IsSelected = false;
 
-				/* ¹ÒÔØÏà¹Ø×é¼ş */
+				/* æŒ‚è½½ç›¸å…³ç»„ä»¶ */
 				node_inst.EntityHandle = Registry.create();
 				auto& component = Registry.emplace<MGFloat2Component>(node_inst.EntityHandle);
 			}
@@ -710,7 +710,7 @@ namespace Wuya
 				node_inst.Height = 70;
 				node_inst.IsSelected = false;
 
-				/* ¹ÒÔØÏà¹Ø×é¼ş */
+				/* æŒ‚è½½ç›¸å…³ç»„ä»¶ */
 				node_inst.EntityHandle = Registry.create();
 				auto& component = Registry.emplace<MGFloat3Component>(node_inst.EntityHandle);
 			}
@@ -723,7 +723,7 @@ namespace Wuya
 				node_inst.Height = 70;
 				node_inst.IsSelected = false;
 
-				/* ¹ÒÔØÏà¹Ø×é¼ş */
+				/* æŒ‚è½½ç›¸å…³ç»„ä»¶ */
 				node_inst.EntityHandle = Registry.create();
 				auto& component = Registry.emplace<MGFloat4Component>(node_inst.EntityHandle);
 			}
@@ -736,7 +736,7 @@ namespace Wuya
 				node_inst.Height = 70;
 				node_inst.IsSelected = false;
 
-				/* ¹ÒÔØÏà¹Ø×é¼ş */
+				/* æŒ‚è½½ç›¸å…³ç»„ä»¶ */
 				node_inst.EntityHandle = Registry.create();
 				auto& component = Registry.emplace<MGColorComponent>(node_inst.EntityHandle);
 			}
@@ -749,7 +749,7 @@ namespace Wuya
 				node_inst.Height = 120;
 				node_inst.IsSelected = false;
 
-				/* ¹ÒÔØÏà¹Ø×é¼ş */
+				/* æŒ‚è½½ç›¸å…³ç»„ä»¶ */
 				node_inst.EntityHandle = Registry.create();
 				auto& component = Registry.emplace<MGOperatorComponent>(node_inst.EntityHandle);
 			}
@@ -758,24 +758,24 @@ namespace Wuya
 		return node_inst;
 	}
 
-	/* Çå³şËùÓĞ½ÚµãºÍÁ¬Ïß */
+	/* æ¸…æ¥šæ‰€æœ‰èŠ‚ç‚¹å’Œè¿çº¿ */
 	void MaterialGraphEditor::MaterialGraphEditorDelegate::ClearAll()
 	{
 		NodeArray.clear();
 		LinkArray.clear();
 	}
 
-	/* È«Ñ¡½Úµã */
+	/* å…¨é€‰èŠ‚ç‚¹ */
 	void MaterialGraphEditor::MaterialGraphEditorDelegate::SelectAllNodes()
 	{
 		for (auto& node : NodeArray)
 			node.IsSelected = true;
 	}
 
-	/* É¾³ıÑ¡ÖĞ½Úµã */
+	/* åˆ é™¤é€‰ä¸­èŠ‚ç‚¹ */
 	void MaterialGraphEditor::MaterialGraphEditorDelegate::DeleteSelectedNodes()
 	{
-		/* ÔÚÉ¾³ıÑ¡ÖĞ½ÚµãµÄÍ¬Ê±£¬¼ÇÂ¼ÕâĞ©½ÚµãµÄË÷Òı */
+		/* åœ¨åˆ é™¤é€‰ä¸­èŠ‚ç‚¹çš„åŒæ—¶ï¼Œè®°å½•è¿™äº›èŠ‚ç‚¹çš„ç´¢å¼• */
 		std::vector<size_t> selected_node_indices;
 		size_t node_index = 0;
 		for (auto node_itr = NodeArray.begin(); node_itr != NodeArray.end(); ++node_index)
@@ -789,12 +789,12 @@ namespace Wuya
 				++node_itr;
 		}
 
-		/* É¾³ıÓëÑ¡ÖĞ½ÚµãÖ±½Ó¹ØÁªµÄÁ¬Ïß */
+		/* åˆ é™¤ä¸é€‰ä¸­èŠ‚ç‚¹ç›´æ¥å…³è”çš„è¿çº¿ */
 		for (const auto selected_node_index : selected_node_indices)
 		{
 			for (auto link_itr = LinkArray.begin(); link_itr != LinkArray.end();)
 			{
-				/* ÈôÁ¬Ïß°üº¬Ñ¡ÖĞ½Úµã£¬ ÔòÉ¾³ı¸ÃÁ¬Ïß */
+				/* è‹¥è¿çº¿åŒ…å«é€‰ä¸­èŠ‚ç‚¹ï¼Œ åˆ™åˆ é™¤è¯¥è¿çº¿ */
 				if (link_itr->mInputNodeIndex == selected_node_index || link_itr->mOutputNodeIndex == selected_node_index)
 					link_itr = LinkArray.erase(link_itr);
 				else
@@ -802,7 +802,7 @@ namespace Wuya
 			}
 		}
 
-		/* ¼ÇÂ¼Ê£ÓàÃ¿¸öÁ¬ÏßµÄË÷ÒıĞèÒª¸üĞÂµÄÖµ£¬ÒòÎªÔÚÉ¾³ı½ÚµãÊ±£¬²¿·Ö½ÚµãÔÚNodeArrayµÄÎ»ÖÃ»áÏòÇ°ÒÆ¶¯£¬²»¸üĞÂLinkµÄË÷Òı»áµ¼ÖÂ»æÖÆ³ö´í»òCrash */
+		/* è®°å½•å‰©ä½™æ¯ä¸ªè¿çº¿çš„ç´¢å¼•éœ€è¦æ›´æ–°çš„å€¼ï¼Œå› ä¸ºåœ¨åˆ é™¤èŠ‚ç‚¹æ—¶ï¼Œéƒ¨åˆ†èŠ‚ç‚¹åœ¨NodeArrayçš„ä½ç½®ä¼šå‘å‰ç§»åŠ¨ï¼Œä¸æ›´æ–°Linkçš„ç´¢å¼•ä¼šå¯¼è‡´ç»˜åˆ¶å‡ºé”™æˆ–Crash */
 		std::map<size_t, std::pair<int, int>> update_link_infos; /* <LinkIndex, <InputNodeIndexToSubtract, OutputNodeIndexToSubtract>>*/
 		for (const auto selected_node_index : selected_node_indices)
 		{
@@ -818,7 +818,7 @@ namespace Wuya
 			}
 		}
 
-		/* ¸üĞÂÁ¬ÏßµÄË÷Òı */
+		/* æ›´æ–°è¿çº¿çš„ç´¢å¼• */
 		for (const auto& link_info : update_link_infos)
 		{
 			auto& link = LinkArray[link_info.first];

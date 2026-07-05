@@ -1,13 +1,13 @@
-#pragma once
+﻿#pragma once
 
 #ifdef PLATFORM_MACOS
 
-#include "Wuya/Renderer/VertexArray.h"
+#include "Helios/Renderer/VertexArray.h"
 #include "MetalBuffer.h"
 #include <Metal/Metal.hpp>
 #include <vector>
 
-namespace Wuya
+namespace Helios
 {
     class MetalVertexArray : public VertexArray
     {

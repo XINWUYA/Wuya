@@ -396,4 +396,5 @@ Makefile
 *.cmake
 !CMakeLists.txt
 
-/Kernel/src/Wuya/Tracy/TracyClient.cpp
+/Kernel/src/Helios/Tracy/TracyClient.cpp
+

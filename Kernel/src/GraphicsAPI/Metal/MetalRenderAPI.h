@@ -1,12 +1,12 @@
-#pragma once
+﻿#pragma once
 
 #ifdef PLATFORM_MACOS
 
-#include "Wuya/Renderer/RenderAPI.h"
+#include "Helios/Renderer/RenderAPI.h"
 #include <Metal/Metal.hpp>
 #include <QuartzCore/QuartzCore.hpp>
 
-namespace Wuya
+namespace Helios
 {
     class MetalRenderAPI : public RenderAPI
     {

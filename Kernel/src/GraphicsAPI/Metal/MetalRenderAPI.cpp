@@ -1,12 +1,12 @@
-#ifdef PLATFORM_MACOS
+﻿#ifdef PLATFORM_MACOS
 
 #include "Pch.h"
 #include "MetalRenderAPI.h"
 #include "MetalCommon.h"
 #include "MetalVertexArray.h"
-#include "Wuya/Renderer/VertexArray.h"
+#include "Helios/Renderer/VertexArray.h"
 
-namespace Wuya
+namespace Helios
 {
     MetalRenderAPI::~MetalRenderAPI()
     {

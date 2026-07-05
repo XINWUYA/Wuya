@@ -1,12 +1,12 @@
-#include "Pch.h"
+﻿#include "Pch.h"
 #include "GLWindow.h"
 #include <GLFW/glfw3.h>
-#include "Wuya/Events/ApplicationEvent.h"
-#include "Wuya/Events/KeyEvent.h"
-#include "Wuya/Events/MouseEvent.h"
-#include "Wuya/Renderer/Renderer.h"
+#include "Helios/Events/ApplicationEvent.h"
+#include "Helios/Events/KeyEvent.h"
+#include "Helios/Events/MouseEvent.h"
+#include "Helios/Renderer/Renderer.h"
 
-namespace Wuya
+namespace Helios
 {
 	static uint8_t s_GLFWWindowCnt = 0;
 
@@ -66,7 +66,7 @@ namespace Wuya
 				});
 		}
 
-#ifdef WUYA_DEBUG
+#ifdef HELIOS_DEBUG
 		if (Renderer::CurrentAPI() == RenderAPI::OpenGL)
 			glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);
 #endif

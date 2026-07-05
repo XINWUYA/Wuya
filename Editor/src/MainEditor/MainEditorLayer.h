@@ -1,10 +1,10 @@
-#pragma once
+ï»¿#pragma once
 #include "EditorCommon.h"
 #include "EditorResourceBrowser.h"
 
-namespace Wuya
+namespace Helios
 {
-	/* Editor²ãÀà */
+	/* Editorå±‚ç±» */
 	class MainEditorLayer final : public ILayer
 	{
 	public:
@@ -18,39 +18,39 @@ namespace Wuya
 		void OnEvent(IEvent* event) override;
 
 	private:
-		/* ÏìÓ¦¼üÅÌ */
+		/* å“åº”é”®ç›˜ */
 		bool OnKeyPressed(class KeyPressedEvent* event);
-		/* ÏìÓ¦Êó±ê */
+		/* å“åº”é¼ æ ‡ */
 		bool OnMouseButtonPressed(class MouseButtonPressedEvent* event);
 
-		/* ĞÂ½¨³¡¾° */
+		/* æ–°å»ºåœºæ™¯ */
 		void NewScene();
-		/* µ¼Èë³¡¾°£ºÍ¨¹ıµ¯´°ÕÒµ½Ö¸¶¨³¡¾°ÎÄ¼ş²¢´ò¿ª */
+		/* å¯¼å…¥åœºæ™¯ï¼šé€šè¿‡å¼¹çª—æ‰¾åˆ°æŒ‡å®šåœºæ™¯æ–‡ä»¶å¹¶æ‰“å¼€ */
 		void ImportScene();
-		/* ±£´æ³¡¾° */
+		/* ä¿å­˜åœºæ™¯ */
 		void SaveScene();
-		/* ±£´æ³¡¾°µ½Ö¸¶¨Â·¾¶ */
+		/* ä¿å­˜åœºæ™¯åˆ°æŒ‡å®šè·¯å¾„ */
 		void SaveSceneAs();
 
-		/* ÏÔÊ¾²Ëµ¥À¸UI */
+		/* æ˜¾ç¤ºèœå•æ UI */
 		void ShowMenuUI();
-		/* ÏÔÊ¾³¡¾°¿ØÖÆUI */
+		/* æ˜¾ç¤ºåœºæ™¯æ§åˆ¶UI */
 		void ShowSceneControllerUI();
-		/* ÏÔÊ¾äÖÈ¾Í³¼ÆĞÅÏ¢ */
+		/* æ˜¾ç¤ºæ¸²æŸ“ç»Ÿè®¡ä¿¡æ¯ */
 		void ShowStatisticInfoUI();
 
-		/* Í¨ÖªÆäËûÖ÷´°¿Ú */
+		/* é€šçŸ¥å…¶ä»–ä¸»çª—å£ */
 		void NotifyGizmoTypeChanged();
 		void NotifyPlayModeChanged();
 
-		/* ×ÊÔ´¹ÜÀí´°¿Ú */
+		/* èµ„æºç®¡ç†çª—å£ */
 		EditorResourceBrowser m_ResourceBrowser;
-		/* Ä¬ÈÏÎª±à¼­Ä£Ê½ */
+		/* é»˜è®¤ä¸ºç¼–è¾‘æ¨¡å¼ */
 		PlayMode m_PlayMode{ PlayMode::Edit };
-		/* ÒÆ¶¯£¬Ğı×ª£¬Ëõ·ÅUI */
+		/* ç§»åŠ¨ï¼Œæ—‹è½¬ï¼Œç¼©æ”¾UI */
 		int m_GizmoType = -1;
 
-		/* ´°¿Ú¿ª¹Ø */
+		/* çª—å£å¼€å…³ */
 		bool m_ActiveSceneEditor{ false };
 		bool m_ActiveModelEditor{ false };
 	};

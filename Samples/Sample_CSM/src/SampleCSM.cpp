@@ -1,10 +1,10 @@
-#include "SampleCSM.h"
+﻿#include "SampleCSM.h"
 #include <imgui.h>
 
-#include <Wuya/Scene/Material.h>
+#include <Helios/Scene/Material.h>
 #include "SampleCamera.h"
 
-namespace Wuya
+namespace Helios
 {
 
 void SampleCSM::OnAttached()

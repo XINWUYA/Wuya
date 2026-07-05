@@ -1,9 +1,9 @@
-#pragma once
-#include "Wuya/Renderer/RenderContext.h"
+﻿#pragma once
+#include "Helios/Renderer/RenderContext.h"
 
 struct GLFWwindow;
 
-namespace Wuya
+namespace Helios
 {
 	class OpenGLContext final : public IRenderContext
 	{

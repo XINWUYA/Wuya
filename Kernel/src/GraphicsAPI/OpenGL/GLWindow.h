@@ -1,10 +1,10 @@
-#pragma once
-#include "Wuya/Core/Window.h"
-#include "Wuya/Renderer/RenderContext.h"
+﻿#pragma once
+#include "Helios/Core/Window.h"
+#include "Helios/Renderer/RenderContext.h"
 
 struct GLFWwindow;
 
-namespace Wuya
+namespace Helios
 {
 	/* GLWindow类：
 	 * 使用GLFWwindow创建OpenGL窗口

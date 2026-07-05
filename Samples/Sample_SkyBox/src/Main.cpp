@@ -1,4 +1,4 @@
-#include "Pch.h"
+ï»¿#include "Pch.h"
 #include "TestApp.h"
 
 #ifdef _WIN32
@@ -6,11 +6,11 @@
 #include <stdlib.h>
 #include <crtdbg.h>
 
-/* ÆôÓÃÄÚ´æÐ¹Â©¼ì²â¹¤¾ß */
+/* å¯ç”¨å†…å­˜æ³„æ¼æ£€æµ‹å·¥å…· */
 void StartMemoryLeakDetector()
 {
 	// Enable run-time memory check for debug builds.
-#ifdef WUYA_DEBUG
+#ifdef HELIOS_DEBUG
 	//_CRTDBG_LEAK_CHECK_DF: Perform automatic leak checking at program exit through a call to _CrtDumpMemoryLeaks and generate an error 
 	//report if the application failed to free all the memory it allocated. OFF: Do not automatically perform leak checking at program exit.
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
@@ -23,7 +23,7 @@ void StartMemoryLeakDetector()
 
 void EndMemoryLeakDetector()
 {
-#ifdef WUYA_DEBUG
+#ifdef HELIOS_DEBUG
 	_CrtDumpMemoryLeaks();
 #endif
 }
@@ -36,23 +36,23 @@ int main(int argc, char** argv)
 {
 	StartMemoryLeakDetector();
 
-	/* todo: ¸ù¾Ýargc/argv»ñÈ¡¹¤³ÌÂ·¾¶ */
+	/* todo: æ ¹æ®argc/argvèŽ·å–å·¥ç¨‹è·¯å¾„ */
 
-	Wuya::Logger::Init();
-	EDITOR_LOG("Wuya Kernel 1.0.0");
+	Helios::Logger::Init();
+	EDITOR_LOG("Helios Kernel 1.0.0");
 
 	// See the profiler result in: edge://tracing/
 	// More suggested: https://ui.perfetto.dev/
 	// Just Drag the json file in.
 	PROFILER_BEGIN_SESSION("Startup", "TimeCostProfiler-Startup.json");
-	auto app = Wuya::CreateApplication();
+	auto app = Helios::CreateApplication();
 	PROFILER_END_SESSION();
 
 	PROFILER_BEGIN_SESSION("Runtime", "TimeCostProfiler-Runtime.json");
 	app->Run();
 	PROFILER_END_SESSION();
 
-	Wuya::Logger::Shutdown();
+	Helios::Logger::Shutdown();
 	EndMemoryLeakDetector();
 
 	return 0;

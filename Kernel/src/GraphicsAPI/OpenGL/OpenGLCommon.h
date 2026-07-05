@@ -1,8 +1,8 @@
-#pragma once
+﻿#pragma once
 #include <glad/glad.h>
-#include "Wuya/Renderer/RenderCommon.h"
+#include "Helios/Renderer/RenderCommon.h"
 
-namespace Wuya
+namespace Helios
 {
 	/* 映射到OpenGL对应的图元类型 */
 	constexpr GLenum TranslateToOpenGLPrimitiveType(PrimitiveType type)
@@ -338,7 +338,7 @@ namespace Wuya
 		}
 	}
 
-	/* OpenGL 错误检查 */#if WUYA_DEBUG
+	/* OpenGL 错误检查 */#if HELIOS_DEBUG
 	void CheckGLError(const char* file, const char* func_name, uint32_t line) noexcept;
 	void CheckGLFrameBufferStatus(GLenum target, const char* func_name, uint32_t line) noexcept;
 	#define CHECK_GL_ERROR { CheckGLError(__FILE__, __func__, __LINE__); }

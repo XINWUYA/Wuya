@@ -1,12 +1,12 @@
-#pragma once
+﻿#pragma once
 
 #ifdef PLATFORM_MACOS
 
-#include "Wuya/Renderer/Shader.h"
+#include "Helios/Renderer/Shader.h"
 #include <Metal/Metal.hpp>
 #include <unordered_map>
 
-namespace Wuya
+namespace Helios
 {
     class MetalShader : public Shader
     {

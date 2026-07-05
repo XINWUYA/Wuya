@@ -1,8 +1,8 @@
-#include "TestApp.h"
+ï»¿#include "TestApp.h"
 #include <imgui.h>
 
-/* ³ÌĞòÖ÷Èë¿Úµã£¬ĞèÒª±£Ö¤·ÅÔÚWuya.hÖ®ºó */
-#include <Wuya/Application/EntryPoint.h>
+/* ç¨‹åºä¸»å…¥å£ç‚¹ï¼Œéœ€è¦ä¿è¯æ”¾åœ¨Wuya.hä¹‹å */
+#include <Helios/Application/EntryPoint.h>
 
 TestLayer::~TestLayer()
 {
@@ -11,18 +11,18 @@ TestLayer::~TestLayer()
 void TestLayer::OnAttached()
 {
 	// Texture
-	m_pTexture2D = Wuya::Texture2D::Create("assets/textures/container.jpg");
+	m_pTexture2D = Helios::Texture2D::Create("assets/textures/container.jpg");
 
 	// Shader
-	m_pShaderLibrary = Wuya::CreateUniquePtr<Wuya::ShaderLibrary>();
+	m_pShaderLibrary = Helios::CreateUniquePtr<Helios::ShaderLibrary>();
 	auto shader = m_pShaderLibrary->Load("assets/shaders/texture.glsl");
 	shader->Bind();
 	shader->SetInt("u_Texture", m_pTexture2D->GetTextureID());
 
-	Wuya::Renderer::Init();
+	Helios::Renderer::Init();
 
 	// Vertex Array
-	m_pVertexArray = Wuya::VertexArray::Create();
+	m_pVertexArray = Helios::VertexArray::Create();
 	m_pVertexArray->Bind();
 
 	// Triangle vertices
@@ -69,27 +69,27 @@ void TestLayer::OnAttached()
 	    -0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
 	    -0.5f,  0.5f, -0.5f,  0.0f, 1.0f
 	};
-	Wuya::SharedPtr<Wuya::VertexBuffer> vertex_buffer = Wuya::VertexBuffer::Create(vertices, sizeof(vertices));
-	Wuya::VertexBufferLayout vertex_buffer_layout = {
-		{ "a_Position", Wuya::BufferDataType::Float3 },
-		{ "a_TexCoord", Wuya::BufferDataType::Float2 }
+	Helios::SharedPtr<Helios::VertexBuffer> vertex_buffer = Helios::VertexBuffer::Create(vertices, sizeof(vertices));
+	Helios::VertexBufferLayout vertex_buffer_layout = {
+		{ "a_Position", Helios::BufferDataType::Float3 },
+		{ "a_TexCoord", Helios::BufferDataType::Float2 }
 	};
 	vertex_buffer->SetLayout(vertex_buffer_layout);
 	m_pVertexArray->AddVertexBuffer(vertex_buffer);
 
 	// Camera
-	m_pEditorCamera = Wuya::CreateUniquePtr<Wuya::EditorCamera>(30.0f);
+	m_pEditorCamera = Helios::CreateUniquePtr<Helios::EditorCamera>(30.0f);
 	m_pEditorCamera->SetDistance(5.0f);
 
 	// Uniform Buffer
-	m_pCameraCBuffer = Wuya::UniformBuffer::Create(sizeof(CameraParams), 0);
+	m_pCameraCBuffer = Helios::UniformBuffer::Create(sizeof(CameraParams), 0);
 
 	// Frame buffer
-	Wuya::FrameBufferDescription desc;
+	Helios::FrameBufferDescription desc;
 	desc.Width = 1280;
 	desc.Height = 720;
-	desc.Attachments = { Wuya::FrameBufferTargetFormat::RGBA8, Wuya::FrameBufferTargetFormat::RedInteger, Wuya::FrameBufferTargetFormat::Depth24Stencil8 };
-	m_pFrameBuffer = Wuya::FrameBuffer::Create(desc);
+	desc.Attachments = { Helios::FrameBufferTargetFormat::RGBA8, Helios::FrameBufferTargetFormat::RedInteger, Helios::FrameBufferTargetFormat::Depth24Stencil8 };
+	m_pFrameBuffer = Helios::FrameBuffer::Create(desc);
 }
 
 void TestLayer::OnDetached()
@@ -104,19 +104,19 @@ void TestLayer::OnUpdate(float delta_time)
 	m_pFrameBuffer->Bind();
 	m_pFrameBuffer->ClearColorAttachment(1, -1);
 
-	Wuya::Renderer::SetClearColor(glm::vec4(0.2f, 0.3f, 0.3f, 1.0f));
-	Wuya::Renderer::Clear();
+	Helios::Renderer::SetClearColor(glm::vec4(0.2f, 0.3f, 0.3f, 1.0f));
+	Helios::Renderer::Clear();
 
 	m_pTexture2D->Bind(m_pTexture2D->GetTextureID());
 
 	m_CameraParams.ViewProjection = m_pEditorCamera->GetViewProjectionMatrix();
 	m_pCameraCBuffer->SetData(&m_CameraParams, sizeof(CameraParams));
 
-	Wuya::Renderer::Submit(m_pShaderLibrary->GetShaderByName("texture"), m_pVertexArray);
+	Helios::Renderer::Submit(m_pShaderLibrary->GetShaderByName("texture"), m_pVertexArray);
 
 	m_pFrameBuffer->Unbind();
-	Wuya::Renderer::SetClearColor(glm::vec4(0.2f, 0.3f, 0.3f, 1.0f));
-	Wuya::Renderer::Clear();
+	Helios::Renderer::SetClearColor(glm::vec4(0.2f, 0.3f, 0.3f, 1.0f));
+	Helios::Renderer::Clear();
 }
 
 void TestLayer::OnImGuiRender()
@@ -133,5 +133,5 @@ void TestLayer::OnImGuiRender()
 
 TestApp::TestApp() : Application("004_FrameBuffer")
 {
-	PushLayer(Wuya::CreateSharedPtr<TestLayer>());
+	PushLayer(Helios::CreateSharedPtr<TestLayer>());
 }

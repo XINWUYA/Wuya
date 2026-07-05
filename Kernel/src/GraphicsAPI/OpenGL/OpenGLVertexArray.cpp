@@ -1,9 +1,9 @@
-#include "Pch.h"
+﻿#include "Pch.h"
 #include "OpenGLVertexArray.h"
 
 #include <glad/glad.h>
 
-namespace Wuya
+namespace Helios
 {
 	OpenGLVertexArray::OpenGLVertexArray()
 	{

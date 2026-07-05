@@ -1,9 +1,9 @@
-#pragma once
+﻿#pragma once
 #include <string>
 #include <glad/glad.h>
-#include "Wuya/Renderer/Texture.h"
+#include "Helios/Renderer/Texture.h"
 
-namespace Wuya
+namespace Helios
 {
 	/**
 	 * \brief 纹理类：可以是普通的纹理，也可以作为RenderBuffer

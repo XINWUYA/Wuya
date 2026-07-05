@@ -1,7 +1,7 @@
-#pragma once
-#include "Wuya/Renderer/UniformBuffer.h"
+﻿#pragma once
+#include "Helios/Renderer/UniformBuffer.h"
 
-namespace Wuya
+namespace Helios
 {
 	class OpenGLUniformBuffer : public UniformBuffer
 	{

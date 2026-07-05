@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #ifdef PLATFORM_MACOS
 
@@ -6,11 +6,11 @@
 #include <QuartzCore/QuartzCore.hpp>
 #include <glm/glm.hpp>
 #include <string>
-#include "Wuya/Core/Logger.h"
-#include "Wuya/Renderer/Buffer.h"
-#include "Wuya/Renderer/RenderCommon.h"
+#include "Helios/Core/Logger.h"
+#include "Helios/Renderer/Buffer.h"
+#include "Helios/Renderer/RenderCommon.h"
 
-namespace Wuya
+namespace Helios
 {
     /* Metal错误检查宏 */
     #define METAL_CHECK_ERROR(result, msg) \

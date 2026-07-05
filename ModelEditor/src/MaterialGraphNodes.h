@@ -1,6 +1,6 @@
-#pragma once
+ï»¿#pragma once
 
-namespace Wuya
+namespace Helios
 {
 	enum class MGNodeOperatorType : uint8_t
 	{
@@ -10,7 +10,7 @@ namespace Wuya
 		Divide
 	};
 
-	/* ½ÚµãÀàĞÍ */
+	/* èŠ‚ç‚¹ç±»å‹ */
 	enum class MaterialGraphNodeType : uint8_t
 	{
 		PBRMaterial,
@@ -24,22 +24,22 @@ namespace Wuya
 		Operator,
 	};
 
-	/* ½ÚµãÊôĞÔ */
+	/* èŠ‚ç‚¹å±æ€§ */
 	struct MaterialGraphNode
 	{
-		/* NodeÃû£¬ÓÃÓÚÏÔÊ¾ÔÚ½ÚµãÉÏ·½£¬±íÊö¸Ã½ÚµãµÄÀàĞÍ£¬Ò»°ã²»»á¸Ä¶¯ */
+		/* Nodeåï¼Œç”¨äºæ˜¾ç¤ºåœ¨èŠ‚ç‚¹ä¸Šæ–¹ï¼Œè¡¨è¿°è¯¥èŠ‚ç‚¹çš„ç±»å‹ï¼Œä¸€èˆ¬ä¸ä¼šæ”¹åŠ¨ */
 		std::string Name;
-		/* NodeÀàĞÍ */
+		/* Nodeç±»å‹ */
 		MaterialGraphNodeType NodeType;
-		/* NodeËùÊ¹ÓÃµÄÑùÊ½Ä£°å£¬»òÕßÊôÓÚs_TemplatesÖĞÒ»¸ö£¬»òÕßÒ²¿ÉÒÔ×Ô¶¨Òå */
+		/* Nodeæ‰€ä½¿ç”¨çš„æ ·å¼æ¨¡æ¿ï¼Œæˆ–è€…å±äºs_Templatesä¸­ä¸€ä¸ªï¼Œæˆ–è€…ä¹Ÿå¯ä»¥è‡ªå®šä¹‰ */
 		GraphEditor::TemplateIndex TemplateIndex;
-		/* NodeÔÚÆÁÄ»¿Õ¼äµÄÎ»ÖÃ */
+		/* Nodeåœ¨å±å¹•ç©ºé—´çš„ä½ç½® */
 		float ScreenPosX, ScreenPosY;
-		/* NodeµÄ³ß´ç */
+		/* Nodeçš„å°ºå¯¸ */
 		float Width = 200.0f, Height = 200.0f;
-		/* µ±Ç°NodeÊôÓÚ±»Ñ¡ÖĞ×´Ì¬£¬¿ÉÄÜÍ¬Ê±´æÔÚ¶à¸ö±»Ñ¡ÖĞµÄ½Úµã */
+		/* å½“å‰Nodeå±äºè¢«é€‰ä¸­çŠ¶æ€ï¼Œå¯èƒ½åŒæ—¶å­˜åœ¨å¤šä¸ªè¢«é€‰ä¸­çš„èŠ‚ç‚¹ */
 		bool IsSelected;
-		/* Ã¿¸öNode°üº¬Ò»¸öEntity£¬ ÓÃÓÚ¹ÒÔØ¸÷×ÔµÄÊôĞÔ×é¼ş */
+		/* æ¯ä¸ªNodeåŒ…å«ä¸€ä¸ªEntityï¼Œ ç”¨äºæŒ‚è½½å„è‡ªçš„å±æ€§ç»„ä»¶ */
 		entt::entity EntityHandle{ entt::null };
 	};
 
@@ -221,7 +221,7 @@ namespace Wuya
 		},
 	};
 
-	/* ½Úµã¿ÉÄÜ¹ÒÔØµÄ×é¼ş */
+	/* èŠ‚ç‚¹å¯èƒ½æŒ‚è½½çš„ç»„ä»¶ */
 	struct MGTexture2DComponent
 	{
 		SharedPtr<Texture> Texture{ nullptr };
@@ -262,7 +262,7 @@ namespace Wuya
 		glm::vec4 Color = glm::vec4(1.0f);
 	};
 
-	/* ¶àÔªµÄ¼Ó¼õ³Ë³ı£¬ ElementCntÓ¦>=2 */
+	/* å¤šå…ƒçš„åŠ å‡ä¹˜é™¤ï¼Œ ElementCntåº”>=2 */
 	struct MGOperatorComponent
 	{
 		MGNodeOperatorType OperatorType = MGNodeOperatorType::Add;

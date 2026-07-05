@@ -1,11 +1,11 @@
-#pragma once
+ï»¿#pragma once
 
-namespace Wuya
+namespace Helios
 {
 	class Scene;
 	class Entity;
 
-	/* ³¡¾°ÊµÌåÁĞ±í */
+	/* åœºæ™¯å®ä½“åˆ—è¡¨ */
 	class SceneHierarchy
 	{
 	public:
@@ -13,48 +13,48 @@ namespace Wuya
 		SceneHierarchy(const SharedPtr<Scene>& scene);
 		~SceneHierarchy() = default;
 
-		/* ËùÊô³¡¾° */
+		/* æ‰€å±åœºæ™¯ */
 		void SetOwnerScene(const SharedPtr<Scene>& scene);
-		/* »æÖÆÏà¹ØUI */
+		/* ç»˜åˆ¶ç›¸å…³UI */
 		void OnImGuiRender();
-		/* Ñ¡ÖĞÊµÌå */
+		/* é€‰ä¸­å®ä½“ */
 		const Entity& GetSelectedEntity() const { return m_SelectedEntity; }
 		void SetSelectedEntity(const Entity& entity);
 
 	private:
-		/* ³õÊ¼»¯Í¼±ê */
+		/* åˆå§‹åŒ–å›¾æ ‡ */
 		void InitIcons();
 
-		/* ÏÔÊ¾³¡¾°ÊµÌåÁĞ±íUI */
+		/* æ˜¾ç¤ºåœºæ™¯å®ä½“åˆ—è¡¨UI */
 		void ShowSceneHierarchyUI();
-		/* ÏÔÊ¾Ñ¡ÖĞÊµÌåÊôĞÔ */
+		/* æ˜¾ç¤ºé€‰ä¸­å®ä½“å±æ€§ */
 		void ShowEntityPropertiesUI();
-		/* ÏÔÊ¾ÊµÌå½Úµã£¨SceneHierarchyÖĞµÄ½Úµã£©*/
+		/* æ˜¾ç¤ºå®ä½“èŠ‚ç‚¹ï¼ˆSceneHierarchyä¸­çš„èŠ‚ç‚¹ï¼‰*/
 		void ShowEntityNode(Entity& entity);
-		/* ÏÔÊ¾ÊµÌåÊôĞÔ×é¼ş */
+		/* æ˜¾ç¤ºå®ä½“å±æ€§ç»„ä»¶ */
 		void ShowEntityComponents();
 
-		/* ÊµÌåÃû³Æ×é¼ş */
+		/* å®ä½“åç§°ç»„ä»¶ */
 		void ShowNameComponent();
-		/* Ôö¼Ó×é¼ş°´Å¥ */
+		/* å¢åŠ ç»„ä»¶æŒ‰é’® */
 		void ShowAddComponentButton();
-		/* ¿Õ¼ä±ä»»×é¼ş */
+		/* ç©ºé—´å˜æ¢ç»„ä»¶ */
 		void ShowTransformComponent();
-		/* Í¼Æ¬¾«Áé×é¼ş */
+		/* å›¾ç‰‡ç²¾çµç»„ä»¶ */
 		void ShowSpriteComponent();
-		/* ³¡¾°Ïà»ú×é¼ş */
+		/* åœºæ™¯ç›¸æœºç»„ä»¶ */
 		void ShowCameraComponent();
-		/* Ä£ĞÍ×é¼ş */
+		/* æ¨¡å‹ç»„ä»¶ */
 		void ShowModelComponent();
-		/* ¹âÔ´×é¼ş */
+		/* å…‰æºç»„ä»¶ */
 		void ShowLightComponent();
 
-		/* ËùÊô³¡¾° */
+		/* æ‰€å±åœºæ™¯ */
 		SharedPtr<Scene> m_pOwnerScene;
-		/* Ñ¡ÖĞÊµÌå */
+		/* é€‰ä¸­å®ä½“ */
 		Entity m_SelectedEntity;
 
-		/* Í¼±ê */
+		/* å›¾æ ‡ */
 		SharedPtr<Texture> m_pAddComponentIcon;
 		SharedPtr<Texture> m_pMenuIcon;
 	};

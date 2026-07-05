@@ -1,10 +1,10 @@
-#pragma once
+﻿#pragma once
 #ifdef PLATFORM_MACOS
 
-#include "Wuya/Renderer/UniformBuffer.h"
+#include "Helios/Renderer/UniformBuffer.h"
 #include <Metal/Metal.hpp>
 
-namespace Wuya
+namespace Helios
 {
     class MetalUniformBuffer : public UniformBuffer
     {

@@ -1,9 +1,9 @@
-#include "Pch.h"
+﻿#include "Pch.h"
 #include "OpenGLRenderAPI.h"
 #include "OpenGLCommon.h"
 #include <glad/glad.h>
 
-namespace Wuya
+namespace Helios
 {
 	void OpenGLMessageCallback(
 		unsigned source,
@@ -29,7 +29,7 @@ namespace Wuya
 	{
 		PROFILE_FUNCTION();
 
-#ifdef WUYA_DEBUG
+#ifdef HELIOS_DEBUG
 #ifndef __APPLE__
 		// glDebugMessageCallback requires OpenGL 4.3+, macOS only supports 4.1
 		glEnable(GL_DEBUG_OUTPUT);
@@ -204,7 +204,7 @@ namespace Wuya
 		for (auto i = 0; i < num; ++i)
 			extensions.emplace((const char*)glGetStringi(GL_EXTENSIONS, (GLuint)i));
 
-#ifdef WUYA_DEBUG
+#ifdef HELIOS_DEBUG
 		CORE_LOG_INFO("Supported Extensions:");
 		for (auto& ext : extensions)
 			CORE_LOG_INFO("- {}", ext);

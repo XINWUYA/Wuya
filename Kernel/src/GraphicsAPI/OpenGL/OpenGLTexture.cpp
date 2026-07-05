@@ -1,11 +1,11 @@
-#include "Pch.h"
+﻿#include "Pch.h"
 #include "OpenGLTexture.h"
 #include "OpenGLCommon.h"
 
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 
-namespace Wuya
+namespace Helios
 {
 	OpenGLTexture::OpenGLTexture(const std::string& name, const TextureDesc& texture_desc)
 		: Texture(name, texture_desc), m_InternalFormat(TranslateToOpenGLTextureFormat(texture_desc.Format))

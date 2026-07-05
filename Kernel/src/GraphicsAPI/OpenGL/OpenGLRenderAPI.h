@@ -1,7 +1,7 @@
-#pragma once
-#include "Wuya/Renderer/RenderAPI.h"
+﻿#pragma once
+#include "Helios/Renderer/RenderAPI.h"
 
-namespace Wuya
+namespace Helios
 {
 	class OpenGLRenderAPI : public RenderAPI
 	{

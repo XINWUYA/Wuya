@@ -1,15 +1,15 @@
-#ifdef PLATFORM_MACOS
+﻿#ifdef PLATFORM_MACOS
 
 #include "Pch.h"
 #include "MetalQuery.h"
 #include "MetalRenderAPI.h"
 #include "MetalCommon.h"
-#include "Wuya/Renderer/Renderer.h"
+#include "Helios/Renderer/Renderer.h"
 
 #import <Metal/Metal.h>
 #import <objc/message.h>
 
-namespace Wuya
+namespace Helios
 {
     /* 定义 Objective-C 消息发送函数指针类型 */
     using SampleCountersFn = void (*)(id, SEL, id, NSUInteger, BOOL);

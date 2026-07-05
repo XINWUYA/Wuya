@@ -1,12 +1,12 @@
-#ifdef PLATFORM_MACOS
+﻿#ifdef PLATFORM_MACOS
 
 #include "Pch.h"
 #include "MetalBuffer.h"
 #include "MetalCommon.h"
 #include "MetalRenderAPI.h"
-#include "Wuya/Renderer/Renderer.h"
+#include "Helios/Renderer/Renderer.h"
 
-namespace Wuya
+namespace Helios
 {
     /* MetalVertexBuffer实现 */
     MetalVertexBuffer::MetalVertexBuffer(uint32_t size)

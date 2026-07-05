@@ -1,13 +1,13 @@
-#pragma once
+ï»¿#pragma once
 #include "EditorBuiltinCamera.h"
 #include "EditorResourceBrowser.h"
 #include "ModelInfo.h"
 
-namespace Wuya
+namespace Helios
 {
-	/* Ä£ĞÍ±à¼­Æ÷
-	 * £ºÄ£ĞÍµ¼Èë
-	 * £º²ÄÖÊ±à¼­
+	/* æ¨¡å‹ç¼–è¾‘å™¨
+	 * ï¼šæ¨¡å‹å¯¼å…¥
+	 * ï¼šæè´¨ç¼–è¾‘
 	 */
 	class ModelEditorLayer final : public ILayer
 	{
@@ -21,46 +21,46 @@ namespace Wuya
 		void OnImGuiRender() override;
 		void OnEvent(IEvent* event) override;
 
-		/* ¼¤»î´°¿Ú */
+		/* æ¿€æ´»çª—å£ */
 		void Active(bool active = true) { m_IsActivated = active; }
 		bool IsActivated() const { return m_IsActivated; }
 
-		/* µ¼ÈëÄ£ĞÍ */
+		/* å¯¼å…¥æ¨¡å‹ */
 		void ImportModel();
-		/* µ¼³öÄ£ĞÍ(.mesh & .mtl) */
+		/* å¯¼å‡ºæ¨¡å‹(.mesh & .mtl) */
 		void ExportMeshAndMtl();
-		/* µ¼³öMesh */
+		/* å¯¼å‡ºMesh */
 		void ExportMesh(const std::string& path);
 
 	private:
-		/* ÏÔÊ¾Ö÷³¡¾°ÊÓ¿Ú */
+		/* æ˜¾ç¤ºä¸»åœºæ™¯è§†å£ */
 		void ShowSceneViewportUI();
-		/* ÏÔÊ¾Ä£ĞÍ±à¼­UI */
+		/* æ˜¾ç¤ºæ¨¡å‹ç¼–è¾‘UI */
 		void ShowModelParamsUI();
-		/* ÏìÓ¦ÍÏ×§ÎÄ¼şµ½Ö÷´°¿Ú */
+		/* å“åº”æ‹–æ‹½æ–‡ä»¶åˆ°ä¸»çª—å£ */
 		void OnDragItemToScene(const std::filesystem::path& path);
 
-		/* ¸üĞÂÄ£ĞÍ */
+		/* æ›´æ–°æ¨¡å‹ */
 		void UpdateModel();
-		/* ¸üĞÂ²ÄÖÊ£ºµ±ÓÃ»§ĞŞ¸ÄÊ±¸ù¾İ²ÄÖÊ²ÎÊıÉèÖÃ²ÄÖÊ */
+		/* æ›´æ–°æè´¨ï¼šå½“ç”¨æˆ·ä¿®æ”¹æ—¶æ ¹æ®æè´¨å‚æ•°è®¾ç½®æè´¨ */
 		void UpdateMaterial(const SharedPtr<Material>& material, const MaterialParams& material_params);
 
-		/* Ä¬ÈÏ³¡¾° */
+		/* é»˜è®¤åœºæ™¯ */
 		SharedPtr<Scene> m_pDefaultScene{ nullptr };
-		/* ±à¼­Æ÷Ïà»ú */
+		/* ç¼–è¾‘å™¨ç›¸æœº */
 		UniquePtr<EditorCamera> m_pEditorCamera{ nullptr };
-		/* ÊÓ¿Ú·¶Î§: x: width_min; y: height_min; z: width_max; w: height_max */
+		/* è§†å£èŒƒå›´: x: width_min; y: height_min; z: width_max; w: height_max */
 		ViewportRegion m_ViewportRegion{};
 
-		/* ´ÓÎÄ¼şÖĞ¼ÓÔØÄ£ĞÍĞÅÏ¢ */
+		/* ä»æ–‡ä»¶ä¸­åŠ è½½æ¨¡å‹ä¿¡æ¯ */
 		UniquePtr<ModelInfo> m_pModelInfo{ nullptr };
 
-		/* µ±Ç°Ä£ĞÍ */
+		/* å½“å‰æ¨¡å‹ */
 		SharedPtr<Model> m_pModel{ nullptr };
-		/* µ±Ç°Ä£ĞÍ¶ÔÓ¦µÄ²ÄÖÊ×é£¬ÆäÖĞÃ¿¸öMaterial¶ÔÓ¦Ò»¸ö×ÓÄ£ĞÍ */
+		/* å½“å‰æ¨¡å‹å¯¹åº”çš„æè´¨ç»„ï¼Œå…¶ä¸­æ¯ä¸ªMaterialå¯¹åº”ä¸€ä¸ªå­æ¨¡å‹ */
 		SharedPtr<MaterialGroup> m_pMaterialGroup{ nullptr };
 
-		/* µ±Ç°´°¿ÚÊÇ·ñ±»¼¤»î */
+		/* å½“å‰çª—å£æ˜¯å¦è¢«æ¿€æ´» */
 		bool m_IsActivated{ false };
 	};
 }

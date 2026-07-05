@@ -1,12 +1,12 @@
-#ifdef PLATFORM_MACOS
+﻿#ifdef PLATFORM_MACOS
 
 #include "Pch.h"
 #include "MetalUniformBuffer.h"
 #include "MetalCommon.h"
 #include "MetalRenderAPI.h"
-#include "Wuya/Renderer/Renderer.h"
+#include "Helios/Renderer/Renderer.h"
 
-namespace Wuya
+namespace Helios
 {
     MetalUniformBuffer::MetalUniformBuffer(uint32_t size, uint32_t binding_point)
         : m_Size(size), m_BindingPoint(binding_point)

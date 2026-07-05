@@ -1,12 +1,12 @@
-#pragma once
+ï»¿#pragma once
 #include "SceneHierarchy.h"
 #include "EditorResourceBrowser.h"
 #include "EditorBuiltinCamera.h"
 #include "EditorCommon.h"
 
-namespace Wuya
+namespace Helios
 {
-	/* Editor²ãÀà */
+	/* Editorå±‚ç±» */
 	class SceneEditorLayer final : public ILayer
 	{
 	public:
@@ -19,13 +19,13 @@ namespace Wuya
 		void OnImGuiRender() override;
 		void OnEvent(IEvent* event) override;
 
-		/* ĞÂ½¨³¡¾° */
+		/* æ–°å»ºåœºæ™¯ */
 		void NewScene();
-		/* µ¼Èë³¡¾°£ºÍ¨¹ıµ¯´°ÕÒµ½Ö¸¶¨³¡¾°ÎÄ¼ş²¢´ò¿ª */
+		/* å¯¼å…¥åœºæ™¯ï¼šé€šè¿‡å¼¹çª—æ‰¾åˆ°æŒ‡å®šåœºæ™¯æ–‡ä»¶å¹¶æ‰“å¼€ */
 		void ImportScene();
-		/* ±£´æ³¡¾° */
+		/* ä¿å­˜åœºæ™¯ */
 		void SaveScene();
-		/* ±£´æ³¡¾°µ½Ö¸¶¨Â·¾¶ */
+		/* ä¿å­˜åœºæ™¯åˆ°æŒ‡å®šè·¯å¾„ */
 		void SaveSceneAs();
 
 		void Active(bool active = true) { m_IsActivated = active; }
@@ -35,49 +35,49 @@ namespace Wuya
 		void SetPlayMode(PlayMode mode) { m_PlayMode = mode; }
 
 	private:
-		/* ¸üĞÂÊÓ¿Ú */
+		/* æ›´æ–°è§†å£ */
 		void UpdateViewport();
-		/* ÏìÓ¦¼üÅÌ */
+		/* å“åº”é”®ç›˜ */
 		bool OnKeyPressed(class KeyPressedEvent* event);
-		/* ÏìÓ¦Êó±ê */
+		/* å“åº”é¼ æ ‡ */
 		bool OnMouseButtonPressed(class MouseButtonPressedEvent* event);
-		/* ÇĞ»»ÔËĞĞÄ£Ê½ */
+		/* åˆ‡æ¢è¿è¡Œæ¨¡å¼ */
 		void OnPlayModeChanged();
-		/* ÏìÓ¦ÍÏ×§ÎÄ¼şµ½Ö÷´°¿Ú */
+		/* å“åº”æ‹–æ‹½æ–‡ä»¶åˆ°ä¸»çª—å£ */
 		void OnDragItemToScene(const std::filesystem::path& path);
 
-		/* ÏÔÊ¾Ö÷³¡¾°ÊÓ¿Ú */
+		/* æ˜¾ç¤ºä¸»åœºæ™¯è§†å£ */
 		void ShowSceneViewportUI();
-		/* ÏÔÊ¾äÖÈ¾Í³¼ÆĞÅÏ¢ */
+		/* æ˜¾ç¤ºæ¸²æŸ“ç»Ÿè®¡ä¿¡æ¯ */
 		void ShowStatisticInfoUI();
-		/* Ñ¡ÖĞEntityÊ±ÏÔÊ¾²Ù×÷Gizmo */
+		/* é€‰ä¸­Entityæ—¶æ˜¾ç¤ºæ“ä½œGizmo */
 		void ShowOperationGizmoUI();
 
-		/* Êó±êÑ¡ÖĞEntityÊ±µÄÏìÓ¦ */
+		/* é¼ æ ‡é€‰ä¸­Entityæ—¶çš„å“åº” */
 		void CheckMouseSelectEntity();
 
-		/* ±à¼­Æ÷Ïà»ú */
+		/* ç¼–è¾‘å™¨ç›¸æœº */
 		UniquePtr<EditorCamera> m_pEditorCamera{ nullptr };
 
-		/* Ö÷³¡¾° */
+		/* ä¸»åœºæ™¯ */
 		SharedPtr<Scene> m_pMainScene;
-		/* µ±Ç°³¡¾°Â·¾¶ */
+		/* å½“å‰åœºæ™¯è·¯å¾„ */
 		std::string m_ActiveScenePath{};
-		/* ³¡¾°ÊµÌå¹ÜÀí´°¿Ú */
+		/* åœºæ™¯å®ä½“ç®¡ç†çª—å£ */
 		SceneHierarchy m_SceneHierarchy;
-		/* Ñ¡ÖĞÊµÌå */
+		/* é€‰ä¸­å®ä½“ */
 		Entity m_HoveredEntity;
-		/* ÊÓ¿Ú·¶Î§: x: width_min; y: height_min; z: width_max; w: height_max */
+		/* è§†å£èŒƒå›´: x: width_min; y: height_min; z: width_max; w: height_max */
 		ViewportRegion m_ViewportRegion{};
-		/* ÊÓ¿Ú´°¿Ú±»¼¤»î */
+		/* è§†å£çª—å£è¢«æ¿€æ´» */
 		bool m_IsViewportFocused{ false };
-		/* Êó±êÍ£ÁôÔÚÊÓ¿ÚÉÏ */
+		/* é¼ æ ‡åœç•™åœ¨è§†å£ä¸Š */
 		bool m_IsViewportHovered{ false };
-		/* ÒÆ¶¯£¬Ğı×ª£¬Ëõ·ÅUI */
+		/* ç§»åŠ¨ï¼Œæ—‹è½¬ï¼Œç¼©æ”¾UI */
 		int m_GizmoType = -1;
-		/* Ä¬ÈÏÎª±à¼­Ä£Ê½ */
+		/* é»˜è®¤ä¸ºç¼–è¾‘æ¨¡å¼ */
 		PlayMode m_PlayMode{ PlayMode::Edit };
-		/* µ±Ç°±à¼­Æ÷ÊÇ·ñ±»ÆôÓÃ */
+		/* å½“å‰ç¼–è¾‘å™¨æ˜¯å¦è¢«å¯ç”¨ */
 		bool m_IsActivated{ true };
 	};
 }

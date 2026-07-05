@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.20)
+﻿cmake_minimum_required(VERSION 3.20)
 
 # Third-party libraries configuration
 
@@ -128,7 +128,7 @@ set(IMGUI_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/imgui/imgui_demo.cpp
 )
 
-# Note: We use custom ImGuiRenderer through Wuya's RHI abstraction layer,
+# Note: We use custom ImGuiRenderer through Helios's RHI abstraction layer,
 
 target_sources(ImGui PRIVATE ${IMGUI_SOURCES})
 target_include_directories(ImGui PUBLIC 

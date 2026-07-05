@@ -1,10 +1,10 @@
-#include "GraphEditor.h"
+ï»¿#include "GraphEditor.h"
 #include "MaterialGraphNodes.h"
 
-namespace Wuya
+namespace Helios
 {
-	/* ²ÄÖÊÍ¼±à¼­Æ÷Àà
-	 * ÓÃÓÚĞŞ¸Ä²ÄÖÊµÄÊµ¼ÊÊµÏÖ
+	/* æè´¨å›¾ç¼–è¾‘å™¨ç±»
+	 * ç”¨äºä¿®æ”¹æè´¨çš„å®é™…å®ç°
 	 */
 	class MaterialGraphEditor
 	{
@@ -12,80 +12,80 @@ namespace Wuya
 		MaterialGraphEditor();
 		~MaterialGraphEditor() = default;
 
-		/* ÏÔÊ¾/Òş²Ø±à¼­Æ÷ */
+		/* æ˜¾ç¤º/éšè—ç¼–è¾‘å™¨ */
 		void ShowOrHide();
 
-		/* »æÖÆÏà¹ØUI */
+		/* ç»˜åˆ¶ç›¸å…³UI */
 		void OnImGuiRenderer();
 
-		/* ĞòÁĞ»¯ */
+		/* åºåˆ—åŒ– */
 		void Serializer(const std::string& path);
-		/* ·´ĞòÁĞ»¯*/
+		/* ååºåˆ—åŒ–*/
 		void Deserializer(const std::string& path);
 
 	private:
-		/* ±£´æ²ÄÖÊ */
+		/* ä¿å­˜æè´¨ */
 		void SaveMaterial();
 
-		/* ¼Ì³ĞImGuizmoÖĞµÄGraphEditor::Delegate, ÓÃÓÚ×Ô¶¨Òå½ÚµãµÄĞĞÎª */
+		/* ç»§æ‰¿ImGuizmoä¸­çš„GraphEditor::Delegate, ç”¨äºè‡ªå®šä¹‰èŠ‚ç‚¹çš„è¡Œä¸º */
 		struct MaterialGraphEditorDelegate : public GraphEditor::Delegate
 		{
-			/* ¹¹ÔìÊ±Ö´ĞĞ */
+			/* æ„é€ æ—¶æ‰§è¡Œ */
 			MaterialGraphEditorDelegate();
-			/* Ö§³ÖÁ¬Ïß */
+			/* æ”¯æŒè¿çº¿ */
 			bool AllowedLink(GraphEditor::NodeIndex from, GraphEditor::NodeIndex to) override;
-			/* Ñ¡ÖĞ½Úµã */
+			/* é€‰ä¸­èŠ‚ç‚¹ */
 			void SelectNode(GraphEditor::NodeIndex node_index, bool selected) override;
-			/* ÒÆ¶¯Ñ¡ÖĞ½Úµã */
+			/* ç§»åŠ¨é€‰ä¸­èŠ‚ç‚¹ */
 			void MoveSelectedNodes(const ImVec2 delta) override;
-			/* Á¬Ïß */
+			/* è¿çº¿ */
 			void AddLink(GraphEditor::NodeIndex input_node_index, GraphEditor::SlotIndex input_slot_index, GraphEditor::NodeIndex output_node_index, GraphEditor::SlotIndex output_slot_index) override;
-			/* É¾³ıÁ¬Ïß */
+			/* åˆ é™¤è¿çº¿ */
 			void DelLink(GraphEditor::LinkIndex link_index) override;
-			/* ×Ô¶¨Òå»æÖÆ */
+			/* è‡ªå®šä¹‰ç»˜åˆ¶ */
 			void CustomDraw(ImDrawList* draw_list, ImRect rectangle, GraphEditor::NodeIndex node_index) override;
-			/* ÓÒ¼üÏìÓ¦ */
+			/* å³é”®å“åº” */
 			void RightClick(GraphEditor::NodeIndex node_index, GraphEditor::SlotIndex slot_index_input, GraphEditor::SlotIndex slot_index_output) override;
-			/* »ñÈ¡½ÚµãÄ£°åÊıÁ¿ */
+			/* è·å–èŠ‚ç‚¹æ¨¡æ¿æ•°é‡ */
 			const size_t GetTemplateCount() override;
-			/* »ñÈ¡Ö¸¶¨½ÚµãÄ£°å */
+			/* è·å–æŒ‡å®šèŠ‚ç‚¹æ¨¡æ¿ */
 			const GraphEditor::Template GetTemplate(GraphEditor::TemplateIndex index) override;
-			/* »ñÈ¡½ÚµãÊıÁ¿ */
+			/* è·å–èŠ‚ç‚¹æ•°é‡ */
 			const size_t GetNodeCount() override;
-			/* »ñÈ¡Ö¸¶¨½Úµã */
+			/* è·å–æŒ‡å®šèŠ‚ç‚¹ */
 			const GraphEditor::Node GetNode(GraphEditor::NodeIndex index) override;
-			/* »ñÈ¡Á¬ÏßÊıÁ¿ */
+			/* è·å–è¿çº¿æ•°é‡ */
 			const size_t GetLinkCount() override;
-			/* »ñÈ¡Ö¸¶¨Á¬Ïß */
+			/* è·å–æŒ‡å®šè¿çº¿ */
 			const GraphEditor::Link GetLink(GraphEditor::LinkIndex index) override;
-			/* ´´½¨Ò»¸öÖ¸¶¨ÀàĞÍµÄNode */
+			/* åˆ›å»ºä¸€ä¸ªæŒ‡å®šç±»å‹çš„Node */
 			MaterialGraphNode CreateNode(MaterialGraphNodeType node_type, const ImVec2& ScreenPos = ImVec2(0,0));
-			/* Çå³şËùÓĞ½ÚµãºÍÁ¬Ïß */
+			/* æ¸…æ¥šæ‰€æœ‰èŠ‚ç‚¹å’Œè¿çº¿ */
 			void ClearAll();
-			/* È«Ñ¡½Úµã */
+			/* å…¨é€‰èŠ‚ç‚¹ */
 			void SelectAllNodes();
-			/* É¾³ıÑ¡ÖĞ½Úµã */
+			/* åˆ é™¤é€‰ä¸­èŠ‚ç‚¹ */
 			void DeleteSelectedNodes();
 
-			/* ÓÒ¼ü¿Õ°×´¦ */
+			/* å³é”®ç©ºç™½å¤„ */
 			bool m_IsRightClickEmpty{ false };
-			/* ½ÚµãÁĞ±í */
+			/* èŠ‚ç‚¹åˆ—è¡¨ */
 			std::vector<MaterialGraphNode> NodeArray{};
-			/* Á¬ÏßÁĞ±í */
+			/* è¿çº¿åˆ—è¡¨ */
 			std::vector<GraphEditor::Link> LinkArray{};
 			/* Registry */
 			entt::registry Registry{};
 		};
 
-		/* ÊÇ·ñÏÔÊ¾ */
+		/* æ˜¯å¦æ˜¾ç¤º */
 		bool m_IsShow{ false };
-		/* Â·¾¶ */
+		/* è·¯å¾„ */
 		std::string m_Path{};
-		/* ÏÔÊ¾Ñ¡Ïî */
+		/* æ˜¾ç¤ºé€‰é¡¹ */
 		GraphEditor::Options m_Options{};
 		GraphEditor::ViewState m_ViewState{};
 		GraphEditor::FitOnScreen m_FitMode{ GraphEditor::Fit_AllNodes };
-		/* ×Ô¶¨ÒåµÄÎ¯ÍĞ */
+		/* è‡ªå®šä¹‰çš„å§”æ‰˜ */
 		MaterialGraphEditorDelegate m_Delegate{};
 	};
 }

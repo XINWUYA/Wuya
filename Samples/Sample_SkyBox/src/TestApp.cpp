@@ -1,7 +1,7 @@
-#include "TestApp.h"
+﻿#include "TestApp.h"
 #include "SampleSkyBox.h"
 
-namespace Wuya
+namespace Helios
 {
 TestApp::TestApp() : Application("Sample_SkyBox")
 {

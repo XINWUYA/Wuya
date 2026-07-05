@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.20)
+﻿cmake_minimum_required(VERSION 3.20)
 
 project(Editor LANGUAGES CXX)
 
@@ -53,9 +53,9 @@ target_link_libraries(Editor
 # Build configuration specific settings
 target_compile_definitions(Editor
     PRIVATE
-        $<$<CONFIG:Debug>:WUYA_DEBUG>
-        $<$<CONFIG:Release>:WUYA_RELEASE>
-        $<$<CONFIG:Shipping>:WUYA_SHIPPING>
+        $<$<CONFIG:Debug>:HELIOS_DEBUG>
+        $<$<CONFIG:Release>:HELIOS_RELEASE>
+        $<$<CONFIG:Shipping>:HELIOS_SHIPPING>
 )
 
 # Output directory

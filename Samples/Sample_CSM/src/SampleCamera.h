@@ -1,9 +1,9 @@
-#pragma once
-#include <Wuya.h>
+ï»¿#pragma once
+#include <Helios.h>
 
-namespace Wuya
+namespace Helios
 {
-	/* ÄÚ½¨Ïà»úÀà */
+	/* å†…å»ºç›¸æœºç±» */
 	class SampleCamera final : public Camera
 	{
 	public:
@@ -13,21 +13,21 @@ namespace Wuya
 		void OnUpdate(float delta_time);
 		void OnEvent(class IEvent* event) {}
 
-		/* ÉèÖÃÊÓ¿ÚÇøÓò */
+		/* è®¾ç½®è§†å£åŒºåŸŸ */
 		void SetViewportRegion(const ViewportRegion& region);
 		[[nodiscard]]
 		const ViewportRegion& GetViewportRegion() const { return m_ViewportRegion; }
 
-		/* ÉèÖÃ¾Û½¹Ä£Ê½ */
+		/* è®¾ç½®èšç„¦æ¨¡å¼ */
 		[[nodiscard]]
 		bool IsFocus() const { return m_IsFocus; }
 		void SetFocus(bool focus) { m_IsFocus = focus; }
 
-		/* Ïà»ú¾àÀë */
+		/* ç›¸æœºè·ç¦» */
 		void SetDistance(float distance) { m_Distance = distance; m_IsDirty = true; }
 		[[nodiscard]]
 		float GetDistance() const { return m_Distance; }
-		/* ÒÆ¶¯ËÙ¶È */
+		/* ç§»åŠ¨é€Ÿåº¦ */
 		void SetMoveSpeed(float speed) { m_MoveSpeed = speed; }
 		[[nodiscard]]
 		float GetMoveSpeed() const { return m_MoveSpeed; }
@@ -45,17 +45,17 @@ namespace Wuya
 		void SetViewMatrix(const glm::mat4& view_mat);
 
 	private:
-		/* ¹¹½¨ÄÚÖÃµÄFrameGraph */
+		/* æ„å»ºå†…ç½®çš„FrameGraph */
 		void ConstructRenderView() override;
 
 		void UpdateProjectionMatrix();
 		void UpdateViewMatrix();
 		void UpdateCameraDirections();
 
-		// ¾Û½¹Ä£Ê½
-		void OnMousePan(const glm::vec2& delta); // ÕûÌåÆ½ÒÆ
-		void OnMouseRotate(const glm::vec2& delta); // ÈÆ¾Û½¹ÖĞĞÄĞı×ª
-		void OnMouseZoom(float delta); // À­Ô¶À­½ü
+		// èšç„¦æ¨¡å¼
+		void OnMousePan(const glm::vec2& delta); // æ•´ä½“å¹³ç§»
+		void OnMouseRotate(const glm::vec2& delta); // ç»•èšç„¦ä¸­å¿ƒæ—‹è½¬
+		void OnMouseZoom(float delta); // æ‹‰è¿œæ‹‰è¿‘
 
 		[[nodiscard]]
 		glm::vec2 PanSpeed() const;
@@ -65,22 +65,22 @@ namespace Wuya
 		float ZoomSpeed() const;
 
 		float m_Pitch{ 0.0f }, m_Yaw{ 0.0f };
-		/* Ïà»úÎ»ÖÃ */
+		/* ç›¸æœºä½ç½® */
 		float m_Distance{ 10.0f };
-		/* Ïà»úÒÆ¶¯ËÙ¶È */
+		/* ç›¸æœºç§»åŠ¨é€Ÿåº¦ */
 		float m_MoveSpeed{ 1.0f };
 
-		/* ÊÇ·ñÆôÓÃ¾Û½¹Ä£Ê½ */
+		/* æ˜¯å¦å¯ç”¨èšç„¦æ¨¡å¼ */
 		bool m_IsFocus{ true };
-		/* ÊÇ·ñĞèÒª¸üĞÂ±ä»»¾ØÕó */
+		/* æ˜¯å¦éœ€è¦æ›´æ–°å˜æ¢çŸ©é˜µ */
 		bool m_IsDirty{ true };
-		/* ÊÇ·ñĞèÒªÖØĞÂ¹¹½¨FrameGraph */
+		/* æ˜¯å¦éœ€è¦é‡æ–°æ„å»ºFrameGraph */
 		bool m_IsFrameGraphDirty = true;
 
 		glm::vec3 m_FocalPoint{ 0.0f, 0.0f, 0.0f };
 		glm::vec2 m_LastMousePosition{ 0.0f, 0.0f };
 
-		/* ÊÓ¿ÚÇøÓò */
+		/* è§†å£åŒºåŸŸ */
 		ViewportRegion m_ViewportRegion{};
 	};
 }

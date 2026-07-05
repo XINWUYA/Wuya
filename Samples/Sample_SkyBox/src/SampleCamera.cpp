@@ -1,11 +1,11 @@
-#include "Pch.h"
+ï»¿#include "Pch.h"
 #include "SampleCamera.h"
 #include <glm/gtx/quaternion.hpp>
 
-#include "Wuya/Application/Application.h"
-#include "Wuya/ImGui/ImGuiLayer.h"
+#include "Helios/Application/Application.h"
+#include "Helios/ImGui/ImGuiLayer.h"
 
-namespace Wuya
+namespace Helios
 {
 	SampleCamera::SampleCamera(const std::string& name, float fov, float aspect_ratio, float near_clip, float far_clip)
 		: Camera(name, fov, aspect_ratio, near_clip, far_clip)
@@ -48,7 +48,7 @@ namespace Wuya
 		{
 			if (Input::IsMouseButtonPressed(Mouse::ButtonRight))
 			{
-				/* ÏòÇ°/Ïòºó */
+				/* å‘å‰/å‘å */
 				if (Input::IsKeyPressed(Key::W))
 				{
 					m_Position -= m_ForwardDirection * m_MoveSpeed * delta_time;
@@ -60,7 +60,7 @@ namespace Wuya
 					m_IsDirty = true;
 				}
 
-				/* Ïò×ó/ÏòÓÒ */
+				/* å‘å·¦/å‘å³ */
 				if (Input::IsKeyPressed(Key::A))
 				{
 					m_Position -= m_RightDirection * m_MoveSpeed * delta_time;
@@ -72,7 +72,7 @@ namespace Wuya
 					m_IsDirty = true;
 				}
 
-				/* ÏòÉÏ/ÏòÏÂ */
+				/* å‘ä¸Š/å‘ä¸‹ */
 				if (Input::IsKeyPressed(Key::Q))
 				{
 					m_Position += m_UpDirection * m_MoveSpeed * delta_time;
@@ -89,7 +89,7 @@ namespace Wuya
 		UpdateViewMatrix();
 	}
 
-	/* ÉèÖÃÊÓ¿ÚÇøÓò */
+	/* è®¾ç½®è§†å£åŒºåŸŸ */
 	void SampleCamera::SetViewportRegion(const ViewportRegion& region)
 	{
 		PROFILE_FUNCTION();
@@ -100,11 +100,11 @@ namespace Wuya
 		m_AspectRatio = static_cast<float>(m_ViewportRegion.Width) / static_cast<float>(m_ViewportRegion.Height);
 		UpdateProjectionMatrix();
 
-		/* ¸üĞÂÊÓ¿ÚÇøÓòÊ±£¬ĞèÖØĞÂ¹¹½¨FrameGraph, ±£Ö¤RenderTargetµÄsizeÊÇÕıÈ·µÄ */
+		/* æ›´æ–°è§†å£åŒºåŸŸæ—¶ï¼Œéœ€é‡æ–°æ„å»ºFrameGraph, ä¿è¯RenderTargetçš„sizeæ˜¯æ­£ç¡®çš„ */
 		m_IsFrameGraphDirty = true;
 	}
 
-	/* ¹¹½¨ÄÚÖÃµÄFrameGraph */
+	/* æ„å»ºå†…ç½®çš„FrameGraph */
 	void SampleCamera::ConstructRenderView()
 	{
 		PROFILE_FUNCTION();
@@ -163,7 +163,7 @@ namespace Wuya
 				render_api->PopDebugGroup();
 			});
 
-		/* Ã¥Â°Â†ImGuiÃ¦Â¸Â²Ã¦ÂŸÂ“Ã¤Â½ÂœÃ¤Â¸ÂºFrameGraphÃ§ÂšÂ„Ã¦ÂœÂ€Ã¥ÂÂÃ¤Â¸Â€Ã¤Â¸ÂªPass */
+		/* æ°“æ³è ImGuiå¿™èµ‚è™å¿™è¼è¯ç›²é™†è¹ç›²èµ‚æ½FrameGraphè½è·èå¿™è¹è™æ°“è¬è¨ç›²èµ‚è™ç›²èµ‚é™‹Pass */
 		if (const auto& imgui_layer = Application::Instance()->GetImGuiLayer())
 		{
 			imgui_layer->AddFrameGraphPass(*frame_graph);
@@ -188,8 +188,8 @@ namespace Wuya
 		{
 			m_ViewMatrix = view_mat;
 
-			/* ¸ù¾İViewMatrix»Ö¸´PitchºÍYaw */
-			/* todo£º Êı¾İÎ´»Ö¸´È«£¬ÈÔ´æÔÚÎÊÌâ£¬ĞèÒªÖØĞÂÎ¬»¤Õâ²¿·Ö */
+			/* æ ¹æ®ViewMatrixæ¢å¤Pitchå’ŒYaw */
+			/* todoï¼š æ•°æ®æœªæ¢å¤å…¨ï¼Œä»å­˜åœ¨é—®é¢˜ï¼Œéœ€è¦é‡æ–°ç»´æŠ¤è¿™éƒ¨åˆ† */
 			const auto orientation = glm::toQuat(view_mat);
 			const glm::vec3 euler_angles = glm::eulerAngles(orientation);
 			m_Pitch = -euler_angles.x;
@@ -215,7 +215,7 @@ namespace Wuya
 		{
 			if (m_IsFocus)
 			{
-				m_Position = m_FocalPoint - m_ForwardDirection * m_Distance; /* Ïà»úÊ¼ÖÕÎ§ÈÆ¾Û½¹µã */
+				m_Position = m_FocalPoint - m_ForwardDirection * m_Distance; /* ç›¸æœºå§‹ç»ˆå›´ç»•èšç„¦ç‚¹ */
 				m_ViewMatrix = glm::translate(glm::mat4(1.0f), m_Position) * glm::toMat4(GetOrientation());
 				m_ViewMatrix = glm::inverse(m_ViewMatrix);
 			}

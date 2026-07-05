@@ -1,8 +1,8 @@
-#include "Pch.h"
+﻿#include "Pch.h"
 #include "OpenGLUniformBuffer.h"
 #include <glad/glad.h>
 
-namespace Wuya
+namespace Helios
 {
 	OpenGLUniformBuffer::OpenGLUniformBuffer(uint32_t size, uint32_t binding_point)
 	{

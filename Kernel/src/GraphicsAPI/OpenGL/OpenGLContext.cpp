@@ -1,9 +1,9 @@
-#include "Pch.h"
+﻿#include "Pch.h"
 #include "OpenGLContext.h"
 #include <GLFW/glfw3.h>
 #include <glad/glad.h>
 
-namespace Wuya
+namespace Helios
 {
 	OpenGLContext::OpenGLContext(GLFWwindow* window)
 		: m_pGLFWWindow(window)
@@ -37,7 +37,7 @@ namespace Wuya
 
 
 		/* 创建DebugOutput回调 */
-#ifdef WUYA_DEBUG
+#ifdef HELIOS_DEBUG
 		int flags;
 		glGetIntegerv(GL_CONTEXT_FLAGS, &flags);
 		if (flags & GL_CONTEXT_FLAG_DEBUG_BIT)

@@ -1,7 +1,7 @@
-#pragma once
-#include "Wuya/Renderer/Buffer.h"
+﻿#pragma once
+#include "Helios/Renderer/Buffer.h"
 
-namespace Wuya
+namespace Helios
 {
 	class OpenGLVertexBuffer : public VertexBuffer
 	{

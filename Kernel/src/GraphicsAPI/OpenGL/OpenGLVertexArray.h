@@ -1,7 +1,7 @@
-#pragma once
-#include "Wuya/Renderer/VertexArray.h"
+﻿#pragma once
+#include "Helios/Renderer/VertexArray.h"
 
-namespace Wuya
+namespace Helios
 {
 	class OpenGLVertexArray : public VertexArray
 	{

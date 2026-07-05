@@ -1,7 +1,7 @@
-#pragma once
-#include <Wuya.h>
+﻿#pragma once
+#include <Helios.h>
 
-class TestLayer : public Wuya::ILayer
+class TestLayer : public Helios::ILayer
 {
 public:
 	~TestLayer() override;
@@ -9,21 +9,21 @@ public:
 	void OnDetached() override;
 	void OnUpdate(float delta_time) override;
 	void OnImGuiRender() override;
-	void OnEvent(Wuya::IEvent* event) override;
+	void OnEvent(Helios::IEvent* event) override;
 
 private:
-	Wuya::SharedPtr<Wuya::VertexArray> m_pVertexArray;
-	Wuya::UniquePtr<Wuya::ShaderLibrary> m_pShaderLibrary;
+	Helios::SharedPtr<Helios::VertexArray> m_pVertexArray;
+	Helios::UniquePtr<Helios::ShaderLibrary> m_pShaderLibrary;
 };
 
-class TestApp : public Wuya::Application
+class TestApp : public Helios::Application
 {
 public:
 	TestApp();
 	~TestApp() override {}
 };
 
-Wuya::UniquePtr<Wuya::Application> Wuya::CreateApplication()
+Helios::UniquePtr<Helios::Application> Helios::CreateApplication()
 {
-	return Wuya::CreateUniquePtr<TestApp>();
+	return Helios::CreateUniquePtr<TestApp>();
 }

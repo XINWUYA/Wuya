@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 /* Ensure Windows Visual Studio correctly handles UTF-8 encoded source files */
 #ifdef _MSC_VER
@@ -38,9 +38,9 @@
 #include <entt/entt.hpp>
 
 /* === Engine Common (included by almost every module) === */
-#include "WuyaConfig.h"
-#include "Wuya/Common/Utils.h"
-#include "Wuya/Common/Common.h"
-#include "Wuya/Common/Assert.h"
-#include "Wuya/Core/Logger.h"
-#include "Wuya/Core/Profiler.h"
+#include "HeliosConfig.h"
+#include "Helios/Common/Utils.h"
+#include "Helios/Common/Common.h"
+#include "Helios/Common/Assert.h"
+#include "Helios/Core/Logger.h"
+#include "Helios/Core/Profiler.h"

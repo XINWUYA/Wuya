@@ -1,9 +1,9 @@
-#!/bin/bash
+﻿#!/bin/bash
 
 # Generate CMake project files for macOS
 
 echo "========================================"
-echo "Wuya CMake Project Generator (macOS)"
+echo "Helios CMake Project Generator (macOS)"
 echo "========================================"
 echo ""
 
@@ -59,7 +59,7 @@ echo "Build directory: build"
 echo "========================================"
 echo ""
 echo "Next steps:"
-echo "  1. Open build/Wuya.xcodeproj (if using Xcode)"
+echo "  1. Open build/Helios.xcodeproj (if using Xcode)"
 echo "  2. Build the project in your IDE"
 echo "  Or use: cmake --build build --config Debug"
 echo ""

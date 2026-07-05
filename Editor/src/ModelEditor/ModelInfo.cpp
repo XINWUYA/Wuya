@@ -1,9 +1,9 @@
-#include "Pch.h"
+ï»¿#include "Pch.h"
 #include "ModelInfo.h"
 
-namespace Wuya
+namespace Helios
 {
-	/* ¼ÓÔØObjÄ£ĞÍĞÅÏ¢ */
+	/* åŠ è½½Objæ¨¡å‹ä¿¡æ¯ */
 	void ModelInfo::LoadFromObj(const std::string& filepath)
 	{
 		if (filepath.empty())
@@ -12,9 +12,9 @@ namespace Wuya
 		}
 
 		m_Path = filepath;
-		const std::string basedir = ExtractFileBaseDir(filepath); /* Ä£ĞÍËùÔÚÂ·¾¶ */
+		const std::string basedir = ExtractFileBaseDir(filepath); /* æ¨¡å‹æ‰€åœ¨è·¯å¾„ */
 
-		/* ¼ÓÔØÄ£ĞÍÊı¾İ */
+		/* åŠ è½½æ¨¡å‹æ•°æ® */
 		std::string warn, err;
 		bool ret = tinyobj::LoadObj(&m_Attributes, &m_Shapes, &m_Materials, &warn, &err, filepath.c_str(), basedir.c_str());
 
@@ -24,8 +24,8 @@ namespace Wuya
 		if (!err.empty())
 			EDITOR_LOG_ERROR("Load Obj Error: {}.", err);
 
-#if WUYA_DEBUG
-		/* ´òÓ¡Ä£ĞÍĞÅÏ¢ */
+#if HELIOS_DEBUG
+		/* æ‰“å°æ¨¡å‹ä¿¡æ¯ */
 		EDITOR_LOG_DEBUG("Loading Obj: {}", filepath);
 		EDITOR_LOG_DEBUG("Vertices  : {}", m_Attributes.vertices.size() / 3);
 		EDITOR_LOG_DEBUG("Normals   : {}", m_Attributes.normals.size() / 3);
@@ -34,7 +34,7 @@ namespace Wuya
 		EDITOR_LOG_DEBUG("Materials : {}", m_Materials.size());
 #endif
 
-		/* Ã¿¸öShape¶ÔÓ¦Ò»¸öMeshSegment */
+		/* æ¯ä¸ªShapeå¯¹åº”ä¸€ä¸ªMeshSegment */
 		for (size_t shape_idx = 0; shape_idx < m_Shapes.size(); ++shape_idx)
 		{
 			const auto& shape_data = m_Shapes[shape_idx];
@@ -42,29 +42,29 @@ namespace Wuya
 			SharedPtr<SubModelInfo> sub_model_info = CreateSharedPtr<SubModelInfo>();
 			sub_model_info->Name = shape_data.name;
 
-			/* ¼ÇÂ¼AABBĞÅÏ¢ */
+			/* è®°å½•AABBä¿¡æ¯ */
 			auto aabb_min = glm::vec3(std::numeric_limits<float>::max());
 			auto aabb_max = glm::vec3(-std::numeric_limits<float>::max());
 
 			const auto face_count = shape_data.mesh.indices.size() / 3;
 			for (size_t face_idx = 0; face_idx < face_count; ++face_idx)
 			{
-				/* Èı½ÇĞÎÃæÆ¬µÄ3¸ö¶¥µãË÷Òı */
+				/* ä¸‰è§’å½¢é¢ç‰‡çš„3ä¸ªé¡¶ç‚¹ç´¢å¼• */
 				auto index0 = shape_data.mesh.indices[face_idx * 3 + 0];
 				auto index1 = shape_data.mesh.indices[face_idx * 3 + 1];
 				auto index2 = shape_data.mesh.indices[face_idx * 3 + 2];
 
-				/* ÊÕ¼¯3¸ö¶¥µã×ø±ê */
+				/* æ”¶é›†3ä¸ªé¡¶ç‚¹åæ ‡ */
 				ASSERT(index0.vertex_index >= 0 && index1.vertex_index >= 0 && index2.vertex_index >= 0);
 				float vertex[3][3];
 				for (int i = 0; i < 3; ++i)
 				{
-					/* x->y->zÖµÒÀ´Î»ñÈ¡ */
+					/* x->y->zå€¼ä¾æ¬¡è·å– */
 					vertex[0][i] = m_Attributes.vertices[index0.vertex_index * 3 + i];
 					vertex[1][i] = m_Attributes.vertices[index1.vertex_index * 3 + i];
 					vertex[2][i] = m_Attributes.vertices[index2.vertex_index * 3 + i];
 
-					/* ¼ÇÂ¼AABB */
+					/* è®°å½•AABB */
 					aabb_min[i] = std::min(vertex[0][i], aabb_min[i]);
 					aabb_min[i] = std::min(vertex[1][i], aabb_min[i]);
 					aabb_min[i] = std::min(vertex[2][i], aabb_min[i]);
@@ -73,7 +73,7 @@ namespace Wuya
 					aabb_max[i] = std::max(vertex[2][i], aabb_max[i]);
 				}
 
-				/* ÊÕ¼¯3¸ö¶¥µã·¨Ïß */
+				/* æ”¶é›†3ä¸ªé¡¶ç‚¹æ³•çº¿ */
 				float normal[3][3];
 				bool invalid_normal = false;
 				if (!m_Attributes.normals.empty())
@@ -86,7 +86,7 @@ namespace Wuya
 					{
 						for (int i = 0; i < 3; ++i)
 						{
-							/* x->y->zÖµÒÀ´Î»ñÈ¡ */
+							/* x->y->zå€¼ä¾æ¬¡è·å– */
 							normal[0][i] = m_Attributes.normals[index0.normal_index * 3 + i];
 							normal[1][i] = m_Attributes.normals[index1.normal_index * 3 + i];
 							normal[2][i] = m_Attributes.normals[index2.normal_index * 3 + i];
@@ -96,24 +96,24 @@ namespace Wuya
 
 				if (invalid_normal)
 				{
-					/* todo: Éú³É·¨Ïß */
+					/* todo: ç”Ÿæˆæ³•çº¿ */
 				}
 
-				/* ÊÕ¼¯3¸ö¶¥µãÑÕÉ« */
+				/* æ”¶é›†3ä¸ªé¡¶ç‚¹é¢œè‰² */
 				float color[3][3];
-				memset(color, 1.0f, 9 * sizeof(float)); /* Ä¬ÈÏÎª°×É« */
+				memset(color, 1.0f, 9 * sizeof(float)); /* é»˜è®¤ä¸ºç™½è‰² */
 				if (!m_Attributes.colors.empty())
 				{
 					for (int i = 0; i < 3; ++i)
 					{
-						/* x->y->zÖµÒÀ´Î»ñÈ¡ */
+						/* x->y->zå€¼ä¾æ¬¡è·å– */
 						color[0][i] = m_Attributes.colors[index0.vertex_index * 3 + i];
 						color[1][i] = m_Attributes.colors[index1.vertex_index * 3 + i];
 						color[2][i] = m_Attributes.colors[index2.vertex_index * 3 + i];
 					}
 				}
 
-				/* ÊÕ¼¯3¸ö¶¥µãuv */
+				/* æ”¶é›†3ä¸ªé¡¶ç‚¹uv */
 				float uv[3][2];
 				memset(uv, 0.0f, 6 * sizeof(float));
 				if (!m_Attributes.texcoords.empty())
@@ -129,10 +129,10 @@ namespace Wuya
 					}
 				}
 
-				/* ¼ÆËãÇĞÏß */
+				/* è®¡ç®—åˆ‡çº¿ */
 				float tangent[3][4];
 				memset(tangent, 0.0f, 12 * sizeof(float));
-				if (!m_Attributes.texcoords.empty()) /* È·±£´æÔÚuvÊı¾İ */
+				if (!m_Attributes.texcoords.empty()) /* ç¡®ä¿å­˜åœ¨uvæ•°æ® */
 				{
 					// Ref: https://learnopengl-cn.github.io/05%20Advanced%20Lighting/04%20Normal%20Mapping/#_3
 					glm::vec3 v0 = glm::vec3(vertex[0][0], vertex[0][1], vertex[0][2]);
@@ -229,7 +229,7 @@ namespace Wuya
 
 			m_SubModelInfos.emplace_back(sub_model_info);
 
-			/* ¸üĞÂÄ£ĞÍÕûÌåµÄAABB */
+			/* æ›´æ–°æ¨¡å‹æ•´ä½“çš„AABB */
 			m_AABB.first.x = std::min(m_AABB.first.x, aabb_min.x);
 			m_AABB.first.y = std::min(m_AABB.first.y, aabb_min.y);
 			m_AABB.first.z = std::min(m_AABB.first.z, aabb_min.z);
@@ -239,7 +239,7 @@ namespace Wuya
 		}
 	}
 
-	/* ÖØÖÃÊı¾İ */
+	/* é‡ç½®æ•°æ® */
 	void ModelInfo::Reset()
 	{
 		m_Shapes.clear();

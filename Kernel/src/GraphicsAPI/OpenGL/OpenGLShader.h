@@ -1,8 +1,8 @@
-#pragma once
+﻿#pragma once
 #include <glad/glad.h>
-#include "Wuya/Renderer/Shader.h"
+#include "Helios/Renderer/Shader.h"
 
-namespace Wuya
+namespace Helios
 {
 	class OpenGLShader : public Shader
 	{

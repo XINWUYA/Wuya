@@ -1,7 +1,7 @@
-#pragma once
-#include <Wuya.h>
+﻿#pragma once
+#include <Helios.h>
 
-namespace Wuya
+namespace Helios
 {
 
 class TestApp : public Application

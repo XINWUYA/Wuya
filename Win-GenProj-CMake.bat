@@ -1,11 +1,11 @@
-@echo off
+﻿@echo off
 REM Generate CMake project files for Windows
 
 REM Enable delayed expansion for safe variable expansion inside blocks
 setlocal enabledelayedexpansion
 
 echo ========================================
-echo Wuya CMake Project Generator (Windows)
+echo Helios CMake Project Generator (Windows)
 echo ========================================
 echo.
 
@@ -106,19 +106,16 @@ goto parse_args
 
 REM ----------------------------------------------------------------------
 REM Determine generator if not manually specified
+REM Default to Visual Studio on Windows. Ninja must be requested explicitly.
 REM ----------------------------------------------------------------------
 if not defined GENERATOR (
     if not defined DETECTED_VS (
         echo.
-        echo WARNING: No Visual Studio installation detected!
-        echo.
-        echo Options:
-        echo   1. Install Visual Studio 2017 or later
-        echo   2. Use Ninja build system: %~nx0 ninja
-        echo   3. Manually specify VS version: %~nx0 vs2022
-        echo.
-        set GENERATOR=Ninja
-        echo Falling back to Ninja generator...
+        echo ERROR: No Visual Studio installation detected.
+        echo        Visual Studio is the default generator on Windows.
+        echo        Install Visual Studio 2017 or later, or explicitly use Ninja:
+        echo          %~nx0 ninja
+        exit /b 1
     ) else (
         echo Auto-detected Visual Studio: !DETECTED_VS!
 
@@ -139,7 +136,7 @@ REM ----------------------------------------------------------------------
 REM Validate that the selected CMake actually supports the chosen generator
 REM ----------------------------------------------------------------------
 set GENERATOR_SUPPORTED=
-set CMAKE_HELP_FILE=%TEMP%\WuyaCMakeHelp_%RANDOM%.txt
+set CMAKE_HELP_FILE=%TEMP%\HeliosCMakeHelp_%RANDOM%.txt
 !CMAKE_EXE! --help > "!CMAKE_HELP_FILE!" 2>nul
 findstr /C:"!GENERATOR!" "!CMAKE_HELP_FILE!" >nul 2>&1
 if !ERRORLEVEL! equ 0 set GENERATOR_SUPPORTED=1
@@ -226,7 +223,7 @@ echo ========================================
 echo.
 echo Next steps:
 if not "!GENERATOR!"=="Ninja" (
-    echo   1. Open build\Wuya.slnx in Visual Studio
+    echo   1. Open build\Helios.slnx in Visual Studio
     echo   2. Build the solution in your IDE
 )
 echo   Or use: cmake --build build --config !BUILD_TYPE!

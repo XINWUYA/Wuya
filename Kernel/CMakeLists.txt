@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.20)
+﻿cmake_minimum_required(VERSION 3.20)
 
 project(Kernel LANGUAGES CXX)
 
@@ -16,7 +16,7 @@ set(PCH_HEADER "${CMAKE_CURRENT_SOURCE_DIR}/src/Pch.h")
 
 # Copy TracyClient.cpp before build and insert Pch.h
 set(TRACY_CLIENT_SRC "${CMAKE_SOURCE_DIR}/Libraries/ThirdParty/tracy/public/TracyClient.cpp")
-set(TRACY_CLIENT_DST "${CMAKE_CURRENT_SOURCE_DIR}/src/Wuya/Tracy/TracyClient.cpp")
+set(TRACY_CLIENT_DST "${CMAKE_CURRENT_SOURCE_DIR}/src/Helios/Tracy/TracyClient.cpp")
 
 add_custom_command(
     OUTPUT ${TRACY_CLIENT_DST}
@@ -45,7 +45,7 @@ endif()
 target_include_directories(Kernel
     PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}/src
-        ${CMAKE_BINARY_DIR}  # For WuyaConfig.h
+        ${CMAKE_BINARY_DIR}  # For HeliosConfig.h
     PRIVATE
         ${CMAKE_SOURCE_DIR}/Libraries/ThirdParty/spdlog/include
         ${CMAKE_SOURCE_DIR}/Libraries/ThirdParty/debugbreak
@@ -121,9 +121,9 @@ endif()
 # Build configuration specific settings
 target_compile_definitions(Kernel
     PRIVATE
-        $<$<CONFIG:Debug>:WUYA_DEBUG>
-        $<$<CONFIG:Release>:WUYA_RELEASE>
-        $<$<CONFIG:Shipping>:WUYA_SHIPPING>
+        $<$<CONFIG:Debug>:HELIOS_DEBUG>
+        $<$<CONFIG:Release>:HELIOS_RELEASE>
+        $<$<CONFIG:Shipping>:HELIOS_SHIPPING>
 )
 
 # Output directory
@@ -140,8 +140,8 @@ elseif(APPLE)
     # Files that need to be compiled as Objective-C++ on macOS
     # (FileDialog uses Cocoa NSOpenPanel; ImGuiLayer/MetalQuery use Metal APIs)
     set(KERNEL_OBJCXX_SOURCES
-        "${CMAKE_CURRENT_SOURCE_DIR}/src/Wuya/Application/FileDialog.cpp"
-        "${CMAKE_CURRENT_SOURCE_DIR}/src/Wuya/ImGui/ImGuiLayer.cpp"
+        "${CMAKE_CURRENT_SOURCE_DIR}/src/Helios/Application/FileDialog.cpp"
+        "${CMAKE_CURRENT_SOURCE_DIR}/src/Helios/ImGui/ImGuiLayer.cpp"
         "${CMAKE_CURRENT_SOURCE_DIR}/src/GraphicsAPI/Metal/MetalQuery.cpp"
     )
     set_source_files_properties(${KERNEL_OBJCXX_SOURCES} PROPERTIES

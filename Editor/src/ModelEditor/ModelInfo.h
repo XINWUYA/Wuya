@@ -1,9 +1,9 @@
-#pragma once
+ï»¿#pragma once
 #include <tiny_obj_loader.h>
 
-namespace Wuya
+namespace Helios
 {
-	/* Ä£ĞÍ²ÄÖÊ²ÎÊı£¬°üÀ¨ÎÆÀíºÍÑÕÉ«µÈ */
+	/* æ¨¡å‹æè´¨å‚æ•°ï¼ŒåŒ…æ‹¬çº¹ç†å’Œé¢œè‰²ç­‰ */
 	struct MaterialParams
 	{
 		/* Name */
@@ -46,40 +46,40 @@ namespace Wuya
 		float IOR;
 	};
 
-	/* ×ÓÄ£ĞÍĞÅÏ¢ */
+	/* å­æ¨¡å‹ä¿¡æ¯ */
 	struct SubModelInfo
 	{
 		std::string Name;
 		SharedPtr<VertexArray> VertexArray;
-		std::vector<float> VertexData; /* ¶¥µãÊı¾İµÄÔ­Ê¼ĞÅÏ¢£¬±£´æÄ£ĞÍÊ±ĞèÒª */
+		std::vector<float> VertexData; /* é¡¶ç‚¹æ•°æ®çš„åŸå§‹ä¿¡æ¯ï¼Œä¿å­˜æ¨¡å‹æ—¶éœ€è¦ */
 		MaterialParams MaterialParams;
 		std::pair<glm::vec3, glm::vec3> AABB;
 	};
 
-	/* ¼ÓÔØÄ£ĞÍÔ­Ê¼ÎÄ¼ş£¨Obj£© */
+	/* åŠ è½½æ¨¡å‹åŸå§‹æ–‡ä»¶ï¼ˆObjï¼‰ */
 	class ModelInfo final
 	{
 	public:
 		~ModelInfo() = default;
 
-		/* ¼ÓÔØObjÄ£ĞÍĞÅÏ¢ */
+		/* åŠ è½½Objæ¨¡å‹ä¿¡æ¯ */
 		void LoadFromObj(const std::string& filepath);
 
-		/* ÖØÖÃÊı¾İ */
+		/* é‡ç½®æ•°æ® */
 		void Reset();
 
 	private:
-		/* ËùÔÚÂ·¾¶ */
+		/* æ‰€åœ¨è·¯å¾„ */
 		std::string m_Path{};
-		/* °üº¬ËùÓĞµÄvertex¡¢normal¡¢texcoords */
+		/* åŒ…å«æ‰€æœ‰çš„vertexã€normalã€texcoords */
 		tinyobj::attrib_t m_Attributes;
-		/* °üº¬Ã¿¸öÍø¸ñÊı¾İ¶ÎµÄindices¡¢faces¡¢material_idx */
+		/* åŒ…å«æ¯ä¸ªç½‘æ ¼æ•°æ®æ®µçš„indicesã€facesã€material_idx */
 		std::vector<tinyobj::shape_t> m_Shapes;
-		/* °üº¬¸÷ÖÖtextures£¬Èçdiffuse, specular, normalµÈ */
+		/* åŒ…å«å„ç§texturesï¼Œå¦‚diffuse, specular, normalç­‰ */
 		std::vector<tinyobj::material_t> m_Materials;
-		/* Ä£ĞÍ°üº¬µÄ×ÓÄ£ĞÍÊı¾İ */
+		/* æ¨¡å‹åŒ…å«çš„å­æ¨¡å‹æ•°æ® */
 		std::vector<SharedPtr<SubModelInfo>> m_SubModelInfos;
-		/* ÕûÌåµÄAABB */
+		/* æ•´ä½“çš„AABB */
 		std::pair<glm::vec3, glm::vec3> m_AABB;
 
 		friend class ModelEditorLayer;

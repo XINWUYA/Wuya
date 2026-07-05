@@ -1,6 +1,6 @@
-cmake_minimum_required(VERSION 3.20)
+﻿cmake_minimum_required(VERSION 3.20)
 
-project(Wuya VERSION 1.0.0 LANGUAGES C CXX)
+project(Helios VERSION 1.0.0 LANGUAGES C CXX)
 
 # Enable folder organization in IDEs (Xcode, Visual Studio, etc.)
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
@@ -102,8 +102,8 @@ endif()
 # Assets path definition - generate config header
 set(ASSETS_PATH "${CMAKE_SOURCE_DIR}/Assets")
 configure_file(
-    "${CMAKE_SOURCE_DIR}/cmake/WuyaConfig.h.in"
-    "${CMAKE_BINARY_DIR}/WuyaConfig.h"
+    "${CMAKE_SOURCE_DIR}/cmake/HeliosConfig.h.in"
+    "${CMAKE_BINARY_DIR}/HeliosConfig.h"
     @ONLY
 )
 
@@ -125,7 +125,7 @@ endif()
 
 # Print configuration summary
 message(STATUS "")
-message(STATUS "Wuya Build Configuration:")
+message(STATUS "Helios Build Configuration:")
 message(STATUS "  Build Type: ${CMAKE_BUILD_TYPE}")
 message(STATUS "  C++ Standard: ${CMAKE_CXX_STANDARD}")
 message(STATUS "  Platform: ${CMAKE_SYSTEM_NAME}")

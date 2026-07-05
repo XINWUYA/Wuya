@@ -1,11 +1,11 @@
-#pragma once
+﻿#pragma once
 
 #ifdef PLATFORM_MACOS
 
-#include "Wuya/Renderer/Buffer.h"
+#include "Helios/Renderer/Buffer.h"
 #include <Metal/Metal.hpp>
 
-namespace Wuya
+namespace Helios
 {
     class MetalVertexBuffer : public VertexBuffer
     {

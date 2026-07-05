@@ -1,16 +1,16 @@
-# Wuya CMake Build System
+﻿# Helios CMake Build System
 
 ## 简介
 
-Wuya项目使用CMake构建系统，支持Windows和macOS平台。
+Helios项目使用CMake构建系统，支持Windows和macOS平台。
 
 ## 目录结构
 
 ```
-Wuya/
+Helios/
 ├── CMakeLists.txt              # 根CMake配置文件
 ├── cmake/
-│   └── WuyaConfig.h.in         # 配置头文件模板
+│   └── HeliosConfig.h.in         # 配置头文件模板
 ├── Kernel/
 │   └── CMakeLists.txt          # 核心库配置
 ├── Editor/
@@ -139,8 +139,9 @@ cmake --build build --config Debug -- -j8
 
 ### IDE构建
 
-- **Visual Studio**: 打开`build/Wuya.sln`，在IDE中构建
-- **Xcode**: 打开`build/Wuya.xcodeproj`，在IDE中构建
+- **Visual Studio**: 打开`build/Helios.slnx`，在IDE中构建
+
+- **Xcode**: 打开`build/Helios.xcodeproj`，在IDE中构建
 
 ## 输出目录
 

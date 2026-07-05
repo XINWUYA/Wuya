@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.20)
+﻿cmake_minimum_required(VERSION 3.20)
 
 project(Sample_SkyBox LANGUAGES CXX)
 
@@ -38,9 +38,9 @@ target_link_libraries(Sample_SkyBox
 # Build configuration specific settings
 target_compile_definitions(Sample_SkyBox
     PRIVATE
-        $<$<CONFIG:Debug>:WUYA_DEBUG>
-        $<$<CONFIG:Release>:WUYA_RELEASE>
-        $<$<CONFIG:Shipping>:WUYA_SHIPPING>
+        $<$<CONFIG:Debug>:HELIOS_DEBUG>
+        $<$<CONFIG:Release>:HELIOS_RELEASE>
+        $<$<CONFIG:Shipping>:HELIOS_SHIPPING>
 )
 
 # Output directory

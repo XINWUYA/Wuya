@@ -1,10 +1,10 @@
-#include "Pch.h"
+﻿#include "Pch.h"
 #include "SceneEditorLayer.h"
 #include <glm/gtc/type_ptr.hpp>
 #include "EditorBuiltinCamera.h"
 #include "ImGuizmo.h"
 
-namespace Wuya
+namespace Helios
 {
 	SceneEditorLayer::SceneEditorLayer()
 		: ILayer("SceneEditorLayer")

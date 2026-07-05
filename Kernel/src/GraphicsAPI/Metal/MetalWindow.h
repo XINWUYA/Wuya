@@ -1,15 +1,15 @@
-#pragma once
+﻿#pragma once
 
 #ifdef PLATFORM_MACOS
 
-#include "Wuya/Core/Window.h"
-#include "Wuya/Renderer/RenderContext.h"
+#include "Helios/Core/Window.h"
+#include "Helios/Renderer/RenderContext.h"
 #include <QuartzCore/CAMetalLayer.hpp>
 #include <Metal/Metal.hpp>
 
 struct GLFWwindow;
 
-namespace Wuya
+namespace Helios
 {
     /* MetalContext类：管理Metal渲染上下文和交换链 */
     class MetalContext final : public IRenderContext

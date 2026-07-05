@@ -1,13 +1,13 @@
-#ifdef PLATFORM_MACOS
+﻿#ifdef PLATFORM_MACOS
 
 #include "Pch.h"
 #include "MetalTexture.h"
 #include "MetalCommon.h"
 #include "MetalRenderAPI.h"
-#include "Wuya/Renderer/Renderer.h"
+#include "Helios/Renderer/Renderer.h"
 #include "stb_image.h"
 
-namespace Wuya
+namespace Helios
 {
     MetalTexture::MetalTexture(const std::string& name, const TextureDesc& texture_desc)
         : Texture(name, texture_desc)

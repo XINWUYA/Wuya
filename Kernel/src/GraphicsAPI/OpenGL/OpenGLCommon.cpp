@@ -1,7 +1,7 @@
-#include "Pch.h"
+﻿#include "Pch.h"
 #include "OpenGLCommon.h"
 
-namespace Wuya
+namespace Helios
 {
 	/* 检查GLError信息 */
 	void CheckGLError(const char* file, const char* func_name, uint32_t line) noexcept

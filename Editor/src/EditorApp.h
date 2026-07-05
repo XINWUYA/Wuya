@@ -1,6 +1,6 @@
-#pragma once
+﻿#pragma once
 
-namespace Wuya
+namespace Helios
 {
 	class EditorApp : public Application
 	{

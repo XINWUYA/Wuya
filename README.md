@@ -1,4 +1,4 @@
-# Wuya
+﻿# Helios
 
 ## 环境
 
@@ -19,7 +19,7 @@
 
 #### Metal C++ 环境配置
 
-Wuya引擎使用 **metal-cpp** 作为Metal后端的C++接口，无需额外安装，已作为子模块集成到项目中。构建前初始化所有子模块：
+Helios引擎使用 **metal-cpp** 作为Metal后端的C++接口，无需额外安装，已作为子模块集成到项目中。构建前初始化所有子模块：
 
 ```bash
 git submodule update --init --recursive
@@ -90,8 +90,9 @@ chmod +x Mac-GenProj-CMake.sh
 - ✅ 支持多种生成器（Visual Studio、Xcode、Ninja、Makefiles等）
 
 构建完成后，打开生成的工程文件即可编译运行：
-- Windows: `build/Wuya.sln`
-- macOS: `build/Wuya.xcodeproj`
+- Windows: `build/Helios.slnx`
+
+- macOS: `build/Helios.xcodeproj`
 
 
 
@@ -104,9 +105,9 @@ chmod +x Mac-GenProj-CMake.sh
 
 ## 使用Tracy
 
-1. 先执行`Wuya\Libraries\ThirdParty\tracy\vcpkg\install_vcpkg_dependencies.bat`安装所需依赖；
+1. 先执行`Helios\Libraries\ThirdParty\tracy\vcpkg\install_vcpkg_dependencies.bat`安装所需依赖；
 
-2. 使用Visual Studio打开Tracy工程：`Wuya\Libraries\ThirdParty\tracy\profiler\build\win32\Tracy.sln`，并运行，点击connect启动监听；
+2. 使用Visual Studio打开Tracy工程：`Helios\Libraries\ThirdParty\tracy\profiler\build\win32\Tracy.sln`，并运行，点击connect启动监听；
    
    ![](./Documents/Imgs/Tracy.png)
 

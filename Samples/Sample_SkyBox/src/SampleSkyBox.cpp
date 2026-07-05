@@ -1,10 +1,10 @@
-#include "SampleSkyBox.h"
+﻿#include "SampleSkyBox.h"
 #include <imgui.h>
 
-#include <Wuya/Scene/Material.h>
+#include <Helios/Scene/Material.h>
 #include "SampleCamera.h"
 
-namespace Wuya
+namespace Helios
 {
 
 void SampleSkyBox::OnAttached()

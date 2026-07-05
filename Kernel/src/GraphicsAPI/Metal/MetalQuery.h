@@ -1,11 +1,11 @@
-#pragma once
+﻿#pragma once
 
 #ifdef PLATFORM_MACOS
 
-#include "Wuya/Renderer/RenderQuery.h"
+#include "Helios/Renderer/RenderQuery.h"
 #include <Metal/Metal.hpp>
 
-namespace Wuya
+namespace Helios
 {
     class MetalQueryNode final : public RenderQueryNode
     {

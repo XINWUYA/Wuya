@@ -1,7 +1,7 @@
-#pragma once
-#include "Wuya/Renderer/RenderQuery.h"
+﻿#pragma once
+#include "Helios/Renderer/RenderQuery.h"
 
-namespace Wuya
+namespace Helios
 {
 	class OpenGLQueryNode final : public RenderQueryNode
 	{

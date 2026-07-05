@@ -1,11 +1,11 @@
-#include "Pch.h"
+﻿#include "Pch.h"
 #include "SampleCamera.h"
 #include <glm/gtx/quaternion.hpp>
 
-#include "Wuya/Application/Application.h"
-#include "Wuya/ImGui/ImGuiLayer.h"
+#include "Helios/Application/Application.h"
+#include "Helios/ImGui/ImGuiLayer.h"
 
-namespace Wuya
+namespace Helios
 {
 	SampleCamera::SampleCamera(const std::string& name, float fov, float aspect_ratio, float near_clip, float far_clip)
 		: Camera(name, fov, aspect_ratio, near_clip, far_clip)

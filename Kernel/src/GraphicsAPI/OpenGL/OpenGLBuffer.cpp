@@ -1,8 +1,8 @@
-#include "Pch.h"
+﻿#include "Pch.h"
 #include "OpenGLBuffer.h"
 #include <glad/glad.h>
 
-namespace Wuya
+namespace Helios
 {
 	OpenGLVertexBuffer::OpenGLVertexBuffer(uint32_t size)
 		: m_DataSize(size)

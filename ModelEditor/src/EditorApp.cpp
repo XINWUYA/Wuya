@@ -1,8 +1,8 @@
-#include "Pch.h"
+﻿#include "Pch.h"
 #include "EditorApp.h"
 #include "ModelEditor.h"
 
-namespace Wuya
+namespace Helios
 {
 	ModelEditorApp::ModelEditorApp() : Application("ModelEditor")
 	{

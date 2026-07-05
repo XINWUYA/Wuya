@@ -1,7 +1,7 @@
-#include "Pch.h"
+﻿#include "Pch.h"
 #include "SceneHierarchy.h"
 
-namespace Wuya
+namespace Helios
 {
 	SceneHierarchy::SceneHierarchy()
 	{

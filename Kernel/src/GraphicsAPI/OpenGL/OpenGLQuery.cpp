@@ -1,9 +1,9 @@
-#include "Pch.h"
+﻿#include "Pch.h"
 #include "OpenGLQuery.h"
 #include <glad/glad.h>
 #include "OpenGLCommon.h"
 
-namespace Wuya
+namespace Helios
 {
 	OpenGLQueryNode::OpenGLQueryNode()
 	{

@@ -1,6 +1,6 @@
-#pragma once
+﻿#pragma once
 
-namespace Wuya
+namespace Helios
 {
 	/* 资源浏览器：编辑资源 */
 	class EditorResourceBrowser

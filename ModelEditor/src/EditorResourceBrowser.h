@@ -1,19 +1,19 @@
-#pragma once
+ï»¿#pragma once
 
-namespace Wuya
+namespace Helios
 {
-	/* ×ÊÔ´¹ÜÀíÆ÷Àà£º±à¼­Æ÷×ÊÔ´´°¿Ú */
+	/* èµ„æºç®¡ç†å™¨ç±»ï¼šç¼–è¾‘å™¨èµ„æºçª—å£ */
 	class EditorResourceBrowser
 	{
 	public:
 		EditorResourceBrowser() = default;
 		~EditorResourceBrowser() = default;
 
-		/* »æÖÆÏà¹ØUI */
+		/* ç»˜åˆ¶ç›¸å…³UI */
 		void OnImGuiRenderer();
 
 	private:
-		/* ÎÄ¼şÀàĞÍ£¬¸ù¾İÎÄ¼şºó×ºÃûÀ´È·ÈÏ */
+		/* æ–‡ä»¶ç±»å‹ï¼Œæ ¹æ®æ–‡ä»¶åç¼€åæ¥ç¡®è®¤ */
 		enum class FileType : uint8_t
 		{
 			Default,
@@ -23,17 +23,17 @@ namespace Wuya
 			MtlGraph,
 		};
 
-		/* ×ÊÔ´Ä¿Â¼ÏÂµÄÎÄ¼ş½Úµã£¬°üÀ¨ÎÄ¼ş¼ĞºÍÎÄ¼ş */
+		/* èµ„æºç›®å½•ä¸‹çš„æ–‡ä»¶èŠ‚ç‚¹ï¼ŒåŒ…æ‹¬æ–‡ä»¶å¤¹å’Œæ–‡ä»¶ */
 		struct FileNode
 		{
-			std::string FileName;							/* ÎÄ¼şÃû */
-			std::string FilePath;							/* ¼ÇÂ¼µ±Ç°ÎÄ¼şÂ·¾¶ */
-			FileType	FileType;							/* ÎÄ¼şÀàĞÍ */
-			float		FileSize{ 0 };						/* ÎÄ¼ş´óĞ¡ */
-			int			Depth{ -1 };						/* ÎÄ¼ş¼Ğ¾àÀë¸ùÄ¿Â¼µÄ²ãÊı */
-			std::vector<SharedPtr<FileNode>> ChildNodes;	/* ×Ó½ÚµãÎÄ¼ş£¬Ä¿Â¼ÏÂ¿ÉÄÜÓĞ¶à¸ö */
-			WeakPtr<FileNode> ParentNode;					/* ¸¸½Úµã£¬±ØĞëÊ¹ÓÃWeakPtr, ²»È»»á³öÏÖÖÇÄÜÖ¸ÕëÑ­»·ÒıÓÃ£¬µ¼ÖÂÄÚ´æĞ¹Â© */
-			SharedPtr<Texture> Icon;						/* ÎÄ¼şÍ¼±ê */
+			std::string FileName;							/* æ–‡ä»¶å */
+			std::string FilePath;							/* è®°å½•å½“å‰æ–‡ä»¶è·¯å¾„ */
+			FileType	FileType;							/* æ–‡ä»¶ç±»å‹ */
+			float		FileSize{ 0 };						/* æ–‡ä»¶å¤§å° */
+			int			Depth{ -1 };						/* æ–‡ä»¶å¤¹è·ç¦»æ ¹ç›®å½•çš„å±‚æ•° */
+			std::vector<SharedPtr<FileNode>> ChildNodes;	/* å­èŠ‚ç‚¹æ–‡ä»¶ï¼Œç›®å½•ä¸‹å¯èƒ½æœ‰å¤šä¸ª */
+			WeakPtr<FileNode> ParentNode;					/* çˆ¶èŠ‚ç‚¹ï¼Œå¿…é¡»ä½¿ç”¨WeakPtr, ä¸ç„¶ä¼šå‡ºç°æ™ºèƒ½æŒ‡é’ˆå¾ªç¯å¼•ç”¨ï¼Œå¯¼è‡´å†…å­˜æ³„æ¼ */
+			SharedPtr<Texture> Icon;						/* æ–‡ä»¶å›¾æ ‡ */
 
 			FileNode() = default;
 			FileNode(std::string name, std::string path, enum class FileType type, float size, int depth)
@@ -54,22 +54,22 @@ namespace Wuya
 			}
 		};
 
-		/* µİ¹éÉú³ÉÎÄ¼ş½ÚµãÊ÷ */
+		/* é€’å½’ç”Ÿæˆæ–‡ä»¶èŠ‚ç‚¹æ ‘ */
 		void BuildFileNodeTree(const SharedPtr<FileNode>& parent_node);
-		/* Éú³ÉÎÄ¼ş½ÚµãUI(ÏêÏ¸ĞÅÏ¢) */
+		/* ç”Ÿæˆæ–‡ä»¶èŠ‚ç‚¹UI(è¯¦ç»†ä¿¡æ¯) */
 		void BuildFileUIListTreeDetail(const SharedPtr<FileNode>& node);
-		/* Éú³ÉÎÄ¼ş½ÚµãUI(¼òµ¥Ë÷Òı) */
+		/* ç”Ÿæˆæ–‡ä»¶èŠ‚ç‚¹UI(ç®€å•ç´¢å¼•) */
 		void BuildFileUIListTreeSimple(const SharedPtr<FileNode>& node);
 
-		/* »ñÈ¡ÎÄ¼şÏà¶ÔÂ·¾¶ */
+		/* è·å–æ–‡ä»¶ç›¸å¯¹è·¯å¾„ */
 		static std::filesystem::path GetRelativePath(const std::filesystem::path& dir, const std::filesystem::path& path);
 
-		/* ×ÊÔ´Ä¿Â¼ÖĞÎÄ¼şÁĞ±í½Úµã */
+		/* èµ„æºç›®å½•ä¸­æ–‡ä»¶åˆ—è¡¨èŠ‚ç‚¹ */
 		SharedPtr<FileNode> m_RootFileNodeTree{};
-		/* µ±Ç°Ñ¡ÖĞµÄÎÄ¼ş½Úµã */
+		/* å½“å‰é€‰ä¸­çš„æ–‡ä»¶èŠ‚ç‚¹ */
 		SharedPtr<FileNode> m_CurrentFileNode{};
 
-		/* Ö»ÓĞÄ¿Â¼ÎÄ¼ş±»¸ü¸ÄÊ±£¬²Å¸üĞÂÎÄ¼ş½ÚµãÊ÷ */
+		/* åªæœ‰ç›®å½•æ–‡ä»¶è¢«æ›´æ”¹æ—¶ï¼Œæ‰æ›´æ–°æ–‡ä»¶èŠ‚ç‚¹æ ‘ */
 		bool m_IsDirty{ true };
 	};
 }

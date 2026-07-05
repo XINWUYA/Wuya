@@ -1,8 +1,8 @@
-#pragma once
+﻿#pragma once
 #include <glad/glad.h>
-#include "Wuya/Renderer/FrameBuffer.h"
+#include "Helios/Renderer/FrameBuffer.h"
 
-namespace Wuya
+namespace Helios
 {
 	/* FrameBuffer类 */
 	class OpenGLFrameBuffer : public FrameBuffer

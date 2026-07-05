@@ -1,0 +1,16 @@
+﻿#pragma once
+namespace Helios
+{
+	/* 系统文件弹窗 */
+	class FileDialog
+	{
+	public:
+		/* 通过文件窗口选取指定类型文件路径 */
+		static std::string OpenFile(const char* filter = "*.*");
+		/* 保存文件到指定路径 */
+		static std::string SaveFile(const char* filter = "*.*");
+	};
+
+	/* 打开到指定文件目录 */
+	bool OpenFileExplorer(const char* path);
+}

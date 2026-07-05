@@ -1,4 +1,4 @@
-#ifdef PLATFORM_MACOS
+﻿#ifdef PLATFORM_MACOS
 
 #include "Pch.h"
 #include "MetalWindow.h"
@@ -6,15 +6,15 @@
 #include <GLFW/glfw3.h>
 #include <objc/message.h>
 #include <objc/objc.h>
-#include "Wuya/Events/ApplicationEvent.h"
-#include "Wuya/Events/KeyEvent.h"
-#include "Wuya/Events/MouseEvent.h"
-#include "Wuya/Renderer/Renderer.h"
+#include "Helios/Events/ApplicationEvent.h"
+#include "Helios/Events/KeyEvent.h"
+#include "Helios/Events/MouseEvent.h"
+#include "Helios/Renderer/Renderer.h"
 
 /* 前向声明GLFW native函数 */
 extern "C" void* glfwGetCocoaWindow(GLFWwindow* window);
 
-namespace Wuya
+namespace Helios
 {
     /* MetalContext实现 */
     MetalContext::MetalContext(GLFWwindow* window)
