@@ -19,7 +19,11 @@
 
 #### Metal C++ 环境配置
 
-Wuya引擎使用 **metal-cpp** 作为Metal后端的C++接口，无需额外安装，已集成到项目中。
+Wuya引擎使用 **metal-cpp** 作为Metal后端的C++接口，无需额外安装，已作为子模块集成到项目中。构建前初始化所有子模块：
+
+```bash
+git submodule update --init --recursive
+```
 
 **配置要点：**
 

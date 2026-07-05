@@ -61,8 +61,13 @@ target_include_directories(Kernel
         ${CMAKE_SOURCE_DIR}/Libraries/ThirdParty/magic_enum/include
         ${CMAKE_SOURCE_DIR}/Libraries/ThirdParty/assimp/include
         ${CMAKE_SOURCE_DIR}/Libraries/ThirdParty/tracy/public
-        ${CMAKE_SOURCE_DIR}/Libraries/ThirdParty/metal-cpp  # Metal C++ wrapper
 )
+
+if(APPLE)
+    target_include_directories(Kernel PRIVATE
+        ${CMAKE_SOURCE_DIR}/Libraries/ThirdParty/metal-cpp  # Metal C++ wrapper
+    )
+endif()
 
 if(VULKAN_SDK)
     target_include_directories(Kernel PRIVATE ${VULKAN_SDK}/Include)
