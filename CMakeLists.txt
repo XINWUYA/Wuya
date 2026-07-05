@@ -64,7 +64,12 @@ endif()
 if(MSVC)
     # Multi-processor compilation
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP")
-    
+
+    # Disable iterator debugging to avoid stdext::checked_array_iterator issues
+    # with the bundled fmt/spdlog on newer MSVC STL versions (C++20).
+    # All project libraries are built from source, so this stays consistent.
+    add_compile_definitions(_ITERATOR_DEBUG_LEVEL=0)
+
     # Disable specific warnings
     add_compile_options(
         /wd4244
@@ -72,7 +77,7 @@ if(MSVC)
         /wd4312
         /wd4819
     )
-    
+
     # Static runtime library
     set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang|AppleClang|GNU")
