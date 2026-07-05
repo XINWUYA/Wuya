@@ -5,11 +5,11 @@
 namespace Helios
 {
 	/* Shader基类 */
-	class Shader
+	class DeviceShader
 	{
 	public:
-		Shader(std::string path);
-		virtual ~Shader() = default;
+		DeviceShader(std::string path);
+		virtual ~DeviceShader() = default;
 
 		/* 路径 */
 		const std::string& GetPath() const { return m_Path; }
@@ -32,8 +32,8 @@ namespace Helios
 		virtual const std::string& GetDebugName() const = 0;
 
 		/* 创建Shader */
-		static SharedPtr<Shader> Create(const std::string& filepath);
-		static SharedPtr<Shader> Create(const std::string& name, const std::string& vertex_src, const std::string& pixel_src);
+		static SharedPtr<DeviceShader> Create(const std::string& filepath);
+		static SharedPtr<DeviceShader> Create(const std::string& name, const std::string& vertex_src, const std::string& pixel_src);
 
 	protected:
 		/* 文件路径 */

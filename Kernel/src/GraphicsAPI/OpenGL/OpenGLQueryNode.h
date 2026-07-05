@@ -1,9 +1,9 @@
 ﻿#pragma once
-#include "Helios/Renderer/RenderQuery.h"
+#include "Helios/VirtualDevice/DeviceQueryNode.h"
 
 namespace Helios
 {
-	class OpenGLQueryNode final : public RenderQueryNode
+	class OpenGLQueryNode final : public DeviceQueryNode
 	{
 	public:
 		OpenGLQueryNode();

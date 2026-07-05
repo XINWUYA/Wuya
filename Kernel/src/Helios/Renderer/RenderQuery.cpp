@@ -1,38 +1,14 @@
 ﻿#include "Pch.h"
 #include "RenderQuery.h"
-#include "Renderer.h"
-#include "GraphicsAPI/OpenGL/OpenGLQuery.h"
-#ifdef PLATFORM_MACOS
-#include "GraphicsAPI/Metal/MetalQuery.h"
-#endif
 
 namespace Helios
 {
 	void RenderQueryContext::Init()
 	{
 		PROFILE_FUNCTION();
-
-		switch (Renderer::CurrentAPI())
-		{
-		case RenderAPI::None:
-			CORE_LOG_ERROR("RenderAPI can't be None!");
-			break;
-		case RenderAPI::OpenGL:
-			m_QueryNodes.reserve(DEFAULT_QUERY_COUNT);
-			for (uint8_t index = 0; index < DEFAULT_QUERY_COUNT; ++index)
-				m_QueryNodes.emplace_back(new OpenGLQueryNode);
-			break;
-#ifdef PLATFORM_MACOS
-		case RenderAPI::Metal:
-			m_QueryNodes.reserve(DEFAULT_QUERY_COUNT);
-			for (uint8_t index = 0; index < DEFAULT_QUERY_COUNT; ++index)
-				m_QueryNodes.emplace_back(new MetalQueryNode);
-			break;
-#endif
-		default:
-			CORE_LOG_ERROR("Unknown RenderAPI is unsupported!");
-			break;
-		}
+		m_QueryNodes.reserve(DEFAULT_QUERY_COUNT);
+		for (uint8_t index = 0; index < DEFAULT_QUERY_COUNT; ++index)
+			m_QueryNodes.emplace_back(DeviceQueryNode::Create());
 	}
 
 	void RenderQueryContext::Destroy()
@@ -83,20 +59,7 @@ namespace Helios
 
 		if (m_UsedNodeIndex >= m_QueryNodes.size())
 		{
-			switch (Renderer::CurrentAPI())
-			{
-			case RenderAPI::OpenGL:
-				m_QueryNodes.emplace_back(new OpenGLQueryNode);
-				break;
-#ifdef PLATFORM_MACOS
-			case RenderAPI::Metal:
-				m_QueryNodes.emplace_back(new MetalQueryNode);
-				break;
-#endif
-			default:
-				CORE_LOG_ERROR("Unsupported RenderAPI for query!");
-				return;
-			}
+			m_QueryNodes.emplace_back(DeviceQueryNode::Create());
 		}
 
 		auto& newQueryNode = m_QueryNodes[m_UsedNodeIndex];
@@ -225,8 +188,8 @@ namespace Helios
 
 		if (readContext.PrepareQueryResult())
 		{
-			std::function<void(ResultGPUTimerNode&, RenderQueryNode*)> FillResultGPUTimeRecursively;
-			FillResultGPUTimeRecursively = [&FillResultGPUTimeRecursively, &readContext](ResultGPUTimerNode& timerNode, RenderQueryNode* queryNode)
+			std::function<void(ResultGPUTimerNode&, DeviceQueryNode*)> FillResultGPUTimeRecursively;
+			FillResultGPUTimeRecursively = [&FillResultGPUTimeRecursively, &readContext](ResultGPUTimerNode& timerNode, DeviceQueryNode* queryNode)
 				{
 					timerNode.Label = queryNode->Label;
 					timerNode.QueryIndex = queryNode->NodeIndex;

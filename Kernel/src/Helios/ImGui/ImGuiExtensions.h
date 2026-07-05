@@ -11,7 +11,7 @@ namespace Helios
 #define START_TRANSPARENT_BUTTON ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0))
 #define END_TRANSPARENT_BUTTON ImGui::PopStyleColor()
 
-class Texture;
+class DeviceTexture;
 
 /* 扩展一些常用的UI */
 namespace ImGuiExt
@@ -21,7 +21,7 @@ namespace ImGuiExt
 	/* 绘制一个Color UI */
 	void DrawColorUI(const std::string& label, glm::vec4& color, float label_width = 100.0f);
 	/* 绘制一个图片UI */
-	void DrawTextureUI(const std::string& label, SharedPtr<Texture>& texture, float& tiling_factor, float label_width = 100.0f);
+	void DrawTextureUI(const std::string& label, SharedPtr<DeviceTexture>& texture, float& tiling_factor, float label_width = 100.0f);
 	/* 绘制一个可拖动的Int UI */
 	void DrawDragIntUI(const char* label, int& value, float label_width = 100.0f);
 	/* 绘制一个可拖动的Float UI */
@@ -35,7 +35,7 @@ namespace ImGuiExt
 	/* 绘制一个vec3 UI， 带XYZ */
 	void DrawVec3ControlUI(const std::string& label, glm::vec3& values, float reset_value = 0.0f, float label_width = 100.0f);
 	/* 绘制带选中的图像按钮UI */
-	void DrawCheckedImageButtonUI(const std::string& label, const SharedPtr<Texture>& texture, const ImVec2& size, bool checked = false, const std::function<void()>& button_func = []() {});
+	void DrawCheckedImageButtonUI(const std::string& label, const SharedPtr<DeviceTexture>& texture, const ImVec2& size, bool checked = false, const std::function<void()>& button_func = []() {});
 	/* 绘制一个Checkbox */
 	void DrawCheckboxUI(const std::string& label, bool& value, float label_width = 100.0f);
 	/* 绘制一个Combo */

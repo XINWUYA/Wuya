@@ -1,5 +1,5 @@
 ﻿#pragma once
-#include "RenderCommon.h"
+#include <Helios/Renderer/RenderCommon.h>
 
 namespace Helios
 {
@@ -55,11 +55,11 @@ namespace Helios
 
 
 	/* 通用纹理类，根据描述和用途创建不同类型的纹理 */
-	class Texture
+	class DeviceTexture
 	{
 	public:
-		Texture(std::string name, const TextureDesc& texture_desc);
-		virtual ~Texture() = default;
+		DeviceTexture(std::string name, const TextureDesc& texture_desc);
+		virtual ~DeviceTexture() = default;
 
 		/* 绑定 */
 		virtual void Bind(uint32_t slot = 0) = 0;
@@ -85,22 +85,22 @@ namespace Helios
 		[[nodiscard]] virtual bool IsLoaded() const = 0;
 
 		/* 重载operators */
-		virtual bool operator==(const Texture& other) const = 0;
+		virtual bool operator==(const DeviceTexture& other) const = 0;
 
 		/* 创建纹理 */
-		static SharedPtr<Texture> Create(const std::string& name, const TextureDesc& texture_desc);
-		static SharedPtr<Texture> Create(const std::string& path, const TextureLoadConfig& load_config = {}); /* 目前仅支持加载二维纹理 */
+		static SharedPtr<DeviceTexture> Create(const std::string& name, const TextureDesc& texture_desc);
+		static SharedPtr<DeviceTexture> Create(const std::string& path, const TextureLoadConfig& load_config = {}); /* 目前仅支持加载二维纹理 */
 
 		/* 默认纹理 */
-		static SharedPtr<Texture> White();
-		static SharedPtr<Texture> Black();
-		static SharedPtr<Texture> Normal();
+		static SharedPtr<DeviceTexture> White();
+		static SharedPtr<DeviceTexture> Black();
+		static SharedPtr<DeviceTexture> Normal();
 
 	protected:
-		Texture() = default;
+		DeviceTexture() = default;
 
 		/* 名称 */
-		std::string m_DebugName{ "Unnamed Texture" };
+		std::string m_DebugName{ "Unnamed DeviceTexture" };
 		/* 纹理描述 */
 		TextureDesc m_TextureDesc{};
 		/* 加载配置 */

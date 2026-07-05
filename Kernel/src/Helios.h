@@ -10,12 +10,13 @@
 #include "Helios/Events/KeyEvent.h"
 #include "Helios/Events/MouseEvent.h"
 
-#include "Helios/Renderer/Buffer.h"
-#include "Helios/Renderer/FrameBuffer.h"
+#include "Helios/VirtualDevice/DeviceBuffer.h"
+#include "Helios/VirtualDevice/DeviceFrameBuffer.h"
+#include "Helios/VirtualDevice/DeviceShader.h"
+#include "Helios/VirtualDevice/DeviceTexture.h"
+#include "Helios/VirtualDevice/DeviceUniformBuffer.h"
+
 #include "Helios/Renderer/Renderer.h"
-#include "Helios/Renderer/Shader.h"
-#include "Helios/Renderer/Texture.h"
-#include "Helios/Renderer/UniformBuffer.h"
 #include "Helios/Renderer/RenderView.h"
 #include "Helios/Renderer/FrameGraph/FrameGraph.h"
 

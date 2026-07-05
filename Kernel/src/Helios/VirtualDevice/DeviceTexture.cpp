@@ -1,6 +1,6 @@
 ﻿#include "Pch.h"
-#include "Texture.h"
-#include "Renderer.h"
+#include "DeviceTexture.h"
+#include "Helios/Renderer/Renderer.h"
 #include "GraphicsAPI/OpenGL/OpenGLTexture.h"
 #ifdef PLATFORM_MACOS
 #include "GraphicsAPI/Metal/MetalTexture.h"
@@ -8,13 +8,13 @@
 
 namespace Helios
 {
-	Texture::Texture(std::string name, const TextureDesc& texture_desc)
+	DeviceTexture::DeviceTexture(std::string name, const TextureDesc& texture_desc)
 		: m_DebugName(std::move(name)), m_TextureDesc(texture_desc)
 	{
 	}
 
 	/* 创建纹理 */
-	SharedPtr<Texture> Texture::Create(const std::string& name, const TextureDesc& texture_desc)
+	SharedPtr<DeviceTexture> DeviceTexture::Create(const std::string& name, const TextureDesc& texture_desc)
 	{
 		switch (Renderer::CurrentAPI())
 		{
@@ -34,7 +34,7 @@ namespace Helios
 	}
 
 	/* 创建纹理 */
-	SharedPtr<Texture> Texture::Create(const std::string& path, const TextureLoadConfig& load_config)
+	SharedPtr<DeviceTexture> DeviceTexture::Create(const std::string& path, const TextureLoadConfig& load_config)
 	{
 		switch (Renderer::CurrentAPI())
 		{
@@ -53,15 +53,15 @@ namespace Helios
 		}
 	}
 	/* 默认纹理 */
-	SharedPtr<Texture> Texture::White()
+	SharedPtr<DeviceTexture> DeviceTexture::White()
 	{
-		SharedPtr<Texture> texture;
+		SharedPtr<DeviceTexture> texture;
 
 		if (!texture)
 		{
-			// Texture
+			// DeviceTexture
 			constexpr TextureDesc desc{ 2,2 };
-			texture = Texture::Create("DefaultWhiteTex", desc);
+			texture = DeviceTexture::Create("DefaultWhiteTex", desc);
 			uint32_t default_texture_data[4] = {
 				0xffffffff,
 				0xffffffff,
@@ -74,15 +74,15 @@ namespace Helios
 		return texture;
 	}
 
-	SharedPtr<Texture> Texture::Black()
+	SharedPtr<DeviceTexture> DeviceTexture::Black()
 	{
-		SharedPtr<Texture> texture;
+		SharedPtr<DeviceTexture> texture;
 
 		if (!texture)
 		{
-			// Texture
+			// DeviceTexture
 			constexpr TextureDesc desc{ 2,2 };
-			texture = Texture::Create("DefaultBlackTex", desc);
+			texture = DeviceTexture::Create("DefaultBlackTex", desc);
 			uint32_t default_texture_data[4] = {
 				0x00000000,
 				0x00000000,
@@ -95,15 +95,15 @@ namespace Helios
 		return texture;
 	}
 
-	SharedPtr<Texture> Texture::Normal()
+	SharedPtr<DeviceTexture> DeviceTexture::Normal()
 	{
-		SharedPtr<Texture> texture;
+		SharedPtr<DeviceTexture> texture;
 
 		if (!texture)
 		{
-			// Texture
+			// DeviceTexture
 			constexpr TextureDesc desc{ 2,2 };
-			texture = Texture::Create("DefaultNormalTex", desc);
+			texture = DeviceTexture::Create("DefaultNormalTex", desc);
 			uint32_t default_texture_data[4] = {
 				0xffff0000,
 				0xffff0000,

@@ -141,7 +141,7 @@ namespace Helios
 
 	}
 
-	void OpenGLRenderAPI::DrawIndexed(PrimitiveType type, const SharedPtr<VertexArray>& vertex_array, uint32_t index_count, uint32_t index_offset)
+	void OpenGLRenderAPI::DrawIndexed(PrimitiveType type, const SharedPtr<DeviceVertexArray>& vertex_array, uint32_t index_count, uint32_t index_offset)
 	{
 		PROFILE_FUNCTION();
 
@@ -160,7 +160,7 @@ namespace Helios
 		glDrawElements(TranslateToOpenGLPrimitiveType(type), (GLsizei)count, index_gl_type, reinterpret_cast<const void*>(index_offset * index_size));
 	}
 
-	void OpenGLRenderAPI::DrawArrays(PrimitiveType type, const SharedPtr<VertexArray>& vertex_array)
+	void OpenGLRenderAPI::DrawArrays(PrimitiveType type, const SharedPtr<DeviceVertexArray>& vertex_array)
 	{
 		PROFILE_FUNCTION();
 

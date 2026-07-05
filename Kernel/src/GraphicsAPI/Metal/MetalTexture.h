@@ -2,12 +2,12 @@
 
 #ifdef PLATFORM_MACOS
 
-#include "Helios/Renderer/Texture.h"
+#include "Helios/VirtualDevice/DeviceTexture.h"
 #include <Metal/Metal.hpp>
 
 namespace Helios
 {
-    class MetalTexture : public Texture
+    class MetalTexture : public DeviceTexture
     {
     public:
         MetalTexture(const std::string& name, const TextureDesc& texture_desc);
@@ -24,7 +24,7 @@ namespace Helios
         uint32_t GetTextureID() const override { return static_cast<uint32_t>(reinterpret_cast<uintptr_t>(m_Texture)); }
         bool IsLoaded() const override { return m_IsLoaded; }
 
-        bool operator==(const Texture& other) const override;
+        bool operator==(const DeviceTexture& other) const override;
 
         /* Metal特有接口 */
         MTL::Texture* GetMetalTexture() const { return m_Texture; }

@@ -1,11 +1,11 @@
 ﻿#pragma once
 #include <glad/glad.h>
-#include "Helios/Renderer/FrameBuffer.h"
+#include "Helios/VirtualDevice/DeviceFrameBuffer.h"
 
 namespace Helios
 {
 	/* FrameBuffer类 */
-	class OpenGLFrameBuffer : public FrameBuffer
+	class OpenGLFrameBuffer : public DeviceFrameBuffer
 	{
 	public:
 		OpenGLFrameBuffer(const std::string& name, const FrameBufferDesc& desc);

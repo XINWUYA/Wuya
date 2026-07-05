@@ -12,7 +12,7 @@ public:
 	void OnEvent(Helios::IEvent* event) override;
 
 private:
-	Helios::SharedPtr<Helios::VertexArray> m_pVertexArray;
+	Helios::SharedPtr<Helios::DeviceVertexArray> m_pVertexArray;
 	Helios::UniquePtr<Helios::ShaderLibrary> m_pShaderLibrary;
 };
 

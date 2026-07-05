@@ -1,5 +1,5 @@
 ﻿#include "Pch.h"
-#include "OpenGLQuery.h"
+#include "OpenGLQueryNode.h"
 #include <glad/glad.h>
 #include "OpenGLCommon.h"
 

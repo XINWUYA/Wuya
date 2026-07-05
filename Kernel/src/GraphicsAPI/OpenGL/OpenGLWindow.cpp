@@ -1,5 +1,5 @@
 ﻿#include "Pch.h"
-#include "GLWindow.h"
+#include "OpenGLWindow.h"
 #include <GLFW/glfw3.h>
 #include "Helios/Events/ApplicationEvent.h"
 #include "Helios/Events/KeyEvent.h"
@@ -10,20 +10,20 @@ namespace Helios
 {
 	static uint8_t s_GLFWWindowCnt = 0;
 
-	GLWindow::GLWindow(const WindowDesc& desc)
+	OpenGLWindow::OpenGLWindow(const WindowDesc& desc)
 	{
 		PROFILE_FUNCTION();
 
 		Build(desc);
 	}
 
-	GLWindow::~GLWindow()
+	OpenGLWindow::~OpenGLWindow()
 	{
 		Destroy();
 	}
 
 	/* 更新，交换一帧 */
-	void GLWindow::OnUpdate()
+	void OpenGLWindow::OnUpdate()
 	{
 		PROFILE_FUNCTION();
 
@@ -32,7 +32,7 @@ namespace Helios
 	}
 
 	/* 设置垂直同步 */
-	void GLWindow::SetVSync(bool enable)
+	void OpenGLWindow::SetVSync(bool enable)
 	{
 		if (enable)
 			glfwSwapInterval(1);
@@ -43,7 +43,7 @@ namespace Helios
 	}
 
 	/* 创建窗口；创建上下文；绑定响应事件 */
-	void GLWindow::Build(const WindowDesc& desc)
+	void OpenGLWindow::Build(const WindowDesc& desc)
 	{
 		PROFILE_FUNCTION();
 
@@ -87,7 +87,7 @@ namespace Helios
 			++s_GLFWWindowCnt;
 		}
 
-		m_pRenderContext = IRenderContext::Create(m_pGLFWWindow);
+		m_pRenderContext = DeviceContext::Create(m_pGLFWWindow);
 		m_pRenderContext->Init();
 
 		// 指定窗口信息
@@ -193,7 +193,7 @@ namespace Helios
 	}
 
 	/* 销毁窗口 */
-	void GLWindow::Destroy()
+	void OpenGLWindow::Destroy()
 	{
 		PROFILE_FUNCTION();
 

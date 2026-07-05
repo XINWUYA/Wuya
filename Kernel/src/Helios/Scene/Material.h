@@ -4,8 +4,8 @@
 
 namespace Helios
 {
-	class Texture;
-	class Shader;
+	class DeviceTexture;
+	class DeviceShader;
 
 	/* PBR材质纹理贴图Slot */
 	namespace TextureSlot
@@ -56,7 +56,7 @@ namespace Helios
 	{
 		ParamType	Type{}; /* 参数类型 */
 		std::string Name;   /* 参数名 */
-		std::any	Value;  /* 参数值, 对于Texture需特殊处理，其Value类型为std::pair<SharedPtr<Texture>, uint32_t> */
+		std::any	Value;  /* 参数值, 对于Texture需特殊处理，其Value类型为std::pair<SharedPtr<DeviceTexture>, uint32_t> */
 
 		MaterialParamInfo() = default;
 		MaterialParamInfo(ParamType type, std::string name, std::any value)
@@ -77,13 +77,13 @@ namespace Helios
 		~Material();
 
 		/* 设置Shader */
-		void SetShader(const SharedPtr<Shader>& shader) { m_pShader = shader; }
-		[[nodiscard]] const SharedPtr<Shader>& GetShader() const { return m_pShader; }
+		void SetShader(const SharedPtr<DeviceShader>& shader) { m_pShader = shader; }
+		[[nodiscard]] const SharedPtr<DeviceShader>& GetShader() const { return m_pShader; }
 		/* 设置参数 */
 		void SetParameters(ParamType type, const std::string& name, const std::any& param);
 		[[nodiscard]] const ParameterMap& GetAllParameters() const { return m_Parameters; }
 		/* 设置纹理 */
-		void SetTexture(const std::string& name, const SharedPtr<Texture>& texture, int slot = -1);
+		void SetTexture(const std::string& name, const SharedPtr<DeviceTexture>& texture, int slot = -1);
 		/* 设置光栅化状态 */
 		void SetRasterState(const RenderRasterState& state) { m_RasterState = state; }
 		[[nodiscard]] const RenderRasterState& GetRasterState() const { return m_RasterState; }
@@ -100,11 +100,11 @@ namespace Helios
 		static SharedPtr<Material>& Error();
 
 		/* 创建材质 */
-		static SharedPtr<Material> Create(const SharedPtr<Shader>& shader);
+		static SharedPtr<Material> Create(const SharedPtr<DeviceShader>& shader);
 
 	private:
 		/* Shader */
-		SharedPtr<Shader> m_pShader{ nullptr };
+		SharedPtr<DeviceShader> m_pShader{ nullptr };
 		/* 材质所需的各种参数<ToID(Name), MaterialParamInfo> */
 		ParameterMap m_Parameters{};
 		/* 光栅化状态配置 */

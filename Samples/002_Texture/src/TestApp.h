@@ -11,7 +11,7 @@ public:
 	void OnImGuiRender() override;
 
 private:
-	Helios::SharedPtr<Helios::VertexArray> m_pVertexArray;
+	Helios::SharedPtr<Helios::DeviceVertexArray> m_pVertexArray;
 	Helios::UniquePtr<Helios::ShaderLibrary> m_pShaderLibrary;
 	Helios::SharedPtr<Helios::Texture2D> m_pTexture2D;
 };

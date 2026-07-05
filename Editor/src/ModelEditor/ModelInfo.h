@@ -50,7 +50,7 @@ namespace Helios
 	struct SubModelInfo
 	{
 		std::string Name;
-		SharedPtr<VertexArray> VertexArray;
+		SharedPtr<DeviceVertexArray> VertexArray;
 		std::vector<float> VertexData; /* 顶点数据的原始信息，保存模型时需要 */
 		MaterialParams MaterialParams;
 		std::pair<glm::vec3, glm::vec3> AABB;

@@ -22,7 +22,7 @@ void TestLayer::OnAttached()
 	Helios::Renderer::Init();
 
 	// Vertex Array
-	m_pVertexArray = Helios::VertexArray::Create();
+	m_pVertexArray = Helios::DeviceVertexArray::Create();
 	m_pVertexArray->Bind();
 
 	// Triangle vertices
@@ -32,7 +32,7 @@ void TestLayer::OnAttached()
 		-1.0f,  1.0f, 0.0f, 0.0f, 1.0f,
 		 1.0f,  1.0f, 0.0f, 1.0f, 1.0f
 	};
-	Helios::SharedPtr<Helios::VertexBuffer> vertex_buffer = Helios::VertexBuffer::Create(vertices, sizeof(vertices));
+	Helios::SharedPtr<Helios::DeviceVertexBuffer> vertex_buffer = Helios::DeviceVertexBuffer::Create(vertices, sizeof(vertices));
 	Helios::VertexBufferLayout vertex_buffer_layout = {
 		{ "a_Position", Helios::BufferDataType::Float3 },
 		{ "a_TexCoord", Helios::BufferDataType::Float2 }

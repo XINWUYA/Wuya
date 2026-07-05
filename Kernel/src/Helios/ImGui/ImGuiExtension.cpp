@@ -4,7 +4,7 @@
 #include <imgui_internal.h>
 #include "Helios/Application/AssetManager.h"
 #include "Helios/Common/Math.h"
-#include "Helios/Renderer/Texture.h"
+#include "Helios/VirtualDevice/DeviceTexture.h"
 #include "Helios/Scene/SceneCommon.h"
 
 namespace Helios::ImGuiExt
@@ -363,7 +363,7 @@ namespace Helios::ImGuiExt
 	}
 
 	/* 绘制一个图片UI */
-	void DrawTextureUI(const std::string& label, SharedPtr<Texture>& texture, float& tiling_factor, float label_width)
+	void DrawTextureUI(const std::string& label, SharedPtr<DeviceTexture>& texture, float& tiling_factor, float label_width)
 	{
 		PROFILE_FUNCTION();
 
@@ -745,7 +745,7 @@ namespace Helios::ImGuiExt
 	}
 
 	/* 绘制带选中的图像按钮UI */
-	void DrawCheckedImageButtonUI(const std::string& label, const SharedPtr<Texture>& texture, const ImVec2& size, bool checked, const std::function<void()>& button_func)
+	void DrawCheckedImageButtonUI(const std::string& label, const SharedPtr<DeviceTexture>& texture, const ImVec2& size, bool checked, const std::function<void()>& button_func)
 	{
 		PROFILE_FUNCTION();
 

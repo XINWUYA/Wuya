@@ -1,16 +1,16 @@
 ﻿#pragma once
-#include "RenderCommon.h"
+#include <Helios/Renderer/RenderCommon.h>
 
 namespace Helios
 {
-	class Texture;
+	class DeviceTexture;
 	struct PixelDesc;
 
 	/* RenderBuffer信息 */
 	struct RenderBufferInfo
 	{
 		/* 经CreateTexture创建的RenderBuffer */
-		SharedPtr<Texture> RenderTarget{ nullptr };
+		SharedPtr<DeviceTexture> RenderTarget{ nullptr };
 		/* Mip level */
 		uint16_t Level{ 0 };
 		/* CubeMap's face or 3DTexture's slice */
@@ -29,10 +29,10 @@ namespace Helios
 	};
 
 	/* 根据描述创建FrameBuffer */
-	class FrameBuffer
+	class DeviceFrameBuffer
 	{
 	public:
-		virtual ~FrameBuffer() = default;
+		virtual ~DeviceFrameBuffer() = default;
 
 		/* 绑定 */
 		virtual void Bind() = 0;
@@ -49,11 +49,11 @@ namespace Helios
 		[[nodiscard]] const FrameBufferDesc& GetDescription() const { return m_FrameBufferDesc; }
 
 		/* 创建FrameBuffer */
-		static SharedPtr<FrameBuffer> Create(const std::string& name, const FrameBufferDesc& desc);
+		static SharedPtr<DeviceFrameBuffer> Create(const std::string& name, const FrameBufferDesc& desc);
 
 	protected:
-		FrameBuffer() = default;
-		FrameBuffer(std::string name, FrameBufferDesc desc);
+		DeviceFrameBuffer() = default;
+		DeviceFrameBuffer(std::string name, FrameBufferDesc desc);
 
 		/* 名称 */
 		std::string m_DebugName;

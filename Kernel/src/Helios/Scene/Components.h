@@ -3,7 +3,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/quaternion.hpp>
 #include "SceneCamera.h"
-#include "Helios/Renderer/Texture.h"
+#include "Helios/VirtualDevice/DeviceTexture.h"
 #include "Model.h"
 #include "Light.h"
 
@@ -63,7 +63,7 @@ namespace Helios
 	/* 图片精灵组件 */
 	struct SpriteComponent
 	{
-		SharedPtr<Texture> Texture{ nullptr };
+		SharedPtr<DeviceTexture> Texture{ nullptr };
 		glm::vec4 BaseColor{ 1.0f, 1.0f, 1.0f, 1.0f };
 		float TilingFactor{ 1.0f };
 

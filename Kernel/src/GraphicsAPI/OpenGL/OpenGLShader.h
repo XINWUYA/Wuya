@@ -1,10 +1,10 @@
 ﻿#pragma once
 #include <glad/glad.h>
-#include "Helios/Renderer/Shader.h"
+#include "Helios/VirtualDevice/DeviceShader.h"
 
 namespace Helios
 {
-	class OpenGLShader : public Shader
+	class OpenGLShader : public DeviceShader
 	{
 	public:
 		OpenGLShader(const std::string& filepath);

@@ -25,7 +25,7 @@ void SampleCSM::OnAttached()
 			SamplerMinFilter::Linear,
 			SamplerMagFilter::Linear
 		};
-		const auto sky_texture = Texture::Create(ABSOLUTE_PATH("Textures/drakensberg_solitary_mountain_4k.hdr"), load_config);
+		const auto sky_texture = DeviceTexture::Create(ABSOLUTE_PATH("Textures/drakensberg_solitary_mountain_4k.hdr"), load_config);
 
 		RenderRasterState raster_state;
 		raster_state.EnableDepthWrite = true;

@@ -1,6 +1,6 @@
 ﻿#include "Pch.h"
-#include "Buffer.h"
-#include "Renderer.h"
+#include "DeviceBuffer.h"
+#include "Helios/Renderer/Renderer.h"
 #include "GraphicsAPI/OpenGL/OpenGLBuffer.h"
 #ifdef PLATFORM_MACOS
 #include "GraphicsAPI/Metal/MetalBuffer.h"
@@ -80,7 +80,7 @@ namespace Helios
 		}
 	}
 
-	SharedPtr<VertexBuffer> VertexBuffer::Create(uint32_t size)
+	SharedPtr<DeviceVertexBuffer> DeviceVertexBuffer::Create(uint32_t size)
 	{
 		switch (Renderer::CurrentAPI())
 		{
@@ -99,7 +99,7 @@ namespace Helios
 		}
 	}
 
-	SharedPtr<VertexBuffer> VertexBuffer::Create(const void* vertices, uint32_t size)
+	SharedPtr<DeviceVertexBuffer> DeviceVertexBuffer::Create(const void* vertices, uint32_t size)
 	{
 		switch (Renderer::CurrentAPI())
 		{

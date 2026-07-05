@@ -10,7 +10,7 @@ namespace Helios
 {
 	class Entity;
 	class RenderView;
-	class Texture;
+	class DeviceTexture;
 	class Camera;
 
 	/* 场景类 */

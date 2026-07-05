@@ -1,7 +1,7 @@
 ﻿#include "Pch.h"
 #include "AssetManager.h"
-#include "Helios/Renderer/Shader.h"
-#include "Helios/Renderer/Texture.h"
+#include "Helios/VirtualDevice/DeviceShader.h"
+#include "Helios/VirtualDevice/DeviceTexture.h"
 
 namespace Helios
 {
@@ -13,7 +13,7 @@ namespace Helios
 	}
 
 	/* 从文件中加载Shader */
-	SharedPtr<Shader> ShaderAssetManager::GetOrLoad(const std::string& path)
+	SharedPtr<DeviceShader> ShaderAssetManager::GetOrLoad(const std::string& path)
 	{
 		PROFILE_FUNCTION();
 
@@ -24,7 +24,7 @@ namespace Helios
 			return iter->second;
 
 		/* 找不到，则创建 */
-		auto shader = Shader::Create(path);
+		auto shader = DeviceShader::Create(path);
 		m_ShaderAssetMap[key] = shader;
 		return shader;
 	}
@@ -42,13 +42,13 @@ namespace Helios
 		return instance;
 	}
 
-	SharedPtr<Texture> TextureAssetManager::GetOrCreateTexture(const std::string& path)
+	SharedPtr<DeviceTexture> TextureAssetManager::GetOrCreateTexture(const std::string& path)
 	{
 		constexpr TextureLoadConfig load_config;
 		return GetOrCreateTexture(path, load_config);
 	}
 
-	SharedPtr<Texture> TextureAssetManager::GetOrCreateTexture(const std::string& path, const TextureLoadConfig& load_config)
+	SharedPtr<DeviceTexture> TextureAssetManager::GetOrCreateTexture(const std::string& path, const TextureLoadConfig& load_config)
 	{
 		PROFILE_FUNCTION();
 
@@ -63,7 +63,7 @@ namespace Helios
 		}
 
 		/* 找不到，则创建 */
-		auto texture = Texture::Create(path, load_config);
+		auto texture = DeviceTexture::Create(path, load_config);
 		m_TextureAssetMap[key] = texture;
 		return texture;
 	}

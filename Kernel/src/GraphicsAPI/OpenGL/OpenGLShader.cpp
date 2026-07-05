@@ -39,7 +39,7 @@ namespace Helios
 	}
 
 	OpenGLShader::OpenGLShader(const std::string& filepath)
-		: Shader(filepath)
+		: DeviceShader(filepath)
 	{
 		PROFILE_FUNCTION();
 
@@ -54,7 +54,7 @@ namespace Helios
 	}
 
 	OpenGLShader::OpenGLShader(std::string name, const std::string& vertex_src, const std::string& pixel_src)
-		: Shader(""), m_DebugName(std::move(name))
+		: DeviceShader(""), m_DebugName(std::move(name))
 	{
 		PROFILE_FUNCTION();
 
@@ -316,7 +316,7 @@ namespace Helios
 			std::filesystem::path cache_path = cache_dir / (shader_path.filename().string() + GetOpenGLShaderCacheFileExtension(shader_type));
 
 			std::ifstream in(cache_path, std::ios::in | std::ios::binary);
-			if (false/*in.is_open()*/) /* 暂时关闭ShaderCache */
+			if (in.is_open())
 			{
 				// Cache existed
 				in.seekg(0, std::ios::end);
@@ -326,6 +326,7 @@ namespace Helios
 				auto& data = m_OpenGLSPIRVs[shader_type];
 				data.resize(size / sizeof(uint32_t));
 				in.read((char*)data.data(), size);
+				in.close();
 			}
 			else
 			{
@@ -384,6 +385,9 @@ namespace Helios
 
 			compiled_shaders.emplace_back(shader);
 		}
+
+		/* SPIRV 数据已经上传到 GPU，中间产物不再需要，立即释放以避免长期滞留内存。 */
+		m_OpenGLSPIRVs.clear();
 #else
 		// Use traditional GLSL compilation on macOS/Linux
 		for (auto& source_code : m_OpenGLSourceCodes)

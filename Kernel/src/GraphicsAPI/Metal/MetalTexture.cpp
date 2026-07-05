@@ -10,14 +10,14 @@
 namespace Helios
 {
     MetalTexture::MetalTexture(const std::string& name, const TextureDesc& texture_desc)
-        : Texture(name, texture_desc)
+        : DeviceTexture(name, texture_desc)
     {
         CreateTexture(texture_desc);
         CreateSamplerState(texture_desc);
     }
 
     MetalTexture::MetalTexture(const std::string& path, const TextureLoadConfig& load_config)
-        : Texture("Texture", TextureDesc{})
+        : DeviceTexture("Texture", TextureDesc{})
     {
         LoadFromFile(path, load_config);
     }
@@ -59,7 +59,7 @@ namespace Helios
         m_Texture->replaceRegion(region, level, 0, data, bytes_per_row, 0);
     }
 
-    bool MetalTexture::operator==(const Texture& other) const
+    bool MetalTexture::operator==(const DeviceTexture& other) const
     {
         return m_Texture == dynamic_cast<const MetalTexture&>(other).m_Texture;
     }

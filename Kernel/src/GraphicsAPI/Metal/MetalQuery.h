@@ -2,12 +2,12 @@
 
 #ifdef PLATFORM_MACOS
 
-#include "Helios/Renderer/RenderQuery.h"
+#include "Helios/VirtualDevice/DeviceQueryNode.h"
 #include <Metal/Metal.hpp>
 
 namespace Helios
 {
-    class MetalQueryNode final : public RenderQueryNode
+    class MetalQueryNode final : public DeviceQueryNode
     {
     public:
         MetalQueryNode();

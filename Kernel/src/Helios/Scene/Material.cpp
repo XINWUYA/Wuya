@@ -4,8 +4,8 @@
 
 #include "SceneCommon.h"
 #include "Helios/Application/AssetManager.h"
-#include "Helios/Renderer/Shader.h"
-#include "Helios/Renderer/Texture.h"
+#include "Helios/VirtualDevice/DeviceShader.h"
+#include "Helios/VirtualDevice/DeviceTexture.h"
 
 namespace Helios
 {
@@ -25,7 +25,7 @@ namespace Helios
 		m_Parameters[ToID(name)] = { type, name, param };
 	}
 
-	void Material::SetTexture(const std::string& name, const SharedPtr<Texture>& texture, int slot)
+	void Material::SetTexture(const std::string& name, const SharedPtr<DeviceTexture>& texture, int slot)
 	{
 		PROFILE_FUNCTION();
 
@@ -59,7 +59,7 @@ namespace Helios
 			case ParamType::Texture:
 				{
 					/* 绑定纹理 */
-					const auto texture_info = std::any_cast<std::pair<SharedPtr<Texture>, uint32_t>>(value);
+					const auto texture_info = std::any_cast<std::pair<SharedPtr<DeviceTexture>, uint32_t>>(value);
 					if (texture_info.second != TextureSlot::Invalid)
 						texture_info.first->Bind(texture_info.second);
 				}
@@ -112,7 +112,7 @@ namespace Helios
 	}
 	
 	/* 创建材质 */
-	SharedPtr<Material> Material::Create(const SharedPtr<Shader>& shader)
+	SharedPtr<Material> Material::Create(const SharedPtr<DeviceShader>& shader)
 	{
 		PROFILE_FUNCTION();
 
@@ -179,7 +179,7 @@ namespace Helios
 				case ParamType::Texture:
 					{
 						auto texture_doc = param_doc->InsertNewChildElement("Texture");
-						const auto texture_info = std::any_cast<std::pair<SharedPtr<Texture>, uint32_t>>(param_info.Value);
+						const auto texture_info = std::any_cast<std::pair<SharedPtr<DeviceTexture>, uint32_t>>(param_info.Value);
 						auto& texture = texture_info.first;
 						
 						texture_doc->SetAttribute("Path", RELATIVE_PATH(texture->GetPath()).c_str());

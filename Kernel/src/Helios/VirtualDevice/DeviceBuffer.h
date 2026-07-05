@@ -66,11 +66,11 @@ namespace Helios
 	};
 
 	// Vertex Buffer
-	class VertexBuffer
+	class DeviceVertexBuffer
 	{
 	public:
-		VertexBuffer() = default;
-		virtual ~VertexBuffer() = default;
+		DeviceVertexBuffer() = default;
+		virtual ~DeviceVertexBuffer() = default;
 
 		virtual void Bind() const = 0;
 		virtual void Unbind() const = 0;
@@ -86,8 +86,8 @@ namespace Helios
 		/* 获取顶点数量 */
 		[[nodiscard]] virtual uint32_t GetVertexCount() const = 0;
 
-		static SharedPtr<VertexBuffer> Create(uint32_t size);
-		static SharedPtr<VertexBuffer> Create(const void* vertices, uint32_t size);
+		static SharedPtr<DeviceVertexBuffer> Create(uint32_t size);
+		static SharedPtr<DeviceVertexBuffer> Create(const void* vertices, uint32_t size);
 	};
 
 	// Index Buffer

@@ -4,7 +4,7 @@
 #include "MetalRenderAPI.h"
 #include "MetalCommon.h"
 #include "MetalVertexArray.h"
-#include "Helios/Renderer/VertexArray.h"
+#include "Helios/VirtualDevice/DeviceVertexArray.h"
 
 namespace Helios
 {
@@ -126,7 +126,7 @@ namespace Helios
         }
     }
 
-    void MetalRenderAPI::DrawIndexed(PrimitiveType type, const SharedPtr<VertexArray>& vertex_array, uint32_t index_count, uint32_t index_offset)
+    void MetalRenderAPI::DrawIndexed(PrimitiveType type, const SharedPtr<DeviceVertexArray>& vertex_array, uint32_t index_count, uint32_t index_offset)
     {
         PROFILE_FUNCTION();
 
@@ -173,7 +173,7 @@ namespace Helios
         );
     }
 
-    void MetalRenderAPI::DrawArrays(PrimitiveType type, const SharedPtr<VertexArray>& vertex_array)
+    void MetalRenderAPI::DrawArrays(PrimitiveType type, const SharedPtr<DeviceVertexArray>& vertex_array)
     {
         PROFILE_FUNCTION();
 

@@ -2,12 +2,12 @@
 
 #ifdef PLATFORM_MACOS
 
-#include "Helios/Renderer/FrameBuffer.h"
+#include "Helios/VirtualDevice/DeviceFrameBuffer.h"
 #include <Metal/Metal.hpp>
 
 namespace Helios
 {
-    class MetalFrameBuffer : public FrameBuffer
+    class MetalFrameBuffer : public DeviceFrameBuffer
     {
     public:
         MetalFrameBuffer(const std::string& name, const FrameBufferDesc& desc);

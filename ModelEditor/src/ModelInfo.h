@@ -55,7 +55,7 @@ namespace Helios
 	struct SubModelInfo
 	{
 		std::string Name;
-		SharedPtr<VertexArray> VertexArray;
+		SharedPtr<DeviceVertexArray> VertexArray;
 		uint32_t VertexCount;
 		std::vector<std::pair<uint32_t, float*>> VertexBufferDatas; /* 顶点数据的原始信息，保存模型时需要<stride, data> */
 		std::vector<uint32_t> Indices; /* 顶点数据的索引信息 */

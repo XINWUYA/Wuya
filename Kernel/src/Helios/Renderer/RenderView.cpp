@@ -33,7 +33,7 @@ namespace Helios
 		m_ViewportRegion = region;
 	}
 
-	SharedPtr<Texture> RenderView::GetRenderTarget() const
+	SharedPtr<DeviceTexture> RenderView::GetRenderTarget() const
 	{
 		PROFILE_FUNCTION();
 
@@ -44,14 +44,14 @@ namespace Helios
 	}
 
 	/* 存储各Pass的FrameBuffer */
-	void RenderView::EmplacePassFrameBuffer(const std::string& name, const SharedPtr<FrameBuffer>& frame_buffer)
+	void RenderView::EmplacePassFrameBuffer(const std::string& name, const SharedPtr<DeviceFrameBuffer>& frame_buffer)
 	{
 		PROFILE_FUNCTION();
 
 		m_PassFrameBuffers[name] = frame_buffer;
 	}
 
-	const SharedPtr<FrameBuffer>& RenderView::GetPassFrameBuffer(const std::string& name) const
+	const SharedPtr<DeviceFrameBuffer>& RenderView::GetPassFrameBuffer(const std::string& name) const
 	{
 		PROFILE_FUNCTION();
 

@@ -6,7 +6,7 @@ namespace Helios
 {
 	class RenderView;
 	class Material;
-	class UniformBuffer;
+	class DeviceUniformBuffer;
 	struct VisibleMeshObject;
 	struct ValidLight;
 	struct MeshPrimitive;
@@ -33,7 +33,7 @@ namespace Helios
 
 		static const ResultGPUTimerNode& GetGPUTimerRoot() { return m_GPUTimerRoot; }
 
-		static SharedPtr<VertexArray> GetFullScreenVertexArray();
+		static SharedPtr<DeviceVertexArray> GetFullScreenVertexArray();
 
 		static void FillObjectUniformBuffer(const VisibleMeshObject& mesh_object);
 

@@ -4,8 +4,8 @@
 
 namespace Helios
 {
-	class Shader;
-	class Texture;
+	class DeviceShader;
+	class DeviceTexture;
 	struct TextureLoadConfig;
 
 	/* 统一管理Shader, 避免重复创建 */
@@ -16,13 +16,13 @@ namespace Helios
 		static ShaderAssetManager& Instance();
 
 		/* 从文件中加载Shader */
-		SharedPtr<Shader> GetOrLoad(const std::string& path);
+		SharedPtr<DeviceShader> GetOrLoad(const std::string& path);
 		/* 清空所有Shader */
 		void Clear();
 
 	private:
-		/* Shader名Hash到Shader的映射<NameHash, SharedPtr<Shader>> */
-		std::unordered_map<uint32_t, SharedPtr<Shader>> m_ShaderAssetMap;
+		/* Shader名Hash到Shader的映射<NameHash, SharedPtr<DeviceShader>> */
+		std::unordered_map<uint32_t, SharedPtr<DeviceShader>> m_ShaderAssetMap;
 	};
 
 
@@ -34,8 +34,8 @@ namespace Helios
 		static TextureAssetManager& Instance();
 
 		/* 获取Texture */
-		SharedPtr<Texture> GetOrCreateTexture(const std::string& path);
-		SharedPtr<Texture> GetOrCreateTexture(const std::string& path, const TextureLoadConfig& load_config);
+		SharedPtr<DeviceTexture> GetOrCreateTexture(const std::string& path);
+		SharedPtr<DeviceTexture> GetOrCreateTexture(const std::string& path, const TextureLoadConfig& load_config);
 		/* 清空所有Texture */
 		void Clear();
 
@@ -43,6 +43,6 @@ namespace Helios
 		TextureAssetManager() = default;
 
 		/* 相对路径的Hash值作为Key */
-		std::unordered_map<uint32_t, SharedPtr<Texture>> m_TextureAssetMap;
+		std::unordered_map<uint32_t, SharedPtr<DeviceTexture>> m_TextureAssetMap;
 	};
 }

@@ -1,6 +1,6 @@
 ﻿#include "Pch.h"
-#include "FrameBuffer.h"
-#include "Renderer.h"
+#include "DeviceFrameBuffer.h"
+#include "Helios/Renderer/Renderer.h"
 #include "GraphicsAPI/OpenGL/OpenGLFrameBuffer.h"
 #ifdef PLATFORM_MACOS
 #include "GraphicsAPI/Metal/MetalFrameBuffer.h"
@@ -8,13 +8,13 @@
 
 namespace Helios
 {
-	FrameBuffer::FrameBuffer(std::string name, FrameBufferDesc desc)
+	DeviceFrameBuffer::DeviceFrameBuffer(std::string name, FrameBufferDesc desc)
 		: m_DebugName(std::move(name)), m_FrameBufferDesc(std::move(desc))
 	{
 	}
 
 	/* 创建FrameBuffer */
-	SharedPtr<FrameBuffer> FrameBuffer::Create(const std::string& name, const FrameBufferDesc& desc)
+	SharedPtr<DeviceFrameBuffer> DeviceFrameBuffer::Create(const std::string& name, const FrameBufferDesc& desc)
 	{
 		switch (Renderer::CurrentAPI())
 		{

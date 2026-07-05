@@ -1,11 +1,11 @@
 ﻿#pragma once
-#include "Helios/Renderer/RenderContext.h"
+#include "Helios/VirtualDevice/DeviceContext.h"
 
 struct GLFWwindow;
 
 namespace Helios
 {
-	class OpenGLContext final : public IRenderContext
+	class OpenGLContext final : public DeviceContext
 	{
 	public:
 		OpenGLContext(GLFWwindow* window);

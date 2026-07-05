@@ -33,7 +33,7 @@ namespace Helios
 			int			Depth{ -1 };						/* 文件夹距离根目录的层数 */
 			std::vector<SharedPtr<FileNode>> ChildNodes;	/* 子节点文件，目录下可能有多个 */
 			WeakPtr<FileNode> ParentNode;					/* 父节点，必须使用WeakPtr, 不然会出现智能指针循环引用，导致内存泄漏 */
-			SharedPtr<Texture> Icon;						/* 文件图标 */
+			SharedPtr<DeviceTexture> Icon;						/* 文件图标 */
 
 			FileNode() = default;
 			FileNode(std::string name, std::string path, enum class FileType type, float size, int depth)

@@ -9,7 +9,7 @@
 namespace Helios
 {
     MetalShader::MetalShader(const std::string& filepath)
-        : Shader(filepath)
+        : DeviceShader(filepath)
     {
         /* 从文件路径提取着色器名称 */
         auto last_slash = filepath.find_last_of("/\\");
@@ -49,7 +49,7 @@ namespace Helios
     }
 
     MetalShader::MetalShader(std::string name, const std::string& vertex_src, const std::string& pixel_src)
-        : Shader(""), m_DebugName(std::move(name))
+        : DeviceShader(""), m_DebugName(std::move(name))
     {
         /* 转换GLSL到MSL */
         m_VertexMSL = GLSLToMSL(vertex_src, "vertex");

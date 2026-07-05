@@ -16,12 +16,12 @@ private:
 		glm::mat4 ViewProjection;
 	};
 
-	Helios::SharedPtr<Helios::VertexArray> m_pVertexArray;
+	Helios::SharedPtr<Helios::DeviceVertexArray> m_pVertexArray;
 	Helios::UniquePtr<Helios::ShaderLibrary> m_pShaderLibrary;
 	Helios::SharedPtr<Helios::Texture2D> m_pTexture2D;
-	Helios::SharedPtr<Helios::FrameBuffer> m_pFrameBuffer;
+	Helios::SharedPtr<Helios::DeviceFrameBuffer> m_pFrameBuffer;
 	Helios::UniquePtr<Helios::EditorCamera> m_pEditorCamera;
-	Helios::SharedPtr<Helios::UniformBuffer> m_pCameraCBuffer;
+	Helios::SharedPtr<Helios::DeviceUniformBuffer> m_pCameraCBuffer;
 	CameraParams m_CameraParams{};
 };
 

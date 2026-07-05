@@ -1,12 +1,12 @@
 ﻿#pragma once
 #ifdef PLATFORM_MACOS
 
-#include "Helios/Renderer/UniformBuffer.h"
+#include "Helios/VirtualDevice/DeviceUniformBuffer.h"
 #include <Metal/Metal.hpp>
 
 namespace Helios
 {
-    class MetalUniformBuffer : public UniformBuffer
+    class MetalUniformBuffer : public DeviceUniformBuffer
     {
     public:
         MetalUniformBuffer(uint32_t size, uint32_t binding_point);

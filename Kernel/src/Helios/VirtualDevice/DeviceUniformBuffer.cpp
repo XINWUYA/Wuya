@@ -1,6 +1,6 @@
 ﻿#include "Pch.h"
-#include "UniformBuffer.h"
-#include "Renderer.h"
+#include "DeviceUniformBuffer.h"
+#include "Helios/Renderer/Renderer.h"
 #include "GraphicsAPI/OpenGL/OpenGLUniformBuffer.h"
 #ifdef PLATFORM_MACOS
 #include "GraphicsAPI/Metal/MetalUniformBuffer.h"
@@ -8,7 +8,7 @@
 
 namespace Helios
 {
-	SharedPtr<UniformBuffer> UniformBuffer::Create(uint32_t size, uint32_t binding_point)
+	SharedPtr<DeviceUniformBuffer> DeviceUniformBuffer::Create(uint32_t size, uint32_t binding_point)
 	{
 		switch (Renderer::CurrentAPI())
 		{

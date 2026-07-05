@@ -61,7 +61,7 @@ namespace Helios
 		}
 	}
 
-	void OpenGLVertexArray::AddVertexBuffer(const SharedPtr<VertexBuffer>& vertex_buffer)
+	void OpenGLVertexArray::AddVertexBuffer(const SharedPtr<DeviceVertexBuffer>& vertex_buffer)
 	{
 		PROFILE_FUNCTION();
 

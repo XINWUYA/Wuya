@@ -1,14 +1,14 @@
 ﻿#include "Pch.h"
-#include "RenderContext.h"
-#include "Renderer.h"
-#include "GraphicsAPI/OpenGL/OpenGLContext.h"
+#include "DeviceVertexArray.h"
+#include "Helios/Renderer/Renderer.h"
+#include "GraphicsAPI/OpenGL/OpenGLVertexArray.h"
 #ifdef PLATFORM_MACOS
-#include "GraphicsAPI/Metal/MetalWindow.h"
+#include "GraphicsAPI/Metal/MetalVertexArray.h"
 #endif
 
 namespace Helios
 {
-	UniquePtr<IRenderContext> IRenderContext::Create(void* window)
+	SharedPtr<DeviceVertexArray> DeviceVertexArray::Create()
 	{
 		switch (Renderer::CurrentAPI())
 		{
@@ -16,10 +16,10 @@ namespace Helios
 			CORE_LOG_ERROR("RenderAPI can't be None!");
 			return nullptr;
 		case RenderAPI::OpenGL:
-			return CreateUniquePtr<OpenGLContext>(static_cast<GLFWwindow*>(window));
+			return CreateSharedPtr<OpenGLVertexArray>();
 #ifdef PLATFORM_MACOS
 		case RenderAPI::Metal:
-			return CreateUniquePtr<MetalContext>(static_cast<GLFWwindow*>(window));
+			return CreateSharedPtr<MetalVertexArray>();
 #endif
 		default:
 			CORE_LOG_ERROR("Unknown RenderAPI is unsupported!");

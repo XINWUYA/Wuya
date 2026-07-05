@@ -8,7 +8,7 @@ namespace Helios
 	class FrameGraph;
 	class RenderPassNode;
 	class IResource;
-	class FrameBuffer;
+	class DeviceFrameBuffer;
 
 	/* FrameGraph中一个RenderPassNode中使用的资源 */
 	class FrameGraphResources
@@ -42,7 +42,7 @@ namespace Helios
 		}
 
 		/* 获取当前RenderPass的RenderTarget */
-		[[nodiscard]] SharedPtr<FrameBuffer> GetPassRenderTarget(uint32_t idx = 0) const;
+		[[nodiscard]] SharedPtr<DeviceFrameBuffer> GetPassRenderTarget(uint32_t idx = 0) const;
 
 	private:
 		/* 从FrameGraph中获取资源 */
@@ -54,12 +54,12 @@ namespace Helios
 		RenderPassNode& m_RenderPassNode;
 	};
 
-	class Texture;
+	class DeviceTexture;
 
 	/* FrameGraph中使用的Texture */
 	struct FrameGraphTexture
 	{
-		SharedPtr<Texture> Texture;
+		SharedPtr<DeviceTexture> Texture;
 
 		/* 描述 */
 		struct Descriptor

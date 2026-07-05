@@ -9,8 +9,8 @@ namespace Helios
 	class Camera;
 	class Scene;
 	class MeshSegment;
-	class Texture;
-	class FrameBuffer;
+	class DeviceTexture;
+	class DeviceFrameBuffer;
 	class FrameGraph;
 	class ShadowMapManager;
 
@@ -74,14 +74,14 @@ namespace Helios
 
 		/* 设置RenderTarget */
 		void SetRenderTargetHandle(FrameGraphResourceHandle handle) { m_RenderTargetHandle = handle; }
-		[[nodiscard]] SharedPtr<Texture> GetRenderTarget() const;
+		[[nodiscard]] SharedPtr<DeviceTexture> GetRenderTarget() const;
 
 		/* 获取FrameGraph */
 		[[nodiscard]] const SharedPtr<FrameGraph>& GetFrameGraph() const { return m_pFrameGraph; }
 
 		/* 存储各Pass的FrameBuffer */
-		void EmplacePassFrameBuffer(const std::string& name, const SharedPtr<FrameBuffer>& frame_buffer);
-		[[nodiscard]] const SharedPtr<FrameBuffer>& GetPassFrameBuffer(const std::string& name) const;
+		void EmplacePassFrameBuffer(const std::string& name, const SharedPtr<DeviceFrameBuffer>& frame_buffer);
+		[[nodiscard]] const SharedPtr<DeviceFrameBuffer>& GetPassFrameBuffer(const std::string& name) const;
 
 		/* 准备一帧的RenderView数据 */
 		void Prepare();
@@ -122,7 +122,7 @@ namespace Helios
 		/* 是否使用自定义的FrameGraph覆盖 */
 		bool m_IsOverrideFrameGraph{ false };
 		/* 收集当前RenderView对应的FrameGraph中各Pass阶段的FrameBuffer，用于ReadPixels<PassName, FrameBufferPtr> */
-		std::unordered_map<std::string, SharedPtr<FrameBuffer>> m_PassFrameBuffers{};
+		std::unordered_map<std::string, SharedPtr<DeviceFrameBuffer>> m_PassFrameBuffers{};
 
 		/* 是否开启投影 */
 		bool m_IsHasShadowCast{ false };

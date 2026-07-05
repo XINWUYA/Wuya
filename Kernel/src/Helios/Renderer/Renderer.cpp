@@ -1,10 +1,10 @@
 ﻿#include "Pch.h"
 #include "Renderer.h"
-#include "FrameBuffer.h"
 #include "RenderView.h"
-#include "Texture.h"
-#include "Shader.h"
-#include "UniformBuffer.h"
+#include <Helios/VirtualDevice/DeviceFrameBuffer.h>
+#include <Helios/VirtualDevice/DeviceTexture.h>
+#include <Helios/VirtualDevice/DeviceShader.h>
+#include <Helios/VirtualDevice/DeviceUniformBuffer.h>
 #include "Helios/Scene/Camera.h"
 #include "Helios/Scene/Material.h"
 #include "Helios/Scene/Mesh.h"
@@ -52,9 +52,9 @@ namespace Helios
 	{
 		/* 全局UniformBuffers */
 		ViewUniformData ViewUniformData;
-		SharedPtr<UniformBuffer> pViewUniformBuffer;
-		SharedPtr<UniformBuffer> pObjectUniformBuffer;
-		SharedPtr<UniformBuffer> pLightUniformBuffer;
+		SharedPtr<DeviceUniformBuffer> pViewUniformBuffer;
+		SharedPtr<DeviceUniformBuffer> pObjectUniformBuffer;
+		SharedPtr<DeviceUniformBuffer> pLightUniformBuffer;
 	};
 
 	static RenderData s_RenderData;
@@ -69,9 +69,9 @@ namespace Helios
 		m_pRenderAPI = RenderAPI::Create();
 		m_pRenderAPI->Init();
 
-		s_RenderData.pViewUniformBuffer = UniformBuffer::Create(sizeof(ViewUniformData), UniformBufferBindingPoint::View);
-		s_RenderData.pObjectUniformBuffer = UniformBuffer::Create(sizeof(ObjectUniformData), UniformBufferBindingPoint::Object);
-		s_RenderData.pLightUniformBuffer = UniformBuffer::Create(sizeof(LightUniformData), UniformBufferBindingPoint::Light);
+		s_RenderData.pViewUniformBuffer = DeviceUniformBuffer::Create(sizeof(ViewUniformData), UniformBufferBindingPoint::View);
+		s_RenderData.pObjectUniformBuffer = DeviceUniformBuffer::Create(sizeof(ObjectUniformData), UniformBufferBindingPoint::Object);
+		s_RenderData.pLightUniformBuffer = DeviceUniformBuffer::Create(sizeof(LightUniformData), UniformBufferBindingPoint::Light);
 	}
 
 	void Renderer::Update()
@@ -145,7 +145,7 @@ namespace Helios
 		mesh_primitive.VertexArray->Unbind();
 	}
 
-	SharedPtr<VertexArray> Renderer::GetFullScreenVertexArray()
+	SharedPtr<DeviceVertexArray> Renderer::GetFullScreenVertexArray()
 	{
 		PROFILE_FUNCTION();
 
@@ -160,7 +160,7 @@ namespace Helios
 		{
 			{ "a_Position", BufferDataType::Float4 }
 		};
-		const auto vertex_buffer = VertexBuffer::Create(vertices, sizeof(vertices));
+		const auto vertex_buffer = DeviceVertexBuffer::Create(vertices, sizeof(vertices));
 		vertex_buffer->SetLayout(vertex_buffer_layout);
 
 		/* Indices */
@@ -170,7 +170,7 @@ namespace Helios
 		};
 		const auto index_buffer = IndexBuffer::Create(indices, 3, IndexType::UInt16);
 
-		auto vertex_array = VertexArray::Create();
+		auto vertex_array = DeviceVertexArray::Create();
 		vertex_array->AddVertexBuffer(vertex_buffer);
 		vertex_array->SetIndexBuffer(index_buffer);
 		return vertex_array;

@@ -1,6 +1,6 @@
 ﻿#include "Pch.h"
-#include "Shader.h"
-#include "Renderer.h"
+#include "DeviceShader.h"
+#include "Helios/Renderer/Renderer.h"
 #include "GraphicsAPI/OpenGL/OpenGLShader.h"
 #ifdef PLATFORM_MACOS
 #include "GraphicsAPI/Metal/MetalShader.h"
@@ -8,13 +8,13 @@
 
 namespace Helios
 {
-	Shader::Shader(std::string path)
+	DeviceShader::DeviceShader(std::string path)
 		: m_Path(std::move(path))
 	{
 	}
 
 	/* 创建Shader */
-	SharedPtr<Shader> Shader::Create(const std::string& filepath)
+	SharedPtr<DeviceShader> DeviceShader::Create(const std::string& filepath)
 	{
 		switch(Renderer::CurrentAPI())
 		{
@@ -34,7 +34,7 @@ namespace Helios
 	}
 
 	/* 创建Shader */
-	SharedPtr<Shader> Shader::Create(const std::string& name, const std::string& vertex_src, const std::string& pixel_src)
+	SharedPtr<DeviceShader> DeviceShader::Create(const std::string& name, const std::string& vertex_src, const std::string& pixel_src)
 	{
 		switch (Renderer::CurrentAPI())
 		{

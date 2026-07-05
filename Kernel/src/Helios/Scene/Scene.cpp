@@ -173,7 +173,7 @@ namespace Helios
 					{
 						auto& sprite_component = entity.AddComponent<SpriteComponent>();
 						const std::string texture_path = sprite_root->Attribute("TexturePath");
-						sprite_component.Texture = Texture::Create(texture_path);
+						sprite_component.Texture = DeviceTexture::Create(texture_path);
 						sprite_component.BaseColor = ToVec4(sprite_root->Attribute("BaseColor"));
 						sprite_component.TilingFactor = sprite_root->FloatAttribute("TilingFactor");
 					}

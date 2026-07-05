@@ -10,7 +10,7 @@
 namespace Helios
 {
     MetalFrameBuffer::MetalFrameBuffer(const std::string& name, const FrameBufferDesc& desc)
-        : FrameBuffer(name, desc)
+        : DeviceFrameBuffer(name, desc)
     {
         /* 创建渲染通道描述符 */
         m_RenderPassDescriptor = MTL::RenderPassDescriptor::alloc()->init();

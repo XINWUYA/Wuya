@@ -1,31 +1,8 @@
 ﻿#pragma once
+#include "Helios/VirtualDevice/DeviceQueryNode.h"
+
 namespace Helios
 {
-	constexpr uint32_t INVALID_QUERY_NODE_INDEX = UINT32_MAX;
-	constexpr uint64_t INVALID_QUERY_TIME = UINT64_MAX;
-
-	/* RenderQueryNode基类
-	 * 用于记录一个GPU区间的一对时间戳
-	 */
-	struct RenderQueryNode
-	{
-		virtual ~RenderQueryNode() = default;
-
-		virtual void Begin() {}
-		virtual void End() {}
-		virtual bool GetQueryResult() { return true; }
-
-		std::string Label{ "Unnamed QueryNode" };
-		uint32_t NodeIndex{ 0 };
-		uint32_t ParentNodeIndex{ INVALID_QUERY_NODE_INDEX };
-		std::vector<uint32_t> ChildrenNodeIndices{};
-		uint64_t QueryTimeBegin = INVALID_QUERY_TIME;
-		uint64_t QueryTimeEnd = INVALID_QUERY_TIME;
-
-		double ResultTimeBegin = 0.0;
-		double ResultTimeEnd = 0.0;
-	};
-
 	/* Query Context类
 	 * 包含一帧的QueryNode的信息
 	 * 提前分配200个，当超过时，再根据需要增加
@@ -46,7 +23,7 @@ namespace Helios
 
 	private:
 		static constexpr uint8_t DEFAULT_QUERY_COUNT = 32; // 预留32个QuaryNode
-		std::vector<RenderQueryNode*> m_QueryNodes{};
+		std::vector<DeviceQueryNode*> m_QueryNodes{};
 		uint32_t m_RootNodeIndex{ INVALID_QUERY_NODE_INDEX };
 		uint32_t m_CurrentNodeIndex{ INVALID_QUERY_NODE_INDEX };
 		uint32_t m_UsedNodeIndex{ 0 };

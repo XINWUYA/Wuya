@@ -1,7 +1,7 @@
 ﻿#pragma once
 #include <glm/glm.hpp>
 #include "RenderCommon.h"
-#include "VertexArray.h"
+#include <Helios/VirtualDevice/DeviceVertexArray.h>
 
 namespace Helios
 {
@@ -26,8 +26,8 @@ namespace Helios
 		/* 应用光栅化状态 */
 		virtual void ApplyRasterState(RenderRasterState raster_state) = 0;
 		/* 绘制调用 */
-		virtual void DrawIndexed(PrimitiveType type, const SharedPtr<VertexArray>& vertex_array, uint32_t index_count = 0, uint32_t index_offset = 0) = 0;
-		virtual void DrawArrays(PrimitiveType type, const SharedPtr<VertexArray>& vertex_array) = 0;
+		virtual void DrawIndexed(PrimitiveType type, const SharedPtr<DeviceVertexArray>& vertex_array, uint32_t index_count = 0, uint32_t index_offset = 0) = 0;
+		virtual void DrawArrays(PrimitiveType type, const SharedPtr<DeviceVertexArray>& vertex_array) = 0;
 		/* Flush */
 		virtual void Flush() = 0;
 

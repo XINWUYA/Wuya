@@ -2,12 +2,12 @@
 
 #ifdef PLATFORM_MACOS
 
-#include "Helios/Renderer/Buffer.h"
+#include "Helios/VirtualDevice/DeviceBuffer.h"
 #include <Metal/Metal.hpp>
 
 namespace Helios
 {
-    class MetalVertexBuffer : public VertexBuffer
+    class MetalVertexBuffer : public DeviceVertexBuffer
     {
     public:
         MetalVertexBuffer(uint32_t size);

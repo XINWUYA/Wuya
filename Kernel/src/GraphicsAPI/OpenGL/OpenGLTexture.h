@@ -1,14 +1,14 @@
 ﻿#pragma once
 #include <string>
 #include <glad/glad.h>
-#include "Helios/Renderer/Texture.h"
+#include "Helios/VirtualDevice/DeviceTexture.h"
 
 namespace Helios
 {
 	/**
 	 * \brief 纹理类：可以是普通的纹理，也可以作为RenderBuffer
 	 */
-	class OpenGLTexture : public Texture
+	class OpenGLTexture : public DeviceTexture
 	{
 	public:
 		OpenGLTexture(const std::string& name, const TextureDesc& texture_desc);
@@ -32,7 +32,7 @@ namespace Helios
 		bool IsLoaded() const override { return m_IsLoaded; }
 
 		/* ����operators */
-		bool operator==(const Texture& other) const override
+		bool operator==(const DeviceTexture& other) const override
 		{
 			return ((OpenGLTexture&)other).GetTextureID() == m_TextureId;
 		}

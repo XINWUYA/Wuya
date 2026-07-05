@@ -55,7 +55,7 @@ namespace Helios
 		Entity m_SelectedEntity;
 
 		/* 图标 */
-		SharedPtr<Texture> m_pAddComponentIcon;
-		SharedPtr<Texture> m_pMenuIcon;
+		SharedPtr<DeviceTexture> m_pAddComponentIcon;
+		SharedPtr<DeviceTexture> m_pMenuIcon;
 	};
 }

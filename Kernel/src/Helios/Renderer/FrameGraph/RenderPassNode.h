@@ -9,7 +9,7 @@ namespace Helios
 {
 	class IFrameGraphPass;
 	class RenderResourceNode;
-	class FrameBuffer;
+	class DeviceFrameBuffer;
 
 	/* 包含RenderPass所需的数据，一个RenderPass可能包含多组数据 */
 	struct RenderPassData
@@ -20,7 +20,7 @@ namespace Helios
 		SharedPtr<RenderResourceNode> OutgoingResourceNodes[FrameGraphPassInfo::MAX_ATTACHMENT_NUM] = {};				/* 输出的资源节点 */
 		FrameGraphResourceHandleTyped<FrameGraphTexture> ValidAttachments[FrameGraphPassInfo::MAX_ATTACHMENT_NUM] = {}; /* 收集有效的Attachments */
 		RenderBufferUsage RenderBufferUsage{ RenderBufferUsage::None };													/* RenderBuffer的使用情况 */
-		SharedPtr<FrameBuffer> FrameBuffer{ nullptr };																	/* FrameBuffer */
+		SharedPtr<DeviceFrameBuffer> FrameBuffer{ nullptr };																	/* FrameBuffer */
 	};
 
 	/* RenderPassNode类，作为FrameGraph依赖关系图中的一个节点 */

@@ -224,7 +224,7 @@ namespace Helios
 	/* 节点可能挂载的组件 */
 	struct MGTexture2DComponent
 	{
-		SharedPtr<Texture> Texture{ nullptr };
+		SharedPtr<DeviceTexture> Texture{ nullptr };
 		glm::vec4 BaseColor{ 1.0f, 1.0f, 1.0f, 1.0f };
 		float TilingFactor{ 1.0f };
 		bool IsGenMipmap{ true };

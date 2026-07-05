@@ -1,7 +1,7 @@
 ﻿#include "Pch.h"
 #include "RenderPassNode.h"
 #include "RenderResourceNode.h"
-#include "Helios/Renderer/FrameBuffer.h"
+#include "Helios/VirtualDevice/DeviceFrameBuffer.h"
 
 namespace Helios
 {
@@ -137,8 +137,16 @@ namespace Helios
 				desc.StencilRenderBuffer.Layer = fg_texture->GetSubDescriptor().Layer;
 			}
 
-			/* 创建FrameBuffer */
-			render_pass_data->FrameBuffer = FrameBuffer::Create(render_pass_data->DebugName + "_FrameBuffer", desc);
+		/* 没有附件的 Pass（如 SideEffect Pass）直接渲染到默认 RT，不需要创建 FrameBuffer，
+		 * 避免每帧生成并销毁空 FBO 造成驱动内存抖动。 */
+		if (render_pass_data->RenderBufferUsage == RenderBufferUsage::None)
+		{
+			render_pass_data->FrameBuffer.reset();
+			continue;
+		}
+
+		/* 创建FrameBuffer */
+		render_pass_data->FrameBuffer = DeviceFrameBuffer::Create(render_pass_data->DebugName + "_FrameBuffer", desc);
 		}
 
 		/* 执行当前Pass */

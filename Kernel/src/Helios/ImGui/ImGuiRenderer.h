@@ -1,10 +1,10 @@
 ﻿#pragma once
 
-#include "Helios/Renderer/Shader.h"
-#include "Helios/Renderer/Texture.h"
-#include "Helios/Renderer/Buffer.h"
-#include "Helios/Renderer/VertexArray.h"
-#include "Helios/Renderer/UniformBuffer.h"
+#include "Helios/VirtualDevice/DeviceShader.h"
+#include "Helios/VirtualDevice/DeviceTexture.h"
+#include "Helios/VirtualDevice/DeviceBuffer.h"
+#include "Helios/VirtualDevice/DeviceVertexArray.h"
+#include "Helios/VirtualDevice/DeviceUniformBuffer.h"
 #include <glm/glm.hpp>
 #include <vector>
 #include <cstdint>
@@ -47,7 +47,7 @@ namespace Helios
         void SetDisplaySize(int width, int height, float scale_x = 1.0f, float scale_y = 1.0f);
 
         /* 获取字体纹理 */
-        SharedPtr<Texture> GetFontTexture() const { return m_FontTexture; }
+        SharedPtr<DeviceTexture> GetFontTexture() const { return m_FontTexture; }
 
     private:
         /* 创建字体图集纹理 */
@@ -68,15 +68,15 @@ namespace Helios
         float m_ScaleY{ 1.0f };
 
         /* 字体纹理 */
-        SharedPtr<Texture> m_FontTexture{ nullptr };
+        SharedPtr<DeviceTexture> m_FontTexture{ nullptr };
 
         /* UI着色器 */
-        SharedPtr<Shader> m_UIShader{ nullptr };
+        SharedPtr<DeviceShader> m_UIShader{ nullptr };
 
         /* 顶点和索引缓冲区 */
-        SharedPtr<VertexBuffer> m_VertexBuffer{ nullptr };
+        SharedPtr<DeviceVertexBuffer> m_VertexBuffer{ nullptr };
         SharedPtr<IndexBuffer> m_IndexBuffer{ nullptr };
-        SharedPtr<VertexArray> m_VertexArray{ nullptr };
+        SharedPtr<DeviceVertexArray> m_VertexArray{ nullptr };
 
         /* 缓冲区容量 */
         int m_VertexBufferSize{ 0 };
@@ -87,7 +87,7 @@ namespace Helios
         std::vector<uint8_t> m_IdxScratch;
 
         /* UI uniform buffer */
-        SharedPtr<UniformBuffer> m_UIUniformBuffer{ nullptr };
+        SharedPtr<DeviceUniformBuffer> m_UIUniformBuffer{ nullptr };
 
         /* 投影矩阵 */
         glm::mat4 m_ProjectionMatrix{ 1.0f };

@@ -172,7 +172,7 @@ namespace Helios
 			}
 
 			/* Vertex Buffer */
-			auto vertex_buffer = VertexBuffer::Create(sub_model_info->VertexData.data(), sub_model_info->VertexData.size() * sizeof(float));
+			auto vertex_buffer = DeviceVertexBuffer::Create(sub_model_info->VertexData.data(), sub_model_info->VertexData.size() * sizeof(float));
 			VertexBufferLayout vertex_buffer_layout = {
 				{ "a_Position", BufferDataType::Float3 },
 				{ "a_Normal", BufferDataType::Float3 },
@@ -183,7 +183,7 @@ namespace Helios
 			vertex_buffer->SetLayout(vertex_buffer_layout);
 
 			/* Vertex Array */
-			sub_model_info->VertexArray = VertexArray::Create();
+			sub_model_info->VertexArray = DeviceVertexArray::Create();
 			sub_model_info->VertexArray->Bind();
 			sub_model_info->VertexArray->AddVertexBuffer(vertex_buffer);
 

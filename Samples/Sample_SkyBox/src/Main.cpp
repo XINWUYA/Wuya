@@ -41,16 +41,18 @@ int main(int argc, char** argv)
 	Helios::Logger::Init();
 	EDITOR_LOG("Helios Kernel 1.0.0");
 
-	// See the profiler result in: edge://tracing/
-	// More suggested: https://ui.perfetto.dev/
-	// Just Drag the json file in.
-	PROFILER_BEGIN_SESSION("Startup", "TimeCostProfiler-Startup.json");
-	auto app = Helios::CreateApplication();
-	PROFILER_END_SESSION();
+	{
+		// See the profiler result in: edge://tracing/
+		// More suggested: https://ui.perfetto.dev/
+		// Just Drag the json file in.
+		PROFILER_BEGIN_SESSION("Startup", "TimeCostProfiler-Startup.json");
+		auto app = Helios::CreateApplication();
+		PROFILER_END_SESSION();
 
-	PROFILER_BEGIN_SESSION("Runtime", "TimeCostProfiler-Runtime.json");
-	app->Run();
-	PROFILER_END_SESSION();
+		PROFILER_BEGIN_SESSION("Runtime", "TimeCostProfiler-Runtime.json");
+		app->Run();
+		PROFILER_END_SESSION();
+	}
 
 	Helios::Logger::Shutdown();
 	EndMemoryLeakDetector();

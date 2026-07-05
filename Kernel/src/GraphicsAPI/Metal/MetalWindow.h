@@ -3,7 +3,7 @@
 #ifdef PLATFORM_MACOS
 
 #include "Helios/Core/Window.h"
-#include "Helios/Renderer/RenderContext.h"
+#include "Helios/VirtualDevice/DeviceContext.h"
 #include <QuartzCore/CAMetalLayer.hpp>
 #include <Metal/Metal.hpp>
 
@@ -12,7 +12,7 @@ struct GLFWwindow;
 namespace Helios
 {
     /* MetalContext类：管理Metal渲染上下文和交换链 */
-    class MetalContext final : public IRenderContext
+    class MetalContext final : public DeviceContext
     {
     public:
         MetalContext(GLFWwindow* window);
@@ -41,7 +41,7 @@ namespace Helios
     };
 
     /* MetalWindow类：使用GLFWwindow创建Metal窗口 */
-    class MetalWindow : public IWindow
+    class MetalWindow : public DeviceWindow
     {
     public:
         MetalWindow(const WindowDesc& desc);

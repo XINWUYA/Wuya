@@ -1,9 +1,9 @@
 ﻿#pragma once
-#include "Helios/Renderer/Buffer.h"
+#include "Helios/VirtualDevice/DeviceBuffer.h"
 
 namespace Helios
 {
-	class OpenGLVertexBuffer : public VertexBuffer
+	class OpenGLVertexBuffer : public DeviceVertexBuffer
 	{
 	public:
 		OpenGLVertexBuffer(uint32_t size);

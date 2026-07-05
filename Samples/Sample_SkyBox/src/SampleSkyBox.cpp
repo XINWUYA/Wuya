@@ -61,10 +61,10 @@ void SampleSkyBox::OnAttached()
 		{ "a_TexCoord", BufferDataType::Float2 }
 	};
 
-	SharedPtr<VertexBuffer> vertex_buffer = VertexBuffer::Create(vertices, sizeof(vertices));
+	SharedPtr<DeviceVertexBuffer> vertex_buffer = DeviceVertexBuffer::Create(vertices, sizeof(vertices));
 	vertex_buffer->SetLayout(vertex_buffer_layout);
 
-	auto vertex_array = VertexArray::Create();
+	auto vertex_array = DeviceVertexArray::Create();
 	vertex_array->AddVertexBuffer(vertex_buffer);
 
 	TextureLoadConfig load_config{
@@ -77,7 +77,7 @@ void SampleSkyBox::OnAttached()
 		.SamplerMinFilter=SamplerMinFilter::Linear,
 		.SamplerMagFilter=SamplerMagFilter::Linear
 	};
-	auto sky_texture = Texture::Create(ABSOLUTE_PATH("Textures/drakensberg_solitary_mountain_4k.hdr"), load_config);
+	auto sky_texture = DeviceTexture::Create(ABSOLUTE_PATH("Textures/drakensberg_solitary_mountain_4k.hdr"), load_config);
 
 	auto shader = ShaderAssetManager::Instance().GetOrLoad(ABSOLUTE_PATH("Shaders/SkyBox.glsl"));
 	auto material = Material::Create(shader);

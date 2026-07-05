@@ -6,7 +6,7 @@
 #include <backends/imgui_impl_glfw.h>
 #include <GLFW/glfw3.h>
 #include "Helios/Application/Application.h"
-#include "Helios/Core/Window.h"
+#include "Helios/VirtualDevice/DeviceWindow.h"
 #include "Helios/Renderer/Renderer.h"
 #include "Helios/Renderer/RenderAPI.h"
 #include "Helios/Renderer/FrameGraph/FrameGraph.h"

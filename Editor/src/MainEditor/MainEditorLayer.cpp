@@ -390,7 +390,7 @@ namespace Helios
 			/* 切换执行模式 */
 			{
 				ImGui::SameLine();
-				const SharedPtr<Texture> icon = (m_PlayMode == PlayMode::Edit) ? play_icon : stop_icon;
+				const SharedPtr<DeviceTexture> icon = (m_PlayMode == PlayMode::Edit) ? play_icon : stop_icon;
 				ImGui::SetCursorPosX((panel_width - icon_size) * 0.5f);
 				if (ImGui::ImageButton((ImTextureID)icon->GetTextureID(), ImVec2(icon_size, icon_size), ImVec2(0, 1), ImVec2(1, 0), 0))
 				{

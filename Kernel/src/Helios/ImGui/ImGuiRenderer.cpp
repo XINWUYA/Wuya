@@ -38,7 +38,7 @@ namespace Helios
     void ImGuiRenderer::Init()
     {
         /* 创建顶点数组 - 必须先创建 */
-        m_VertexArray = VertexArray::Create();
+        m_VertexArray = DeviceVertexArray::Create();
 
         /* 创建初始缓冲区 - 必须在创建着色器之前 */
         EnsureBuffersCapacity(1000, 2000);
@@ -50,7 +50,7 @@ namespace Helios
         CreateFontTexture();
 
         /* 创建UI uniform buffer */
-        m_UIUniformBuffer = UniformBuffer::Create(sizeof(ImGuiUniformData), 4);
+        m_UIUniformBuffer = DeviceUniformBuffer::Create(sizeof(ImGuiUniformData), 4);
 
         CORE_LOG_INFO("ImGuiRenderer initialized successfully");
     }
@@ -257,7 +257,7 @@ namespace Helios
                              */
                             
                             /* 方式1：尝试作为Texture*指针转换（字体纹理） */
-                            Texture* texture = reinterpret_cast<Texture*>(pcmd->TextureId);
+                            DeviceTexture* texture = reinterpret_cast<DeviceTexture*>(pcmd->TextureId);
                             metalTexture = dynamic_cast<MetalTexture*>(texture);
                             
                             /* 方式2：如果不是MetalTexture，尝试作为uint32_t纹理ID（用户图片） */
@@ -415,14 +415,14 @@ namespace Helios
                     uint32_t scissor_h = static_cast<uint32_t>(clip_max.y - clip_min.y);
                     renderAPI->SetScissor(scissor_x, scissor_y, scissor_w, scissor_h);
 
-                    /* 绑定纹理：TextureId可能是 Texture* 指针，也可能是裸纹理ID（uintptr_t） */
+                    /* 绑定纹理：TextureId可能是 DeviceTexture* 指针，也可能是裸纹理ID（uintptr_t） */
                     if (pcmd->TextureId != last_texture_id)
                     {
                         bool bound = false;
                         /* 先尝试作为Texture*指针（字体纹理使用这种方式） */
                         if (pcmd->TextureId)
                         {
-                            Texture* texture = reinterpret_cast<Texture*>(pcmd->TextureId);
+                            DeviceTexture* texture = reinterpret_cast<DeviceTexture*>(pcmd->TextureId);
                             /* 简单健壮性处理：只要指针非空就尝试调用Bind */
                             if (texture)
                             {
@@ -514,7 +514,7 @@ namespace Helios
 		desc.Usage = TextureUsage::Sampleable;
 
         /* 创建纹理 */
-        m_FontTexture = Texture::Create("ImGuiFontTexture", desc);
+        m_FontTexture = DeviceTexture::Create("ImGuiFontTexture", desc);
 
         /* 填充纹理数据 */
         PixelDesc pixel_desc{};
@@ -530,7 +530,7 @@ namespace Helios
 
     void ImGuiRenderer::CreateUIShader()
     {
-        m_UIShader = Shader::Create(ABSOLUTE_PATH("Shaders/ImGuiUI.glsl"));
+        m_UIShader = DeviceShader::Create(ABSOLUTE_PATH("Shaders/ImGuiUI.glsl"));
         
 #ifdef PLATFORM_MACOS
         /* 对于Metal后端，需要设置VertexDescriptor */
@@ -557,7 +557,7 @@ namespace Helios
             while (new_size < vertex_count)
                 new_size = new_size + new_size / 2; /* 1.5x growth */
             m_VertexBufferSize = new_size;
-            m_VertexBuffer = VertexBuffer::Create(m_VertexBufferSize * sizeof(ImDrawVert));
+            m_VertexBuffer = DeviceVertexBuffer::Create(m_VertexBufferSize * sizeof(ImDrawVert));
 
             /* 设置顶点布局 */
             VertexBufferLayout layout;
@@ -567,7 +567,7 @@ namespace Helios
             m_VertexBuffer->SetLayout(layout);
 
             /* 重新创建顶点数组并添加顶点缓冲区 */
-            m_VertexArray = VertexArray::Create();
+            m_VertexArray = DeviceVertexArray::Create();
             m_VertexArray->AddVertexBuffer(m_VertexBuffer);
             /* 若已有IndexBuffer，重新挂回VAO，保持索引绑定一致 */
             if (m_IndexBuffer)
@@ -645,7 +645,7 @@ namespace Helios
                 /* 绑定纹理（如果不是默认字体纹理） */
                 if (pcmd->TextureId)
                 {
-                    auto* texture = reinterpret_cast<Texture*>(pcmd->TextureId);
+                    auto* texture = reinterpret_cast<DeviceTexture*>(pcmd->TextureId);
                     texture->Bind(0);
                 }
 

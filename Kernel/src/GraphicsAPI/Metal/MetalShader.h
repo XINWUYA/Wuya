@@ -2,13 +2,13 @@
 
 #ifdef PLATFORM_MACOS
 
-#include "Helios/Renderer/Shader.h"
+#include "Helios/VirtualDevice/DeviceShader.h"
 #include <Metal/Metal.hpp>
 #include <unordered_map>
 
 namespace Helios
 {
-    class MetalShader : public Shader
+    class MetalShader : public DeviceShader
     {
     public:
         MetalShader(const std::string& filepath);
@@ -37,7 +37,7 @@ namespace Helios
         void SetVertexDescriptor(MTL::VertexDescriptor* descriptor);
 
     private:
-        struct UniformBuffer
+        struct DeviceUniformBuffer
         {
             MTL::Buffer* Buffer{ nullptr };
             uint32_t Size{ 0 };
@@ -58,7 +58,7 @@ namespace Helios
         MTL::VertexDescriptor* m_VertexDescriptor{ nullptr };
 
         /* Uniform缓冲区 */
-        UniformBuffer m_UniformBuffer;
+        DeviceUniformBuffer m_UniformBuffer;
         std::unordered_map<std::string, int> m_UniformLocations;
     };
 }

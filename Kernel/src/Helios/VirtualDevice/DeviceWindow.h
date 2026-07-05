@@ -18,12 +18,12 @@ namespace Helios
 	};
 
 	/* 窗口类，用于创建编辑器的主窗口 */
-	class IWindow
+	class DeviceWindow
 	{
 	public:
 		using EventCallbackFunc = std::function<void(IEvent*)>;
 
-		virtual ~IWindow() = default;
+		virtual ~DeviceWindow() = default;
 
 		/* 更新，交换一帧 */
 		virtual void OnUpdate() = 0;
@@ -43,9 +43,9 @@ namespace Helios
 		virtual void SetEventCallback(const EventCallbackFunc& callback) = 0;
 
 		/* 根据描述创建窗口 */
-		static UniquePtr<IWindow> Create(const WindowDesc& desc = {});
+		static UniquePtr<DeviceWindow> Create(const WindowDesc& desc = {});
 
 	protected:
-		IWindow() = default;
+		DeviceWindow() = default;
 	};
 }

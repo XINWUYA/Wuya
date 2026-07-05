@@ -1,5 +1,5 @@
 ﻿#pragma once
-#include "Helios/Core/Window.h"
+#include "Helios/VirtualDevice/DeviceWindow.h"
 #include "Helios/Core/LayerStack.h"
 
 namespace Helios
@@ -13,7 +13,7 @@ namespace Helios
 		virtual ~Application();
 
 		static Application* Instance();
-		IWindow& GetWindow() { return *m_pWindow; }
+		DeviceWindow& GetWindow() { return *m_pWindow; }
 
 		virtual void Run();
 		void Close();
@@ -30,7 +30,7 @@ namespace Helios
 
 	protected:
 		static Application* s_pInstance;
-		UniquePtr<IWindow> m_pWindow{ nullptr };
+		UniquePtr<DeviceWindow> m_pWindow{ nullptr };
 		SharedPtr<ImGuiLayer> m_pImGuiLayer{ nullptr };
 		LayerStack m_LayerStack{};
 		bool m_IsRunning{ true };

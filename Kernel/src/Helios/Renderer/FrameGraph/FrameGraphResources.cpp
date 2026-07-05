@@ -2,7 +2,7 @@
 #include "FrameGraphResources.h"
 #include "Resource.h"
 #include "RenderPassNode.h"
-#include "Helios/Renderer/Texture.h"
+#include "Helios/VirtualDevice/DeviceTexture.h"
 
 namespace Helios
 {
@@ -18,7 +18,7 @@ namespace Helios
 	}
 
 	/* 获取当前RenderPass的RenderTarget */
-	SharedPtr<FrameBuffer> FrameGraphResources::GetPassRenderTarget(uint32_t idx) const
+	SharedPtr<DeviceFrameBuffer> FrameGraphResources::GetPassRenderTarget(uint32_t idx) const
 	{
 		const auto& render_pass_data = m_RenderPassNode.GetRenderPassData(idx);
 		if (!render_pass_data)
@@ -52,7 +52,7 @@ namespace Helios
 	{
 		PROFILE_FUNCTION();
 
-		Texture = Texture::Create(name, { desc.Width, desc.Height, desc.Depth, desc.MipLevels, desc.Samples, desc.TextureFormat, desc.SamplerType, usage });
+		Texture = DeviceTexture::Create(name, { desc.Width, desc.Height, desc.Depth, desc.MipLevels, desc.Samples, desc.TextureFormat, desc.SamplerType, usage });
 	}
 
 	/* 销毁 */

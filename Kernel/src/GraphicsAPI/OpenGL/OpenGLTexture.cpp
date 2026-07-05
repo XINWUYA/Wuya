@@ -8,7 +8,7 @@
 namespace Helios
 {
 	OpenGLTexture::OpenGLTexture(const std::string& name, const TextureDesc& texture_desc)
-		: Texture(name, texture_desc), m_InternalFormat(TranslateToOpenGLTextureFormat(texture_desc.Format))
+		: DeviceTexture(name, texture_desc), m_InternalFormat(TranslateToOpenGLTextureFormat(texture_desc.Format))
 	{
 		PROFILE_FUNCTION();
 

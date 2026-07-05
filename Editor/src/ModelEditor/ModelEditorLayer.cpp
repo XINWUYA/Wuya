@@ -262,7 +262,7 @@ namespace Helios
 									{
 									case ParamType::Texture:
 										{
-											auto texture_info = std::any_cast<std::pair<SharedPtr<Texture>, uint32_t>>(param_info.Value);
+											auto texture_info = std::any_cast<std::pair<SharedPtr<DeviceTexture>, uint32_t>>(param_info.Value);
 											auto& texture = texture_info.first;
 											auto load_config = texture->GetTextureLoadConfig();
 
@@ -397,7 +397,7 @@ namespace Helios
 
 							for (uint8_t slot = 0; slot < TextureSlot::ValidSlotCnt; ++slot)
 							{
-								SharedPtr<Texture> tex = material->GetTextureBySlot(slot);
+								SharedPtr<DeviceTexture> tex = material->GetTextureBySlot(slot);
 								float factor = 1.0f;
 								if (ImGui::TreeNode("Test"))
 								{

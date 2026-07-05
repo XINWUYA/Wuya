@@ -1,9 +1,9 @@
 ﻿#pragma once
-#include "Helios/Renderer/UniformBuffer.h"
+#include "Helios/VirtualDevice/DeviceUniformBuffer.h"
 
 namespace Helios
 {
-	class OpenGLUniformBuffer : public UniformBuffer
+	class OpenGLUniformBuffer : public DeviceUniformBuffer
 	{
 	public:
 		OpenGLUniformBuffer(uint32_t size, uint32_t binding_point);

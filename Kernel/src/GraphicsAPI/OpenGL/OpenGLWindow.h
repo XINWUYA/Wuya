@@ -1,6 +1,6 @@
 ﻿#pragma once
-#include "Helios/Core/Window.h"
-#include "Helios/Renderer/RenderContext.h"
+#include "Helios/VirtualDevice/DeviceWindow.h"
+#include "Helios/VirtualDevice/DeviceContext.h"
 
 struct GLFWwindow;
 
@@ -9,11 +9,11 @@ namespace Helios
 	/* GLWindow类：
 	 * 使用GLFWwindow创建OpenGL窗口
 	 */
-	class GLWindow : public IWindow
+	class OpenGLWindow : public DeviceWindow
 	{
 	public:
-		GLWindow(const WindowDesc& desc);
-		~GLWindow() override;
+		OpenGLWindow(const WindowDesc& desc);
+		~OpenGLWindow() override;
 
 		/* 更新，交换一帧 */
 		void OnUpdate() override;
@@ -50,7 +50,7 @@ namespace Helios
 		/* 窗口信息*/
 		WindowInfo m_WindowInfo{};
 		/* 窗口上下文 */
-		UniquePtr<IRenderContext> m_pRenderContext{ nullptr };
+		UniquePtr<DeviceContext> m_pRenderContext{ nullptr };
 	};
 
 }

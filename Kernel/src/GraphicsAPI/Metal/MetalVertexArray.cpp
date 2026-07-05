@@ -29,7 +29,7 @@ namespace Helios
         /* Metal中无需解绑 */
     }
 
-    void MetalVertexArray::AddVertexBuffer(const SharedPtr<VertexBuffer>& vertex_buffer)
+    void MetalVertexArray::AddVertexBuffer(const SharedPtr<DeviceVertexBuffer>& vertex_buffer)
     {
         m_VertexBuffers.push_back(vertex_buffer);
         BuildVertexDescriptor();

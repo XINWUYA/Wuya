@@ -6,15 +6,15 @@
 namespace Helios
 {
 	class Material;
-	class VertexArray;
+	class DeviceVertexArray;
 
 	/* 图元 */
 	struct MeshPrimitive
 	{
 		PrimitiveType PrimitiveType{ PrimitiveType::Triangles };
-		SharedPtr<VertexArray> VertexArray{ nullptr };
+		SharedPtr<DeviceVertexArray> VertexArray{ nullptr };
 
-		MeshPrimitive(const SharedPtr<class VertexArray>& vertex_array, enum PrimitiveType type = PrimitiveType::Triangles)
+		MeshPrimitive(const SharedPtr<class DeviceVertexArray>& vertex_array, enum PrimitiveType type = PrimitiveType::Triangles)
 			: PrimitiveType(type), VertexArray(vertex_array)
 		{
 		}

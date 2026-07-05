@@ -6,10 +6,10 @@
 #include "Mesh.h"
 #include "ModelImporter.h"
 #include "Helios/Common/Math.h"
-#include "Helios/Renderer/Buffer.h"
-#include "Helios/Renderer/Shader.h"
-#include "Helios/Renderer/Texture.h"
-#include "Helios/Renderer/VertexArray.h"
+#include "Helios/VirtualDevice/DeviceBuffer.h"
+#include "Helios/VirtualDevice/DeviceShader.h"
+#include "Helios/VirtualDevice/DeviceTexture.h"
+#include "Helios/VirtualDevice/DeviceVertexArray.h"
 
 namespace Helios
 {
@@ -68,7 +68,7 @@ namespace Helios
 			};
 
 			// Vertex Array
-			SharedPtr<VertexBuffer> vertex_buffer = VertexBuffer::Create(vertices, sizeof(vertices));
+			SharedPtr<DeviceVertexBuffer> vertex_buffer = DeviceVertexBuffer::Create(vertices, sizeof(vertices));
 			VertexBufferLayout vertex_buffer_layout = {
 				{ "a_Position", BufferDataType::Float3 },
 				{ "a_Normal", BufferDataType::Float3 },
@@ -76,7 +76,7 @@ namespace Helios
 			};
 			vertex_buffer->SetLayout(vertex_buffer_layout);
 
-			auto vertex_array = VertexArray::Create();
+			auto vertex_array = DeviceVertexArray::Create();
 			vertex_array->Bind();
 			vertex_array->AddVertexBuffer(vertex_buffer);
 
@@ -147,23 +147,23 @@ namespace Helios
 			odd_row = !odd_row;
 		}
 
-		auto vertex_array = VertexArray::Create();
+		auto vertex_array = DeviceVertexArray::Create();
 		vertex_array->Bind();
 		/* vertices */
 		{
-			auto vertex_buffer = VertexBuffer::Create(vertices.data(), vertex_count * sizeof(glm::vec3));
+			auto vertex_buffer = DeviceVertexBuffer::Create(vertices.data(), vertex_count * sizeof(glm::vec3));
 			vertex_buffer->SetLayout({ { "a_Position", BufferDataType::Float3 } });
 			vertex_array->AddVertexBuffer(vertex_buffer);
 		}
 		/* normals */
 		{
-			auto vertex_buffer = VertexBuffer::Create(normals.data(), vertex_count * sizeof(glm::vec3));
+			auto vertex_buffer = DeviceVertexBuffer::Create(normals.data(), vertex_count * sizeof(glm::vec3));
 			vertex_buffer->SetLayout({ { "a_Normal", BufferDataType::Float3 } });
 			vertex_array->AddVertexBuffer(vertex_buffer);
 		}
 		/* uvs */
 		{
-			auto vertex_buffer = VertexBuffer::Create(uvs.data(), vertex_count * sizeof(glm::vec2));
+			auto vertex_buffer = DeviceVertexBuffer::Create(uvs.data(), vertex_count * sizeof(glm::vec2));
 			vertex_buffer->SetLayout({ { "a_TexCoord", BufferDataType::Float2 } });
 			vertex_array->AddVertexBuffer(vertex_buffer);
 		}
@@ -197,7 +197,7 @@ namespace Helios
 			};
 
 			// Vertex Array
-			SharedPtr<VertexBuffer> vertex_buffer = VertexBuffer::Create(vertices, sizeof(vertices));
+			SharedPtr<DeviceVertexBuffer> vertex_buffer = DeviceVertexBuffer::Create(vertices, sizeof(vertices));
 			VertexBufferLayout vertex_buffer_layout = {
 				{ "a_Position", BufferDataType::Float3 },
 				{ "a_TexCoord", BufferDataType::Float2 },
@@ -205,7 +205,7 @@ namespace Helios
 			};
 			vertex_buffer->SetLayout(vertex_buffer_layout);
 
-			auto vertex_array = VertexArray::Create();
+			auto vertex_array = DeviceVertexArray::Create();
 			vertex_array->Bind();
 			vertex_array->AddVertexBuffer(vertex_buffer);
 
@@ -275,7 +275,7 @@ namespace Helios
 				in_mesh_file.read(name.data(), name_size);
 
 				/* Vertex Array */
-				auto vertex_array = VertexArray::Create();
+				auto vertex_array = DeviceVertexArray::Create();
 				vertex_array->Bind();
 
 				/* 顶点数量 */
@@ -335,7 +335,7 @@ namespace Helios
 					}
 
 					/* Vertex Buffer */
-					auto vertex_buffer = VertexBuffer::Create(buffer_data, vertex_count * stride * sizeof(float));
+					auto vertex_buffer = DeviceVertexBuffer::Create(buffer_data, vertex_count * stride * sizeof(float));
 					vertex_buffer->SetLayout(vertex_buffer_layout);
 					vertex_array->AddVertexBuffer(vertex_buffer);
 					delete[] buffer_data;

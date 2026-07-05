@@ -10,7 +10,7 @@ namespace Helios
 	constexpr uint32_t MAX_FRAME_TARGET_SIZE = 8192;
 
 	OpenGLFrameBuffer::OpenGLFrameBuffer(const std::string& name, const FrameBufferDesc& desc)
-		: FrameBuffer(name, desc)
+		: DeviceFrameBuffer(name, desc)
 	{
 		PROFILE_FUNCTION();
 
@@ -270,27 +270,17 @@ namespace Helios
 		}
 		else
 		{
-			/* todo: 支持MultiSample */
-			if (!!(texture->m_TextureDesc.Usage & TextureUsage::Sampleable)) /* RenderBuffer且非Sampleable，直接绑定 */
+			/* 多采样：Sampleable 资源作为 Texture 绑定；非 Sampleable 资源已在 OpenGLTexture 中创建为 RenderBuffer，直接绑定其 m_TextureId，避免重复创建 RBO 导致泄漏。 */
+			if (!!(texture->m_TextureDesc.Usage & TextureUsage::Sampleable))
+			{
+				glFramebufferTexture2D(GL_FRAMEBUFFER, attachment, GL_TEXTURE_2D_MULTISAMPLE, texture->m_TextureId, 0);
+			}
+			else
 			{
 				glFramebufferRenderbuffer(GL_FRAMEBUFFER, attachment, GL_RENDERBUFFER, texture->m_TextureId);
-				render_buffer_usage = RenderBufferUsage::None;
-
-				CHECK_GL_ERROR;
 			}
-			else /* rt需要MultiSample */
-			{
-				/* 需要额外创建一个RenderBuffer, todo: 不需要每次都创建 */
-				GLuint rbo = 0;
-				glGenRenderbuffers(1, &rbo);
-				glBindRenderbuffer(GL_RENDERBUFFER, rbo);
-				glRenderbufferStorageMultisample(GL_RENDERBUFFER, texture->m_TextureDesc.Samples, texture->m_InternalFormat, (GLsizei)texture->m_TextureDesc.Width, (GLsizei)texture->m_TextureDesc.Height);
-				glBindRenderbuffer(GL_RENDERBUFFER, 0);
 
-				glFramebufferRenderbuffer(GL_FRAMEBUFFER, attachment, GL_RENDERBUFFER, rbo);
-
-				CHECK_GL_ERROR;
-			}
+			CHECK_GL_ERROR;
 		}
 #if 0
 		if (!!(texture->m_TextureDesc.Usage & TextureUsage::Sampleable))
