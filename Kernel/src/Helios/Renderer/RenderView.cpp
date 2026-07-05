@@ -101,12 +101,12 @@ namespace Helios
 		for (auto& entity : model_entity_view)
 		{
 			auto [transform_component, model_component] = model_entity_view.get<TransformComponent, ModelComponent>(entity);
-			if (!model_component.Model)
+			if (!model_component.m_Model)
 				 continue;
 
-			for (const auto& mesh_segment : model_component.Model->GetMeshSegments())
+			for (const auto& mesh_segment : model_component.m_Model->GetMeshSegments())
 			{
-				const auto& world_position = transform_component.Position;
+				const auto& world_position = transform_component.m_Position;
 				// todo: 执行剔除
 				//if ()
 				m_VisibleMeshObjects.emplace_back((int)entity, transform_component.GetTransform(), mesh_segment);
@@ -135,17 +135,17 @@ namespace Helios
 			auto [transform_component, light_component] = light_entity_view.get<TransformComponent, LightComponent>(entity);
 
 			const glm::vec3 light_dir = transform_component.GetTransform() * glm::vec4(0.0f, 1.0f, 0.0f, 1.0f);
-			const auto& light_color = light_component.Light->GetColor();
-			const bool cast_shadow = light_component.Light->IsCastShadow();
-			m_ValidLights.emplace_back(static_cast<uint32_t>(light_component.Type), 
-				glm::vec4(light_color.r, light_color.g, light_color.b, light_component.Light->GetIntensity()), 
+			const auto& light_color = light_component.m_Light->GetColor();
+			const bool cast_shadow = light_component.m_Light->IsCastShadow();
+			m_ValidLights.emplace_back(static_cast<uint32_t>(light_component.m_Type), 
+				glm::vec4(light_color.r, light_color.g, light_color.b, light_component.m_Light->GetIntensity()), 
 				light_dir, 
-				transform_component.Position, 
+				transform_component.m_Position, 
 				cast_shadow);
 
 			if (cast_shadow)
 			{
-				m_pShadowMapManager->AddShadowMap(light_component.Light);
+				m_pShadowMapManager->AddShadowMap(light_component.m_Light);
 				m_IsHasShadowCast = true;
 			}
 		}

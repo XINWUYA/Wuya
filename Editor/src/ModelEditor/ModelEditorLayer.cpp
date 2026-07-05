@@ -22,10 +22,10 @@ namespace Helios
 		/* 默认在场景中增加一盏方向光，光源颜色为白色 */
 		Entity entity = m_pDefaultScene->CreateEntity("DirectionalLight");
 		auto& light_component = entity.AddComponent<LightComponent>(LightType::Directional);
-		light_component.Light->SetColor(glm::vec4(1, 1, 1, 1));
-		light_component.Light->SetIntensity(1);
+		light_component.m_Light->SetColor(glm::vec4(1, 1, 1, 1));
+		light_component.m_Light->SetIntensity(1);
 		auto& light_transform = entity.GetComponent<TransformComponent>();
-		light_transform.Rotation = glm::vec3(0, 0, PI/2);
+		light_transform.m_Rotation = glm::vec3(0, 0, PI/2);
 	}
 
 	void ModelEditorLayer::OnDetached()
@@ -627,7 +627,7 @@ namespace Helios
 		/* 将模型添加到场景中 */
 		Entity entity = m_pDefaultScene->CreateEntity(m_pModel->GetDebugName());
 		auto& mesh_component = entity.AddComponent<ModelComponent>();
-		mesh_component.Model = m_pModel;
+		mesh_component.m_Model = m_pModel;
 
 		/* 根据模型大小自适应相机距离 */
 		const auto& aabb_min = m_pModel->GetAABBMin();

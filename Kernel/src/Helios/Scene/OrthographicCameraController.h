@@ -2,12 +2,13 @@
 
 #include <glm/glm.hpp>
 
+#include "Camera.h"
+
 namespace Helios
 {
 	class IEvent;
 	class MouseScrolledEvent;
 	class WindowResizeEvent;
-	class OrthographicCamera;
 
 	class OrthographicCameraController
 	{
@@ -25,8 +26,8 @@ namespace Helios
 		void SetCameraTranslateSpeed(float speed) { m_CameraTranslateSpeed = speed; }
 		void SetCameraRotateSpeed(float speed) { m_CameraRotateSpeed = speed; }
 
-		const SharedPtr<OrthographicCamera>& GetCamera() { return m_pCamera; }
-		const SharedPtr<OrthographicCamera>& GetCamera() const { return m_pCamera; }
+		const SharedPtr<Camera>& GetCamera() { return m_pCamera; }
+		const SharedPtr<Camera>& GetCamera() const { return m_pCamera; }
 
 	private:
 		bool OnMouseScrolled(MouseScrolledEvent* event);
@@ -42,6 +43,6 @@ namespace Helios
 		float m_CameraTranslateSpeed{ 5.0f };
 		float m_CameraRotateSpeed{ 180.0f };
 
-		SharedPtr<OrthographicCamera> m_pCamera;
+		SharedPtr<Camera> m_pCamera;
 	};
 }

@@ -40,6 +40,8 @@ namespace Helios
 		/* 编辑模式更新场景 */
 		void OnUpdateEditor(Camera* camera, float delta_time);
 
+		void Render();
+
 		/* 获取主相机实体 */
 		Entity GetPrimaryCameraEntity();
 

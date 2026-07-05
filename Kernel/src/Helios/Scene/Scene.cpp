@@ -29,8 +29,7 @@ namespace Helios
 		Entity entity = { m_Registry.create(), shared_from_this() };
 
 		/* 默认添加名称组件和变换组件 */
-		auto& name_component = entity.AddComponent<NameComponent>();
-		name_component.Name = name.empty() ? "Unnamed Entity" : name;
+		auto& name_component = entity.AddComponent<NameComponent>(name.empty() ? "New Entity" : name);
 
 		entity.AddComponent<TransformComponent>();
 
@@ -49,8 +48,25 @@ namespace Helios
 	{
 		PROFILE_FUNCTION();
 
-		/* 更新所有实体的变换 */
-		// auto entity_group = m_Registry.group<TransformComponent>(entt::get<>)
+		Renderer::Update();
+
+		/* 同步 TransformComponent 到 CameraComponent */
+		const auto camera_transform_group = m_Registry.group<TransformComponent>(entt::get<CameraComponent>);
+		for (auto [_, transform_component, camera_component] : camera_transform_group.each())
+		{
+			camera_component.m_Camera->SetTransform(transform_component.GetTransform());
+		}
+
+		/* todo: 收集RenderView */
+		m_RenderViews.clear();
+		const auto& camera_entities = m_Registry.view<CameraComponent>();
+		for (auto& entity : camera_entities)
+		{
+			const auto& camera_component = camera_entities.get<CameraComponent>(entity);
+			auto* render_view = camera_component.m_Camera->GetRenderView();
+			render_view->SetOwnerScene(shared_from_this());
+			m_RenderViews.emplace_back(render_view);
+		}
 	}
 
 	void Scene::OnUpdateEditor(Camera* camera, float delta_time)
@@ -59,13 +75,21 @@ namespace Helios
 
 		Renderer::Update();
 
+		/* 同步 TransformComponent 到 CameraComponent */
+		const auto camera_transform_view = m_Registry.view<TransformComponent, CameraComponent>();
+		for (auto& entity : camera_transform_view)
+		{
+			auto [transform_component, camera_component] = camera_transform_view.get<TransformComponent, CameraComponent>(entity);
+			camera_component.m_Camera->SetTransform(transform_component.GetTransform());
+		}
+
 		/* todo: 收集RenderView */
 		m_RenderViews.clear();
 		const auto& camera_entities = m_Registry.view<CameraComponent>();
 		for (auto& entity : camera_entities)
 		{
 			const auto& camera_component = camera_entities.get<CameraComponent>(entity);
-			auto* render_view = camera_component.Camera->GetRenderView();
+			auto* render_view = camera_component.m_Camera->GetRenderView();
 			render_view->SetOwnerScene(shared_from_this());
 			m_RenderViews.emplace_back(render_view);
 		}
@@ -77,7 +101,10 @@ namespace Helios
 			render_view->SetOwnerScene(shared_from_this());
 			m_RenderViews.emplace_back(render_view);
 		}
+	}
 
+	void Scene::Render()
+	{
 		/* 绘制所有View */
 		for (const auto& view : m_RenderViews)
 		{
@@ -94,7 +121,7 @@ namespace Helios
 		for (auto& entity : entity_view)
 		{
 			const auto& camera_component = entity_view.get<CameraComponent>(entity);
-			if (camera_component.IsPrimary)
+			if (camera_component.m_IsPrimary)
 				return Entity{ entity, shared_from_this() };
 		}
 		return {};
@@ -163,9 +190,9 @@ namespace Helios
 					if (const auto* transform_root = entity_root->FirstChildElement("Transform"))
 					{
 						auto& transform_component = entity.GetComponent<TransformComponent>();
-						transform_component.Position = ToVec3(transform_root->Attribute("Position"));
-						transform_component.Rotation = ToVec3(transform_root->Attribute("Rotation"));
-						transform_component.Scale = ToVec3(transform_root->Attribute("Scale"));
+						transform_component.m_Position = ToVec3(transform_root->Attribute("Position"));
+						transform_component.m_Rotation = ToVec3(transform_root->Attribute("Rotation"));
+						transform_component.m_Scale = ToVec3(transform_root->Attribute("Scale"));
 					}
 
 					/* Sprite */
@@ -173,37 +200,31 @@ namespace Helios
 					{
 						auto& sprite_component = entity.AddComponent<SpriteComponent>();
 						const std::string texture_path = sprite_root->Attribute("TexturePath");
-						sprite_component.Texture = DeviceTexture::Create(texture_path);
-						sprite_component.BaseColor = ToVec4(sprite_root->Attribute("BaseColor"));
-						sprite_component.TilingFactor = sprite_root->FloatAttribute("TilingFactor");
+						sprite_component.m_Texture = DeviceTexture::Create(texture_path);
+						sprite_component.m_BaseColor = ToVec4(sprite_root->Attribute("BaseColor"));
+						sprite_component.m_TilingFactor = sprite_root->FloatAttribute("TilingFactor");
 					}
 
 					/* Camera */
 					if (const auto* camera_root = entity_root->FirstChildElement("Camera"))
 					{
 						auto& camera_component = entity.AddComponent<CameraComponent>();
-						camera_component.IsPrimary = camera_root->BoolAttribute("IsPrimary");
-						camera_component.IsFixedAspectRatio = camera_root->BoolAttribute("IsFixedAspectRatio");
+						camera_component.m_IsPrimary = camera_root->BoolAttribute("IsPrimary");
+						camera_component.m_IsFixedAspectRatio = camera_root->BoolAttribute("IsFixedAspectRatio");
 
-						const auto projection_type = static_cast<SceneCamera::ProjectionType>(camera_root->IntAttribute("ProjectionType"));
-						camera_component.Camera->SetProjectionType(projection_type);
+						const auto projection_type = static_cast<CameraProjectionType>(camera_root->IntAttribute("ProjectionType"));
+						camera_component.m_Camera->SetProjectionType(projection_type);
 						switch (projection_type)
 						{
-						case SceneCamera::ProjectionType::Perspective:
-							{
-								const float fov = camera_root->FloatAttribute("Fov");
-								const float near_clip = camera_root->FloatAttribute("Near");
-								const float far_clip = camera_root->FloatAttribute("Far");
-								camera_component.Camera->SetPerspectiveCameraDesc(CreateSharedPtr<PerspectiveCameraDesc>(fov, near_clip, far_clip));
-							}
+						case CameraProjectionType::Perspective:
+							camera_component.m_Camera->SetFov(camera_root->FloatAttribute("Fov"));
+							camera_component.m_Camera->SetNearClip(camera_root->FloatAttribute("Near"));
+							camera_component.m_Camera->SetFarClip(camera_root->FloatAttribute("Far"));
 							break;
-						case SceneCamera::ProjectionType::Orthographic:
-							{
-								const float height_size = camera_root->FloatAttribute("HeightSize");
-								const float near_clip = camera_root->FloatAttribute("Near");
-								const float far_clip = camera_root->FloatAttribute("Far");
-								camera_component.Camera->SetOrthographicCameraDesc(CreateSharedPtr<OrthographicCameraDesc>(height_size, near_clip, far_clip));
-							}
+						case CameraProjectionType::Orthographic:
+							camera_component.m_Camera->SetHeightSize(camera_root->FloatAttribute("HeightSize"));
+							camera_component.m_Camera->SetNearClip(camera_root->FloatAttribute("Near"));
+							camera_component.m_Camera->SetFarClip(camera_root->FloatAttribute("Far"));
 							break;
 						}
 					}
@@ -216,7 +237,7 @@ namespace Helios
 						const std::string model_path = model_root->Attribute("ModelPath");
 
 						if (!model_path.empty())
-							model_component.Model = Model::Create(model_path);
+							model_component.m_Model = Model::Create(model_path);
 						
 
 						/* todo: 内建模型处理 */
@@ -227,12 +248,12 @@ namespace Helios
 					if (auto* light_root = entity_root->FirstChildElement("Light"))
 					{
 						auto& component = entity.AddComponent<LightComponent>();
-						component.Type = static_cast<LightType>(light_root->IntAttribute("LightType"));
+						component.m_Type = static_cast<LightType>(light_root->IntAttribute("LightType"));
 
-						component.Light = Light::Create(component.Type);
-						component.Light->SetColor(ToVec4(light_root->Attribute("LightColor")));
-						component.Light->SetIntensity(light_root->FloatAttribute("LightIntensity"));
-						component.Light->SetIsCastShadow(light_root->BoolAttribute("IsCastShadow"));
+						component.m_Light = Light::Create(component.m_Type);
+						component.m_Light->SetColor(ToVec4(light_root->Attribute("LightColor")));
+						component.m_Light->SetIntensity(light_root->FloatAttribute("LightIntensity"));
+						component.m_Light->SetIsCastShadow(light_root->BoolAttribute("IsCastShadow"));
 					}
 				}
 			}	
@@ -255,7 +276,7 @@ namespace Helios
 		if (entity.HasComponent<NameComponent>())
 		{
 			const auto& component = entity.GetComponent<NameComponent>();
-			entity_root->SetAttribute("Name", component.Name.c_str());
+			entity_root->SetAttribute("Name", component.m_Name.c_str());
 		}
 
 		/* Transform */
@@ -263,9 +284,9 @@ namespace Helios
 		{
 			auto* transform_root = entity_root->InsertNewChildElement("Transform");
 			const auto& component = entity.GetComponent<TransformComponent>();
-			transform_root->SetAttribute("Position", ToString(component.Position).c_str());
-			transform_root->SetAttribute("Rotation", ToString(component.Rotation).c_str());
-			transform_root->SetAttribute("Scale", ToString(component.Scale).c_str());
+			transform_root->SetAttribute("Position", ToString(component.m_Position).c_str());
+			transform_root->SetAttribute("Rotation", ToString(component.m_Rotation).c_str());
+			transform_root->SetAttribute("Scale", ToString(component.m_Scale).c_str());
 		}
 
 		/* Sprite */
@@ -273,9 +294,9 @@ namespace Helios
 		{
 			auto* sprite_root = entity_root->InsertNewChildElement("Sprite");
 			const auto& component = entity.GetComponent<SpriteComponent>();
-			sprite_root->SetAttribute("TexturePath", RELATIVE_PATH(component.Texture->GetPath()).c_str());
-			sprite_root->SetAttribute("BaseColor", ToString(component.BaseColor).c_str());
-			sprite_root->SetAttribute("TilingFactor", component.TilingFactor);
+			sprite_root->SetAttribute("TexturePath", RELATIVE_PATH(component.m_Texture->GetPath()).c_str());
+			sprite_root->SetAttribute("BaseColor", ToString(component.m_BaseColor).c_str());
+			sprite_root->SetAttribute("TilingFactor", component.m_TilingFactor);
 		}
 
 		/* Camera */
@@ -284,32 +305,29 @@ namespace Helios
 			auto* camera_root = entity_root->InsertNewChildElement("Camera");
 			const auto& component = entity.GetComponent<CameraComponent>();
 
-			camera_root->SetAttribute("IsPrimary", component.IsPrimary);
-			camera_root->SetAttribute("IsFixedAspectRatio", component.IsFixedAspectRatio);
+			camera_root->SetAttribute("IsPrimary", component.m_IsPrimary);
+			camera_root->SetAttribute("IsFixedAspectRatio", component.m_IsFixedAspectRatio);
 
-			const auto projection_type = component.Camera->GetProjectionType();
+			const auto projection_type = component.m_Camera->GetProjectionType();
 			camera_root->SetAttribute("ProjectionType", static_cast<int>(projection_type));
 
 			switch (projection_type)
 			{
-			case SceneCamera::ProjectionType::Perspective:
-				{
-					const auto& camera_desc = component.Camera->GetPerspectiveCameraDesc();
-					camera_root->SetAttribute("Fov", camera_desc->Fov);
-					camera_root->SetAttribute("Near", camera_desc->Near);
-					camera_root->SetAttribute("Far", camera_desc->Far);
-				}
-				break;
-			case SceneCamera::ProjectionType::Orthographic:
-				{
-				const auto& camera_desc = component.Camera->GetOrthographicCameraDesc();
-				camera_root->SetAttribute("HeightSize", camera_desc->HeightSize);
-				camera_root->SetAttribute("Near", camera_desc->Near);
-				camera_root->SetAttribute("Far", camera_desc->Far);
-				}
-				break;
+			case CameraProjectionType::Perspective:
+			{
+				camera_root->SetAttribute("Fov", component.m_Camera->GetFov());
+				camera_root->SetAttribute("Near", component.m_Camera->GetNearClip());
+				camera_root->SetAttribute("Far", component.m_Camera->GetFarClip());
 			}
-			
+			break;
+			case CameraProjectionType::Orthographic:
+			{
+				camera_root->SetAttribute("HeightSize", component.m_Camera->GetHeightSize());
+				camera_root->SetAttribute("Near", component.m_Camera->GetNearClip());
+				camera_root->SetAttribute("Far", component.m_Camera->GetFarClip());
+			}
+			break;
+			}
 		}
 
 		/* Model */
@@ -318,7 +336,7 @@ namespace Helios
 			auto* model_root = entity_root->InsertNewChildElement("Model");
 			const auto& component = entity.GetComponent<ModelComponent>();
 
-			model_root->SetAttribute("ModelPath", RELATIVE_PATH(component.Model->GetPath()).c_str());
+			model_root->SetAttribute("ModelPath", RELATIVE_PATH(component.m_Model->GetPath()).c_str());
 		}
 
 		/* Light */
@@ -327,10 +345,10 @@ namespace Helios
 			auto* model_root = entity_root->InsertNewChildElement("Light");
 			const auto& component = entity.GetComponent<LightComponent>();
 
-			model_root->SetAttribute("LightType", static_cast<int>(component.Type));
-			model_root->SetAttribute("LightColor", ToString(component.Light->GetColor()).c_str());
-			model_root->SetAttribute("LightIntensity", component.Light->GetIntensity());
-			model_root->SetAttribute("IsCastShadow", component.Light->IsCastShadow());
+			model_root->SetAttribute("LightType", static_cast<int>(component.m_Type));
+			model_root->SetAttribute("LightColor", ToString(component.m_Light->GetColor()).c_str());
+			model_root->SetAttribute("LightIntensity", component.m_Light->GetIntensity());
+			model_root->SetAttribute("IsCastShadow", component.m_Light->IsCastShadow());
 		}
 	}
 

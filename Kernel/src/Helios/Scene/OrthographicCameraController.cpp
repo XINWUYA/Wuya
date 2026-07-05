@@ -1,6 +1,6 @@
 ﻿#include "Pch.h"
 #include "OrthographicCameraController.h"
-#include "OrthographicCamera.h"
+#include "Camera.h"
 #include "Helios/Core/Input.h"
 #include "Helios/Events/MouseEvent.h"
 #include "Helios/Events/ApplicationEvent.h"
@@ -10,7 +10,8 @@ namespace Helios
 	OrthographicCameraController::OrthographicCameraController(float aspect_ratio, bool rotatable)
 		: m_AspectRatio(aspect_ratio), m_Rotatable(rotatable)
 	{
-		m_pCamera = CreateSharedPtr<OrthographicCamera>("OrthographicCameraController", -m_AspectRatio * m_ZoomLevel, m_AspectRatio * m_ZoomLevel, -m_ZoomLevel, m_ZoomLevel);
+		m_pCamera = CreateSharedPtr<Camera>(CameraProjectionType::Orthographic, "OrthographicCameraController", m_AspectRatio, -1.0f, 1.0f);
+		m_pCamera->SetHeightSize(2.0f * m_ZoomLevel);
 	}
 
 	void OrthographicCameraController::OnUpdate(float delta_time)
@@ -75,7 +76,8 @@ namespace Helios
 		PROFILE_FUNCTION();
 
 		m_AspectRatio = width / height;
-		m_pCamera->SetProjection(-m_AspectRatio * m_ZoomLevel, m_AspectRatio * m_ZoomLevel, -m_ZoomLevel, m_ZoomLevel);
+		m_pCamera->SetAspectRatio(m_AspectRatio);
+		m_pCamera->SetHeightSize(2.0f * m_ZoomLevel);
 	}
 
 	bool OrthographicCameraController::OnMouseScrolled(MouseScrolledEvent* event)
@@ -84,7 +86,8 @@ namespace Helios
 
 		m_ZoomLevel -= event->GetYOffset() * 0.25f;
 		m_ZoomLevel = std::max(m_ZoomLevel, 0.25f);
-		m_pCamera->SetProjection(-m_AspectRatio * m_ZoomLevel, m_AspectRatio * m_ZoomLevel, -m_ZoomLevel, m_ZoomLevel);
+		m_pCamera->SetAspectRatio(m_AspectRatio);
+		m_pCamera->SetHeightSize(2.0f * m_ZoomLevel);
 		return false;
 	}
 

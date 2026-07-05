@@ -194,7 +194,7 @@ namespace Helios
 
 			Entity entity = m_pMainScene->CreateEntity(path.stem().string());
 			auto& model_component = entity.AddComponent<ModelComponent>();
-			model_component.Model = Model::Create(path.generic_string());
+			model_component.m_Model = Model::Create(path.generic_string());
 
 			return;
 		}
@@ -412,10 +412,10 @@ namespace Helios
 				DecomposeTransform(transform_mat, position, rotation, scale);
 
 				/* 更新组件信息 */
-				glm::vec3 delta_rotation = rotation - transform_component.Rotation;
-				transform_component.Position = position;
-				transform_component.Rotation += delta_rotation;
-				transform_component.Scale = scale;
+				glm::vec3 delta_rotation = rotation - transform_component.m_Rotation;
+				transform_component.m_Position = position;
+				transform_component.m_Rotation += delta_rotation;
+				transform_component.m_Scale = scale;
 			}
 		}
 

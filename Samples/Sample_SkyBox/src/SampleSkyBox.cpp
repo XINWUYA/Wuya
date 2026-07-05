@@ -9,8 +9,6 @@ namespace Helios
 
 void SampleSkyBox::OnAttached()
 {
-	/* Application 构造函数已调用 Renderer::Init()，这里无需再次初始化。 */
-
 	// Cube vertices
 	const float vertices[] = {
 		-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
@@ -94,14 +92,66 @@ void SampleSkyBox::OnAttached()
 	// skybox->AddMeshSegment(segment);
 
 	m_pScene = CreateSharedPtr<Scene>();
-	auto entity = m_pScene->CreateEntity("SkyBox");
-	auto& model_component = entity.AddComponent<ModelComponent>();
-	model_component.Model = skybox;
+	auto model_entity = m_pScene->CreateEntity("SkyBox");
+	auto& model_component = model_entity.AddComponent<ModelComponent>();
+	model_component.m_Model = skybox;
 
 	m_pCamera = CreateSharedPtr<SampleCamera>();
 	auto& window = Application::Instance()->GetWindow();
-	m_pCamera->SetViewportRegion({ 0,0, window.GetWidth(), window.GetHeight() });
 
+	auto camera_entity = m_pScene->CreateEntity("MainCamera");
+	auto& camera_component = camera_entity.AddComponent<CameraComponent>();
+	m_pCamera = camera_component.m_Camera;
+	auto render_view = camera_component.m_Camera->GetRenderView();
+	render_view->SetViewportRegion({ 0,0, window.GetWidth(), window.GetHeight() });
+
+
+	auto& frame_graph = render_view->GetFrameGraph();
+	frame_graph->Reset();
+
+	/* Scene Pass */
+	struct ScenePassData
+	{
+	};
+
+	auto scene_pass = frame_graph->AddPass<ScenePassData>("ScenePass",
+		[&](FrameGraphBuilder& builder, ScenePassData& data)
+		{
+			builder.AsSideEffect();
+		},
+		[&](const FrameGraphResources& resources, const ScenePassData& data)
+		{
+			auto render_api = Renderer::GetRenderAPI();
+			render_api->PushDebugGroup("ScenePass");
+
+			{
+				auto render_view = m_pCamera->GetRenderView();
+				auto& viewport_region = render_view->GetViewportRegion();
+				render_api->Clear();
+				render_api->SetViewport(0, 0, viewport_region.Width, viewport_region.Height);
+				render_api->SetScissor(0, 0, viewport_region.Width, viewport_region.Height);
+
+				for (const auto& mesh_object : render_view->GetVisibleMeshObjects())
+				{
+					/* Fill object uniform buffer */
+					Renderer::FillObjectUniformBuffer(mesh_object);
+
+					auto& material = mesh_object.MeshSegment->GetMaterial();
+					Renderer::Submit(material, mesh_object.MeshSegment->GetMeshPrimitive());
+				}
+			}
+
+			render_api->PopDebugGroup();
+		});
+
+	/* ImGui Pass */
+	if (const auto& imgui_layer = Application::Instance()->GetImGuiLayer())
+	{
+		imgui_layer->AddFrameGraphPass(*frame_graph);
+	}
+
+	// frame_graph->ExportGraphviz("framegraph.txt");
+	render_view->Prepare();
 }
 
 void SampleSkyBox::OnDetached()
@@ -115,7 +165,8 @@ void SampleSkyBox::OnUpdate(float delta_time)
 	Renderer::Clear();
 
 	m_pCamera->OnUpdate(delta_time);
-	m_pScene->OnUpdateEditor(m_pCamera.get(), delta_time);
+	m_pScene->OnUpdateRuntime(delta_time);
+	m_pScene->Render();
 }
 
 void SampleSkyBox::OnImGuiRender()

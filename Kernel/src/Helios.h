@@ -27,7 +27,6 @@
 #include "Helios/Scene/Material.h"
 #include "Helios/Scene/Mesh.h"
 #include "Helios/Scene/Camera.h"
-#include "Helios/Scene/OrthographicCamera.h"
 #include "Helios/Scene/OrthographicCameraController.h"
 
 #include "Helios/Application/Application.h"

@@ -4,7 +4,7 @@
 namespace Helios
 {
 
-class SampleCamera;
+class Camera;
 
 class SampleSkyBox : public ILayer
 {
@@ -16,7 +16,7 @@ public:
 	void OnImGuiRender() override;
 
 private:
-	SharedPtr<SampleCamera> m_pCamera;
+	SharedPtr<Camera> m_pCamera;
 	SharedPtr<Scene> m_pScene;
 };
 

@@ -8,7 +8,7 @@
 namespace Helios
 {
 	SampleCamera::SampleCamera(const std::string& name, float fov, float aspect_ratio, float near_clip, float far_clip)
-		: Camera(name, fov, aspect_ratio, near_clip, far_clip)
+		: Camera(CameraProjectionType::Perspective, name, aspect_ratio, near_clip, far_clip)
 	{
 		PROFILE_FUNCTION();
 
@@ -99,18 +99,12 @@ namespace Helios
 
 		m_AspectRatio = static_cast<float>(m_ViewportRegion.Width) / static_cast<float>(m_ViewportRegion.Height);
 		UpdateProjectionMatrix();
-
-		/* 更新视口区域时，需重新构建FrameGraph, 保证RenderTarget的size是正确的 */
-		m_IsFrameGraphDirty = true;
 	}
 
 	/* 构建内置的FrameGraph */
 	void SampleCamera::ConstructRenderView()
 	{
 		PROFILE_FUNCTION();
-
-		if (!m_IsFrameGraphDirty)
-			return;
 
 		if (m_ViewportRegion.Width <= 0 || m_ViewportRegion.Height <= 0)
 			return;
@@ -171,8 +165,6 @@ namespace Helios
 
 		// frame_graph->ExportGraphviz("framegraph.txt");
 		m_pRenderView->Prepare();
-
-		m_IsFrameGraphDirty = false;
 	}
 
 	glm::quat SampleCamera::GetOrientation() const

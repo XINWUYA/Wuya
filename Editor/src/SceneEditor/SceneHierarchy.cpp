@@ -135,7 +135,7 @@ namespace Helios
 	{
 		PROFILE_FUNCTION();
 
-		const auto& name = entity.GetComponent<NameComponent>().Name;
+		const auto& name = entity.GetComponent<NameComponent>().m_Name;
 
 		ImGuiTreeNodeFlags flags = ((m_SelectedEntity == entity) ? ImGuiTreeNodeFlags_Selected : 0) | ImGuiTreeNodeFlags_OpenOnArrow;
 		flags |= ImGuiTreeNodeFlags_SpanAvailWidth;
@@ -262,7 +262,7 @@ namespace Helios
 		{
 			PROFILE_SCOPE("Show NameComponent");
 
-			auto& name = m_SelectedEntity.GetComponent<NameComponent>().Name;
+			auto& name = m_SelectedEntity.GetComponent<NameComponent>().m_Name;
 
 			char buffer[256] = {};
 			std::strncpy(buffer, name.c_str(), sizeof(buffer));
@@ -349,57 +349,57 @@ namespace Helios
 			});
 	}
 
-	/* 场景相机组件 */
-	void SceneHierarchy::ShowCameraComponent()
-	{
-		PROFILE_FUNCTION();
+/* 场景相机组件 */
+void SceneHierarchy::ShowCameraComponent()
+{
+	PROFILE_FUNCTION();
 
-		ShowComponent<CameraComponent>("Camera", m_SelectedEntity,
-			[](auto& component)
+	ShowComponent<CameraComponent>("Camera", m_SelectedEntity,
+		[](auto& component)
+		{
+			ImGuiExt::DrawCheckboxUI("IsPrimary", component.IsPrimary);
+			ImGuiExt::DrawCheckboxUI("IsFixedAspectRatio", component.IsFixedAspectRatio);
+			auto& camera = component.m_Camera;
+			int projection_idx = static_cast<int>(camera->GetProjectionType());
+			ImGuiExt::DrawComboUI("ProjectionType", GetEnumNames<CameraProjectionType>(), projection_idx,
+				[&camera](int selected_idx)
+				{
+					camera->SetProjectionType(static_cast<CameraProjectionType>(selected_idx));
+				});
+
+			switch (camera->GetProjectionType())
 			{
-				ImGuiExt::DrawCheckboxUI("IsPrimary", component.IsPrimary);
-				ImGuiExt::DrawCheckboxUI("IsFixedAspectRatio", component.IsFixedAspectRatio);
-				auto& scene_camera = component.Camera;
-				int projection_idx = static_cast<int>(scene_camera->GetProjectionType());
-				ImGuiExt::DrawComboUI("ProjectionType", GetEnumNames<SceneCamera::ProjectionType>(), projection_idx,
-					[&scene_camera](int selected_idx)
-					{
-						scene_camera->SetProjectionType(static_cast<SceneCamera::ProjectionType>(selected_idx));
-					});
+			case CameraProjectionType::Perspective:
+			{
+				float fov = camera->GetFov();
+				ImGuiExt::DrawDragFloatUI("Fov", fov);
+				float near_clip = camera->GetNearClip();
+				ImGuiExt::DrawDragFloatUI("Near", near_clip);
+				float far_clip = camera->GetFarClip();
+				ImGuiExt::DrawDragFloatUI("Far", far_clip);
 
-				switch (scene_camera->GetProjectionType())
-				{
-				case SceneCamera::ProjectionType::Perspective:
-				{
-					const auto& camera_desc = scene_camera->GetPerspectiveCameraDesc();
+				camera->SetFov(fov);
+				camera->SetNearClip(near_clip);
+				camera->SetFarClip(far_clip);
+			}
+			break;
+			case CameraProjectionType::Orthographic:
+			{
+				float height_size = camera->GetHeightSize();
+				ImGuiExt::DrawDragFloatUI("HeightSize", height_size);
+				float near_clip = camera->GetNearClip();
+				ImGuiExt::DrawDragFloatUI("Near", near_clip);
+				float far_clip = camera->GetFarClip();
+				ImGuiExt::DrawDragFloatUI("Far", far_clip);
 
-					float fov = camera_desc->Fov;
-					ImGuiExt::DrawDragFloatUI("Fov", fov);
-					float near_clip = camera_desc->Near;
-					ImGuiExt::DrawDragFloatUI("Near", near_clip);
-					float far_clip = camera_desc->Far;
-					ImGuiExt::DrawDragFloatUI("Far", far_clip);
-
-					scene_camera->SetPerspectiveCameraDesc({ fov, near_clip, far_clip });
-				}
-				break;
-				case SceneCamera::ProjectionType::Orthographic:
-				{
-					const auto& camera_desc = scene_camera->GetOrthographicCameraDesc();
-
-					float height_size = camera_desc->HeightSize;
-					ImGuiExt::DrawDragFloatUI("HeightSize", height_size);
-					float near_clip = camera_desc->Near;
-					ImGuiExt::DrawDragFloatUI("Near", near_clip);
-					float far_clip = camera_desc->Far;
-					ImGuiExt::DrawDragFloatUI("Far", far_clip);
-
-					scene_camera->SetOrthographicCameraDesc({ height_size, near_clip, far_clip });
-				}
-				break;
-				}
-			});
-	}
+				camera->SetHeightSize(height_size);
+				camera->SetNearClip(near_clip);
+				camera->SetFarClip(far_clip);
+			}
+			break;
+			}
+		});
+}
 
 	/* 模型组件 */
 	void SceneHierarchy::ShowModelComponent()
