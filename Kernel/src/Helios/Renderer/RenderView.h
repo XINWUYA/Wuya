@@ -72,6 +72,10 @@ namespace Helios
 		/* 设置所属的Scene */
 		void SetOwnerScene(const SharedPtr<Scene>& scene) { m_pOwnerScene = scene; }
 
+		/* 优先级 */
+		void SetPriority(int32_t priority) { m_Priority = priority; }
+		int32_t GetPriority() const { return m_Priority; }
+
 		/* 设置RenderTarget */
 		void SetRenderTargetHandle(FrameGraphResourceHandle handle) { m_RenderTargetHandle = handle; }
 		[[nodiscard]] SharedPtr<DeviceTexture> GetRenderTarget() const;
@@ -128,5 +132,7 @@ namespace Helios
 		bool m_IsHasShadowCast{ false };
 		/* 阴影管理 */
 		SharedPtr<ShadowMapManager> m_pShadowMapManager{ nullptr };
+		/* 优先级 */
+		int32_t m_Priority{ 0 };
 	};
 }

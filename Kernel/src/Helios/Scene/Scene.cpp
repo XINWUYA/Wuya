@@ -29,8 +29,7 @@ namespace Helios
 		Entity entity = { m_Registry.create(), shared_from_this() };
 
 		/* 默认添加名称组件和变换组件 */
-		auto& name_component = entity.AddComponent<NameComponent>(name.empty() ? "New Entity" : name);
-
+		entity.AddComponent<NameComponent>(name.empty() ? "New Entity" : name);
 		entity.AddComponent<TransformComponent>();
 
 		return entity;
@@ -44,7 +43,7 @@ namespace Helios
 		m_Registry.destroy(entity);
 	}
 
-	void Scene::OnUpdateRuntime(float delta_time)
+	void Scene::OnUpdate(float delta_time, Camera* editor_camera)
 	{
 		PROFILE_FUNCTION();
 
@@ -55,35 +54,10 @@ namespace Helios
 		for (auto [_, transform_component, camera_component] : camera_transform_group.each())
 		{
 			camera_component.m_Camera->SetTransform(transform_component.GetTransform());
+			camera_component.m_Camera->OnUpdate(delta_time);
 		}
 
-		/* todo: 收集RenderView */
-		m_RenderViews.clear();
-		const auto& camera_entities = m_Registry.view<CameraComponent>();
-		for (auto& entity : camera_entities)
-		{
-			const auto& camera_component = camera_entities.get<CameraComponent>(entity);
-			auto* render_view = camera_component.m_Camera->GetRenderView();
-			render_view->SetOwnerScene(shared_from_this());
-			m_RenderViews.emplace_back(render_view);
-		}
-	}
-
-	void Scene::OnUpdateEditor(Camera* camera, float delta_time)
-	{
-		PROFILE_FUNCTION();
-
-		Renderer::Update();
-
-		/* 同步 TransformComponent 到 CameraComponent */
-		const auto camera_transform_view = m_Registry.view<TransformComponent, CameraComponent>();
-		for (auto& entity : camera_transform_view)
-		{
-			auto [transform_component, camera_component] = camera_transform_view.get<TransformComponent, CameraComponent>(entity);
-			camera_component.m_Camera->SetTransform(transform_component.GetTransform());
-		}
-
-		/* todo: 收集RenderView */
+		/* 收集RenderView */
 		m_RenderViews.clear();
 		const auto& camera_entities = m_Registry.view<CameraComponent>();
 		for (auto& entity : camera_entities)
@@ -95,12 +69,20 @@ namespace Helios
 		}
 
 		/* Editor Camera's RenderView, 最后一个是编辑器RenderView */
-		if (camera)
+		if (editor_camera)
 		{
-			auto* render_view = camera->GetRenderView();
+			auto* render_view = editor_camera->GetRenderView();
 			render_view->SetOwnerScene(shared_from_this());
 			m_RenderViews.emplace_back(render_view);
 		}
+
+		/* 按优先级进行排序，优先级大的先画 todo：不需要每帧排序 */
+		std::sort(m_RenderViews.begin(), m_RenderViews.end(), [](RenderView* lft, RenderView* rht) {
+			if (!lft && !rht) return false;
+			if (!lft) return false;
+			if (!rht) return true;
+			return lft->GetPriority() > rht->GetPriority();
+			});
 	}
 
 	void Scene::Render()

@@ -16,9 +16,10 @@ namespace Helios
 	class Camera
 	{
 	public:
-		COMPONENT_CLASS(Camera)
-			Camera(CameraProjectionType type = CameraProjectionType::Perspective, const std::string& name = "New Camera", float fov = 45.0f, float aspect_ratio = 1.778f, float near = 0.01f, float far = 1000.0f);
+		Camera(CameraProjectionType type = CameraProjectionType::Perspective, const std::string& name = "New Camera", float fov = 45.0f, float aspect_ratio = 1.778f, float near = 0.01f, float far = 1000.0f);
 		virtual ~Camera() = default;
+
+		COMPONENT_CLASS(Camera)
 
 		/* 更新时间戳 */
 		virtual void OnUpdate(float delta_time);
@@ -27,16 +28,16 @@ namespace Helios
 		CameraProjectionType GetProjectionType() const { return m_ProjectionType; }
 		void SetProjectionType(CameraProjectionType type);
 
-	/* 相机位置 */
-	const glm::vec3& GetPosition() const { return m_Position; }
-	void SetPosition(const glm::vec3& position);
+		/* 相机位置 */
+		const glm::vec3& GetPosition() const { return m_Position; }
+		void SetPosition(const glm::vec3& position);
 
-	/* 根据世界变换矩阵更新相机位置、朝向和视图矩阵 */
-	void SetTransform(const glm::mat4& transform);
+		/* 根据世界变换矩阵更新相机位置、朝向和视图矩阵 */
+		void SetTransform(const glm::mat4& transform);
 
-	/* 相机旋转（正交相机绕 Z 轴，角度制） */
-	float GetRotation() const { return m_Rotation; }
-	void SetRotation(float rotation);
+		/* 相机旋转（正交相机绕 Z 轴，角度制） */
+		float GetRotation() const { return m_Rotation; }
+		void SetRotation(float rotation);
 
 		/* 相机方向 */
 		const glm::vec3& GetUpDir() const { return m_UpDirection; }
@@ -59,31 +60,27 @@ namespace Helios
 		float GetFarClip() const { return m_FarClip; }
 		void SetFarClip(float far_clip) { m_FarClip = far_clip; m_IsDirty = true; }
 
-	/* 高度区域（正交相机） */
-	float GetHeightSize() const { return m_HeightSize; }
-	void SetHeightSize(float height_size) { m_HeightSize = height_size; m_IsDirty = true; }
+		/* 高度区域（正交相机） */
+		float GetHeightSize() const { return m_HeightSize; }
+		void SetHeightSize(float height_size) { m_HeightSize = height_size; m_IsDirty = true; }
 
-	/* 聚焦模式 */
-	bool IsFocus() const { return m_IsFocus; }
-	void SetFocus(bool focus);
+		/* 聚焦模式 */
+		bool IsFocus() const { return m_IsFocus; }
+		void SetFocus(bool focus);
 
-	const glm::vec3& GetFocalPoint() const { return m_FocalPoint; }
-	void SetFocalPoint(const glm::vec3& focal_point) { m_FocalPoint = focal_point; m_IsDirty = true; }
+		const glm::vec3& GetFocalPoint() const { return m_FocalPoint; }
+		void SetFocalPoint(const glm::vec3& focal_point) { m_FocalPoint = focal_point; m_IsDirty = true; }
 
-	float GetFocalDistance() const { return m_FocalDistance; }
-	void SetFocalDistance(float distance) { m_FocalDistance = distance; m_IsDirty = true; }
+		float GetFocalDistance() const { return m_FocalDistance; }
+		void SetFocalDistance(float distance) { m_FocalDistance = distance; m_IsDirty = true; }
 
-	/* 矩阵信息 */
-		[[nodiscard]]
-		virtual const glm::mat4& GetViewMatrix() const { return m_ViewMatrix; }
-		[[nodiscard]]
-		virtual const glm::mat4& GetProjectionMatrix() const { return m_ProjectionMatrix; }
-		[[nodiscard]]
-		virtual glm::mat4 GetViewProjectionMatrix() const { return m_ProjectionMatrix * m_ViewMatrix; }
+		/* 矩阵信息 */
+		const glm::mat4& GetViewMatrix() const { return m_ViewMatrix; }
+		const glm::mat4& GetProjectionMatrix() const { return m_ProjectionMatrix; }
+		glm::mat4 GetViewProjectionMatrix() const { return m_ProjectionMatrix * m_ViewMatrix; }
 
 		/* 获取RenderView */
-		[[nodiscard]]
-		virtual RenderView* GetRenderView() const { return m_pRenderView.get(); }
+		RenderView* GetRenderView() const { return m_pRenderView.get(); }
 
 	protected:
 		/* 为当前相机构建RenderView:

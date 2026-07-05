@@ -34,12 +34,10 @@ namespace Helios
 		entt::registry& GetRegistry() { return m_Registry; }
 		const entt::registry& GetRegistry() const { return m_Registry; }
 
-		/* 运行模式更新场景 */
-		void OnUpdateRuntime(float delta_time);
+		/* 更新相机 */
+		void OnUpdate(float delta_time, Camera* editor_camera = nullptr);
 
-		/* 编辑模式更新场景 */
-		void OnUpdateEditor(Camera* camera, float delta_time);
-
+		/* 渲染所有相机 */
 		void Render();
 
 		/* 获取主相机实体 */

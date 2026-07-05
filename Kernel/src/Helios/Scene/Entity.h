@@ -49,6 +49,15 @@ namespace Helios
 			return m_OwnerScene.lock()->GetRegistry().get<T>(m_EntityHandle);
 		}
 
+		/* 获取组件 */
+		template<typename T>
+		T& GetComponent() const
+		{
+			ASSERT(HasComponent<T>(), "Entity doesn't have component!");
+
+			return m_OwnerScene.lock()->GetRegistry().get<T>(m_EntityHandle);
+		}
+
 		/* 是否具有组件 */
 		template<typename T>
 		bool HasComponent() const

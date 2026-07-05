@@ -1,8 +1,7 @@
 ﻿#include "SampleSkyBox.h"
 #include <imgui.h>
-
 #include <Helios/Scene/Material.h>
-#include "SampleCamera.h"
+#include "SampleCameraController.h"
 
 namespace Helios
 {
@@ -96,12 +95,15 @@ void SampleSkyBox::OnAttached()
 	auto& model_component = model_entity.AddComponent<ModelComponent>();
 	model_component.m_Model = skybox;
 
-	m_pCamera = CreateSharedPtr<SampleCamera>();
 	auto& window = Application::Instance()->GetWindow();
 
 	auto camera_entity = m_pScene->CreateEntity("MainCamera");
 	auto& camera_component = camera_entity.AddComponent<CameraComponent>();
 	m_pCamera = camera_component.m_Camera;
+	m_pCameraController = CreateSharedPtr<SampleCameraController>(camera_entity);
+	m_pCameraController->SetFocus(true);
+	m_pCameraController->SetViewportRegion({ 0,0,window.GetWidth(), window.GetHeight() });
+
 	auto render_view = camera_component.m_Camera->GetRenderView();
 	render_view->SetViewportRegion({ 0,0, window.GetWidth(), window.GetHeight() });
 
@@ -164,8 +166,9 @@ void SampleSkyBox::OnUpdate(float delta_time)
 	Renderer::SetClearColor(glm::vec4(0.2f, 0.3f, 0.3f, 1.0f));
 	Renderer::Clear();
 
-	m_pCamera->OnUpdate(delta_time);
-	m_pScene->OnUpdateRuntime(delta_time);
+	m_pCameraController->OnUpdate(delta_time);
+
+	m_pScene->OnUpdate(delta_time);
 	m_pScene->Render();
 }
 
