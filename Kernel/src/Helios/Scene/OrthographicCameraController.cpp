@@ -10,7 +10,7 @@ namespace Helios
 	OrthographicCameraController::OrthographicCameraController(float aspect_ratio, bool rotatable)
 		: m_AspectRatio(aspect_ratio), m_Rotatable(rotatable)
 	{
-		m_pCamera = CreateSharedPtr<Camera>(CameraProjectionType::Orthographic, "OrthographicCameraController", m_AspectRatio, -1.0f, 1.0f);
+		m_pCamera = CreateSharedPtr<Camera>(CameraProjectionType::Orthographic, m_AspectRatio, -1.0f, 1.0f);
 		m_pCamera->SetHeightSize(2.0f * m_ZoomLevel);
 	}
 

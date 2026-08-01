@@ -47,7 +47,7 @@ namespace Helios
             m_RenderPassDescriptor->release();
     }
 
-    void MetalFrameBuffer::Bind()
+    void MetalFrameBuffer::Bind(const FrameBufferBindInfo& bind_info)
     {
         /* Metal中需要开始渲染通道来绑定帧缓冲区 */
         auto metalRenderAPI = dynamic_cast<MetalRenderAPI*>(Renderer::GetRenderAPI().get());

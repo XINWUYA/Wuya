@@ -5,9 +5,10 @@
 #include <Helios/VirtualDevice/DeviceTexture.h>
 #include <Helios/VirtualDevice/DeviceShader.h>
 #include <Helios/VirtualDevice/DeviceUniformBuffer.h>
-#include "Helios/Scene/Camera.h"
-#include "Helios/Scene/Material.h"
-#include "Helios/Scene/Mesh.h"
+#include <Helios/Scene/Camera.h>
+#include <Helios/Scene/Material.h>
+#include <Helios/Scene/Mesh.h>
+#include <Helios/Scene/Light.h>
 
 namespace Helios
 {
@@ -39,13 +40,20 @@ namespace Helios
 	};
 
 	/* Per light uniform data */
+	constexpr uint32_t MAX_LIGHT_VIEW_PROJ = 4; /* 与 Uniforms.glsl 中的数组长度保持一致 */
 	struct LightUniformData
 	{
+		/* 级联阴影的光照视图投影矩阵数组（最多 MAX_LIGHT_VIEW_PROJ 个） */
+		glm::mat4 LightViewProjectionMat[MAX_LIGHT_VIEW_PROJ]{ glm::mat4(1) };
 		glm::vec4 ColorIntensity{ 1.0f, 1.0f, 1.0f, 1.0f }; /* rgb: color, a: intensity */
 		glm::vec3 LightDir{ 0.0f };
-		float Padding0;
-		glm::vec3 LightPos{ 0.0f };
 		uint32_t LightType{ 0 };
+		glm::vec3 LightPos{ 0.0f };
+		uint32_t CascadeCount{ 0 };
+		glm::vec4 CascadeSplits{ 0.0f };
+		/* 阴影深度偏移（来自 ShadowMapInfo::ConstantBias），缓解阴影失真（peter-panning / acne）。
+		 * 合并进 Light UBO，避免作为独立 uniform 遗漏赋值。 */
+		float ShadowBias{ 0.0f };
 	};
 
 	struct RenderData
@@ -184,13 +192,51 @@ namespace Helios
 		s_RenderData.pObjectUniformBuffer->SetData(&data, sizeof(ObjectUniformData));
 	}
 
-	void Renderer::FillLightUniformBuffer(const ValidLight& valid_light)
+	void Renderer::FillLightUniformBuffer(const SharedPtr<Light>& light, const std::vector<glm::mat4>& light_vp_mats, const glm::vec4& cascade_splits)
 	{
 		static LightUniformData data;
-		data.ColorIntensity = valid_light.ColorIntensity;
-		data.LightDir = valid_light.LightDir;
-		data.LightPos = valid_light.LightPos;
-		data.LightType = valid_light.LightType;
+		/* 拷贝级联阴影的光照视图投影矩阵数组 */
+		const uint32_t cascade_count = std::min<uint32_t>(static_cast<uint32_t>(light_vp_mats.size()), MAX_LIGHT_VIEW_PROJ);
+		for (uint32_t i = 0; i < MAX_LIGHT_VIEW_PROJ; ++i)
+		{
+			if (i < cascade_count)
+				data.LightViewProjectionMat[i] = light_vp_mats[i];
+			else
+				data.LightViewProjectionMat[i] = glm::mat4(1.0f);
+		}
+		data.CascadeCount = cascade_count;
+		data.CascadeSplits = cascade_splits;
+
+		/* 阴影深度偏移：来自光源的 ShadowMapInfo::ConstantBias。
+		 * 合并进 Light UBO，取代原先 shader 中从未被赋值的独立 uniform u_ShadowBias。 */
+		if (const auto& shadow_map_info = light->GetShadowMapInfo())
+			data.ShadowBias = shadow_map_info->ConstantBias;
+		else
+			data.ShadowBias = 0.0f;
+
+		const auto& light_color = light->GetColor();
+		data.ColorIntensity = glm::vec4(light_color.r, light_color.g, light_color.b, light->GetIntensity());
+		data.LightType = static_cast<uint32_t>(light->GetLightType());
+		data.LightPos = light->GetPosition();
+
+		switch (light->GetLightType())
+		{
+		case LightType::Directional:
+		{
+			auto directional_light = StaticPtrCast<DirectionalLight>(light);
+			data.LightDir = directional_light->GetDirection();
+
+			break;
+		}
+		default:
+			break;
+		}
+		
 		s_RenderData.pLightUniformBuffer->SetData(&data, sizeof(LightUniformData));
+	}
+
+	void Renderer::FillLightUniformBuffer(const SharedPtr<Light>& light)
+	{
+		FillLightUniformBuffer(light, {}, glm::vec4(0.0f));
 	}
 }

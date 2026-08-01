@@ -96,6 +96,7 @@ namespace Helios
 		PROFILE_FUNCTION();
 
 		const GLint location = glGetUniformLocation(m_ProgramID, name.c_str());
+		if (location < 0) return;
 		glUniform1i(location, value);
 	}
 
@@ -104,6 +105,7 @@ namespace Helios
 		PROFILE_FUNCTION();
 
 		const GLint location = glGetUniformLocation(m_ProgramID, name.c_str());
+		if (location < 0) return;
 		glUniform1iv(location, count, values);
 	}
 
@@ -112,6 +114,7 @@ namespace Helios
 		PROFILE_FUNCTION();
 
 		const GLint location = glGetUniformLocation(m_ProgramID, name.c_str());
+		if (location < 0) return;
 		glUniform1f(location, value);
 	}
 
@@ -120,6 +123,7 @@ namespace Helios
 		PROFILE_FUNCTION();
 
 		const GLint location = glGetUniformLocation(m_ProgramID, name.c_str());
+		if (location < 0) return;
 		glUniform2f(location, value.x, value.y);
 	}
 
@@ -128,6 +132,7 @@ namespace Helios
 		PROFILE_FUNCTION();
 
 		const GLint location = glGetUniformLocation(m_ProgramID, name.c_str());
+		if (location < 0) return;
 		glUniform3f(location, value.x, value.y, value.z);
 	}
 
@@ -136,6 +141,7 @@ namespace Helios
 		PROFILE_FUNCTION();
 
 		const GLint location = glGetUniformLocation(m_ProgramID, name.c_str());
+		if (location < 0) return;
 		glUniform4f(location, value.x, value.y, value.z, value.w);
 	}
 
@@ -144,6 +150,7 @@ namespace Helios
 		PROFILE_FUNCTION();
 
 		const GLint location = glGetUniformLocation(m_ProgramID, name.c_str());
+		if (location < 0) return;
 		glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(value));
 	}
 
@@ -152,7 +159,7 @@ namespace Helios
 		PROFILE_FUNCTION();
 
 		std::string result;
-	std::ifstream in(filepath, std::ios::in | std::ios::binary); // ifstream closes itself due to RAII
+		std::ifstream in(filepath, std::ios::in | std::ios::binary); // ifstream closes itself due to RAII
 		if (in)
 		{
 			/* 处理 #include
@@ -316,6 +323,7 @@ namespace Helios
 			std::filesystem::path cache_path = cache_dir / (shader_path.filename().string() + GetOpenGLShaderCacheFileExtension(shader_type));
 
 			std::ifstream in(cache_path, std::ios::in | std::ios::binary);
+			bool cache_valid = false;
 			if (in.is_open())
 			{
 				// Cache existed
@@ -323,12 +331,27 @@ namespace Helios
 				auto size = in.tellg();
 				in.seekg(0, std::ios::beg);
 
-				auto& data = m_OpenGLSPIRVs[shader_type];
-				data.resize(size / sizeof(uint32_t));
-				in.read((char*)data.data(), size);
+				/* 校验缓存有效性：SPIR-V 至少需包含一个 word（magic number），
+				 * 空文件或过小的内容视为无效缓存，必须重新编译 */
+				if (size >= (std::streamoff)sizeof(uint32_t))
+				{
+					/* 仅当缓存文件的修改时间不早于源文件时才视为有效，
+					 * 避免源文件改动后一直使用旧缓存 */
+					std::error_code ec;
+					const auto src_time = std::filesystem::last_write_time(m_Path, ec);
+					const auto cache_time = std::filesystem::last_write_time(cache_path, ec);
+					if (!ec && src_time <= cache_time)
+					{
+						auto& data = m_OpenGLSPIRVs[shader_type];
+						data.resize(static_cast<size_t>(size) / sizeof(uint32_t));
+						in.read((char*)data.data(), size);
+						cache_valid = !data.empty();
+					}
+				}
 				in.close();
 			}
-			else
+
+			if (!cache_valid)
 			{
 				// Convert source for SPIR-V (upgrade version, etc.)
 				std::string spirv_source = ConvertGLSLForSPIRV(source);
@@ -355,10 +378,19 @@ namespace Helios
 			}
 		}
 
-		// Reflect
+		/* 反射：从SPIR-V中取出sampler的layout(binding = X) */
 		for (auto&& [shader_type, cached_data] : m_OpenGLSPIRVs)
 		{
-			//
+			ReflectFromSPIRV(cached_data);
+		}
+
+		/* 兜底：若SPIR-V中未带调试名（名字被裁剪），退回源码正则反射 */
+		if (m_Reflection.SamplerBindings.empty())
+		{
+			for (auto&& [shader_type, source] : m_OpenGLSourceCodes)
+			{
+				ReflectFromGLSLSource(source);
+			}
 		}
 	}
 #endif
@@ -389,6 +421,16 @@ namespace Helios
 		/* SPIRV 数据已经上传到 GPU，中间产物不再需要，立即释放以避免长期滞留内存。 */
 		m_OpenGLSPIRVs.clear();
 #else
+		/* macOS/Linux 没有 shaderc，无法产出 SPIR-V，
+		 * 直接从 GLSL 源码反射 layout(binding = X)。
+		 * 注意：macOS 的 GLSL 4.10 不支持 sampler 上的 layout(binding)，
+		 * 下面会在链接后用 glUniform1i 手动把 sampler 指向对应的 texture unit。 */
+		m_Reflection.Clear();
+		for (auto& source_code : m_OpenGLSourceCodes)
+		{
+			ReflectFromGLSLSource(source_code.second);
+		}
+
 		// Use traditional GLSL compilation on macOS/Linux
 		for (auto& source_code : m_OpenGLSourceCodes)
 		{
@@ -484,6 +526,27 @@ namespace Helios
 			block_index = glGetUniformBlockIndex(program, "UIUniformBuffer");
 			if (block_index != GL_INVALID_INDEX)
 				glUniformBlockBinding(program, block_index, 4);
+		}
+#endif
+
+#ifndef PLATFORM_WINDOWS
+		/* 非 Windows 走的是传统 GLSL 编译路径：
+		 * macOS 会剥离 sampler 上的 layout(binding = X)，
+		 * 这里按反射结果显式把每个 sampler 指向声明的 texture unit，
+		 * 使三端行为与 Shader 中写的 binding 完全一致。 */
+		if (is_linked != GL_FALSE && !m_Reflection.SamplerBindings.empty())
+		{
+			GLint prev_program = 0;
+			glGetIntegerv(GL_CURRENT_PROGRAM, &prev_program);
+
+			glUseProgram(program);
+			for (const auto& [sampler_name, binding] : m_Reflection.SamplerBindings)
+			{
+				const GLint location = glGetUniformLocation(program, sampler_name.c_str());
+				if (location >= 0)
+					glUniform1i(location, static_cast<GLint>(binding));
+			}
+			glUseProgram(static_cast<GLuint>(prev_program));
 		}
 #endif
 

@@ -199,6 +199,40 @@ set_target_properties(xxHash PROPERTIES
     FOLDER "Libraries/ThirdParty"
 )
 
+# SPIRV-Cross
+# 用途：
+#   1) 从 SPIR-V 反射 sampler 的 layout(binding = X)，供 Material 自动匹配 texture unit
+#   2) 在 Metal 后端把 GLSL(SPIR-V) 转译为 MSL，并取得 [[texture(N)]] 的实际索引
+project(spirv-cross CXX)
+
+set(SPIRV_CROSS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/spirv-cross)
+
+add_library(spirv-cross STATIC)
+
+target_sources(spirv-cross PRIVATE
+    ${SPIRV_CROSS_DIR}/spirv_cross.cpp
+    ${SPIRV_CROSS_DIR}/spirv_cfg.cpp
+    ${SPIRV_CROSS_DIR}/spirv_cross_parsed_ir.cpp
+    ${SPIRV_CROSS_DIR}/spirv_parser.cpp
+    ${SPIRV_CROSS_DIR}/spirv_cross_util.cpp
+    ${SPIRV_CROSS_DIR}/spirv_glsl.cpp
+    ${SPIRV_CROSS_DIR}/spirv_msl.cpp
+)
+
+target_include_directories(spirv-cross PUBLIC ${SPIRV_CROSS_DIR})
+
+# 第三方代码不参与本工程的告警治理
+if(MSVC)
+    target_compile_options(spirv-cross PRIVATE /W0)
+else()
+    target_compile_options(spirv-cross PRIVATE -w)
+endif()
+
+set_target_properties(spirv-cross PROPERTIES
+    ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib/${OUTPUT_DIR}"
+    FOLDER "Libraries/ThirdParty"
+)
+
 # tinyobjloader
 project(tinyobjloader CXX)
 

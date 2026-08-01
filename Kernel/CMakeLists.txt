@@ -65,6 +65,7 @@ target_include_directories(Kernel
         ${CMAKE_SOURCE_DIR}/Libraries/ThirdParty/magic_enum/include
         ${CMAKE_SOURCE_DIR}/Libraries/ThirdParty/assimp/include
         ${CMAKE_SOURCE_DIR}/Libraries/ThirdParty/tracy/public
+        ${CMAKE_SOURCE_DIR}/Libraries/ThirdParty/spirv-cross
 )
 
 if(APPLE)
@@ -94,6 +95,8 @@ target_link_libraries(Kernel
         tinyobjloader
         assimp
         xxHash
+    PRIVATE
+        spirv-cross
 )
 
 # Platform-specific linking

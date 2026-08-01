@@ -2,15 +2,15 @@
 #include <imgui.h>
 
 #include <Helios/Scene/Material.h>
-#include "SampleCamera.h"
+#include <Helios/Scene/ShadowMap.h>
+#include <Helios/Renderer/Renderer.h>
+#include "SampleCameraController.h"
 
 namespace Helios
 {
 
 void SampleCSM::OnAttached()
 {
-	Renderer::Init();
-
 	m_pScene = CreateSharedPtr<Scene>();
 
 	/* 向场景中添加SkyBox */
@@ -39,48 +39,155 @@ void SampleCSM::OnAttached()
 
 		auto entity = m_pScene->CreateEntity("SkyBox");
 		auto& model_component = entity.AddComponent<ModelComponent>();
-		model_component.Model = Model::Create(BuiltinModelType::Sphere, material);
+		model_component.m_Model = Model::Create(BuiltinModelType::Sphere, material);
+		model_component.m_Model->SetDebugName("SkyBox");
+	}
+
+	/* 向场景中添加地面 */
+	{
+		auto entity = m_pScene->CreateEntity("Plane");
+		auto& model_component = entity.AddComponent<ModelComponent>();
+
+		const auto shader = ShaderAssetManager::Instance().GetOrLoad(ABSOLUTE_PATH("Shaders/ForwardShaders/BuiltinLit.glsl"));
+		auto material = Material::Create(shader);
+		auto texture = TextureAssetManager::Instance().GetOrCreateTexture(ABSOLUTE_PATH("Textures/Grass2.png"));
+		material->SetTexture("u_AlbedoTexture", texture);
+		material->SetParameters(ParamType::Vec4, "u_AlbedoTilingOffset", glm::vec4(4, 4, 0, 0));
+		model_component.m_Model = Model::Create(BuiltinModelType::Plane, material);
+		model_component.m_Model->SetDebugName("Plane");
+
+		auto& transform_component = entity.GetComponent<TransformComponent>();
+		transform_component.m_Scale = glm::vec3(15.0f, 1.0f, 15.0f);
 	}
 
 	/* 向场景中添加房屋模型 */
+	glm::vec3 center_pos = glm::vec3(0.0f);
 	{
 		auto entity = m_pScene->CreateEntity("Cottage");
 		auto& model_component = entity.AddComponent<ModelComponent>();
-		model_component.Model = Model::Create(ABSOLUTE_PATH("Models/big_cottage/Cottage.mesh"));
+		model_component.m_Model = Model::Create(ABSOLUTE_PATH("Models/big_cottage/Cottage.mesh"));
+		model_component.m_Model->SetDebugName("Cottage");
+		auto& material_group = model_component.m_Model->GetMaterialGroup();
 		auto& transform_component = entity.GetComponent<TransformComponent>();
-		transform_component.Scale = glm::vec3(0.6f);
-		transform_component.Position = glm::vec3(0.0f, -2.0f, 0.0f);
+		transform_component.m_Scale = glm::vec3(0.6f);
+		transform_component.m_Position = glm::vec3(0.0f, 0.0f, 0.0f);
+		center_pos = (model_component.m_Model->GetAABBMin() + model_component.m_Model->GetAABBMax()) * 0.5f;
 	}
+
 
 	/* 向场景中添加方向光 */
 	{
-		m_pDirectionLight = std::dynamic_pointer_cast<DirectionalLight>(Light::Create(LightType::Directional));
+		auto directional_light_entity = m_pScene->CreateEntity("DirectionalLight");
+		auto& light_component = directional_light_entity.AddComponent<LightComponent>(LightType::Directional);
+		m_pDirectionLight = StaticPtrCast<DirectionalLight>(light_component.m_Light);
+		m_pDirectionLight->SetDirection(glm::normalize(glm::vec3(0.5f, -0.7f, -0.5f)));
+		m_pDirectionLight->SetIntensity(2.0f);
+		m_pDirectionLight->SetDebugName("DirectionalLight");
 
-		auto entity = m_pScene->CreateEntity("DirectionalLight");
-		auto& light_component = entity.AddComponent<LightComponent>();
-		light_component.Light = m_pDirectionLight;
+		/* 配置阴影 */
+		m_pDirectionLight->SetIsCastShadow(true);
+		auto shadow_map_info = CreateSharedPtr<ShadowMapInfo>();
+		shadow_map_info->Size = 2048;
+		shadow_map_info->CascadeCnt = 4;
+		shadow_map_info->CascadeRadius = glm::vec4(10.0f, 30.0f, 80.0f, 200.0f);
+		shadow_map_info->ConstantBias = 0.01f;
+		shadow_map_info->NormalBias = 1.0f;
+		shadow_map_info->ShadowFar = 200.0f;
+		m_pDirectionLight->SetShadowMapInfo(shadow_map_info);
 	}
 
-	m_pCamera = CreateSharedPtr<SampleCamera>();
 	auto& window = Application::Instance()->GetWindow();
-	m_pCamera->SetViewportRegion({ 0,0, window.GetWidth(), window.GetHeight() });
 
+	/* 向场景中添加相机 */
+	{
+		auto camera_entity = m_pScene->CreateEntity("MainCamera");
+		auto& camera_component = camera_entity.AddComponent<CameraComponent>();
+		camera_component.m_Camera->SetDebugName("MainCamera");
+		camera_component.m_Camera->SetNearClip(1.0f);
+		camera_component.m_Camera->SetFarClip(100.0f);
+
+		m_pCameraController = CreateSharedPtr<SampleCameraController>(camera_entity);
+		m_pCameraController->SetViewportRegion({ 0, 0, window.GetWidth(), window.GetHeight() });
+		m_pCameraController->SetFocus(true);
+		m_pCameraController->SetDistance(15.0f);
+		m_pCameraController->SetFocalPoint(center_pos);
+
+		auto render_view = camera_component.m_Camera->GetRenderView();
+		render_view->SetViewportRegion({ 0,0, window.GetWidth(), window.GetHeight() });
+
+		/* 为RenderView定制FrameGraph - 延迟渲染管线 */
+		auto& frame_graph = render_view->GetFrameGraph();
+		render_view->ResetFrameGraph(m_pScene);
+
+		/* 纹理描述 */
+		FrameGraphTexture::Descriptor color_target_desc;
+		color_target_desc.Width = window.GetWidth();
+		color_target_desc.Height = window.GetHeight();
+		color_target_desc.TextureFormat = TextureFormat::RGBA8;
+
+		FrameGraphTexture::Descriptor depth_target_desc;
+		depth_target_desc.Width = window.GetWidth();
+		depth_target_desc.Height = window.GetHeight();
+		depth_target_desc.TextureFormat = TextureFormat::Depth32;
+
+		/* Scene Pass */
+		struct ScenePassData
+		{
+			FrameGraphResourceHandleTyped<FrameGraphTexture> ShadowMapHandle;
+		};
+
+		auto gbuffer_pass = frame_graph->AddPass<ScenePassData>("ScenePass",
+			[&](FrameGraphBuilder& builder, ScenePassData& data)
+			{
+				data.ShadowMapHandle = frame_graph->GetBlackboard().GetResourceHandle<FrameGraphTexture>("ShadowMapHandle");
+				builder.BindInputResource(data.ShadowMapHandle, FrameGraphTexture::Usage::Sampleable);
+
+				builder.AsSideEffect();
+			},
+			[&, render_view](const FrameGraphResources& resources, const ScenePassData& data)
+			{
+				auto render_api = Renderer::GetRenderAPI();
+				{
+					render_api->Clear();
+					auto& viewport_region = render_view->GetViewportRegion();
+					render_api->SetViewport(0, 0, viewport_region.Width, viewport_region.Height);
+					render_api->SetScissor(0, 0, viewport_region.Width, viewport_region.Height);
+
+					for (const auto& mesh_object : render_view->GetVisibleMeshObjects())
+					{
+						Renderer::FillObjectUniformBuffer(mesh_object);
+						auto& material = mesh_object.MeshSegment->GetMaterial();
+						/* 指定阴影图 */
+						material->SetParameters(ParamType::Texture, "u_ShadowMap", resources.Get(data.ShadowMapHandle).Texture);
+
+						Renderer::Submit(material, mesh_object.MeshSegment->GetMeshPrimitive());
+					}
+				}
+			}
+		);
+
+		/* ImGui Pass */
+		if (const auto& imgui_layer = Application::Instance()->GetImGuiLayer())
+		{
+			imgui_layer->AddFrameGraphPass(*frame_graph);
+		}
+
+		// frame_graph->ExportGraphviz("framegraph.txt");
+		render_view->Prepare();
+	}
 }
 
 void SampleCSM::OnDetached()
 {
-	ILayer::OnDetached(
-	);
-
+	ILayer::OnDetached();
 }
 
 void SampleCSM::OnUpdate(float delta_time)
 {
-	Renderer::SetClearColor(glm::vec4(0.2f, 0.3f, 0.3f, 1.0f));
-	Renderer::Clear();
+	m_pCameraController->OnUpdate(delta_time);
 
-	m_pCamera->OnUpdate(delta_time);
-	m_pScene->OnUpdateEditor(m_pCamera.get(), delta_time);
+	m_pScene->OnUpdate(delta_time);
+	m_pScene->Render();
 }
 
 void SampleCSM::OnImGuiRender()
@@ -88,6 +195,7 @@ void SampleCSM::OnImGuiRender()
 	ImGui::Begin("Stats");
 	ImGui::Text("Sample CSM:");
 	ImGui::Text("- Alt + Mouse Left: Rotate.");
+
 	auto light_dir = m_pDirectionLight->GetDirection();
 	if (ImGuiExt::DrawDirectionIndicator("Light Dir", light_dir, 0))
 		m_pDirectionLight->SetDirection(light_dir);

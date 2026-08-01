@@ -128,7 +128,8 @@ namespace Helios
 					}
 
 					/* 收集3个顶点uv */
-					float uv[3][2];					memset(uv, 0.0f, 6 * sizeof(float));
+					float uv[3][2];
+					memset(uv, 0.0f, 6 * sizeof(float));
 					if (!in_attribs.texcoords.empty())
 					{
 						if (index0.texcoord_index >= 0 && index1.texcoord_index >= 0 && index2.texcoord_index >= 0)

@@ -40,9 +40,6 @@ vec3 BRDF(vec3 L, vec3 V, vec3 N, float metallic, float roughness, vec3 albedo)
 	float dotLH = clamp(dot(L, H), 0.0, 1.0);
 	float dotNH = clamp(dot(N, H), 0.0, 1.0);
 
-	// Light color fixed
-	vec3 lightColor = vec3(1.0);
-
 	vec3 color = vec3(0.0);
 
 	if (dotNL > 0.0)
@@ -59,7 +56,7 @@ vec3 BRDF(vec3 L, vec3 V, vec3 N, float metallic, float roughness, vec3 albedo)
 		vec3 diff = kD * (1.0 - metallic) * albedo / PI;
 		vec3 spec = D * F * G / (4.0 * dotNL * dotNV);
 
-		color += (diff + spec) * dotNL * lightColor;
+		color += (diff + spec) * dotNL;
 	}
 
 	return color;

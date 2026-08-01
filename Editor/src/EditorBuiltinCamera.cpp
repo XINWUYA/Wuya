@@ -7,8 +7,8 @@
 
 namespace Helios
 {
-	EditorCamera::EditorCamera(const std::string& name, float fov, float aspect_ratio, float near_clip, float far_clip)
-		: Camera(name, fov, aspect_ratio, near_clip, far_clip)
+	EditorCamera::EditorCamera(float fov, float aspect_ratio, float near_clip, float far_clip)
+		: Camera(CameraProjectionType::Perspective, fov, aspect_ratio, near_clip, far_clip)
 	{
 		PROFILE_FUNCTION();
 
@@ -279,12 +279,12 @@ namespace Helios
 						raster_state.BlendFuncDstA = BlendFunc::One;
 						const auto shader = ShaderAssetManager::Instance().GetOrLoad(ABSOLUTE_PATH("Shaders/lighting.glsl"));
 						material->SetShader(shader);
-						material->SetTexture("u_GBufferTexture0", resources.Get(data.GBufferTexture0).Texture, 0);
-						material->SetTexture("u_GBufferTexture1", resources.Get(data.GBufferTexture1).Texture, 1);
-						material->SetTexture("u_GBufferTexture2", resources.Get(data.GBufferTexture2).Texture, 2);
-						material->SetTexture("u_GBufferTexture3", resources.Get(data.GBufferTexture3).Texture, 3);
-						material->SetTexture("u_GBufferTexture4", resources.Get(data.GBufferTexture4).Texture, 4);
-						material->SetTexture("u_GBufferTexture5", resources.Get(data.GBufferTexture5).Texture, 5);
+						material->SetTexture("u_GBufferTexture0", resources.Get(data.GBufferTexture0).Texture);
+						material->SetTexture("u_GBufferTexture1", resources.Get(data.GBufferTexture1).Texture);
+						material->SetTexture("u_GBufferTexture2", resources.Get(data.GBufferTexture2).Texture);
+						material->SetTexture("u_GBufferTexture3", resources.Get(data.GBufferTexture3).Texture);
+						material->SetTexture("u_GBufferTexture4", resources.Get(data.GBufferTexture4).Texture);
+						material->SetTexture("u_GBufferTexture5", resources.Get(data.GBufferTexture5).Texture);
 						Renderer::Submit(material, Renderer::GetFullScreenVertexArray());
 					}
 				}

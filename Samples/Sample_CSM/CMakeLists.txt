@@ -13,6 +13,9 @@ file(GLOB_RECURSE SAMPLE_SOURCES
 
 target_sources(Sample_CSM PRIVATE ${SAMPLE_SOURCES})
 
+# Organize source files in Visual Studio by directory structure
+source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}/src" FILES ${SAMPLE_SOURCES})
+
 # Include directories
 target_include_directories(Sample_CSM
     PRIVATE

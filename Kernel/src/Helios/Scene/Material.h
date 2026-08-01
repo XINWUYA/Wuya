@@ -7,40 +7,6 @@ namespace Helios
 	class DeviceTexture;
 	class DeviceShader;
 
-	/* PBR材质纹理贴图Slot */
-	namespace TextureSlot
-	{
-		constexpr uint8_t Albedo = 0;
-		constexpr uint8_t Specular = 1;
-		constexpr uint8_t Normal = 2;
-		constexpr uint8_t Bump = 3;
-		constexpr uint8_t Displacement = 4;
-		constexpr uint8_t Roughness = 5;
-		constexpr uint8_t Metallic = 6;
-		constexpr uint8_t Emissive = 7;
-		constexpr uint8_t Ambient = 8;
-		constexpr uint8_t ValidSlotCnt = 9;
-
-		constexpr uint8_t Invalid = 255;
-
-		inline std::string GetSlotName(uint8_t slot)
-		{
-			switch (slot)
-			{
-			case Albedo:		return "Albedo";
-			case Specular:		return "Specular";
-			case Normal:		return "Normal";
-			case Bump:			return "Bump";
-			case Displacement:	return "Displacement";
-			case Roughness:		return "Roughness";
-			case Metallic:		return "Metallic";
-			case Emissive:		return "Emissive";
-			case Ambient:		return "Ambient";
-			default:			return "Invalid";
-			}
-		}
-	}
-
 	enum class ParamType : uint8_t
 	{
 		Texture = 0,
@@ -49,6 +15,7 @@ namespace Helios
 		Vec2,
 		Vec3,
 		Vec4,
+		Mat4,
 	};
 
 	/* 材质参数信息 */
@@ -77,13 +44,17 @@ namespace Helios
 		~Material();
 
 		/* 设置Shader */
-		void SetShader(const SharedPtr<DeviceShader>& shader) { m_pShader = shader; }
+		void SetShader(const SharedPtr<DeviceShader>& shader);
 		[[nodiscard]] const SharedPtr<DeviceShader>& GetShader() const { return m_pShader; }
 		/* 设置参数 */
 		void SetParameters(ParamType type, const std::string& name, const std::any& param);
 		[[nodiscard]] const ParameterMap& GetAllParameters() const { return m_Parameters; }
-		/* 设置纹理 */
-		void SetTexture(const std::string& name, const SharedPtr<DeviceTexture>& texture, int slot = -1);
+		/* 设置纹理
+		 * 绑定点（texture unit / [[texture(N)]]）完全由 Shader 反射决定：
+		 * 直接取 Shader 中 `layout(binding = X) uniform sampler2D <name>;` 的 X，
+		 * 调用方无需、也不应再人为指定 slot。
+		 */
+		void SetTexture(const std::string& name, const SharedPtr<DeviceTexture>& texture);
 		/* 设置光栅化状态 */
 		void SetRasterState(const RenderRasterState& state) { m_RasterState = state; }
 		[[nodiscard]] const RenderRasterState& GetRasterState() const { return m_RasterState; }
@@ -103,6 +74,11 @@ namespace Helios
 		static SharedPtr<Material> Create(const SharedPtr<DeviceShader>& shader);
 
 	private:
+		/* 从当前Shader反射出sampler的绑定点，未找到返回TextureSlot::Invalid */
+		[[nodiscard]] uint32_t ResolveTextureBinding(const std::string& name) const;
+		/* Shader变更后，重新解析所有纹理参数的绑定点 */
+		void RefreshTextureBindings();
+
 		/* Shader */
 		SharedPtr<DeviceShader> m_pShader{ nullptr };
 		/* 材质所需的各种参数<ToID(Name), MaterialParamInfo> */

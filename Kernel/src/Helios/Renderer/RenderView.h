@@ -13,6 +13,7 @@ namespace Helios
 	class DeviceFrameBuffer;
 	class FrameGraph;
 	class ShadowMapManager;
+	class Light;
 
 	/* 对当前RenderView可见的模型 */
 	struct VisibleMeshObject
@@ -24,21 +25,6 @@ namespace Helios
 		VisibleMeshObject() = default;
 		VisibleMeshObject(int object_id, const glm::mat4& local_2_world, const SharedPtr<class MeshSegment>& mesh_segment)
 			: ObjectId(object_id), Local2WorldMat(local_2_world), MeshSegment(mesh_segment)
-		{}
-	};
-
-	/* 影响场景的有效光源 */
-	struct ValidLight
-	{
-		uint32_t LightType{ 0 };
-		glm::vec4 ColorIntensity{ 1.0f, 1.0f, 1.0f, 1.0f }; /* rgb: color, a: intensity */
-		glm::vec3 LightDir{ 0.0f };
-		glm::vec3 LightPos{ 0.0f };
-		bool IsCastShadow{ false };
-
-		ValidLight() = default;
-		ValidLight(uint32_t type, const glm::vec4& color_intensity, const glm::vec3& dir, const glm::vec3& pos, bool cast_shadow)
-			: LightType(type), ColorIntensity(color_intensity), LightDir(dir), LightPos(pos), IsCastShadow(cast_shadow)
 		{}
 	};
 
@@ -83,12 +69,20 @@ namespace Helios
 		/* 获取FrameGraph */
 		[[nodiscard]] const SharedPtr<FrameGraph>& GetFrameGraph() const { return m_pFrameGraph; }
 
+		/* 获取阴影管理器 */
+		[[nodiscard]] SharedPtr<ShadowMapManager>& GetShadowMapManager() { return m_pShadowMapManager; }
+
 		/* 存储各Pass的FrameBuffer */
 		void EmplacePassFrameBuffer(const std::string& name, const SharedPtr<DeviceFrameBuffer>& frame_buffer);
 		[[nodiscard]] const SharedPtr<DeviceFrameBuffer>& GetPassFrameBuffer(const std::string& name) const;
 
 		/* 准备一帧的RenderView数据 */
 		void Prepare();
+
+		/* 重置FrameGraph，并自动根据场景中光源是否开启ShadowCast来注入ShadowPass
+		 * 应在Sample自定义各Pass之前调用，以保证ShadowPass位于依赖它的Pass之前
+		 */
+		void ResetFrameGraph(const SharedPtr<Scene>& scene);
 
 		/* 执行渲染当前View */
 		void Execute();
@@ -97,7 +91,7 @@ namespace Helios
 		[[nodiscard]] const std::vector<VisibleMeshObject>& GetVisibleMeshObjects() const { return m_VisibleMeshObjects; }
 
 		/* 获取光源 */
-		[[nodiscard]] const std::vector<ValidLight>& GetValidLights() const { return m_ValidLights; }
+		[[nodiscard]] const std::vector<SharedPtr<Light>>& GetValidLights() const { return m_ValidLights; }
 
 	private:
 		/* 视锥体剔除，仅保留对当前RenderView可见的对象 */
@@ -118,7 +112,7 @@ namespace Helios
 		/* 视锥体剔除之后，对当前可见MeshSegment */
 		std::vector<VisibleMeshObject> m_VisibleMeshObjects{};
 		/* 对场景产生影响的光源 */
-		std::vector<ValidLight> m_ValidLights{};
+		std::vector<SharedPtr<Light>> m_ValidLights{};
 		/* 当前View的渲染结果输出到该RenderTarget */
 		FrameGraphResourceHandle m_RenderTargetHandle{};
 		/* FrameGraph */

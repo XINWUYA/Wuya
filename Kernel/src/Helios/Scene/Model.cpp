@@ -1,14 +1,9 @@
 ﻿#include "Pch.h"
 #include "Model.h"
-
-#include <tinyxml2.h>
-
 #include "Mesh.h"
-#include "ModelImporter.h"
+#include "SceneCommon.h"
 #include "Helios/Common/Math.h"
 #include "Helios/VirtualDevice/DeviceBuffer.h"
-#include "Helios/VirtualDevice/DeviceShader.h"
-#include "Helios/VirtualDevice/DeviceTexture.h"
 #include "Helios/VirtualDevice/DeviceVertexArray.h"
 
 namespace Helios
@@ -187,21 +182,21 @@ namespace Helios
 		{
 			// todo: Plane vertices
 			static constexpr float vertices[] = {
-				// Position,          TexCoord,    EntityId
-				-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,  0,
-				 0.5f, -0.5f, -0.5f,  1.0f, 0.0f,  0,
-				 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,  0,
-				 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,  0,
-				-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,  0,
-				-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,  0,
+				// Position,        Normal,           TexCoord,
+				-0.5f, 0.0f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f,
+				-0.5f, 0.0f,  0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+				 0.5f, 0.0f,  0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f,
+				 0.5f, 0.0f,  0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f,
+				 0.5f, 0.0f, -0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,
+				-0.5f, 0.0f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f,
 			};
 
 			// Vertex Array
 			SharedPtr<DeviceVertexBuffer> vertex_buffer = DeviceVertexBuffer::Create(vertices, sizeof(vertices));
 			VertexBufferLayout vertex_buffer_layout = {
 				{ "a_Position", BufferDataType::Float3 },
+				{ "a_Normal", BufferDataType::Float3 },
 				{ "a_TexCoord", BufferDataType::Float2 },
-				{ "a_EntityId", BufferDataType::Int}
 			};
 			vertex_buffer->SetLayout(vertex_buffer_layout);
 
@@ -216,11 +211,24 @@ namespace Helios
 	}
 
 	Model::Model(std::string path)
-		: m_DebugName(ExtractFilename(path))
-		, m_Path(std::move(path))
+		: m_Path(std::move(path))
 		, m_AABBMin(glm::vec3(std::numeric_limits<float>::max()))
 		, m_AABBMax(glm::vec3(-std::numeric_limits<float>::max()))
 	{
+	}
+
+	/* 由世界变换矩阵写入位置、旋转与缩放 */
+	void Model::SetTransform(const glm::mat4& transform)
+	{
+		/* 位置与旋转由基类统一处理 */
+		SceneObject::SetTransform(transform);
+
+		/* 缩放是模型特有属性，额外分解写入 */
+		const glm::mat3 rotation = glm::mat3(transform);
+		m_Scale = glm::vec3(
+			glm::length(glm::vec3(rotation[0])),
+			glm::length(glm::vec3(rotation[1])),
+			glm::length(glm::vec3(rotation[2])));
 	}
 
 	/* 添加一个MeshSegment到模型 */
@@ -289,7 +297,7 @@ namespace Helios
 				in_mesh_file.read((char*)indices, index_count * sizeof(uint32_t));
 
 				/* Index Buffer */
-				auto index_type = index_count > UINT16_MAX ? IndexType::UInt32 : IndexType::UInt16;
+				auto index_type = IndexType::UInt32; // index_count > UINT16_MAX ? IndexType::UInt32 : IndexType::UInt16;
 				auto index_buffer = IndexBuffer::Create(indices, index_count, index_type);
 				vertex_array->SetIndexBuffer(index_buffer);
 				delete[] indices;

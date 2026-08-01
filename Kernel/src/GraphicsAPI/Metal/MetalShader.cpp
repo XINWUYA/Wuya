@@ -42,6 +42,14 @@ namespace Helios
         m_VertexMSL = GLSLToMSL(vertex_src, "vertex");
         m_FragmentMSL = GLSLToMSL(fragment_src, "fragment");
 
+        /* 反射：从 GLSL 源码取出 sampler 的 layout(binding = X)。
+         * 注意：当前 Metal 后端的 GLSLToMSL 仍是占位实现，并未真正用 SPIRV-Cross
+         * 转译出与 binding 对应的 [[texture(N)]]；此处仅先填充反射数据，
+         * 待接入真正的 GLSL->MSL 转译后，Bind 时的 texture unit 才会与 Shader 一致。 */
+        m_Reflection.Clear();
+        ShaderReflection::ReflectFromGLSLSource(vertex_src, m_Reflection);
+        ShaderReflection::ReflectFromGLSLSource(fragment_src, m_Reflection);
+
         /* 创建Uniform缓冲区 */
         CreateUniformBuffer();
 
@@ -54,6 +62,11 @@ namespace Helios
         /* 转换GLSL到MSL */
         m_VertexMSL = GLSLToMSL(vertex_src, "vertex");
         m_FragmentMSL = GLSLToMSL(pixel_src, "fragment");
+
+        /* 反射：从 GLSL 源码取出 sampler 的 layout(binding = X)（见文件顶部说明） */
+        m_Reflection.Clear();
+        ShaderReflection::ReflectFromGLSLSource(vertex_src, m_Reflection);
+        ShaderReflection::ReflectFromGLSLSource(pixel_src, m_Reflection);
 
         /* 创建Uniform缓冲区 */
         CreateUniformBuffer();

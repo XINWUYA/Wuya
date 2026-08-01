@@ -1,7 +1,7 @@
 ﻿#pragma once
 #include <glm/glm.hpp>
 #include "Material.h"
-#include "SceneCommon.h"
+#include "SceneObject.h"
 
 namespace Helios
 {
@@ -20,12 +20,10 @@ namespace Helios
 	 * 默认为静态模型
 	 * 仅支持.mesh格式文件，通过ModelEditor导出
 	 */
-	class Model
+	class Model : public SceneObject
 	{
 	public:
-		COMPONENT_CLASS(Model)
-
-			Model(std::string path);
+		Model(std::string path);
 		virtual ~Model() = default;
 
 		/* 标记是否为静态模型 */
@@ -36,6 +34,13 @@ namespace Helios
 		/* 模型的AABB */
 		[[nodiscard]] const glm::vec3& GetAABBMin() const { return m_AABBMin; }
 		[[nodiscard]] const glm::vec3& GetAABBMax() const { return m_AABBMax; }
+
+		/* 模型缩放 */
+		[[nodiscard]] const glm::vec3& GetScale() const { return m_Scale; }
+		void SetScale(const glm::vec3& scale) { m_Scale = scale; }
+
+		/* 由世界变换矩阵写入位置、旋转与缩放 */
+		void SetTransform(const glm::mat4& transform) override;
 
 		/* 添加一个MeshSegment到模型 */
 		void AddMeshSegment(const SharedPtr<MeshSegment>& mesh_segment);
@@ -53,8 +58,6 @@ namespace Helios
 		/* 加载模型时，加载材质 */
 		void LoadMaterial(const std::string& path);
 
-		/* 标记名 */
-		std::string m_DebugName{ "Unnamed Model" };
 		/* 文件路径 */
 		std::string m_Path{};
 		/* 一个模型中包含的子模型 */
@@ -64,6 +67,8 @@ namespace Helios
 		/* AABB */
 		glm::vec3 m_AABBMin;
 		glm::vec3 m_AABBMax;
+		/* 缩放 */
+		glm::vec3 m_Scale{ 1.0f };
 
 		friend class SkeletonModel;
 	};

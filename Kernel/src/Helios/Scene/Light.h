@@ -1,5 +1,5 @@
 ﻿#pragma once
-#include "SceneCommon.h"
+#include "SceneObject.h"
 
 namespace Helios
 {
@@ -25,11 +25,9 @@ namespace Helios
 	};
 
 	/* 光源类 */
-	class Light
+	class Light : public SceneObject
 	{
 	public:
-		COMPONENT_CLASS(Light)
-
 		Light() = default;
 		virtual ~Light() = default;
 
@@ -50,13 +48,12 @@ namespace Helios
 
 		/* 阴影信息 */
 		[[nodiscard]] const SharedPtr<ShadowMapInfo>& GetShadowMapInfo() const { return m_pShadowMapInfo; }
+		void SetShadowMapInfo(const SharedPtr<ShadowMapInfo>& shadow_map_info) { m_pShadowMapInfo = shadow_map_info; }
 
 		/* 创建指定类型光源 */
 		static SharedPtr<Light> Create(LightType type);
 
 	protected:
-		/* 标记名 */
-		std::string m_DebugName{ "Unnamed Light" };
 		/* 光源颜色 */
 		glm::vec4 m_Color{ 1.0f };
 		/* 光源强度 */

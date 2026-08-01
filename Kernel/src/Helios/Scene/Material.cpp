@@ -9,6 +9,10 @@
 
 namespace Helios
 {
+
+	/* 无效Slot */
+	constexpr uint8_t InvalidTextureSlot = 255;
+
 	/* 默认材质和错误材质 */
 	SharedPtr<Material> Material::m_pDefaultMaterial = CreateSharedPtr<Material>();// Material::Create();
 	SharedPtr<Material> Material::m_pErrorMaterial = CreateSharedPtr<Material>();
@@ -18,27 +22,42 @@ namespace Helios
 		m_Parameters.clear();
 	}
 
+	void Material::SetShader(const SharedPtr<DeviceShader>& shader)
+	{
+		PROFILE_FUNCTION();
+
+		if (m_pShader == shader)
+			return;
+
+		m_pShader = shader;
+		/* Shader更换，binding布局也随之改变，刷新Shader的反射结果 */
+		RefreshTextureBindings();
+	}
+
 	void Material::SetParameters(ParamType type, const std::string& name, const std::any& param)
 	{
 		PROFILE_FUNCTION();
 
+		if (type == ParamType::Texture)
+		{
+			const auto texture = std::any_cast<const SharedPtr<DeviceTexture>>(param);
+			if (!texture)
+				return;
+			m_Parameters[ToID(name)] = { ParamType::Texture, name, std::make_pair(texture, ResolveTextureBinding(name)) };
+			return;
+		}
+
 		m_Parameters[ToID(name)] = { type, name, param };
 	}
 
-	void Material::SetTexture(const std::string& name, const SharedPtr<DeviceTexture>& texture, int slot)
+	void Material::SetTexture(const std::string& name, const SharedPtr<DeviceTexture>& texture)
 	{
 		PROFILE_FUNCTION();
 
 		if (!texture)
 			return;
 
-		if (slot < 0)
-			slot = m_pShader->GetUniformLocation(name);
-
-		if (slot < 0)
-			return;
-
-		m_Parameters[ToID(name)] = { ParamType::Texture, name, std::make_pair(texture, static_cast<uint32_t>(slot)) };
+		m_Parameters[ToID(name)] = { ParamType::Texture, name, std::make_pair(texture, ResolveTextureBinding(name)) };
 	}
 
 	/* 绑定材质中的各参数 */
@@ -60,8 +79,11 @@ namespace Helios
 				{
 					/* 绑定纹理 */
 					const auto texture_info = std::any_cast<std::pair<SharedPtr<DeviceTexture>, uint32_t>>(value);
-					if (texture_info.second != TextureSlot::Invalid)
+					if (texture_info.second != InvalidTextureSlot)
+					{
 						texture_info.first->Bind(texture_info.second);
+						m_pShader->SetInt(param_info.Name, texture_info.second);
+					}
 				}
 				break;
 			case ParamType::Int:
@@ -79,6 +101,9 @@ namespace Helios
 			case ParamType::Vec4:
 				m_pShader->SetFloat4(param_info.Name, std::any_cast<glm::vec4>(value));
 				break;
+			case ParamType::Mat4:
+				m_pShader->SetMat4(param_info.Name, std::any_cast<glm::mat4>(value));
+				break;
 			}
 		}
 	}
@@ -95,7 +120,7 @@ namespace Helios
 		if (!m_pDefaultMaterial->GetShader())
 		{
 			/* 只能在获取时设置Shader，在静态编译期，OpenGL尚未初始化，无法正确创建ShaderProgram */
-			m_pDefaultMaterial->SetShader(ShaderAssetManager::Instance().GetOrLoad("assets/shaders/default.glsl"));
+			m_pDefaultMaterial->SetShader(ShaderAssetManager::Instance().GetOrLoad(ABSOLUTE_PATH("Shaders/default.glsl")));
 		}
 
 		return m_pDefaultMaterial;
@@ -106,7 +131,7 @@ namespace Helios
 	{
 		if (!m_pErrorMaterial->GetShader())
 		{
-			m_pErrorMaterial->SetShader(ShaderAssetManager::Instance().GetOrLoad("assets/shaders/error.glsl"));
+			m_pErrorMaterial->SetShader(ShaderAssetManager::Instance().GetOrLoad(ABSOLUTE_PATH("Shaders/error.glsl")));
 		}
 		return m_pErrorMaterial;
 	}
@@ -120,6 +145,31 @@ namespace Helios
 		material->SetShader(shader);
 
 		return material;
+	}
+
+	uint32_t Material::ResolveTextureBinding(const std::string& name) const
+	{
+		if (!m_pShader)
+			return InvalidTextureSlot;
+
+		const int binding = m_pShader->GetUniformBinding(name);
+		return binding < 0 ? InvalidTextureSlot : static_cast<uint32_t>(binding);
+	}
+
+	void Material::RefreshTextureBindings()
+	{
+		if (!m_pShader)
+			return;
+
+		for (auto& [id, param_info] : m_Parameters)
+		{
+			if (param_info.Type != ParamType::Texture)
+				continue;
+
+			auto texture_info = std::any_cast<std::pair<SharedPtr<DeviceTexture>, uint32_t>>(param_info.Value);
+			texture_info.second = ResolveTextureBinding(param_info.Name);
+			m_Parameters[id] = { param_info.Type, param_info.Name, texture_info };
+		}
 	}
 
 	/* 添加一个Material */
@@ -275,16 +325,15 @@ namespace Helios
 					{
 						const auto texture_doc = param_doc->FirstChildElement("Texture");
 						auto texture_path = texture_doc->Attribute("Path");
-						int slot = texture_doc->IntAttribute("Slot");
 
 						TextureLoadConfig load_config;
 						const auto load_config_doc = texture_doc->FirstChildElement("LoadConfig");
 						load_config.IsFlipV = load_config_doc->BoolAttribute("IsFlipV");
 						load_config.IsGenMips = load_config_doc->BoolAttribute("IsGenMips");
 						load_config.SamplerType = static_cast<SamplerType>(load_config_doc->IntAttribute("SamplerType"));
-						
+
 						auto texture = TextureAssetManager::Instance().GetOrCreateTexture(ABSOLUTE_PATH(texture_path), load_config);
-						material->SetTexture(param_name, texture, slot);
+						material->SetTexture(param_name, texture);
 					}
 					break;
 				case ParamType::Int:

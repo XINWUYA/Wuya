@@ -22,10 +22,10 @@ namespace Helios
 		/* 默认在场景中增加一盏方向光，光源颜色为白色 */
 		Entity entity = m_pDefaultScene->CreateEntity("DirectionalLight");
 		auto& light_component = entity.AddComponent<LightComponent>(LightType::Directional);
-		light_component.Light->SetColor(glm::vec4(1, 1, 1, 1));
-		light_component.Light->SetIntensity(1);
+		light_component.m_Light->SetColor(glm::vec4(1, 1, 1, 1));
+		light_component.m_Light->SetIntensity(1);
 		auto& light_transform = entity.GetComponent<TransformComponent>();
-		light_transform.Rotation = glm::vec3(0, 0, PI/2);
+		light_transform.m_Rotation = glm::vec3(0, 0, PI/2);
 	}
 
 	void ModelEditor::OnDetached()
@@ -43,7 +43,7 @@ namespace Helios
 		Renderer::Clear();
 
 		m_pEditorCamera->OnUpdate(delta_time);
-		m_pDefaultScene->OnUpdateEditor(m_pEditorCamera.get(), delta_time);
+		m_pDefaultScene->OnUpdate(delta_time, m_pEditorCamera.get());
 	}
 
 	void ModelEditor::OnImGuiRender()
@@ -350,7 +350,7 @@ namespace Helios
 														};
 														/* 填入默认值 */
 														const auto& default_texture = TextureAssetManager::Instance().GetOrCreateTexture(ABSOLUTE_PATH("Textures/Default.png"));
-														material->SetTexture(param_info.Name, default_texture, GetSlot(param_info.Name));
+														material->SetTexture(param_info.Name, default_texture);
 													}
 													break;
 												case ParamType::Int:
@@ -383,8 +383,8 @@ namespace Helios
 									{
 									case ParamType::Texture:
 										{
-											auto texture_info = std::any_cast<std::pair<SharedPtr<DeviceTexture>, uint32_t>>(param_info.Value);
-											auto& texture = texture_info.first;
+											auto texture_info = std::any_cast<TextureBindingInfo>(param_info.Value);
+											auto& texture = texture_info.Texture;
 											auto load_config = texture->GetTextureLoadConfig();
 
 											/* Show texture image */
@@ -400,7 +400,7 @@ namespace Helios
 													const wchar_t* path = (const wchar_t*)payload->Data;
 													const std::filesystem::path texture_path = path;
 
-													material->SetTexture(param_info.Name, TextureAssetManager::Instance().GetOrCreateTexture(ABSOLUTE_PATH(texture_path), load_config), texture_info.second);
+													material->SetTexture(param_info.Name, TextureAssetManager::Instance().GetOrCreateTexture(ABSOLUTE_PATH(texture_path), load_config));
 													sub_model_info->MaterialParams.AmbientTexPath = { texture_path.string(), true };
 												}
 												ImGui::EndDragDropTarget();
@@ -426,7 +426,7 @@ namespace Helios
 											if (load_config != texture->GetTextureLoadConfig())
 											{
 												auto new_texture = TextureAssetManager::Instance().GetOrCreateTexture(texture->GetPath(), load_config);
-												material->SetTexture(param_info.Name, new_texture, texture_info.second);
+												material->SetTexture(param_info.Name, new_texture);
 											}
 
 											ImGui::Columns(1);
@@ -778,7 +778,7 @@ namespace Helios
 		/* 将模型添加到场景中 */
 		Entity entity = m_pDefaultScene->CreateEntity(m_pModel->GetDebugName());
 		auto& mesh_component = entity.AddComponent<ModelComponent>();
-		mesh_component.Model = m_pModel;
+		mesh_component.m_Model = m_pModel;
 
 		/* 根据模型大小自适应相机距离 */
 		const auto& aabb_min = m_pModel->GetAABBMin();
@@ -804,65 +804,65 @@ namespace Helios
 		{
 			/* Ambient */
 			if (material_params.AmbientTexPath.second)
-				material->SetTexture("AmbientTex", TextureAssetManager::Instance().GetOrCreateTexture(ABSOLUTE_PATH(material_params.AmbientTexPath.first), load_config), TextureSlot::Ambient);
+				material->SetTexture("AmbientTex", TextureAssetManager::Instance().GetOrCreateTexture(ABSOLUTE_PATH(material_params.AmbientTexPath.first), load_config));
 			else
-				material->SetTexture("AmbientTex", TextureAssetManager::Instance().GetOrCreateTexture(ABSOLUTE_PATH("Textures/Black.png"), load_config), TextureSlot::Ambient);
+				material->SetTexture("AmbientTex", TextureAssetManager::Instance().GetOrCreateTexture(ABSOLUTE_PATH("Textures/Black.png"), load_config));
 			if (material_params.AmbientFactor.second)
 				material->SetParameters(ParamType::Vec3, "AmbientColor", material_params.AmbientFactor.first);
 
 			/* Diffuse/Albedo */
 			if (material_params.DiffuseTexPath.second)
-				material->SetTexture("AlbedoTex", TextureAssetManager::Instance().GetOrCreateTexture(ABSOLUTE_PATH(material_params.DiffuseTexPath.first), load_config), TextureSlot::Albedo);
+				material->SetTexture("AlbedoTex", TextureAssetManager::Instance().GetOrCreateTexture(ABSOLUTE_PATH(material_params.DiffuseTexPath.first), load_config));
 			else
-				material->SetTexture("AlbedoTex", TextureAssetManager::Instance().GetOrCreateTexture(ABSOLUTE_PATH("Textures/White.png"), load_config), TextureSlot::Albedo);
+				material->SetTexture("AlbedoTex", TextureAssetManager::Instance().GetOrCreateTexture(ABSOLUTE_PATH("Textures/White.png"), load_config));
 			if (material_params.DiffuseFactor.second)
 				material->SetParameters(ParamType::Vec3, "AlbedoColor", material_params.DiffuseFactor.first);
 
 			/* Specular */
 			if (material_params.SpecularTexPath.second)
-				material->SetTexture("SpecularTex", TextureAssetManager::Instance().GetOrCreateTexture(ABSOLUTE_PATH(material_params.SpecularTexPath.first), load_config), TextureSlot::Specular);
+				material->SetTexture("SpecularTex", TextureAssetManager::Instance().GetOrCreateTexture(ABSOLUTE_PATH(material_params.SpecularTexPath.first), load_config));
 			else
-				material->SetTexture("SpecularTex", TextureAssetManager::Instance().GetOrCreateTexture(ABSOLUTE_PATH("Textures/Black.png"), load_config), TextureSlot::Specular);
+				material->SetTexture("SpecularTex", TextureAssetManager::Instance().GetOrCreateTexture(ABSOLUTE_PATH("Textures/Black.png"), load_config));
 			if (material_params.SpecularFactor.second)
 				material->SetParameters(ParamType::Vec3, "SpecularColor", material_params.SpecularFactor.first);
 
 			/* Normal, todo: 处理Bump和Displacement */
 			if (material_params.NormalTexPath.second)
-				material->SetTexture("NormalTex", TextureAssetManager::Instance().GetOrCreateTexture(ABSOLUTE_PATH(material_params.NormalTexPath.first), load_config), TextureSlot::Normal);
+				material->SetTexture("NormalTex", TextureAssetManager::Instance().GetOrCreateTexture(ABSOLUTE_PATH(material_params.NormalTexPath.first), load_config));
 			else
-				material->SetTexture("NormalTex", TextureAssetManager::Instance().GetOrCreateTexture(ABSOLUTE_PATH("Textures/Normal.png"), load_config), TextureSlot::Normal);
+				material->SetTexture("NormalTex", TextureAssetManager::Instance().GetOrCreateTexture(ABSOLUTE_PATH("Textures/Normal.png"), load_config));
 			if (material_params.BumpTexPath.second)
-				material->SetTexture("BumpTex", TextureAssetManager::Instance().GetOrCreateTexture(ABSOLUTE_PATH(material_params.BumpTexPath.first), load_config), TextureSlot::Bump);
+				material->SetTexture("BumpTex", TextureAssetManager::Instance().GetOrCreateTexture(ABSOLUTE_PATH(material_params.BumpTexPath.first), load_config));
 			else
-				material->SetTexture("BumpTex", TextureAssetManager::Instance().GetOrCreateTexture(ABSOLUTE_PATH("Textures/Black.png"), load_config), TextureSlot::Bump);
+				material->SetTexture("BumpTex", TextureAssetManager::Instance().GetOrCreateTexture(ABSOLUTE_PATH("Textures/Black.png"), load_config));
 			if (material_params.DisplacementTexPath.second)
-				material->SetTexture("DisplacementTex", TextureAssetManager::Instance().GetOrCreateTexture(ABSOLUTE_PATH(material_params.DisplacementTexPath.first), load_config), TextureSlot::Displacement);
+				material->SetTexture("DisplacementTex", TextureAssetManager::Instance().GetOrCreateTexture(ABSOLUTE_PATH(material_params.DisplacementTexPath.first), load_config));
 			else
-				material->SetTexture("DisplacementTex", TextureAssetManager::Instance().GetOrCreateTexture(ABSOLUTE_PATH("Textures/Black.png"), load_config), TextureSlot::Displacement);
+				material->SetTexture("DisplacementTex", TextureAssetManager::Instance().GetOrCreateTexture(ABSOLUTE_PATH("Textures/Black.png"), load_config));
 			if (!material_params.NormalTexPath.second && !material_params.BumpTexPath.second && !material_params.DisplacementTexPath.second)
-				material->SetTexture("NormalTex", TextureAssetManager::Instance().GetOrCreateTexture(ABSOLUTE_PATH("Textures/Normal.png"), load_config), TextureSlot::Normal);
+				material->SetTexture("NormalTex", TextureAssetManager::Instance().GetOrCreateTexture(ABSOLUTE_PATH("Textures/Normal.png"), load_config));
 
 			/* Roughness */
 			if (material_params.RoughnessTexPath.second)
-				material->SetTexture("RoughnessTex", TextureAssetManager::Instance().GetOrCreateTexture(ABSOLUTE_PATH(material_params.RoughnessTexPath.first), load_config), TextureSlot::Roughness);
+				material->SetTexture("RoughnessTex", TextureAssetManager::Instance().GetOrCreateTexture(ABSOLUTE_PATH(material_params.RoughnessTexPath.first), load_config));
 			else
-				material->SetTexture("RoughnessTex", TextureAssetManager::Instance().GetOrCreateTexture(ABSOLUTE_PATH("Textures/White.png"), load_config), TextureSlot::Roughness);
+				material->SetTexture("RoughnessTex", TextureAssetManager::Instance().GetOrCreateTexture(ABSOLUTE_PATH("Textures/White.png"), load_config));
 			if (material_params.RoughnessFactor.second)
 				material->SetParameters(ParamType::Float, "Roughness", material_params.RoughnessFactor.first);
 
 			/* Metallic */
 			if (material_params.MetallicTexPath.second)
-				material->SetTexture("MetallicTex", TextureAssetManager::Instance().GetOrCreateTexture(ABSOLUTE_PATH(material_params.MetallicTexPath.first), load_config), TextureSlot::Metallic);
+				material->SetTexture("MetallicTex", TextureAssetManager::Instance().GetOrCreateTexture(ABSOLUTE_PATH(material_params.MetallicTexPath.first), load_config));
 			else
-				material->SetTexture("MetallicTex", TextureAssetManager::Instance().GetOrCreateTexture(ABSOLUTE_PATH("Textures/Black.png"), load_config), TextureSlot::Metallic);
+				material->SetTexture("MetallicTex", TextureAssetManager::Instance().GetOrCreateTexture(ABSOLUTE_PATH("Textures/Black.png"), load_config));
 			if (material_params.MetallicFactor.second)
 				material->SetParameters(ParamType::Float, "Metallic", material_params.MetallicFactor.first);
 
 			/* Emission */
 			if (material_params.EmissionTexPath.second)
-				material->SetTexture("EmissiveTex", TextureAssetManager::Instance().GetOrCreateTexture(ABSOLUTE_PATH(material_params.EmissionTexPath.first), load_config), TextureSlot::Emissive);
+				material->SetTexture("EmissiveTex", TextureAssetManager::Instance().GetOrCreateTexture(ABSOLUTE_PATH(material_params.EmissionTexPath.first), load_config));
 			else
-				material->SetTexture("EmissiveTex", TextureAssetManager::Instance().GetOrCreateTexture(ABSOLUTE_PATH("Textures/Black.png"), load_config), TextureSlot::Emissive);
+				material->SetTexture("EmissiveTex", TextureAssetManager::Instance().GetOrCreateTexture(ABSOLUTE_PATH("Textures/Black.png"), load_config));
 			if (material_params.EmissionFactor.second)
 				material->SetParameters(ParamType::Vec3, "EmissiveColor", material_params.EmissionFactor.first);
 

@@ -17,7 +17,7 @@ namespace Helios
 		PROFILE_FUNCTION();
 		
 		// Camera
-		m_pEditorCamera = CreateUniquePtr<EditorCamera>("EditorBuiltinCamera", 30.0f);
+		m_pEditorCamera = CreateUniquePtr<EditorCamera>(30.0f);
 
 		m_pMainScene = CreateSharedPtr<Scene>();
 		m_SceneHierarchy.SetOwnerScene(m_pMainScene);
@@ -481,11 +481,11 @@ namespace Helios
 				}
 
 				/* 更新场景中的实体 */
-				m_pMainScene->OnUpdateEditor(m_pEditorCamera.get(), delta_time);
+				m_pMainScene->OnUpdate(delta_time, m_pEditorCamera.get());
 				break;
 			case PlayMode::Runtime:
 				/* 更新场景 */
-				m_pMainScene->OnUpdateRuntime(delta_time);
+				m_pMainScene->OnUpdate(delta_time);
 				break;
 			}
 		}

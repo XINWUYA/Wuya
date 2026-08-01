@@ -5,8 +5,8 @@
 
 namespace Helios
 {
-	Camera::Camera(CameraProjectionType type, const std::string& name, float fov, float aspect_ratio, float near, float far)
-		: m_ProjectionType(type), m_DebugName(name), m_Fov(fov), m_AspectRatio(aspect_ratio), m_NearClip(near), m_FarClip(far)
+	Camera::Camera(CameraProjectionType type, float fov, float aspect_ratio, float near_clip, float far_clip)
+		: m_ProjectionType(type), m_Fov(fov), m_AspectRatio(aspect_ratio), m_NearClip(near_clip), m_FarClip(far_clip)
 	{
 		PROFILE_FUNCTION();
 
@@ -43,32 +43,7 @@ namespace Helios
 		m_RightDirection = glm::normalize(glm::cross(m_ForwardDirection, m_UpDirection));
 
 		/* 恢复正交相机常用的 Z 轴旋转（角度制） */
-		m_Rotation = glm::degrees(std::atan2(m_ForwardDirection.y, m_ForwardDirection.x));
-
-		if (m_IsFocus)
-		{
-			m_FocalPoint = m_Position + m_ForwardDirection * m_FocalDistance;
-		}
-
-		m_IsDirty = true;
-	}
-
-	/* 设置聚焦模式 */
-	void Camera::SetFocus(bool focus)
-	{
-		if (m_IsFocus == focus)
-			return;
-
-		m_IsFocus = focus;
-
-		if (m_IsFocus)
-		{
-			m_FocalPoint = m_Position + m_ForwardDirection * m_FocalDistance;
-		}
-		else
-		{
-			m_Position = m_FocalPoint - m_ForwardDirection * m_FocalDistance;
-		}
+		m_ZRoll = glm::degrees(std::atan2(m_ForwardDirection.y, m_ForwardDirection.x));
 
 		m_IsDirty = true;
 	}
@@ -76,24 +51,16 @@ namespace Helios
 	/* 设置相机位置 */
 	void Camera::SetPosition(const glm::vec3& position)
 	{
-		if (m_IsFocus)
-		{
-			m_FocalPoint = position + m_ForwardDirection * m_FocalDistance;
-		}
-		else
-		{
-			m_Position = position;
-		}
-
+		m_Position = position;
 		m_IsDirty = true;
 	}
 
 	/* 设置正交相机绕 Z 轴旋转（角度制） */
 	void Camera::SetRotation(float rotation)
 	{
-		m_Rotation = rotation;
+		m_ZRoll = rotation;
 
-		const glm::mat4 rotation_mat = glm::rotate(glm::mat4(1.0f), glm::radians(m_Rotation), glm::vec3(0.0f, 0.0f, 1.0f));
+		const glm::mat4 rotation_mat = glm::rotate(glm::mat4(1.0f), glm::radians(m_ZRoll), glm::vec3(0.0f, 0.0f, 1.0f));
 		m_ForwardDirection = glm::normalize(glm::vec3(rotation_mat * glm::vec4(0.0f, 0.0f, -1.0f, 0.0f)));
 		m_UpDirection = glm::normalize(glm::vec3(rotation_mat * glm::vec4(0.0f, 1.0f, 0.0f, 0.0f)));
 		m_RightDirection = glm::normalize(glm::cross(m_ForwardDirection, m_UpDirection));
@@ -105,15 +72,7 @@ namespace Helios
 	{
 		PROFILE_FUNCTION();
 
-		if (m_IsFocus)
-		{
-			m_Position = m_FocalPoint - m_ForwardDirection * m_FocalDistance;
-			m_ViewMatrix = glm::lookAt(m_Position, m_FocalPoint, m_UpDirection);
-		}
-		else
-		{
-			m_ViewMatrix = glm::lookAt(m_Position, m_Position + m_ForwardDirection, m_UpDirection);
-		}
+		m_ViewMatrix = glm::lookAt(m_Position, m_Position + m_ForwardDirection, m_UpDirection);
 	}
 
 

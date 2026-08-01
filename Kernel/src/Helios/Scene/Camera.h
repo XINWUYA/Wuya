@@ -1,7 +1,7 @@
 ﻿#pragma once
 #include <glm/glm.hpp>
 #include "Helios/Renderer/RenderView.h"
-#include "SceneCommon.h"
+#include "SceneObject.h"
 
 namespace Helios
 {
@@ -13,13 +13,11 @@ namespace Helios
 	};
 
 	/* 相机类 */
-	class Camera
+	class Camera : public SceneObject
 	{
 	public:
-		Camera(CameraProjectionType type = CameraProjectionType::Perspective, const std::string& name = "New Camera", float fov = 45.0f, float aspect_ratio = 1.778f, float near = 0.01f, float far = 1000.0f);
+		Camera(CameraProjectionType type = CameraProjectionType::Perspective, float fov = 45.0f, float aspect_ratio = 1.778f, float near_clip = 0.1f, float far_clip = 1000.0f);
 		virtual ~Camera() = default;
-
-		COMPONENT_CLASS(Camera)
 
 		/* 更新时间戳 */
 		virtual void OnUpdate(float delta_time);
@@ -28,15 +26,18 @@ namespace Helios
 		CameraProjectionType GetProjectionType() const { return m_ProjectionType; }
 		void SetProjectionType(CameraProjectionType type);
 
-		/* 相机位置 */
-		const glm::vec3& GetPosition() const { return m_Position; }
-		void SetPosition(const glm::vec3& position);
+		/* 相机位置（复用 SceneObject 基类存储） */
+		void SetPosition(const glm::vec3& position) override;
 
 		/* 根据世界变换矩阵更新相机位置、朝向和视图矩阵 */
-		void SetTransform(const glm::mat4& transform);
+		void SetTransform(const glm::mat4& transform) override;
 
-		/* 相机旋转（正交相机绕 Z 轴，角度制） */
-		float GetRotation() const { return m_Rotation; }
+		/* 相机旋转：基类以欧拉角(vec3, 弧度)表达，相机仅取绕 Z 轴的 roll 角（角度制） */
+		glm::vec3 GetRotation() const override { return glm::vec3(0.0f, 0.0f, glm::radians(m_ZRoll)); }
+		void SetRotation(const glm::vec3& rotation) override { SetRotation(glm::degrees(rotation.z)); }
+
+		/* 相机旋转（绕 Z 轴，角度制）—— 相机专用接口 */
+		float GetRotationZ() const { return m_ZRoll; }
 		void SetRotation(float rotation);
 
 		/* 相机方向 */
@@ -64,16 +65,6 @@ namespace Helios
 		float GetHeightSize() const { return m_HeightSize; }
 		void SetHeightSize(float height_size) { m_HeightSize = height_size; m_IsDirty = true; }
 
-		/* 聚焦模式 */
-		bool IsFocus() const { return m_IsFocus; }
-		void SetFocus(bool focus);
-
-		const glm::vec3& GetFocalPoint() const { return m_FocalPoint; }
-		void SetFocalPoint(const glm::vec3& focal_point) { m_FocalPoint = focal_point; m_IsDirty = true; }
-
-		float GetFocalDistance() const { return m_FocalDistance; }
-		void SetFocalDistance(float distance) { m_FocalDistance = distance; m_IsDirty = true; }
-
 		/* 矩阵信息 */
 		const glm::mat4& GetViewMatrix() const { return m_ViewMatrix; }
 		const glm::mat4& GetProjectionMatrix() const { return m_ProjectionMatrix; }
@@ -93,9 +84,6 @@ namespace Helios
 		/* 更新相机投影矩阵 */
 		virtual void UpdateProjectionMatrix();
 
-		/* 标记名 */
-		std::string m_DebugName{ "Unnamed Camera" };
-
 		/* 相机类型 */
 		CameraProjectionType m_ProjectionType{ CameraProjectionType::Perspective };
 
@@ -105,9 +93,6 @@ namespace Helios
 		float m_NearClip{ 0.1f };
 		float m_FarClip{ 1000.0f };
 
-		/* 相机位置 */
-		glm::vec3 m_Position{ 0.0f, 0.0f, 0.0f };
-
 		/* 相机朝向 */
 		glm::vec3 m_UpDirection{ 0.0f, 1.0f, 0.0f };
 		glm::vec3 m_RightDirection{ 1.0f, 0.0f, 0.0f };
@@ -116,13 +101,8 @@ namespace Helios
 		/* 正交相机区域 */
 		float m_HeightSize{ 10.0f };
 
-		/* 相机旋转（正交相机绕 Z 轴，角度制） */
-		float m_Rotation{ 0.0f };
-
-		/* 聚焦模式 */
-		bool m_IsFocus{ false };
-		float m_FocalDistance{ 10.0f };
-		glm::vec3 m_FocalPoint{ 0.0f, 0.0f, 0.0f };
+		/* 相机旋转（绕 Z 轴 roll 角，角度制） */
+		float m_ZRoll{ 0.0f };
 
 		/* 相机矩阵 */
 		glm::mat4 m_ViewMatrix{ glm::mat4(1.0f) };

@@ -1,10 +1,11 @@
 ﻿#include "Pch.h"
 #include "RenderView.h"
 #include "FrameGraph/FrameGraph.h"
-#include "Helios/Scene/Scene.h"
-#include "Helios/Scene/Components.h"
-#include "Helios/Scene/Material.h"
-#include "Helios/Scene/ShadowMap.h"
+#include <Helios/Scene/Scene.h>
+#include <Helios/Scene/Components.h>
+#include <Helios/Scene/Material.h>
+#include <Helios/Scene/ShadowMap.h>
+#include <Helios/Scene/Light.h>
 
 namespace Helios
 {
@@ -70,6 +71,25 @@ namespace Helios
 		m_pFrameGraph->Build();
 	}
 
+	/* 重置FrameGraph，并自动根据场景中光源是否开启ShadowCast来注入ShadowPass */
+	void RenderView::ResetFrameGraph(const SharedPtr<Scene>& scene)
+	{
+		PROFILE_FUNCTION();
+
+		/* 绑定所属Scene，使后续PrepareLights能收集到光源 */
+		SetOwnerScene(scene);
+
+		/* 重置FrameGraph */
+		m_pFrameGraph->Reset();
+
+		/* 收集光源信息并准备阴影（含纹理描述与VP矩阵） */
+		PrepareLights();
+
+		/* 自动根据光源是否开启ShadowCast来注入ShadowPass */
+		if (m_IsHasShadowCast)
+			m_pShadowMapManager->AddShadowPass(*m_pFrameGraph, scene, this);
+	}
+
 	/* 执行渲染当前View */
 	void RenderView::Execute()
 	{
@@ -77,8 +97,11 @@ namespace Helios
 
 		/* 收集当前RenderView可见的对象 */
 		PrepareVisibleObjects();
-		/* 收集光源信息 */
-		PrepareLights();
+
+		/* 每帧依据当前方向光方向与相机，重算级联阴影的视图投影矩阵与分割距离，
+		 * 使方向光旋转 / 相机移动能实时反映到阴影投影（矩阵计算收口于 ShadowMapManager）。 */
+		if (m_IsHasShadowCast)
+			m_pShadowMapManager->UpdateCascadeMatrices(GetCullingCamera());
 
 		m_pFrameGraph->Execute();
 	}
@@ -122,7 +145,7 @@ namespace Helios
 
 		m_ValidLights.clear();
 		m_IsHasShadowCast = false;
-		m_pShadowMapManager.reset();
+		m_pShadowMapManager->Clear();
 
 		/* 收集所有光源 */
 		const auto owner_scene = m_pOwnerScene.lock();
@@ -133,24 +156,19 @@ namespace Helios
 		for (auto& entity : light_entity_view)
 		{
 			auto [transform_component, light_component] = light_entity_view.get<TransformComponent, LightComponent>(entity);
-
-			const glm::vec3 light_dir = transform_component.GetTransform() * glm::vec4(0.0f, 1.0f, 0.0f, 1.0f);
-			const auto& light_color = light_component.m_Light->GetColor();
-			const bool cast_shadow = light_component.m_Light->IsCastShadow();
-			m_ValidLights.emplace_back(static_cast<uint32_t>(light_component.m_Type), 
-				glm::vec4(light_color.r, light_color.g, light_color.b, light_component.m_Light->GetIntensity()), 
-				light_dir, 
-				transform_component.m_Position, 
-				cast_shadow);
-
-			if (cast_shadow)
+			if (light_component.m_Light)
 			{
-				m_pShadowMapManager->AddShadowMap(light_component.m_Light);
-				m_IsHasShadowCast = true;
+				m_ValidLights.emplace_back(light_component.m_Light);
+
+				if (light_component.m_Light->IsCastShadow())
+				{
+					m_pShadowMapManager->RegisterShadowLight(light_component.m_Light);
+					m_IsHasShadowCast = true;
+				}
 			}
 		}
 
 		if (m_IsHasShadowCast)
-			m_pShadowMapManager->PrepareAllShadowMaps(owner_scene);
+			m_pShadowMapManager->PrepareForShadowMaps(owner_scene, GetCullingCamera());
 	}
 }

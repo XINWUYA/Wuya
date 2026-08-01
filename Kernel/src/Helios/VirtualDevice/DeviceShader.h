@@ -4,6 +4,33 @@
 
 namespace Helios
 {
+	/* Shader反射数据：从Shader中`layout(binding = X) uniform sampler2D u_xxx; ` 反射出真实的绑定点  */
+	struct ShaderReflectionData
+	{
+		/* Sampler变量名->binding */
+		std::unordered_map<std::string, uint32_t> SamplerBindings{};
+		/* Sampler变量名->MetalSamplerState索引（[[sampler(N)]]），仅Metal后端使用 */
+		std::unordered_map<std::string, uint32_t> SamplerStateBindings{};
+
+		void Clear()
+		{
+			SamplerBindings.clear();
+			SamplerStateBindings.clear();
+		}
+
+		[[nodiscard]] int FindSamplerBinding(const std::string& name) const
+		{
+			const auto it = SamplerBindings.find(name);
+			return it == SamplerBindings.end() ? -1 : static_cast<int>(it->second);
+		}
+
+		[[nodiscard]] int FindSamplerStateBinding(const std::string& name) const
+		{
+			const auto it = SamplerStateBindings.find(name);
+			return it == SamplerStateBindings.end() ? -1 : static_cast<int>(it->second);
+		}
+	};
+
 	/* Shader基类 */
 	class DeviceShader
 	{
@@ -19,6 +46,19 @@ namespace Helios
 		virtual void Unbind() = 0;
 
 		virtual int GetUniformLocation(const std::string& name) = 0;
+
+		/* 获取 sampler 在 Shader 中声明的绑定点（layout(binding = X)）
+		 *  - OpenGL：texture unit
+		 *  - Metal ：[[texture(N)]] 的索引
+		 * 未在 Shader 中找到该 sampler 时返回 -1。 */
+		[[nodiscard]] virtual int GetUniformBinding(const std::string& name) const
+		{
+			return m_Reflection.FindSamplerBinding(name);
+		}
+
+		/* Shader 反射数据 */
+		[[nodiscard]] const ShaderReflectionData& GetReflectionData() const { return m_Reflection; }
+
 		/* 设置Uniform参数 */
 		virtual void SetInt(const std::string& name, int value) = 0;
 		virtual void SetIntArray(const std::string& name, int* values, uint32_t count) = 0;
@@ -36,8 +76,13 @@ namespace Helios
 		static SharedPtr<DeviceShader> Create(const std::string& name, const std::string& vertex_src, const std::string& pixel_src);
 
 	protected:
+		void ReflectFromSPIRV(const std::vector<uint32_t>& spirv);
+		void ReflectFromGLSLSource(const std::string& source);
+
 		/* 文件路径 */
 		std::string m_Path{};
+		/* Shader 反射数据（由各后端在编译/链接阶段填充） */
+		ShaderReflectionData m_Reflection{};
 	};
 }
 

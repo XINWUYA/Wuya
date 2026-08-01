@@ -1,4 +1,4 @@
-#type vertex
+﻿#type vertex
 #version 410 core
 
 struct SVextex2Frag
@@ -11,7 +11,7 @@ layout(location = 0) out SVextex2Frag vert2frag;
 
 void main()
 {
-	gl_Position = a_Position; //vec4(a_Position.xy, a_Position.z * 0.5f + 0.5f, 1.0f);
+	gl_Position = a_Position;
 	gl_Position.z = a_Position.z * 0.5f + 0.5f;
 
 	vert2frag.TexCoord = a_Position.xy * 0.5f + 0.5f;
@@ -25,6 +25,7 @@ void main()
 #include "builtin/GBuffer.glsl"
 #include "builtin/Math.glsl"
 #include "builtin/BRDF.glsl"
+#include "builtin/ShadowUtils.glsl"
 
 struct SVextex2Frag
 {
@@ -34,21 +35,24 @@ struct SVextex2Frag
 layout(location = 0) out vec4 OutFragColor;
 layout(location = 0) in SVextex2Frag vert2frag;
 
+layout(binding = 1) uniform sampler2DArray u_ShadowMap;
+
 void main()
 {
 	SGBufferData gbuffer;
 	CalculateGBuffer(gbuffer, vert2frag.TexCoord);
-	
+
 	vec3 l = -normalize(u_LightDir);
 	vec3 v = normalize(u_ViewPos - gbuffer.WorldPosition);
 
-	// Direct Lighting
+	vec3 view_pos = (u_ViewMat * vec4(gbuffer.WorldPosition, 1.0f)).xyz;
+
+	float shadow = CalculateShadow(u_ShadowMap, gbuffer.WorldPosition, view_pos);
+
 	vec3 lighting_result = max(vec3(0.0f), BRDF(l, v, gbuffer.WorldNormal, gbuffer.Metallic, gbuffer.Roughness, gbuffer.Albedo)) * u_ColorIntensity.rgb * u_ColorIntensity.a;
-	// Ambient
+	lighting_result *= (1.0f - shadow * 0.8f);
 	lighting_result += max(vec3(0.0f), gbuffer.Ambient * gbuffer.Albedo * gbuffer.AO);
-	// Emissive
 	lighting_result += gbuffer.Emission;
 
-	//OutFragColor = vec4(gbuffer.WorldNormal, 1.0f);
 	OutFragColor = vec4(lighting_result, 1.0f);
 }

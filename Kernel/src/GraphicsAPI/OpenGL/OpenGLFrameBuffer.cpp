@@ -66,12 +66,16 @@ namespace Helios
 		glDeleteFramebuffers(1, &m_FrameBufferId);
 	}
 
-	void OpenGLFrameBuffer::Bind()
+	void OpenGLFrameBuffer::Bind(const FrameBufferBindInfo& bind_info)
 	{
 		PROFILE_FUNCTION();
 
 		glBindFramebuffer(GL_FRAMEBUFFER, m_FrameBufferId);
 		glViewport(m_FrameBufferDesc.ViewportRegion.MinX, m_FrameBufferDesc.ViewportRegion.MinY, (GLsizei)m_FrameBufferDesc.ViewportRegion.Width, (GLsizei)m_FrameBufferDesc.ViewportRegion.Height);
+
+		/* Layered模式：将指定附件重新绑定到Texture2DArray/CubeMap的指定层/面：用于CSM多Cascade渲染到同一数组纹理的不同切片，或分层渲染到Color数组纹理，或烘焙到CubeMap各面 */
+		if (bind_info.Mode == FrameBufferBindMode::Layered)
+			SetAttachmentLayer(bind_info.TargetAttachment, bind_info.ColorIndex, bind_info.LayerIndex);
 	}
 
 	void OpenGLFrameBuffer::Unbind()
@@ -294,5 +298,62 @@ namespace Helios
 		}
 #endif
 		CHECK_GL_FRAMEBUFFER_STATUS(GL_FRAMEBUFFER);
+	}
+
+	void OpenGLFrameBuffer::SetAttachmentLayer(FrameBufferAttachment attachment, uint16_t attachment_index, uint16_t layer)
+	{
+		PROFILE_FUNCTION();
+
+		/* 解析目标附件的 RenderBufferInfo 与 GL attachment 枚举 */
+		const RenderBufferInfo* target_info{ nullptr };
+		GLenum gl_attachment{ GL_NONE };
+		switch (attachment)
+		{
+		case FrameBufferAttachment::Depth:
+			target_info = &m_FrameBufferDesc.DepthRenderBuffer;
+			gl_attachment = GL_DEPTH_ATTACHMENT;
+			break;
+		case FrameBufferAttachment::Stencil:
+			target_info = &m_FrameBufferDesc.StencilRenderBuffer;
+			gl_attachment = GL_STENCIL_ATTACHMENT;
+			break;
+		case FrameBufferAttachment::Color:
+			if (attachment_index >= m_FrameBufferDesc.ColorRenderBuffers.size())
+				return;
+			target_info = &m_FrameBufferDesc.ColorRenderBuffers[attachment_index];
+			gl_attachment = GL_COLOR_ATTACHMENT0 + attachment_index;
+			break;
+		default:
+			return;
+		}
+
+		if (!target_info || !target_info->RenderTarget)
+			return;
+
+		const auto& texture = std::dynamic_pointer_cast<OpenGLTexture>(target_info->RenderTarget);
+		if (!texture)
+			return;
+
+		/* 按纹理目标选择层绑定方式：
+		 * - Texture2DArray：layer 为数组切片，使用 glFramebufferTextureLayer
+		 * - CubeMap：layer 为 face 索引（0~5），使用 glFramebufferTexture2D + CUBE_MAP_POSITIVE_X + face
+		 *   典型场景：烘焙天空盒到 CubeMap 的 6 个面。 */
+		if (texture->m_TextureTarget == GL_TEXTURE_2D_ARRAY)
+		{
+			glFramebufferTextureLayer(GL_FRAMEBUFFER, gl_attachment, texture->GetTextureID(), target_info->Level, layer);
+		}
+		else if (texture->m_TextureTarget == GL_TEXTURE_CUBE_MAP)
+		{
+			if (layer >= 6)
+				return;
+			glFramebufferTexture2D(GL_FRAMEBUFFER, gl_attachment, GL_TEXTURE_CUBE_MAP_POSITIVE_X + layer, texture->GetTextureID(), target_info->Level);
+		}
+		else
+		{
+			return;
+		}
+
+		CHECK_GL_FRAMEBUFFER_STATUS(GL_FRAMEBUFFER);
+		CHECK_GL_ERROR;
 	}
 }

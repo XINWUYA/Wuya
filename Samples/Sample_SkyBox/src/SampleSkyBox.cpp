@@ -1,4 +1,4 @@
-﻿#include "SampleSkyBox.h"
+#include "SampleSkyBox.h"
 #include <imgui.h>
 #include <Helios/Scene/Material.h>
 #include "SampleCameraController.h"
@@ -78,11 +78,11 @@ void SampleSkyBox::OnAttached()
 
 	auto shader = ShaderAssetManager::Instance().GetOrLoad(ABSOLUTE_PATH("Shaders/SkyBox.glsl"));
 	auto material = Material::Create(shader);
-	material->SetTexture("u_SkyTex", sky_texture, 0);
+	material->SetTexture("u_SkyTex", sky_texture);
 	RenderRasterState raster_state;
 	raster_state.EnableDepthWrite = true;
 	raster_state.DepthCompareFunc = CompareFunc::LessEqual;
-	raster_state.CullMode = CullMode::Cull_None;
+	raster_state.CullMode = CullMode::Cull_Front;
 	material->SetRasterState(raster_state);
 
 	auto segment = MeshSegment::Create("SkyBoxMesh", vertex_array, material);
@@ -99,7 +99,6 @@ void SampleSkyBox::OnAttached()
 
 	auto camera_entity = m_pScene->CreateEntity("MainCamera");
 	auto& camera_component = camera_entity.AddComponent<CameraComponent>();
-	m_pCamera = camera_component.m_Camera;
 	m_pCameraController = CreateSharedPtr<SampleCameraController>(camera_entity);
 	m_pCameraController->SetFocus(true);
 	m_pCameraController->SetViewportRegion({ 0,0,window.GetWidth(), window.GetHeight() });
@@ -121,13 +120,12 @@ void SampleSkyBox::OnAttached()
 		{
 			builder.AsSideEffect();
 		},
-		[&](const FrameGraphResources& resources, const ScenePassData& data)
+		[&, render_view](const FrameGraphResources& resources, const ScenePassData& data)
 		{
 			auto render_api = Renderer::GetRenderAPI();
 			render_api->PushDebugGroup("ScenePass");
 
 			{
-				auto render_view = m_pCamera->GetRenderView();
 				auto& viewport_region = render_view->GetViewportRegion();
 				render_api->Clear();
 				render_api->SetViewport(0, 0, viewport_region.Width, viewport_region.Height);

@@ -7,7 +7,7 @@
 
 vec3 SrgbToLinear(vec3 color)
 {
-	return pow(color, vec3(2.2));
+	return pow(color, vec3(2.2f));
 }
 
 #endif // MATH_GLSL

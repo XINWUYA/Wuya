@@ -54,6 +54,7 @@ set(INCLUDE_DIRS
     magic_enum    ${CMAKE_SOURCE_DIR}/Libraries/ThirdParty/magic_enum/include
     assimp        ${CMAKE_SOURCE_DIR}/Libraries/ThirdParty/assimp/include
     tracy         ${CMAKE_SOURCE_DIR}/Libraries/ThirdParty/tracy/public
+    spirv-cross   ${CMAKE_SOURCE_DIR}/Libraries/ThirdParty/spirv-cross
 )
 
 if(VULKAN_SDK)
@@ -121,6 +122,7 @@ add_subdirectory(Editor)
 option(BUILD_SAMPLES "Build sample projects" ON)  # Disabled for macOS compatibility
 if(BUILD_SAMPLES)
     add_subdirectory(Samples/Sample_SkyBox)
+    add_subdirectory(Samples/Sample_CSM)
 endif()
 
 # Print configuration summary

@@ -8,6 +8,7 @@
 #include "Camera.h"
 #include "Helios/Renderer/Renderer.h"
 #include "Helios/Renderer/RenderView.h"
+#include "SceneCommon.h"
 
 namespace Helios
 {
@@ -47,22 +48,31 @@ namespace Helios
 	{
 		PROFILE_FUNCTION();
 
-		Renderer::Update();
-
-		/* 同步 TransformComponent 到 CameraComponent */
-		const auto camera_transform_group = m_Registry.group<TransformComponent>(entt::get<CameraComponent>);
-		for (auto [_, transform_component, camera_component] : camera_transform_group.each())
+		/* 统一将 TransformComponent 同步给所有 SceneObject（Model / Light / Camera）。
+		 * 具体变换如何写入由各 SceneObject 重写的 SetTransform 决定（多态）。 */
+		const auto transform_view = m_Registry.view<TransformComponent>();
+		for (auto entity : transform_view)
 		{
-			camera_component.m_Camera->SetTransform(transform_component.GetTransform());
-			camera_component.m_Camera->OnUpdate(delta_time);
+			const auto& transform_component = transform_view.get<TransformComponent>(entity);
+
+			if (auto* model_component = m_Registry.try_get<ModelComponent>(entity); model_component && model_component->m_Model)
+				model_component->m_Model->SetTransform(transform_component.GetTransform());
+
+			if (auto* light_component = m_Registry.try_get<LightComponent>(entity); light_component && light_component->m_Light)
+				light_component->m_Light->SetTransform(transform_component.GetTransform());
+
+			if (auto* camera_component = m_Registry.try_get<CameraComponent>(entity); camera_component && camera_component->m_Camera)
+				camera_component->m_Camera->SetTransform(transform_component.GetTransform());
 		}
 
-		/* 收集RenderView */
+		/* 收集RenderView，并在收集前更新 Camera 的视图/投影矩阵 */
 		m_RenderViews.clear();
 		const auto& camera_entities = m_Registry.view<CameraComponent>();
-		for (auto& entity : camera_entities)
+		for (auto entity : camera_entities)
 		{
-			const auto& camera_component = camera_entities.get<CameraComponent>(entity);
+			auto& camera_component = camera_entities.get<CameraComponent>(entity);
+			camera_component.m_Camera->OnUpdate(delta_time);
+
 			auto* render_view = camera_component.m_Camera->GetRenderView();
 			render_view->SetOwnerScene(shared_from_this());
 			m_RenderViews.emplace_back(render_view);
@@ -87,6 +97,8 @@ namespace Helios
 
 	void Scene::Render()
 	{
+		Renderer::Update();
+
 		/* 绘制所有View */
 		for (const auto& view : m_RenderViews)
 		{

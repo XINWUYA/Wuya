@@ -8,7 +8,7 @@ namespace Helios
 	class Material;
 	class DeviceUniformBuffer;
 	struct VisibleMeshObject;
-	struct ValidLight;
+	class Light;
 	struct MeshPrimitive;
 
 	class Renderer
@@ -37,7 +37,11 @@ namespace Helios
 
 		static void FillObjectUniformBuffer(const VisibleMeshObject& mesh_object);
 
-		static void FillLightUniformBuffer(const ValidLight& valid_light);
+		/* 填充光照UniformBuffer；light_vp_mats 为级联阴影的光照视图投影矩阵数组，
+		 * cascade_splits 为各级联在视图空间的分割距离（远边界） */
+		static void FillLightUniformBuffer(const SharedPtr<Light>& light, const std::vector<glm::mat4>& light_vp_mats, const glm::vec4& cascade_splits);
+		/* 便捷重载：仅填充光源信息，不携带级联 VP 矩阵（用于无阴影/非级联光源） */
+		static void FillLightUniformBuffer(const SharedPtr<Light>& light);
 
 	private:
 		static SharedPtr<RenderAPI> m_pRenderAPI;

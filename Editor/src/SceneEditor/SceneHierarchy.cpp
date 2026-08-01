@@ -327,11 +327,11 @@ namespace Helios
 		ShowComponent<TransformComponent>("Transform", m_SelectedEntity,
 			[](auto& component)
 			{
-				ImGuiExt::DrawVec3ControlUI("Position", component.Position, 0.0f);
-				glm::vec3 rotation = glm::degrees(component.Rotation);
+				ImGuiExt::DrawVec3ControlUI("Position", component.m_Position, 0.0f);
+				glm::vec3 rotation = glm::degrees(component.m_Rotation);
 				ImGuiExt::DrawVec3ControlUI("Rotation", rotation, 0.0f);
-				component.Rotation = glm::radians(rotation);
-				ImGuiExt::DrawVec3ControlUI("Scale", component.Scale, 1.0f);
+				component.m_Rotation = glm::radians(rotation);
+				ImGuiExt::DrawVec3ControlUI("Scale", component.m_Scale, 1.0f);
 
 			});
 	}
@@ -344,8 +344,8 @@ namespace Helios
 		ShowComponent<SpriteComponent>("Sprite", m_SelectedEntity,
 			[](auto& component)
 			{
-				ImGuiExt::DrawColorUI("BaseColor", component.BaseColor);
-				ImGuiExt::DrawTextureUI("Texture", component.Texture, component.TilingFactor);
+				ImGuiExt::DrawColorUI("BaseColor", component.m_BaseColor);
+				ImGuiExt::DrawTextureUI("Texture", component.m_Texture, component.m_TilingFactor);
 			});
 	}
 
@@ -357,8 +357,8 @@ void SceneHierarchy::ShowCameraComponent()
 	ShowComponent<CameraComponent>("Camera", m_SelectedEntity,
 		[](auto& component)
 		{
-			ImGuiExt::DrawCheckboxUI("IsPrimary", component.IsPrimary);
-			ImGuiExt::DrawCheckboxUI("IsFixedAspectRatio", component.IsFixedAspectRatio);
+			ImGuiExt::DrawCheckboxUI("IsPrimary", component.m_IsPrimary);
+			ImGuiExt::DrawCheckboxUI("IsFixedAspectRatio", component.m_IsFixedAspectRatio);
 			auto& camera = component.m_Camera;
 			int projection_idx = static_cast<int>(camera->GetProjectionType());
 			ImGuiExt::DrawComboUI("ProjectionType", GetEnumNames<CameraProjectionType>(), projection_idx,
@@ -409,7 +409,7 @@ void SceneHierarchy::ShowCameraComponent()
 		ShowComponent<ModelComponent>("Model", m_SelectedEntity,
 			[](auto& component)
 			{
-				auto& model = component.Model;
+				auto& model = component.m_Model;
 
 				if (model)
 				{
@@ -448,7 +448,7 @@ void SceneHierarchy::ShowCameraComponent()
 		ShowComponent<LightComponent>("Light", m_SelectedEntity,
 			[](auto& component)
 			{
-				SharedPtr<Light>& light = component.Light;
+				SharedPtr<Light>& light = component.m_Light;
 				if (!light)
 					return;
 

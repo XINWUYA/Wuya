@@ -13,7 +13,7 @@ namespace Helios
         MetalFrameBuffer(const std::string& name, const FrameBufferDesc& desc);
         ~MetalFrameBuffer() override;
 
-        void Bind() override;
+        void Bind(const FrameBufferBindInfo& bind_info = {}) override;
         void Unbind() override;
 
         void Resize(uint32_t width, uint32_t height) override;

@@ -34,8 +34,8 @@ namespace Helios
 
 			/* 创建纹理 */
 			glGenTextures(1, &m_TextureId);
-			glBindTexture(m_TextureTarget, m_TextureId);
 			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(m_TextureTarget, m_TextureId);
 
 			/* 分配存储 */
 			switch (m_TextureTarget)
@@ -104,6 +104,16 @@ namespace Helios
 			default:
 				break;
 			}
+
+			/* 设置采样参数：深度纹理不可被线性过滤须显式设为GL_NEAREST；其余格式保留GL_LINEAR */
+			const bool is_depth = (m_TextureDesc.Format == TextureFormat::Depth16 || m_TextureDesc.Format == TextureFormat::Depth24 || m_TextureDesc.Format == TextureFormat::Depth32);
+			const GLenum filter = is_depth ? GL_NEAREST : GL_LINEAR;
+			glTexParameteri(m_TextureTarget, GL_TEXTURE_MIN_FILTER, filter);
+			glTexParameteri(m_TextureTarget, GL_TEXTURE_MAG_FILTER, filter);
+			glTexParameteri(m_TextureTarget, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+			glTexParameteri(m_TextureTarget, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+			glTexParameteri(m_TextureTarget, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+
 			CHECK_GL_ERROR;
 		}
 		else
