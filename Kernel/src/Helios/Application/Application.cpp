@@ -74,7 +74,7 @@ namespace Helios
 					for (const auto& layer : m_LayerStack)
 						layer->OnImGuiRender();
 				}
-				m_pImGuiLayer->PrepareRenderData();
+				m_pImGuiLayer->End();
 
 				/* 2. 执行场景FrameGraph：其末尾的ImGuiPass会消费DrawData，
 				 *    并渲染到主窗口默认RT（Metal drawable / OpenGL default FBO）。 */

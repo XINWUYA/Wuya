@@ -276,7 +276,7 @@ namespace Helios
 	}
 
 	/* 清空已收集的阴影贴图与纹理，保留Manager对象本身 */
-	void ShadowMapManager::Clear()
+	void ShadowMapManager::Reset()
 	{
 		m_CascadeShadowMaps.clear();
 		m_PunctualShadowMaps.clear();

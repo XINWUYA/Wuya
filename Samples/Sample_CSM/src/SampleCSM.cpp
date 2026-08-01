@@ -1,9 +1,6 @@
 ﻿#include "SampleCSM.h"
 #include <imgui.h>
-
 #include <Helios/Scene/Material.h>
-#include <Helios/Scene/ShadowMap.h>
-#include <Helios/Renderer/Renderer.h>
 #include "SampleCameraController.h"
 
 namespace Helios
@@ -34,7 +31,7 @@ void SampleCSM::OnAttached()
 
 		const auto shader = ShaderAssetManager::Instance().GetOrLoad(ABSOLUTE_PATH("Shaders/SkyBox.glsl"));
 		const auto material = Material::Create(shader);
-		material->SetTexture("u_SkyTex", sky_texture);
+		material->SetParameters(ParamType::Texture, "u_SkyTex", sky_texture);
 		material->SetRasterState(raster_state);
 
 		auto entity = m_pScene->CreateEntity("SkyBox");
@@ -73,7 +70,6 @@ void SampleCSM::OnAttached()
 		transform_component.m_Position = glm::vec3(0.0f, 0.0f, 0.0f);
 		center_pos = (model_component.m_Model->GetAABBMin() + model_component.m_Model->GetAABBMax()) * 0.5f;
 	}
-
 
 	/* 向场景中添加方向光 */
 	{
@@ -114,66 +110,7 @@ void SampleCSM::OnAttached()
 
 		auto render_view = camera_component.m_Camera->GetRenderView();
 		render_view->SetViewportRegion({ 0,0, window.GetWidth(), window.GetHeight() });
-
-		/* 为RenderView定制FrameGraph - 延迟渲染管线 */
-		auto& frame_graph = render_view->GetFrameGraph();
-		render_view->ResetFrameGraph(m_pScene);
-
-		/* 纹理描述 */
-		FrameGraphTexture::Descriptor color_target_desc;
-		color_target_desc.Width = window.GetWidth();
-		color_target_desc.Height = window.GetHeight();
-		color_target_desc.TextureFormat = TextureFormat::RGBA8;
-
-		FrameGraphTexture::Descriptor depth_target_desc;
-		depth_target_desc.Width = window.GetWidth();
-		depth_target_desc.Height = window.GetHeight();
-		depth_target_desc.TextureFormat = TextureFormat::Depth32;
-
-		/* Scene Pass */
-		struct ScenePassData
-		{
-			FrameGraphResourceHandleTyped<FrameGraphTexture> ShadowMapHandle;
-		};
-
-		auto gbuffer_pass = frame_graph->AddPass<ScenePassData>("ScenePass",
-			[&](FrameGraphBuilder& builder, ScenePassData& data)
-			{
-				data.ShadowMapHandle = frame_graph->GetBlackboard().GetResourceHandle<FrameGraphTexture>("ShadowMapHandle");
-				builder.BindInputResource(data.ShadowMapHandle, FrameGraphTexture::Usage::Sampleable);
-
-				builder.AsSideEffect();
-			},
-			[&, render_view](const FrameGraphResources& resources, const ScenePassData& data)
-			{
-				auto render_api = Renderer::GetRenderAPI();
-				{
-					render_api->Clear();
-					auto& viewport_region = render_view->GetViewportRegion();
-					render_api->SetViewport(0, 0, viewport_region.Width, viewport_region.Height);
-					render_api->SetScissor(0, 0, viewport_region.Width, viewport_region.Height);
-
-					for (const auto& mesh_object : render_view->GetVisibleMeshObjects())
-					{
-						Renderer::FillObjectUniformBuffer(mesh_object);
-						auto& material = mesh_object.MeshSegment->GetMaterial();
-						/* 指定阴影图 */
-						material->SetParameters(ParamType::Texture, "u_ShadowMap", resources.Get(data.ShadowMapHandle).Texture);
-
-						Renderer::Submit(material, mesh_object.MeshSegment->GetMeshPrimitive());
-					}
-				}
-			}
-		);
-
-		/* ImGui Pass */
-		if (const auto& imgui_layer = Application::Instance()->GetImGuiLayer())
-		{
-			imgui_layer->AddFrameGraphPass(*frame_graph);
-		}
-
-		// frame_graph->ExportGraphviz("framegraph.txt");
-		render_view->Prepare();
+		render_view->SetOwnerScene(m_pScene);
 	}
 }
 

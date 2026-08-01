@@ -37,12 +37,8 @@ namespace Helios
 	class RenderView
 	{
 	public:
-		RenderView(std::string name, Camera* owner_camera);
+		RenderView(Camera* owner_camera);
 		~RenderView();
-
-		/* 设置名称 */
-		void SetDebugName(const std::string& name) { m_DebugName = name; }
-		[[nodiscard]] const std::string& GetDebugName() const { return m_DebugName; }
 
 		/* 获取裁剪相机 */
 		[[nodiscard]] const Camera* GetCullingCamera() const { return m_pOwnerCamera; }
@@ -79,11 +75,6 @@ namespace Helios
 		/* 准备一帧的RenderView数据 */
 		void Prepare();
 
-		/* 重置FrameGraph，并自动根据场景中光源是否开启ShadowCast来注入ShadowPass
-		 * 应在Sample自定义各Pass之前调用，以保证ShadowPass位于依赖它的Pass之前
-		 */
-		void ResetFrameGraph(const SharedPtr<Scene>& scene);
-
 		/* 执行渲染当前View */
 		void Execute();
 
@@ -98,9 +89,10 @@ namespace Helios
 		void PrepareVisibleObjects();
 		/* 准备光源信息 */
 		void PrepareLights();
+		/* 更新FrameGraph */
+		void UpdateFrameGraph();
 
-		/* RenderView名 */
-		std::string m_DebugName{ "Unnamed RenderView" };
+
 		/* 视口区域 */
 		ViewportRegion m_ViewportRegion{};
 		/* 是否启用视锥体剔除 */

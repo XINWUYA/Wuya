@@ -71,8 +71,10 @@ namespace Helios
         UpdateProjectionMatrix();
     }
 
-    void ImGuiRenderer::RenderDrawData(ImDrawData* draw_data)
+    void ImGuiRenderer::RenderDrawData()
     {
+        ImDrawData* draw_data = ImGui::GetDrawData();
+
         if (!draw_data || draw_data->DisplaySize.x <= 0 || draw_data->DisplaySize.y <= 0)
             return;
 

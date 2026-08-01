@@ -8,150 +8,53 @@ namespace Helios
 
 void SampleSkyBox::OnAttached()
 {
-	// Cube vertices
-	const float vertices[] = {
-		-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
-	     0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
-	     0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-	     0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-	    -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-	    -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
-
-	    -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-	     0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-	     0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-	     0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-	    -0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
-	    -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-
-	    -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-	    -0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-	    -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-	    -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-	    -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-	    -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-
-	     0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-	     0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-	     0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-	     0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-	     0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-	     0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-
-	    -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-	     0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
-	     0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-	     0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-	    -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-	    -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-
-	    -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-	     0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-	     0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-	     0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-	    -0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
-	    -0.5f,  0.5f, -0.5f,  0.0f, 1.0f
-	};
-
-	VertexBufferLayout vertex_buffer_layout = {
-		{ "a_Position", BufferDataType::Float3 },
-		{ "a_TexCoord", BufferDataType::Float2 }
-	};
-
-	SharedPtr<DeviceVertexBuffer> vertex_buffer = DeviceVertexBuffer::Create(vertices, sizeof(vertices));
-	vertex_buffer->SetLayout(vertex_buffer_layout);
-
-	auto vertex_array = DeviceVertexArray::Create();
-	vertex_array->AddVertexBuffer(vertex_buffer);
-
-	TextureLoadConfig load_config{
-		.IsFlipV=true,
-		.IsGenMips=false,
-		.IsHdr=true,
-		.IsSrgb=false,
-		.SamplerType=SamplerType::Sampler2D,
-		.SamplerWrapMode=SamplerWrapMode::ClampToEdge,
-		.SamplerMinFilter=SamplerMinFilter::Linear,
-		.SamplerMagFilter=SamplerMagFilter::Linear
-	};
-	auto sky_texture = DeviceTexture::Create(ABSOLUTE_PATH("Textures/drakensberg_solitary_mountain_4k.hdr"), load_config);
-
-	auto shader = ShaderAssetManager::Instance().GetOrLoad(ABSOLUTE_PATH("Shaders/SkyBox.glsl"));
-	auto material = Material::Create(shader);
-	material->SetTexture("u_SkyTex", sky_texture);
-	RenderRasterState raster_state;
-	raster_state.EnableDepthWrite = true;
-	raster_state.DepthCompareFunc = CompareFunc::LessEqual;
-	raster_state.CullMode = CullMode::Cull_Front;
-	material->SetRasterState(raster_state);
-
-	auto segment = MeshSegment::Create("SkyBoxMesh", vertex_array, material);
-
-	auto skybox = Model::Create(BuiltinModelType::Sphere, material);
-	// skybox->AddMeshSegment(segment);
-
 	m_pScene = CreateSharedPtr<Scene>();
-	auto model_entity = m_pScene->CreateEntity("SkyBox");
-	auto& model_component = model_entity.AddComponent<ModelComponent>();
-	model_component.m_Model = skybox;
+	
+	/* 向场景中添加SkyBox */
+	{
+		TextureLoadConfig load_config{
+			.IsFlipV = true,
+			.IsGenMips = false,
+			.IsHdr = true,
+			.IsSrgb = false,
+			.SamplerType = SamplerType::Sampler2D,
+			.SamplerWrapMode = SamplerWrapMode::ClampToEdge,
+			.SamplerMinFilter = SamplerMinFilter::Linear,
+			.SamplerMagFilter = SamplerMagFilter::Linear
+		};
+		auto sky_texture = DeviceTexture::Create(ABSOLUTE_PATH("Textures/drakensberg_solitary_mountain_4k.hdr"), load_config);
+
+		RenderRasterState raster_state;
+		raster_state.EnableDepthWrite = true;
+		raster_state.DepthCompareFunc = CompareFunc::LessEqual;
+		raster_state.CullMode = CullMode::Cull_Front;
+
+		auto shader = ShaderAssetManager::Instance().GetOrLoad(ABSOLUTE_PATH("Shaders/SkyBox.glsl"));
+		auto material = Material::Create(shader);
+		material->SetParameters(ParamType::Texture, "u_SkyTex", sky_texture);
+		material->SetRasterState(raster_state);
+
+		auto skybox = Model::Create(BuiltinModelType::Sphere, material);
+
+		auto model_entity = m_pScene->CreateEntity("SkyBox");
+		auto& model_component = model_entity.AddComponent<ModelComponent>();
+		model_component.m_Model = skybox;
+	}
 
 	auto& window = Application::Instance()->GetWindow();
 
-	auto camera_entity = m_pScene->CreateEntity("MainCamera");
-	auto& camera_component = camera_entity.AddComponent<CameraComponent>();
-	m_pCameraController = CreateSharedPtr<SampleCameraController>(camera_entity);
-	m_pCameraController->SetFocus(true);
-	m_pCameraController->SetViewportRegion({ 0,0,window.GetWidth(), window.GetHeight() });
-
-	auto render_view = camera_component.m_Camera->GetRenderView();
-	render_view->SetViewportRegion({ 0,0, window.GetWidth(), window.GetHeight() });
-
-
-	auto& frame_graph = render_view->GetFrameGraph();
-	frame_graph->Reset();
-
-	/* Scene Pass */
-	struct ScenePassData
+	/* 向场景中添加相机 */
 	{
-	};
+		auto camera_entity = m_pScene->CreateEntity("MainCamera");
+		auto& camera_component = camera_entity.AddComponent<CameraComponent>();
+		m_pCameraController = CreateSharedPtr<SampleCameraController>(camera_entity);
+		m_pCameraController->SetFocus(true);
+		m_pCameraController->SetViewportRegion({ 0,0,window.GetWidth(), window.GetHeight() });
 
-	auto scene_pass = frame_graph->AddPass<ScenePassData>("ScenePass",
-		[&](FrameGraphBuilder& builder, ScenePassData& data)
-		{
-			builder.AsSideEffect();
-		},
-		[&, render_view](const FrameGraphResources& resources, const ScenePassData& data)
-		{
-			auto render_api = Renderer::GetRenderAPI();
-			render_api->PushDebugGroup("ScenePass");
-
-			{
-				auto& viewport_region = render_view->GetViewportRegion();
-				render_api->Clear();
-				render_api->SetViewport(0, 0, viewport_region.Width, viewport_region.Height);
-				render_api->SetScissor(0, 0, viewport_region.Width, viewport_region.Height);
-
-				for (const auto& mesh_object : render_view->GetVisibleMeshObjects())
-				{
-					/* Fill object uniform buffer */
-					Renderer::FillObjectUniformBuffer(mesh_object);
-
-					auto& material = mesh_object.MeshSegment->GetMaterial();
-					Renderer::Submit(material, mesh_object.MeshSegment->GetMeshPrimitive());
-				}
-			}
-
-			render_api->PopDebugGroup();
-		});
-
-	/* ImGui Pass */
-	if (const auto& imgui_layer = Application::Instance()->GetImGuiLayer())
-	{
-		imgui_layer->AddFrameGraphPass(*frame_graph);
+		auto render_view = camera_component.m_Camera->GetRenderView();
+		render_view->SetViewportRegion({ 0,0, window.GetWidth(), window.GetHeight() });
+		render_view->SetOwnerScene(m_pScene);
 	}
-
-	// frame_graph->ExportGraphviz("framegraph.txt");
-	render_view->Prepare();
 }
 
 void SampleSkyBox::OnDetached()
@@ -176,8 +79,5 @@ void SampleSkyBox::OnImGuiRender()
 	ImGui::Text("Sample SkyBox: Show SkyBox.");
 	ImGui::Text("- Alt + Mouse Left: Rotate.");
 	ImGui::End();
-
-	/* 若当前ImGui窗口不是主窗口，应阻塞事件传递 */
-	Application::Instance()->GetImGuiLayer()->BlockEvents(!ImGui::IsWindowFocused() && !ImGui::IsWindowHovered());
 }
 }

@@ -41,7 +41,7 @@ namespace Helios
         /* 开始新帧 - 更便显示尺寸等 */
         void NewFrame(float delta_time);
         /* 处理ImGui绘制数据并渲染 */
-        void RenderDrawData(ImDrawData* draw_data);
+        void RenderDrawData();
 
         /* 设置显示尺寸 */
         void SetDisplaySize(int width, int height, float scale_x = 1.0f, float scale_y = 1.0f);

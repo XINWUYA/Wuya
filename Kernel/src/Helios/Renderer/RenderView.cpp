@@ -6,15 +6,16 @@
 #include <Helios/Scene/Material.h>
 #include <Helios/Scene/ShadowMap.h>
 #include <Helios/Scene/Light.h>
+#include <Helios/Renderer/RenderPasses/ScenePass.h>
 
 namespace Helios
 {
-	RenderView::RenderView(std::string name, Camera* owner_camera)
-		: m_DebugName(std::move(name)), m_pOwnerCamera(owner_camera)
+	RenderView::RenderView(Camera* owner_camera)
+		: m_pOwnerCamera(owner_camera)
 	{
 		PROFILE_FUNCTION();
 
-		m_pFrameGraph = CreateSharedPtr<FrameGraph>(m_DebugName + "_FrameGraph");
+		m_pFrameGraph = CreateSharedPtr<FrameGraph>(m_pOwnerCamera->GetDebugName() + "_FrameGraph");
 		m_pShadowMapManager = CreateSharedPtr<ShadowMapManager>();
 	}
 
@@ -67,27 +68,7 @@ namespace Helios
 	{
 		PROFILE_FUNCTION();
 
-		/* 生成当前FrameGraph */
-		m_pFrameGraph->Build();
-	}
-
-	/* 重置FrameGraph，并自动根据场景中光源是否开启ShadowCast来注入ShadowPass */
-	void RenderView::ResetFrameGraph(const SharedPtr<Scene>& scene)
-	{
-		PROFILE_FUNCTION();
-
-		/* 绑定所属Scene，使后续PrepareLights能收集到光源 */
-		SetOwnerScene(scene);
-
-		/* 重置FrameGraph */
-		m_pFrameGraph->Reset();
-
-		/* 收集光源信息并准备阴影（含纹理描述与VP矩阵） */
-		PrepareLights();
-
-		/* 自动根据光源是否开启ShadowCast来注入ShadowPass */
-		if (m_IsHasShadowCast)
-			m_pShadowMapManager->AddShadowPass(*m_pFrameGraph, scene, this);
+		
 	}
 
 	/* 执行渲染当前View */
@@ -95,8 +76,20 @@ namespace Helios
 	{
 		PROFILE_FUNCTION();
 
+		const auto owner_scene = m_pOwnerScene.lock();
+		if (!owner_scene)
+		{
+			CORE_LOG_ERROR("Invalid scene for RenderView.");
+			return;
+		}
+
 		/* 收集当前RenderView可见的对象 */
 		PrepareVisibleObjects();
+
+		/* 收集光源信息并准备阴影（含纹理描述与VP矩阵） */
+		PrepareLights();
+
+		UpdateFrameGraph();
 
 		/* 每帧依据当前方向光方向与相机，重算级联阴影的视图投影矩阵与分割距离，
 		 * 使方向光旋转 / 相机移动能实时反映到阴影投影（矩阵计算收口于 ShadowMapManager）。 */
@@ -145,7 +138,7 @@ namespace Helios
 
 		m_ValidLights.clear();
 		m_IsHasShadowCast = false;
-		m_pShadowMapManager->Clear();
+		m_pShadowMapManager->Reset();
 
 		/* 收集所有光源 */
 		const auto owner_scene = m_pOwnerScene.lock();
@@ -171,4 +164,26 @@ namespace Helios
 		if (m_IsHasShadowCast)
 			m_pShadowMapManager->PrepareForShadowMaps(owner_scene, GetCullingCamera());
 	}
+
+	/* 更新FrameGraph */
+	void RenderView::UpdateFrameGraph()
+	{
+		PROFILE_FUNCTION();
+
+		/* 重置FrameGraph */
+		m_pFrameGraph->Reset();
+
+		/* 根据是否有光源开启ShadowCast来注入ShadowPass */
+		if (m_IsHasShadowCast)
+			m_pShadowMapManager->AddShadowPass(*m_pFrameGraph, m_pOwnerScene.lock(), this);
+
+		/* ScenePass */
+		Forward::AddScenePass(this, m_IsHasShadowCast);
+
+		/* 生成当前FrameGraph */
+		m_pFrameGraph->Build();
+
+		// m_pFrameGraph->ExportGraphviz("framegraph.txt");
+	}
+
 }

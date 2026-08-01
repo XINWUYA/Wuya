@@ -10,7 +10,7 @@ namespace Helios
 	{
 		PROFILE_FUNCTION();
 
-		m_pRenderView = CreateUniquePtr<RenderView>(m_DebugName + "_RenderView", this);
+		m_pRenderView = CreateUniquePtr<RenderView>(this);
 		m_IsDirty = true;
 	}
 

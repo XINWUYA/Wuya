@@ -64,7 +64,7 @@ namespace Helios
 		void UpdateCascadeMatrices(const Camera* camera);
 
 		/* 清空已收集的阴影贴图与纹理，保留Manager对象本身 */
-		void Clear();
+		void Reset();
 
 		/* 将ShadowPass注入到指定的FrameGraph中
 		 * 阴影纹理句柄会被写入FrameGraph的Blackboard（"ShadowMapHandle"），供后续Pass使用
