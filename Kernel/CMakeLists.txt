@@ -82,7 +82,7 @@ endif()
 target_compile_definitions(Kernel
     PRIVATE
         GLFW_INCLUDE_NONE
-        TRACY_ENABLE
+        # TRACY_ENABLE
 )
 
 # Link libraries
