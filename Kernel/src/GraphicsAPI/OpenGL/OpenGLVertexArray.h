@@ -6,7 +6,7 @@ namespace Helios
 	class OpenGLVertexArray : public DeviceVertexArray
 	{
 	public:
-		OpenGLVertexArray();
+		OpenGLVertexArray(const std::string& name);
 		~OpenGLVertexArray() override;
 
 		void Bind() const override;

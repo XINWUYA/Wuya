@@ -9,7 +9,6 @@
 #include "Helios/VirtualDevice/DeviceWindow.h"
 #include "Helios/Renderer/Renderer.h"
 #include "Helios/Renderer/RenderAPI.h"
-#include "Helios/Renderer/FrameGraph/FrameGraph.h"
 #include "Helios/Scene/SceneCommon.h"
 
 #ifdef PLATFORM_MACOS

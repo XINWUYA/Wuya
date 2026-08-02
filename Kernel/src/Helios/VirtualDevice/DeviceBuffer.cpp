@@ -80,7 +80,7 @@ namespace Helios
 		}
 	}
 
-	SharedPtr<DeviceVertexBuffer> DeviceVertexBuffer::Create(uint32_t size)
+	SharedPtr<DeviceVertexBuffer> DeviceVertexBuffer::Create(const std::string& name, uint32_t size)
 	{
 		switch (Renderer::CurrentAPI())
 		{
@@ -88,10 +88,10 @@ namespace Helios
 			CORE_LOG_ERROR("RenderAPI can't be None!");
 			return nullptr;
 		case RenderAPI::OpenGL:
-			return CreateSharedPtr<OpenGLVertexBuffer>(size);
+			return CreateSharedPtr<OpenGLVertexBuffer>(name, size);
 #ifdef PLATFORM_MACOS
 		case RenderAPI::Metal:
-			return CreateSharedPtr<MetalVertexBuffer>(size);
+			return CreateSharedPtr<MetalVertexBuffer>(name, size);
 #endif
 		default:
 			CORE_LOG_ERROR("Unknown RenderAPI is unsupported!");
@@ -99,7 +99,7 @@ namespace Helios
 		}
 	}
 
-	SharedPtr<DeviceVertexBuffer> DeviceVertexBuffer::Create(const void* vertices, uint32_t size)
+	SharedPtr<DeviceVertexBuffer> DeviceVertexBuffer::Create(const std::string& name, const void* vertices, uint32_t size)
 	{
 		switch (Renderer::CurrentAPI())
 		{
@@ -107,10 +107,10 @@ namespace Helios
 			CORE_LOG_ERROR("RenderAPI can't be None!");
 			return nullptr;
 		case RenderAPI::OpenGL:
-			return CreateSharedPtr<OpenGLVertexBuffer>(vertices, size);
+			return CreateSharedPtr<OpenGLVertexBuffer>(name, vertices, size);
 #ifdef PLATFORM_MACOS
 		case RenderAPI::Metal:
-			return CreateSharedPtr<MetalVertexBuffer>(vertices, size);
+			return CreateSharedPtr<MetalVertexBuffer>(name, vertices, size);
 #endif
 		default:
 			CORE_LOG_ERROR("Unknown RenderAPI is unsupported!");
@@ -118,7 +118,7 @@ namespace Helios
 		}
 	}
 
-	SharedPtr<IndexBuffer> IndexBuffer::Create(const void* indices, uint32_t count, IndexType type)
+	SharedPtr<IndexBuffer> IndexBuffer::Create(const std::string& name, const void* indices, uint32_t count, IndexType type)
 	{
 		switch (Renderer::CurrentAPI())
 		{
@@ -126,10 +126,10 @@ namespace Helios
 			CORE_LOG_ERROR("RenderAPI can't be None!");
 			return nullptr;
 		case RenderAPI::OpenGL:
-			return CreateSharedPtr<OpenGLIndexBuffer>(indices, count, type);
+			return CreateSharedPtr<OpenGLIndexBuffer>(name, indices, count, type);
 #ifdef PLATFORM_MACOS
 		case RenderAPI::Metal:
-			return CreateSharedPtr<MetalIndexBuffer>(indices, count, type);
+			return CreateSharedPtr<MetalIndexBuffer>(name, indices, count, type);
 #endif
 		default:
 			CORE_LOG_ERROR("Unknown RenderAPI is unsupported!");
@@ -137,7 +137,7 @@ namespace Helios
 		}
 	}
 
-	SharedPtr<IndexBuffer> IndexBuffer::Create(uint32_t count, IndexType type)
+	SharedPtr<IndexBuffer> IndexBuffer::Create(const std::string& name, uint32_t count, IndexType type)
 	{
 		switch (Renderer::CurrentAPI())
 		{
@@ -145,10 +145,10 @@ namespace Helios
 			CORE_LOG_ERROR("RenderAPI can't be None!");
 			return nullptr;
 		case RenderAPI::OpenGL:
-			return CreateSharedPtr<OpenGLIndexBuffer>(count, type);
+			return CreateSharedPtr<OpenGLIndexBuffer>(name, count, type);
 #ifdef PLATFORM_MACOS
 		case RenderAPI::Metal:
-			return CreateSharedPtr<MetalIndexBuffer>(count, type);
+			return CreateSharedPtr<MetalIndexBuffer>(name, count, type);
 #endif
 		default:
 			CORE_LOG_ERROR("Unknown RenderAPI is unsupported!");

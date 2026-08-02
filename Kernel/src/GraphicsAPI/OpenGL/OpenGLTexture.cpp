@@ -36,6 +36,9 @@ namespace Helios
 			glGenTextures(1, &m_TextureId);
 			glActiveTexture(GL_TEXTURE0);
 			glBindTexture(m_TextureTarget, m_TextureId);
+#ifdef HELIOS_DEBUG
+			glObjectLabel(GL_TEXTURE, m_TextureId, -1, name.c_str());
+#endif
 
 			/* 分配存储 */
 			switch (m_TextureTarget)

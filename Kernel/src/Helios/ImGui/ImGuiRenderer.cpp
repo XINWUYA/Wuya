@@ -38,7 +38,7 @@ namespace Helios
     void ImGuiRenderer::Init()
     {
         /* 创建顶点数组 - 必须先创建 */
-        m_VertexArray = DeviceVertexArray::Create();
+        m_VertexArray = DeviceVertexArray::Create("ImGui_VertexArray");
 
         /* 创建初始缓冲区 - 必须在创建着色器之前 */
         EnsureBuffersCapacity(1000, 2000);
@@ -559,7 +559,7 @@ namespace Helios
             while (new_size < vertex_count)
                 new_size = new_size + new_size / 2; /* 1.5x growth */
             m_VertexBufferSize = new_size;
-            m_VertexBuffer = DeviceVertexBuffer::Create(m_VertexBufferSize * sizeof(ImDrawVert));
+            m_VertexBuffer = DeviceVertexBuffer::Create("ImGui_VertexBuffer", m_VertexBufferSize * sizeof(ImDrawVert));
 
             /* 设置顶点布局 */
             VertexBufferLayout layout;
@@ -569,7 +569,7 @@ namespace Helios
             m_VertexBuffer->SetLayout(layout);
 
             /* 重新创建顶点数组并添加顶点缓冲区 */
-            m_VertexArray = DeviceVertexArray::Create();
+            m_VertexArray = DeviceVertexArray::Create("ImGui_VertexArray");
             m_VertexArray->AddVertexBuffer(m_VertexBuffer);
             /* 若已有IndexBuffer，重新挂回VAO，保持索引绑定一致 */
             if (m_IndexBuffer)
@@ -598,7 +598,7 @@ namespace Helios
             m_IndexBufferSize = new_size;
             /* ImGui 缺省 ImDrawIdx 为 unsigned short，对应 UInt16 */
             const IndexType index_type = (sizeof(ImDrawIdx) == 2) ? IndexType::UInt16 : IndexType::UInt32;
-            m_IndexBuffer = IndexBuffer::Create(static_cast<uint32_t>(m_IndexBufferSize), index_type);
+            m_IndexBuffer = IndexBuffer::Create("ImGui_IndexBuffer", static_cast<uint32_t>(m_IndexBufferSize), index_type);
             if (m_VertexArray)
                 m_VertexArray->SetIndexBuffer(m_IndexBuffer);
         }

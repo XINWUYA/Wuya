@@ -4,7 +4,7 @@
 
 namespace Helios
 {
-	OpenGLVertexBuffer::OpenGLVertexBuffer(uint32_t size)
+	OpenGLVertexBuffer::OpenGLVertexBuffer(const std::string& name, uint32_t size)
 		: m_DataSize(size)
 	{
 		PROFILE_FUNCTION();
@@ -18,10 +18,13 @@ namespace Helios
 		// Windows/Linux: Use modern DSA functions (OpenGL 4.5+)
 		glCreateBuffers(1, &m_VertexBufferId);
 		glNamedBufferData(m_VertexBufferId, size, nullptr, GL_DYNAMIC_DRAW);
+#ifdef HELIOS_DEBUG
+		glObjectLabel(GL_BUFFER, m_VertexBufferId, -1, name.c_str());
+#endif
 #endif
 	}
 
-	OpenGLVertexBuffer::OpenGLVertexBuffer(const void* vertices, uint32_t size)
+	OpenGLVertexBuffer::OpenGLVertexBuffer(const std::string& name, const void* vertices, uint32_t size)
 		: m_DataSize(size)
 	{
 		PROFILE_FUNCTION();
@@ -35,6 +38,9 @@ namespace Helios
 		// Windows/Linux: Use modern DSA functions (OpenGL 4.5+)
 		glCreateBuffers(1, &m_VertexBufferId);
 		glNamedBufferData(m_VertexBufferId, size, vertices, GL_STATIC_DRAW);
+#ifdef HELIOS_DEBUG
+		glObjectLabel(GL_BUFFER, m_VertexBufferId, -1, name.c_str());
+#endif
 #endif
 	}
 
@@ -87,7 +93,7 @@ namespace Helios
 		return m_DataSize / m_Layout.GetStride();
 	}
 
-	OpenGLIndexBuffer::OpenGLIndexBuffer(const void* indices, uint32_t count, IndexType type)
+	OpenGLIndexBuffer::OpenGLIndexBuffer(const std::string& name, const void* indices, uint32_t count, IndexType type)
 		: m_Count(count), m_IndexType(type)
 	{
 		PROFILE_FUNCTION();
@@ -106,11 +112,14 @@ namespace Helios
 		// Windows/Linux: Use modern DSA functions (OpenGL 4.5+)
 		glCreateBuffers(1, &m_IndexBufferId);
 		glNamedBufferData(m_IndexBufferId, size_in_bytes, indices, GL_STATIC_DRAW);
+#ifdef HELIOS_DEBUG
+		glObjectLabel(GL_BUFFER, m_IndexBufferId, -1, name.c_str());
+#endif
 #endif
 	}
 
 	/* 预分配空索引缓冲区（用于后续 SetData 动态更新，如ImGui） */
-	OpenGLIndexBuffer::OpenGLIndexBuffer(uint32_t count, IndexType type)
+	OpenGLIndexBuffer::OpenGLIndexBuffer(const std::string& name, uint32_t count, IndexType type)
 		: m_Count(count), m_IndexType(type)
 	{
 		PROFILE_FUNCTION();
@@ -126,6 +135,9 @@ namespace Helios
 #else
 		glCreateBuffers(1, &m_IndexBufferId);
 		glNamedBufferData(m_IndexBufferId, size_in_bytes, nullptr, GL_DYNAMIC_DRAW);
+#ifdef HELIOS_DEBUG
+		glObjectLabel(GL_BUFFER, m_IndexBufferId, -1, name.c_str());
+#endif
 #endif
 	}
 

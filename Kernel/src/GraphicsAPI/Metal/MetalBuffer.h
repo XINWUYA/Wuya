@@ -10,8 +10,8 @@ namespace Helios
     class MetalVertexBuffer : public DeviceVertexBuffer
     {
     public:
-        MetalVertexBuffer(uint32_t size);
-        MetalVertexBuffer(const void* vertices, uint32_t size);
+        MetalVertexBuffer(const std::string& name, uint32_t size);
+        MetalVertexBuffer(const std::string& name, const void* vertices, uint32_t size);
         ~MetalVertexBuffer() override;
 
         void Bind() const override;
@@ -37,9 +37,9 @@ namespace Helios
     {
     public:
         /* 创建带初始数据的索引缓冲区 */
-        MetalIndexBuffer(const void* indices, uint32_t count, IndexType type);
+        MetalIndexBuffer(const std::string& name, const void* indices, uint32_t count, IndexType type);
         /* 创建空容量的索引缓冲区（预分配） */
-        MetalIndexBuffer(uint32_t count, IndexType type);
+        MetalIndexBuffer(const std::string& name, uint32_t count, IndexType type);
         ~MetalIndexBuffer() override;
 
         void Bind() const override;

@@ -13,9 +13,11 @@ namespace Helios
 	{
 		auto model = CreateSharedPtr<Model>("BuiltinCube");
 
-		/* 填充MeshSegment */
+		/* 仅需准备一次顶点数据 */
+		static SharedPtr<DeviceVertexArray> vertex_array = nullptr;
+		if (!vertex_array)
 		{
-			// Cube vertices
+			/* Cube vertices */
 			static constexpr float vertices[] = {
 				/* Position-----------Normal---------------TexCoord */
 				/* Bottom */
@@ -62,22 +64,21 @@ namespace Helios
 				-0.5f,  0.5f, -0.5f,  0.0f,  0.0f,  1.0f,  0.0f, 1.0f,
 			};
 
-			// Vertex Array
-			SharedPtr<DeviceVertexBuffer> vertex_buffer = DeviceVertexBuffer::Create(vertices, sizeof(vertices));
+			/* Vertex Buffer */
+			SharedPtr<DeviceVertexBuffer> vertex_buffer = DeviceVertexBuffer::Create("BuiltinCube_VertexBuffer", vertices, sizeof(vertices));
 			VertexBufferLayout vertex_buffer_layout = {
 				{ "a_Position", BufferDataType::Float3 },
 				{ "a_Normal", BufferDataType::Float3 },
 				{ "a_TexCoord", BufferDataType::Float2 },
 			};
 			vertex_buffer->SetLayout(vertex_buffer_layout);
-
-			auto vertex_array = DeviceVertexArray::Create();
+			/* Vertex Array */
+			vertex_array = DeviceVertexArray::Create("BuiltinCube_VertexArray");
 			vertex_array->Bind();
 			vertex_array->AddVertexBuffer(vertex_buffer);
-
-			model->AddMeshSegment(CreateSharedPtr<MeshSegment>("BuiltinCube", vertex_array, material));
 		}
 
+		model->AddMeshSegment(CreateSharedPtr<MeshSegment>("BuiltinCube", vertex_array, material));
 		return model;
 	}
 
@@ -86,90 +87,94 @@ namespace Helios
 	{
 		auto model = CreateSharedPtr<Model>("BuiltinSphere");
 
-		constexpr int16_t segments_x = 32;
-		constexpr int16_t segments_y = 32;
-
-		/* Calculate vertices, normals, uvs */
-		std::vector<glm::vec3> vertices;
-		std::vector<glm::vec3> normals;
-		std::vector<glm::vec2> uvs;
-
-		constexpr int32_t vertex_count = (segments_x + 1) * (segments_y + 1);
-		vertices.reserve(vertex_count);
-		normals.reserve(vertex_count);
-		uvs.reserve(vertex_count);
-
-		for (int32_t x = 0; x <= segments_x; ++x)
+		/* 仅需准备一次顶点数据 */
+		static SharedPtr<DeviceVertexArray> vertex_array = nullptr;
+		if (!vertex_array)
 		{
-			float s_x = static_cast<float>(x) / segments_x;
-			for (int32_t y = 0; y <= segments_y; ++y)
+			constexpr int16_t segments_x = 32;
+			constexpr int16_t segments_y = 32;
+
+			/* Calculate vertices, normals, uvs */
+			std::vector<glm::vec3> vertices;
+			std::vector<glm::vec3> normals;
+			std::vector<glm::vec2> uvs;
+
+			constexpr int32_t vertex_count = (segments_x + 1) * (segments_y + 1);
+			vertices.reserve(vertex_count);
+			normals.reserve(vertex_count);
+			uvs.reserve(vertex_count);
+
+			for (int32_t x = 0; x <= segments_x; ++x)
 			{
-				float s_y = static_cast<float>(y) / segments_y;
-
-				glm::vec3 position(
-					std::cos(s_x * 2.0f * PI) * std::sin(s_y * PI),
-					std::cos(s_y * PI),
-					std::sin(s_x * 2.0f * PI) * std::sin(s_y * PI)
-				);
-
-				vertices.emplace_back(position);
-				normals.emplace_back(position); /* 对球心在坐标原点的球，其normal与position相等 */
-				uvs.emplace_back(s_x, s_y);
-			}
-		}
-
-		/* Calculate indices */
-		std::vector<uint16_t> indices;
-		bool odd_row = false;
-		for (int16_t y = 0; y < segments_y; ++y)
-		{
-			if (!odd_row) // even rows: y == 0, y == 2; and so on
-			{
-				for (int16_t x = 0; x <= segments_x; ++x)
+				float s_x = static_cast<float>(x) / segments_x;
+				for (int32_t y = 0; y <= segments_y; ++y)
 				{
-					indices.emplace_back(y * (segments_x + 1) + x);
-					indices.emplace_back((y + 1) * (segments_x + 1) + x);
+					float s_y = static_cast<float>(y) / segments_y;
+
+					glm::vec3 position(
+						std::cos(s_x * 2.0f * PI) * std::sin(s_y * PI),
+						std::cos(s_y * PI),
+						std::sin(s_x * 2.0f * PI) * std::sin(s_y * PI)
+					);
+
+					vertices.emplace_back(position);
+					normals.emplace_back(position); /* 对球心在坐标原点的球，其normal与position相等 */
+					uvs.emplace_back(s_x, s_y);
 				}
 			}
-			else
-			{
-				for (int16_t x = segments_x; x >= 0; --x)
-				{
-					indices.emplace_back((y + 1) * (segments_x + 1) + x);
-					indices.emplace_back(y * (segments_x + 1) + x);
-				}
-			}
-			odd_row = !odd_row;
-		}
 
-		auto vertex_array = DeviceVertexArray::Create();
-		vertex_array->Bind();
-		/* vertices */
-		{
-			auto vertex_buffer = DeviceVertexBuffer::Create(vertices.data(), vertex_count * sizeof(glm::vec3));
-			vertex_buffer->SetLayout({ { "a_Position", BufferDataType::Float3 } });
-			vertex_array->AddVertexBuffer(vertex_buffer);
-		}
-		/* normals */
-		{
-			auto vertex_buffer = DeviceVertexBuffer::Create(normals.data(), vertex_count * sizeof(glm::vec3));
-			vertex_buffer->SetLayout({ { "a_Normal", BufferDataType::Float3 } });
-			vertex_array->AddVertexBuffer(vertex_buffer);
-		}
-		/* uvs */
-		{
-			auto vertex_buffer = DeviceVertexBuffer::Create(uvs.data(), vertex_count * sizeof(glm::vec2));
-			vertex_buffer->SetLayout({ { "a_TexCoord", BufferDataType::Float2 } });
-			vertex_array->AddVertexBuffer(vertex_buffer);
-		}
-		/* indices */
-		{
-			auto index_buffer = IndexBuffer::Create(indices.data(), indices.size(), IndexType::UInt16);
-			vertex_array->SetIndexBuffer(index_buffer);
+			/* Calculate indices */
+			std::vector<uint16_t> indices;
+			bool odd_row = false;
+			for (int16_t y = 0; y < segments_y; ++y)
+			{
+				if (!odd_row) // even rows: y == 0, y == 2; and so on
+				{
+					for (int16_t x = 0; x <= segments_x; ++x)
+					{
+						indices.emplace_back(y * (segments_x + 1) + x);
+						indices.emplace_back((y + 1) * (segments_x + 1) + x);
+					}
+				}
+				else
+				{
+					for (int16_t x = segments_x; x >= 0; --x)
+					{
+						indices.emplace_back((y + 1) * (segments_x + 1) + x);
+						indices.emplace_back(y * (segments_x + 1) + x);
+					}
+				}
+				odd_row = !odd_row;
+			}
+
+			vertex_array = DeviceVertexArray::Create("BuiltinSphere_VertexArray");
+			vertex_array->Bind();
+			/* vertices */
+			{
+				auto vertex_buffer = DeviceVertexBuffer::Create("BuiltinSphere_VertexBuffer_Position", vertices.data(), vertex_count * sizeof(glm::vec3));
+				vertex_buffer->SetLayout({ { "a_Position", BufferDataType::Float3 } });
+				vertex_array->AddVertexBuffer(vertex_buffer);
+			}
+			/* normals */
+			{
+				auto vertex_buffer = DeviceVertexBuffer::Create("BuiltinSphere_VertexBuffer_Normal", normals.data(), vertex_count * sizeof(glm::vec3));
+				vertex_buffer->SetLayout({ { "a_Normal", BufferDataType::Float3 } });
+				vertex_array->AddVertexBuffer(vertex_buffer);
+			}
+			/* uvs */
+			{
+				auto vertex_buffer = DeviceVertexBuffer::Create("BuiltinSphere_VertexBuffer_TexCoord", uvs.data(), vertex_count * sizeof(glm::vec2));
+				vertex_buffer->SetLayout({ { "a_TexCoord", BufferDataType::Float2 } });
+				vertex_array->AddVertexBuffer(vertex_buffer);
+			}
+			/* indices */
+			{
+				auto index_buffer = IndexBuffer::Create("BuiltinSphere_IndexBuffer", indices.data(), indices.size(), IndexType::UInt16);
+				vertex_array->SetIndexBuffer(index_buffer);
+			}
 		}
 
 		model->AddMeshSegment(MeshSegment::Create("BuiltinSphere", { vertex_array, PrimitiveType::Triangle_Strip }, material));
-
 		return model;
 	}
 
@@ -177,10 +182,11 @@ namespace Helios
 	static SharedPtr<Model> CreatePlane(const SharedPtr<Material>& material)
 	{
 		auto model = CreateSharedPtr<Model>("BuiltinPlane");
-
-		/* 填充MeshSegment */
+		/* 仅需准备一次顶点数据 */
+		static SharedPtr<DeviceVertexArray> vertex_array = nullptr;
+		if (!vertex_array)
 		{
-			// todo: Plane vertices
+			/* Plane Vertices */
 			static constexpr float vertices[] = {
 				// Position,        Normal,           TexCoord,
 				-0.5f, 0.0f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f,
@@ -191,8 +197,8 @@ namespace Helios
 				-0.5f, 0.0f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f,
 			};
 
-			// Vertex Array
-			SharedPtr<DeviceVertexBuffer> vertex_buffer = DeviceVertexBuffer::Create(vertices, sizeof(vertices));
+			/* Vertex Buffer */
+			auto vertex_buffer = DeviceVertexBuffer::Create("BuiltinPlane_VertexBuffer", vertices, sizeof(vertices));
 			VertexBufferLayout vertex_buffer_layout = {
 				{ "a_Position", BufferDataType::Float3 },
 				{ "a_Normal", BufferDataType::Float3 },
@@ -200,13 +206,13 @@ namespace Helios
 			};
 			vertex_buffer->SetLayout(vertex_buffer_layout);
 
-			auto vertex_array = DeviceVertexArray::Create();
+			/* Vertex Array */
+			vertex_array = DeviceVertexArray::Create("BuiltinPlane_VertexArray");
 			vertex_array->Bind();
 			vertex_array->AddVertexBuffer(vertex_buffer);
-
-			model->AddMeshSegment(CreateSharedPtr<MeshSegment>("BuiltinPlane", vertex_array, material));
 		}
 
+		model->AddMeshSegment(CreateSharedPtr<MeshSegment>("BuiltinPlane", vertex_array, material));
 		return model;
 	}
 
@@ -283,7 +289,7 @@ namespace Helios
 				in_mesh_file.read(name.data(), name_size);
 
 				/* Vertex Array */
-				auto vertex_array = DeviceVertexArray::Create();
+				auto vertex_array = DeviceVertexArray::Create(name + "_VertexArray");
 				vertex_array->Bind();
 
 				/* 顶点数量 */
@@ -298,7 +304,7 @@ namespace Helios
 
 				/* Index Buffer */
 				auto index_type = IndexType::UInt32; // index_count > UINT16_MAX ? IndexType::UInt32 : IndexType::UInt16;
-				auto index_buffer = IndexBuffer::Create(indices, index_count, index_type);
+				auto index_buffer = IndexBuffer::Create(name + "_IndexBuffer", indices, index_count, index_type);
 				vertex_array->SetIndexBuffer(index_buffer);
 				delete[] indices;
 
@@ -343,7 +349,7 @@ namespace Helios
 					}
 
 					/* Vertex Buffer */
-					auto vertex_buffer = DeviceVertexBuffer::Create(buffer_data, vertex_count * stride * sizeof(float));
+					auto vertex_buffer = DeviceVertexBuffer::Create(name + "_VertexBuffer", buffer_data, vertex_count * stride * sizeof(float));
 					vertex_buffer->SetLayout(vertex_buffer_layout);
 					vertex_array->AddVertexBuffer(vertex_buffer);
 					delete[] buffer_data;

@@ -5,7 +5,7 @@
 
 namespace Helios
 {
-	OpenGLVertexArray::OpenGLVertexArray()
+	OpenGLVertexArray::OpenGLVertexArray(const std::string& name)
 	{
 		PROFILE_FUNCTION();
 
@@ -15,6 +15,9 @@ namespace Helios
 #else
 		// Windows/Linux: Use modern DSA function (OpenGL 4.5+)
 		glCreateVertexArrays(1, &m_VertexArrayId);
+#endif
+#ifdef HELIOS_DEBUG
+		glObjectLabel(GL_VERTEX_ARRAY, m_VertexArrayId, -1, name.c_str());
 #endif
 	}
 

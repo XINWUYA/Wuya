@@ -43,14 +43,14 @@ namespace Helios
 	{
 		PROFILE_FUNCTION();
 
+		m_DebugName = ExtractFilename(filepath);
+
 		CreateShaderCacheDirectoryIfNeed();
 
 		const std::string shader_src = ReadFile(filepath);
 		PreProcessShaderSrc(shader_src, m_OpenGLSourceCodes);
 
 		CreateShaderProgram();
-		
-		m_DebugName = ExtractFilename(filepath);
 	}
 
 	OpenGLShader::OpenGLShader(std::string name, const std::string& vertex_src, const std::string& pixel_src)
@@ -400,7 +400,9 @@ namespace Helios
 
 		// Create shader program
 		GLuint program = glCreateProgram();
-
+#ifdef HELIOS_DEBUG
+		glObjectLabel(GL_PROGRAM, program, -1, m_DebugName.c_str());
+#endif
 		// Compile shaders
 		std::vector<GLuint> compiled_shaders;
 		
@@ -414,7 +416,9 @@ namespace Helios
 			glShaderBinary(1, &shader, GL_SHADER_BINARY_FORMAT_SPIR_V, shader_data.data(), shader_data.size() * sizeof(uint32_t));
 			glSpecializeShader(shader, "main", 0, nullptr, nullptr);
 			glAttachShader(program, shader);
-
+#ifdef HELIOS_DEBUG
+			glObjectLabel(GL_SHADER, shader, -1, m_DebugName.c_str());
+#endif
 			compiled_shaders.emplace_back(shader);
 		}
 

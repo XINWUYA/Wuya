@@ -6,8 +6,8 @@ namespace Helios
 	class OpenGLVertexBuffer : public DeviceVertexBuffer
 	{
 	public:
-		OpenGLVertexBuffer(uint32_t size);
-		OpenGLVertexBuffer(const void* vertices, uint32_t size);
+		OpenGLVertexBuffer(const std::string& name, uint32_t size);
+		OpenGLVertexBuffer(const std::string& name, const void* vertices, uint32_t size);
 		~OpenGLVertexBuffer() override;
 
 		/* 绑定 */
@@ -39,9 +39,9 @@ namespace Helios
 	{
 	public:
 		/* 创建带初始数据的索引缓冲区（STATIC_DRAW） */
-		OpenGLIndexBuffer(const void* indices, uint32_t count, IndexType type);
+		OpenGLIndexBuffer(const std::string& name, const void* indices, uint32_t count, IndexType type);
 		/* 创建空容量的索引缓冲区（预分配，DYNAMIC_DRAW） */
-		OpenGLIndexBuffer(uint32_t count, IndexType type);
+		OpenGLIndexBuffer(const std::string& name, uint32_t count, IndexType type);
 		~OpenGLIndexBuffer() override;
 
 		/* 绑定 */

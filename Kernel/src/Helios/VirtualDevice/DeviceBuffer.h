@@ -86,8 +86,8 @@ namespace Helios
 		/* 获取顶点数量 */
 		[[nodiscard]] virtual uint32_t GetVertexCount() const = 0;
 
-		static SharedPtr<DeviceVertexBuffer> Create(uint32_t size);
-		static SharedPtr<DeviceVertexBuffer> Create(const void* vertices, uint32_t size);
+		static SharedPtr<DeviceVertexBuffer> Create(const std::string& name, uint32_t size);
+		static SharedPtr<DeviceVertexBuffer> Create(const std::string& name, const void* vertices, uint32_t size);
 	};
 
 	// Index Buffer
@@ -108,8 +108,8 @@ namespace Helios
 		virtual void SetData(const void* data, uint32_t size) = 0;
 
 		/* 创建带初始数据的索引缓冲区（STATIC_DRAW，用于静态数据） */
-		static SharedPtr<IndexBuffer> Create(const void* indices, uint32_t count, IndexType type = IndexType::UInt32);
+		static SharedPtr<IndexBuffer> Create(const std::string& name, const void* indices, uint32_t count, IndexType type = IndexType::UInt32);
 		/* 创建空容量的索引缓冲区（DYNAMIC_DRAW，预分配后由 SetData 动态更新） */
-		static SharedPtr<IndexBuffer> Create(uint32_t count, IndexType type = IndexType::UInt32);
+		static SharedPtr<IndexBuffer> Create(const std::string& name, uint32_t count, IndexType type = IndexType::UInt32);
 	};
 }

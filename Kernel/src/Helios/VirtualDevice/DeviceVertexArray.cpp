@@ -8,7 +8,7 @@
 
 namespace Helios
 {
-	SharedPtr<DeviceVertexArray> DeviceVertexArray::Create()
+	SharedPtr<DeviceVertexArray> DeviceVertexArray::Create(const std::string& name)
 	{
 		switch (Renderer::CurrentAPI())
 		{
@@ -16,10 +16,10 @@ namespace Helios
 			CORE_LOG_ERROR("RenderAPI can't be None!");
 			return nullptr;
 		case RenderAPI::OpenGL:
-			return CreateSharedPtr<OpenGLVertexArray>();
+			return CreateSharedPtr<OpenGLVertexArray>(name);
 #ifdef PLATFORM_MACOS
 		case RenderAPI::Metal:
-			return CreateSharedPtr<MetalVertexArray>();
+			return CreateSharedPtr<MetalVertexArray>(name);
 #endif
 		default:
 			CORE_LOG_ERROR("Unknown RenderAPI is unsupported!");

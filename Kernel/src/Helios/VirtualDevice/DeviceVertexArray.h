@@ -20,6 +20,6 @@ namespace Helios
 		virtual const SharedPtr<IndexBuffer>& GetIndexBuffer() const = 0;
 		virtual uint32_t GetVertexCount() const = 0;
 
-		static SharedPtr<DeviceVertexArray> Create();
+		static SharedPtr<DeviceVertexArray> Create(const std::string& name);
 	};
 }

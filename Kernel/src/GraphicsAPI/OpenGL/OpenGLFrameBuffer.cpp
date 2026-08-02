@@ -17,6 +17,9 @@ namespace Helios
 	/* 1. 创建FrameBuffer */
 		glGenFramebuffers(1, &m_FrameBufferId);
 		glBindFramebuffer(GL_FRAMEBUFFER, m_FrameBufferId);
+#ifdef HELIOS_DEBUG
+		glObjectLabel(GL_FRAMEBUFFER, m_FrameBufferId, -1, name.c_str());
+#endif
 
 	/* 2. 创建ColorAttachments */
 		if (!!(desc.Usage & RenderBufferUsage::ColorAll))

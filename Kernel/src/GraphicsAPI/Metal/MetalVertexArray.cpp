@@ -8,7 +8,7 @@
 
 namespace Helios
 {
-    MetalVertexArray::MetalVertexArray()
+    MetalVertexArray::MetalVertexArray(const std::string& name)
     {
         BuildVertexDescriptor();
     }

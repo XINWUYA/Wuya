@@ -12,7 +12,7 @@ namespace Helios
     class MetalVertexArray : public DeviceVertexArray
     {
     public:
-        MetalVertexArray();
+        MetalVertexArray(const std::string& name);
         ~MetalVertexArray() override;
 
         void Bind() const override;

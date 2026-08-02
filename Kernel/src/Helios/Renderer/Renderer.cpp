@@ -168,7 +168,7 @@ namespace Helios
 		{
 			{ "a_Position", BufferDataType::Float4 }
 		};
-		const auto vertex_buffer = DeviceVertexBuffer::Create(vertices, sizeof(vertices));
+		const auto vertex_buffer = DeviceVertexBuffer::Create("FullScreen_VertexBuffer", vertices, sizeof(vertices));
 		vertex_buffer->SetLayout(vertex_buffer_layout);
 
 		/* Indices */
@@ -176,9 +176,10 @@ namespace Helios
 		{
 			0, 1, 2
 		};
-		const auto index_buffer = IndexBuffer::Create(indices, 3, IndexType::UInt16);
+		const auto index_buffer = IndexBuffer::Create("FullScreen_IndexBuffer", indices, 3, IndexType::UInt16);
 
-		auto vertex_array = DeviceVertexArray::Create();
+		/* VertexArray */
+		auto vertex_array = DeviceVertexArray::Create("FullScreen_VertexArray");
 		vertex_array->AddVertexBuffer(vertex_buffer);
 		vertex_array->SetIndexBuffer(index_buffer);
 		return vertex_array;

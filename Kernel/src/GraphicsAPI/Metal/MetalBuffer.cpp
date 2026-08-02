@@ -9,7 +9,7 @@
 namespace Helios
 {
     /* MetalVertexBuffer实现 */
-    MetalVertexBuffer::MetalVertexBuffer(uint32_t size)
+    MetalVertexBuffer::MetalVertexBuffer(const std::string& name, uint32_t size)
         : m_Size(size)
     {
         auto device = dynamic_cast<MetalRenderAPI*>(Renderer::GetRenderAPI().get())->GetDevice();
@@ -20,7 +20,7 @@ namespace Helios
         }
     }
 
-    MetalVertexBuffer::MetalVertexBuffer(const void* vertices, uint32_t size)
+    MetalVertexBuffer::MetalVertexBuffer(const std::string& name, const void* vertices, uint32_t size)
         : m_Size(size)
     {
         auto device = dynamic_cast<MetalRenderAPI*>(Renderer::GetRenderAPI().get())->GetDevice();
@@ -79,7 +79,7 @@ namespace Helios
 
     /* MetalIndexBuffer实现 */
     /* MetalIndexBuffer实现 - 带初始数据 */
-    MetalIndexBuffer::MetalIndexBuffer(const void* indices, uint32_t count, IndexType type)
+    MetalIndexBuffer::MetalIndexBuffer(const std::string& name, const void* indices, uint32_t count, IndexType type)
         : m_Count(count), m_IndexType(type)
     {
         const uint32_t index_size = (type == IndexType::UInt16) ? sizeof(uint16_t) : sizeof(uint32_t);
@@ -94,7 +94,7 @@ namespace Helios
     }
 
     /* MetalIndexBuffer实现 - 预分配空容量 */
-    MetalIndexBuffer::MetalIndexBuffer(uint32_t count, IndexType type)
+    MetalIndexBuffer::MetalIndexBuffer(const std::string& name, uint32_t count, IndexType type)
         : m_Count(count), m_IndexType(type)
     {
         const uint32_t index_size = (type == IndexType::UInt16) ? sizeof(uint16_t) : sizeof(uint32_t);
