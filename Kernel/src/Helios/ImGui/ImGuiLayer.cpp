@@ -83,8 +83,52 @@ namespace Helios
 		ImGui::DestroyContext();
 	}
 
-	void ImGuiLayer::OnUpdate(float delta_time)
+	void ImGuiLayer::OnEvent(IEvent* event)
 	{
+		if (m_IsBlockEvents)
+		{
+			ImGuiIO& io = ImGui::GetIO();
+			event->Handled |= event->IsInCategory(EventCategoryMouse) & io.WantCaptureMouse;
+			event->Handled |= event->IsInCategory(EventCategoryKeyboard) & io.WantCaptureKeyboard;
+		}
+	}
+
+	void ImGuiLayer::OnImGuiRender()
+	{
+		// Show Demo
+		//bool show = true;
+		//ImGui::ShowDemoWindow(&show);
+	}
+
+	void ImGuiLayer::Begin()
+	{
+		PROFILE_FUNCTION();
+		
+		// Platform new frame
+		m_Renderer->NewFrame();
+		ImGui_ImplGlfw_NewFrame();
+		ImGui::NewFrame();
+	}
+
+	void ImGuiLayer::End()
+	{
+		PROFILE_FUNCTION();
+
+		Renderer::GetRenderAPI()->PushDebugGroup("ImGuiPass");
+		RenderQueryProfiler::Instance().BeginGPUScope("ImGuiPass");
+
+		/* 生成DrawData,并提交渲染 */
+		ImGui::Render();
+		RenderPlatformWindows();
+
+		RenderQueryProfiler::Instance().EndGPUScope();
+		Renderer::GetRenderAPI()->PopDebugGroup();
+	}
+
+	void ImGuiLayer::RenderPlatformWindows()
+	{
+		PROFILE_FUNCTION();
+
 #ifdef PLATFORM_MACOS
 		auto render_api = Renderer::GetRenderAPI();
 		if (!render_api)
@@ -122,62 +166,13 @@ namespace Helios
 			metal_render_api->EndRenderPass();
 
 			pass_desc->release();
-			return;
 		}
-#endif
+#else
 		m_Renderer->RenderDrawData();
-	}
-
-	void ImGuiLayer::OnEvent(IEvent* event)
-	{
-		if (m_IsBlockEvents)
-		{
-			ImGuiIO& io = ImGui::GetIO();
-			event->Handled |= event->IsInCategory(EventCategoryMouse) & io.WantCaptureMouse;
-			event->Handled |= event->IsInCategory(EventCategoryKeyboard) & io.WantCaptureKeyboard;
-		}
-	}
-
-	void ImGuiLayer::OnImGuiRender()
-	{
-		// Show Demo
-		//bool show = true;
-		//ImGui::ShowDemoWindow(&show);
-	}
-
-	void ImGuiLayer::Begin()
-	{
-		PROFILE_FUNCTION();
-
-		// Update display size
-		ImGuiIO& io = ImGui::GetIO();
-		io.DisplaySize = ImVec2(
-			(float)Application::Instance()->GetWindow().GetWidth(),
-			(float)Application::Instance()->GetWindow().GetHeight()
-		);
-		io.DisplayFramebufferScale = ImVec2(1.0f, 1.0f);
-
-		// New frame for renderer
-		m_Renderer->NewFrame(1.0f / 60.0f);
-
-		// Platform new frame
-		ImGui_ImplGlfw_NewFrame();
-		ImGui::NewFrame();
-	}
-
-	void ImGuiLayer::End()
-	{
-		PROFILE_FUNCTION();
-
-		/* 仅生成DrawData，实际提交绘制由FrameGraph中的ImGuiPass负责执行 */
-		ImGui::Render();
-	}
-
-	void ImGuiLayer::RenderPlatformWindows()
-	{
-		PROFILE_FUNCTION();
+#endif
 
 		ImGuiIO& io = ImGui::GetIO();
+		io.DisplaySize = ImVec2((float)Application::Instance()->GetWindow().GetWidth(), (float)Application::Instance()->GetWindow().GetHeight());
 		if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
 		{
 			GLFWwindow* backup_current_context = glfwGetCurrentContext();

@@ -121,6 +121,8 @@ void SampleCSM::OnDetached()
 
 void SampleCSM::OnUpdate(float delta_time)
 {
+	PROFILE_FUNCTION();
+
 	m_pCameraController->OnUpdate(delta_time);
 
 	m_pScene->OnUpdate(delta_time);
@@ -129,6 +131,8 @@ void SampleCSM::OnUpdate(float delta_time)
 
 void SampleCSM::OnImGuiRender()
 {
+	PROFILE_FUNCTION();
+
 	ImGui::Begin("Stats");
 	ImGui::Text("Sample CSM:");
 	ImGui::Text("- Alt + Mouse Left: Rotate.");

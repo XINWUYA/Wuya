@@ -39,7 +39,7 @@ namespace Helios
         void Cleanup();
 
         /* 开始新帧 - 更便显示尺寸等 */
-        void NewFrame(float delta_time);
+        void NewFrame();
         /* 处理ImGui绘制数据并渲染 */
         void RenderDrawData();
 

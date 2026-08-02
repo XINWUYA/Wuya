@@ -65,7 +65,7 @@ namespace Helios
         m_UIUniformBuffer.reset();
     }
 
-    void ImGuiRenderer::NewFrame(float delta_time)
+    void ImGuiRenderer::NewFrame()
     {
         /* 更新投影矩阵 - 使用正交投影 */
         UpdateProjectionMatrix();
