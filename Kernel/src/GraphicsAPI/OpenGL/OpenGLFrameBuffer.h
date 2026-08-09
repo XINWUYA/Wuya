@@ -26,8 +26,8 @@ namespace Helios
 		/* 绑定一个RenderBuffer到FrameBuffer */
 		void AttachARenderBuffer(const RenderBufferInfo& render_buffer_info, GLenum attachment);
 
-		/* 将指定附件重新绑定到Texture2DArray的指定层：attachment指定目标附件类型，attachment_index为Color附件下标 */
-		void SetAttachmentLayer(FrameBufferAttachment attachment, uint16_t attachment_index, uint16_t layer);
+		/* 将指定附件重新绑定到Texture2DArray/CubeMap的指定层和mip：attachment指定目标附件类型，attachment_index为Color附件下标 */
+		void SetAttachmentLayer(FrameBufferAttachment attachment, uint16_t attachment_index, uint16_t layer, uint16_t mip_level);
 
 		uint32_t m_FrameBufferId{ 0 };
 	};

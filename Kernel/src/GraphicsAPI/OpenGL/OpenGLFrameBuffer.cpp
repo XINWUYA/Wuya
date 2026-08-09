@@ -76,9 +76,9 @@ namespace Helios
 		glBindFramebuffer(GL_FRAMEBUFFER, m_FrameBufferId);
 		glViewport(m_FrameBufferDesc.ViewportRegion.MinX, m_FrameBufferDesc.ViewportRegion.MinY, (GLsizei)m_FrameBufferDesc.ViewportRegion.Width, (GLsizei)m_FrameBufferDesc.ViewportRegion.Height);
 
-		/* Layered模式：将指定附件重新绑定到Texture2DArray/CubeMap的指定层/面：用于CSM多Cascade渲染到同一数组纹理的不同切片，或分层渲染到Color数组纹理，或烘焙到CubeMap各面 */
+		/* Layered模式：将指定附件重新绑定到Texture2DArray/CubeMap的指定层/面/mip：用于CSM多Cascade渲染到同一数组纹理的不同切片，或分层渲染到Color数组纹理，或烘焙到CubeMap各面各mip */
 		if (bind_info.Mode == FrameBufferBindMode::Layered)
-			SetAttachmentLayer(bind_info.TargetAttachment, bind_info.ColorIndex, bind_info.LayerIndex);
+			SetAttachmentLayer(bind_info.TargetAttachment, bind_info.ColorIndex, bind_info.LayerIndex, bind_info.MipLevel);
 	}
 
 	void OpenGLFrameBuffer::Unbind()
@@ -303,7 +303,7 @@ namespace Helios
 		CHECK_GL_FRAMEBUFFER_STATUS(GL_FRAMEBUFFER);
 	}
 
-	void OpenGLFrameBuffer::SetAttachmentLayer(FrameBufferAttachment attachment, uint16_t attachment_index, uint16_t layer)
+	void OpenGLFrameBuffer::SetAttachmentLayer(FrameBufferAttachment attachment, uint16_t attachment_index, uint16_t layer, uint16_t mip_level)
 	{
 		PROFILE_FUNCTION();
 
@@ -338,18 +338,18 @@ namespace Helios
 			return;
 
 		/* 按纹理目标选择层绑定方式：
-		 * - Texture2DArray：layer 为数组切片，使用 glFramebufferTextureLayer
-		 * - CubeMap：layer 为 face 索引（0~5），使用 glFramebufferTexture2D + CUBE_MAP_POSITIVE_X + face
-		 *   典型场景：烘焙天空盒到 CubeMap 的 6 个面。 */
+		 * - Texture2DArray：layer 为数组切片，mip_level 指定 mip 层级，使用 glFramebufferTextureLayer
+		 * - CubeMap：layer 为 face 索引（0~5），mip_level 指定 mip 层级，使用 glFramebufferTexture2D + CUBE_MAP_POSITIVE_X + face
+		 *   典型场景：烘焙天空盒到 CubeMap 的 6 个面各 mip 级。 */
 		if (texture->m_TextureTarget == GL_TEXTURE_2D_ARRAY)
 		{
-			glFramebufferTextureLayer(GL_FRAMEBUFFER, gl_attachment, texture->GetTextureID(), target_info->Level, layer);
+			glFramebufferTextureLayer(GL_FRAMEBUFFER, gl_attachment, texture->GetTextureID(), mip_level, layer);
 		}
 		else if (texture->m_TextureTarget == GL_TEXTURE_CUBE_MAP)
 		{
 			if (layer >= 6)
 				return;
-			glFramebufferTexture2D(GL_FRAMEBUFFER, gl_attachment, GL_TEXTURE_CUBE_MAP_POSITIVE_X + layer, texture->GetTextureID(), target_info->Level);
+			glFramebufferTexture2D(GL_FRAMEBUFFER, gl_attachment, GL_TEXTURE_CUBE_MAP_POSITIVE_X + layer, texture->GetTextureID(), mip_level);
 		}
 		else
 		{
