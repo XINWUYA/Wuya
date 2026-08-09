@@ -249,6 +249,10 @@ namespace Helios
 
 		glActiveTexture(GL_TEXTURE0 + slot);
 		glBindTexture(m_TextureTarget, m_TextureId);
+
+		/* 检测到 cubemap 时自动开启无缝采样，消除面边界处的线性过滤缝隙 */
+		if (m_TextureTarget == GL_TEXTURE_CUBE_MAP)
+			glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
 	}
 	/* 解绑纹理 */
 	void OpenGLTexture::Unbind()
@@ -256,6 +260,14 @@ namespace Helios
 		PROFILE_FUNCTION();
 
 		glBindTexture(m_TextureTarget, 0);
+	}
+
+	/* 生成 mipmap */
+	void OpenGLTexture::GenerateMipmap()
+	{
+		PROFILE_FUNCTION();
+
+		glGenerateMipmap(m_TextureTarget);
 	}
 
 	void OpenGLTexture::SetData(void* data, const PixelDesc& pixel_desc, uint32_t level, uint32_t offset_x, uint32_t offset_y, uint32_t offset_z)

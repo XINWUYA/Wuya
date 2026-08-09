@@ -41,6 +41,30 @@ namespace Helios
         /* Metal中无需解绑 */
     }
 
+    void MetalTexture::GenerateMipmap()
+    {
+        if (!m_Texture)
+            return;
+
+        auto device = dynamic_cast<MetalRenderAPI*>(Renderer::GetRenderAPI().get())->GetDevice();
+        if (!device)
+            return;
+
+        MTL::CommandQueue* queue = device->newCommandQueue();
+        MTL::CommandBuffer* cmdBuf = queue->commandBuffer();
+        MTL::BlitCommandEncoder* blitEncoder = cmdBuf->blitCommandEncoder();
+        blitEncoder->generateMipmapsForTexture(m_Texture);
+        blitEncoder->endEncoding();
+        cmdBuf->commit();
+
+        /* blit mipmap 是同步完成等待 */
+        cmdBuf->waitUntilCompleted();
+
+        blitEncoder->release();
+        cmdBuf->release();
+        queue->release();
+    }
+
     void MetalTexture::SetData(void* data, const PixelDesc& pixel_desc, uint32_t level,
         uint32_t offset_x, uint32_t offset_y, uint32_t offset_z)
     {

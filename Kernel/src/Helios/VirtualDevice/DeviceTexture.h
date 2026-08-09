@@ -65,6 +65,9 @@ namespace Helios
 		virtual void Bind(uint32_t slot = 0) = 0;
 		virtual void Unbind() = 0;
 
+		/* 生成 mipmap（驱动端 glGenerateMipmap，从 mip 0 自动填充所有低层级） */
+		virtual void GenerateMipmap() {}
+
 		/* 填充数据 */
 		virtual void SetData(void* data, const PixelDesc& pixel_desc, uint32_t level = 0,
 			uint32_t offset_x = 0, uint32_t offset_y = 0, uint32_t offset_z = 0) = 0;
@@ -90,6 +93,7 @@ namespace Helios
 		/* 创建纹理 */
 		static SharedPtr<DeviceTexture> Create(const std::string& name, const TextureDesc& texture_desc);
 		static SharedPtr<DeviceTexture> Create(const std::string& path, const TextureLoadConfig& load_config = {}); /* 目前仅支持加载二维纹理 */
+		static SharedPtr<DeviceTexture> CreateWithSolidColor(const glm::vec3& color); /* 创建一个纯色贴图 */
 
 		/* 默认纹理 */
 		static SharedPtr<DeviceTexture> White();

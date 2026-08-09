@@ -16,6 +16,7 @@ namespace Helios
 
         void Bind(uint32_t slot = 0) override;
         void Unbind() override;
+        void GenerateMipmap() override;
 
         void SetData(void* data, const PixelDesc& pixel_desc, uint32_t level = 0,
             uint32_t offset_x = 0, uint32_t offset_y = 0, uint32_t offset_z = 0) override;

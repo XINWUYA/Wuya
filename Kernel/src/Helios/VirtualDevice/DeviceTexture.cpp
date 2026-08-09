@@ -52,6 +52,26 @@ namespace Helios
 			return nullptr;
 		}
 	}
+
+	/* 创建一个纯色贴图 */
+	SharedPtr<DeviceTexture> DeviceTexture::CreateWithSolidColor(const glm::vec3& color)
+	{
+		TextureDesc desc;
+		auto texture = DeviceTexture::Create("SolidTexture", desc);
+		const uint8_t pixel[4] = {
+			static_cast<uint8_t>(glm::clamp(color.r, 0.0f, 1.0f) * 255.0f),
+			static_cast<uint8_t>(glm::clamp(color.g, 0.0f, 1.0f) * 255.0f),
+			static_cast<uint8_t>(glm::clamp(color.b, 0.0f, 1.0f) * 255.0f),
+			255
+		};
+
+		PixelDesc pixel_desc;
+		pixel_desc.Format = PixelFormat::RGBA;
+		pixel_desc.Type = PixelType::UnsignedByte;
+		texture->SetData(const_cast<uint8_t*>(pixel), pixel_desc);
+		return texture;
+	}
+
 	/* 默认纹理 */
 	SharedPtr<DeviceTexture> DeviceTexture::White()
 	{
