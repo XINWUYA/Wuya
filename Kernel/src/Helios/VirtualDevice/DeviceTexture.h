@@ -77,6 +77,8 @@ namespace Helios
 		/* 获取纹理原始尺寸 */
 		[[nodiscard]] uint32_t GetWidth() const { return m_TextureDesc.Width; }
 		[[nodiscard]] uint32_t GetHeight() const { return m_TextureDesc.Height; }
+        /* 获取纹理信息描述 */
+        [[nodiscard]] const TextureDesc& GetTextureDesc() const { return m_TextureDesc; }
 		/* 获取纹理加载配置 */
 		[[nodiscard]] const TextureLoadConfig& GetTextureLoadConfig() const { return m_TextureLoadConfig; }
 
