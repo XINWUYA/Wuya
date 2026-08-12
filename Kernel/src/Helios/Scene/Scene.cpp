@@ -14,11 +14,16 @@ namespace Helios
 {
 	Scene::Scene()
 	{
+		/* 统一连接所有组件类型的信号 */
+        ConnectSignalsForComponents(SceneComponentList{});
 	}
 
 	Scene::~Scene()
 	{
 		m_RenderViews.clear();
+
+		/* 先断开所有组件的信号连接 */
+		DisconnectSignalsForComponents(SceneComponentList{});
 		ClearAllEntities();
 	}
 
@@ -346,41 +351,47 @@ namespace Helios
 		}
 	}
 
-	template <typename T>
-	void Scene::OnComponentAdded(Entity& entity, T& component)
+    /* 对各组件类型连接on_construct/on_destroy信号 */
+    template<typename... T>
+    void Scene::ConnectSignalsForComponents(std::tuple<T...>)
+    {
+        (
+            (m_Registry.on_construct<T>().connect<&Scene::OnConstructComponent<T>>(this), ...),
+            (m_Registry.on_destroy<T>().connect<&Scene::OnDestroyComponent<T>>(this), ...)
+            );
+    }
+
+    /* 对各组件类型断开on_construct/on_destroy信号（用于Scene析构阶段） */
+    template<typename... T>
+    void Scene::DisconnectSignalsForComponents(std::tuple<T...>)
+    {
+        (
+            (m_Registry.on_construct<T>().disconnect(this), ...),
+            (m_Registry.on_destroy<T>().disconnect(this), ...)
+            );
+    }
+
+	/* on_construct关联组件的OnAdded */
+	template<typename T>
+	void Scene::OnConstructComponent(entt::registry&, entt::entity entity)
 	{
+		auto& component = m_Registry.get<T>(entity);
+		if constexpr (std::is_base_of_v<ComponentBase, T>)
+		{
+			Entity e{ entity, shared_from_this() };
+			component.OnAdded(*this, e);
+		}
 	}
 
-	template<>
-	void Scene::OnComponentAdded<NameComponent>(Entity& entity, NameComponent& component)
+	/* on_destroy关联组件的OnRemoved */
+	template<typename T>
+	void Scene::OnDestroyComponent(entt::registry&, entt::entity entity)
 	{
-		
-	}
-
-	template<>
-	void Scene::OnComponentAdded<TransformComponent>(Entity& entity, TransformComponent& component)
-	{
-		
-	}
-
-	template<>
-	void Scene::OnComponentAdded<SpriteComponent>(Entity& entity, SpriteComponent& component)
-	{
-
-	}
-
-	template<>
-	void Scene::OnComponentAdded<CameraComponent>(Entity& entity, CameraComponent& component)
-	{
-	}
-
-	template<>
-	void Scene::OnComponentAdded<ModelComponent>(Entity& entity, ModelComponent& component)
-	{
-	}
-
-	template<>
-	void Scene::OnComponentAdded<LightComponent>(Entity& entity, LightComponent& component)
-	{
+		auto& component = m_Registry.get<T>(entity);
+		if constexpr (std::is_base_of_v<ComponentBase, T>)
+		{
+			Entity e{ entity, shared_from_this() };
+			component.OnRemoved(*this, e);
+		}
 	}
 }

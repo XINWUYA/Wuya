@@ -47,10 +47,19 @@ namespace Helios
 		void Serializer(const std::string& path);
 		bool Deserializer(const std::string& path);
 
-		template<typename T>
-		void OnComponentAdded(Entity& entity, T& component);
-
 	private:
+		/* 对类型列表中的每个组件类型连接信号（由ConnectSignalsForComponents驱动展开） */
+		template<typename... Ts>
+        void ConnectSignalsForComponents(std::tuple<Ts...>);
+        /* 断开所有组件的信号连接 */
+        template<typename... Ts>
+        void DisconnectSignalsForComponents(std::tuple<Ts...>);
+		/* on_construct关联组件的OnAdded */
+		template<typename T>
+		void OnConstructComponent(entt::registry& registry, entt::entity entity);
+        /* on_destroy关联组件的OnRemoved */
+        template<typename T>
+		void OnDestroyComponent(entt::registry& registry, entt::entity entity);
 		/* 序列化一个实体 */
 		void SerializeEntity(tinyxml2::XMLElement* root_node, Entity& entity);
 

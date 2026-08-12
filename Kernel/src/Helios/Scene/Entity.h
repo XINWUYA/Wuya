@@ -21,10 +21,7 @@ namespace Helios
 				return GetComponent<T>();
 			}
 
-			T& component = m_OwnerScene.lock()->GetRegistry().emplace<T>(m_EntityHandle, std::forward<Args>(args)...);
-			m_OwnerScene.lock()->OnComponentAdded<T>(*this, component);
-
-			return component;
+			return m_OwnerScene.lock()->GetRegistry().emplace<T>(m_EntityHandle, std::forward<Args>(args)...);
 		}
 
 		/* 移除一个组件 */

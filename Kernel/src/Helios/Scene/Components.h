@@ -9,8 +9,20 @@
 
 namespace Helios
 {
+	class Scene;
+	class Entity;
+
+	/* 组件基类 */
+	struct ComponentBase
+	{
+		virtual ~ComponentBase() = default;
+
+		virtual void OnAdded(const Scene& scene, Entity& entity) {}
+		virtual void OnRemoved(const Scene& scene, Entity& entity) {}
+	};
+
 	/* 实体名称组件 */
-	struct NameComponent
+	struct NameComponent : ComponentBase
 	{
 		std::string m_Name;
 
@@ -23,7 +35,7 @@ namespace Helios
 	};
 
 	/* 空间变换组件 */
-	struct TransformComponent
+	struct TransformComponent : ComponentBase
 	{
 		glm::vec3 m_Position{ 0.0f, 0.0f, 0.0f };
 		glm::vec3 m_Rotation{ 0.0f, 0.0f, 0.0f };
@@ -46,7 +58,7 @@ namespace Helios
 	};
 
 	/* 场景相机组件 */
-	struct CameraComponent
+	struct CameraComponent : ComponentBase
 	{
 		SharedPtr<Camera> m_Camera{ nullptr };
 		bool m_IsPrimary{ true };
@@ -69,7 +81,7 @@ namespace Helios
 	};
 
 	/* 图片精灵组件 */
-	struct SpriteComponent
+	struct SpriteComponent : ComponentBase
 	{
 		SharedPtr<DeviceTexture> m_Texture{ nullptr };
 		glm::vec4 m_BaseColor{ 1.0f, 1.0f, 1.0f, 1.0f };
@@ -84,7 +96,7 @@ namespace Helios
 	};
 
 	/* 模型组件 */
-	struct ModelComponent
+	struct ModelComponent : ComponentBase
 	{
 		SharedPtr<Model> m_Model{ nullptr };
 
@@ -93,7 +105,7 @@ namespace Helios
 	};
 
 	/* 光源组件 */
-	struct LightComponent
+	struct LightComponent : ComponentBase
 	{
 		SharedPtr<Light> m_Light{ nullptr };
 		LightType m_Type{ LightType::Point };
@@ -106,4 +118,13 @@ namespace Helios
 			m_Light = Light::Create(type);
 		}
 	};
+	/* 场景中需要接入on_construct/on_destroy信号分发的全部组件类型 */
+	using SceneComponentList = std::tuple<
+		NameComponent,
+		TransformComponent,
+		SpriteComponent,
+		CameraComponent,
+		ModelComponent,
+		LightComponent,
+	>;
 }
