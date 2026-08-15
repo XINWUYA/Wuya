@@ -5,6 +5,8 @@
 #include <Helios/Renderer/Renderer.h>
 #include <Helios/Scene/Mesh.h>
 #include <Helios/Scene/Material.h>
+#include <Helios/Scene/ReflectionProbe.h>
+#include <Helios/Scene/Scene.h>
 
 namespace Helios
 {
@@ -22,6 +24,9 @@ namespace Helios
 			auto& frame_graph = render_view->GetFrameGraph();
 			if (!frame_graph) return;
 
+            auto scene = render_view->GetOwnerScene();
+            if (!scene) return;
+
 			frame_graph->AddPass<ScenePassData>("ScenePass",
 				[&, shadow_pass_enabled](FrameGraphBuilder& builder, ScenePassData& data)
 				{
@@ -32,7 +37,7 @@ namespace Helios
 					}
 					builder.AsSideEffect();
 				},
-				[&, render_view, shadow_pass_enabled](const FrameGraphResources& resources, const ScenePassData& data)
+				[&, render_view, shadow_pass_enabled, scene](const FrameGraphResources& resources, const ScenePassData& data)
 				{
 					auto render_api = Renderer::GetRenderAPI();
 					{
@@ -41,6 +46,7 @@ namespace Helios
 						render_api->SetViewport(0, 0, viewport_region.Width, viewport_region.Height);
 						render_api->SetScissor(0, 0, viewport_region.Width, viewport_region.Height);
 
+						const auto probe_manager = scene->GetReflectionProbeManager();
 						for (const auto& mesh_object : render_view->GetVisibleMeshObjects())
 						{
 							Renderer::FillObjectUniformBuffer(mesh_object);
@@ -49,6 +55,20 @@ namespace Helios
 							{
 								/* 指定阴影图 */
 								material->SetParameters(ParamType::Texture, "u_ShadowMap", resources.Get(data.ShadowMapHandle).Texture);
+							}
+							if (probe_manager && probe_manager->HasProbe())
+							{
+								/* 选择最近且已烘焙的探针 */
+								const glm::vec3 world_pos = glm::vec3(mesh_object.Local2WorldMat[3]);
+								const auto chosen = probe_manager->GetClostedReflectionProbe(world_pos);
+								if (chosen)
+								{
+									/* 指定IBL资源 */
+									material->SetParameters(ParamType::Int, "u_UseIBL", 1);
+									material->SetTexture("u_BRDFLut", probe_manager->GetBRDFLutMap());
+									material->SetTexture("u_IrradianceMap", chosen->GetIrradianceMap());
+									material->SetTexture("u_PrefilterMap", chosen->GetPrefilterMap());
+								}
 							}
 							Renderer::Submit(material, mesh_object.MeshSegment->GetMeshPrimitive());
 						}

@@ -123,6 +123,7 @@ option(BUILD_SAMPLES "Build sample projects" ON)  # Disabled for macOS compatibi
 if(BUILD_SAMPLES)
     add_subdirectory(Samples/Sample_SkyBox)
     add_subdirectory(Samples/Sample_CSM)
+    add_subdirectory(Samples/Sample_IBL)
 endif()
 
 # Print configuration summary

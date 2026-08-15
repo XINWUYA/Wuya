@@ -25,6 +25,9 @@ namespace Helios
 		/* 绘制一个视图 */
 		static void RenderAView(RenderView* view);
 
+		/* 指定ViewUniformBuffer */
+		static void SetViewUniforms(const glm::mat4& view, const glm::mat4& projection, const glm::vec3& view_pos);
+
 		static void Submit(const SharedPtr<Material>& material, const MeshPrimitive& mesh_primitive, uint32_t index_count = 0);
 
 		static int CurrentAPI() { return RenderAPI::GetAPI(); }

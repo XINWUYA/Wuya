@@ -12,6 +12,7 @@ namespace Helios
 	class RenderView;
 	class DeviceTexture;
 	class Camera;
+	class ReflectionProbeManager;
 
 	/* 场景类 */
 	class Scene final : public std::enable_shared_from_this<Scene>
@@ -43,6 +44,9 @@ namespace Helios
 		/* 获取主相机实体 */
 		Entity GetPrimaryCameraEntity();
 
+		/* 获取反射探针管理器（统一管理需要烘焙的反射探针） */
+		const SharedPtr<ReflectionProbeManager>& GetReflectionProbeManager() const { return m_pReflectionProbeManager; }
+
 		/* 序列化场景 */
 		void Serializer(const std::string& path);
 		bool Deserializer(const std::string& path);
@@ -68,5 +72,8 @@ namespace Helios
 
 		/* RenderView列表 */
 		std::vector<RenderView*> m_RenderViews;
-	};
+
+        /* 反射探针管理器，统一管理需要烘焙的反射探针 */
+        SharedPtr<ReflectionProbeManager> m_pReflectionProbeManager;
+    };
 }

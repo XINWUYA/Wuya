@@ -14,6 +14,8 @@ namespace Helios
 {
 	Scene::Scene()
 	{
+		m_pReflectionProbeManager = CreateSharedPtr<ReflectionProbeManager>();
+
 		/* 统一连接所有组件类型的信号 */
         ConnectSignalsForComponents(SceneComponentList{});
 	}
@@ -68,6 +70,9 @@ namespace Helios
 
 			if (auto* camera_component = m_Registry.try_get<CameraComponent>(entity); camera_component && camera_component->m_Camera)
 				camera_component->m_Camera->SetTransform(transform_component.GetTransform());
+
+			if (auto* probe_component = m_Registry.try_get<ReflectionProbeComponent>(entity); probe_component && probe_component->m_ReflectionProbe)
+				probe_component->m_ReflectionProbe->SetTransform(transform_component.GetTransform());
 		}
 
 		/* 收集RenderView，并在收集前更新 Camera 的视图/投影矩阵 */

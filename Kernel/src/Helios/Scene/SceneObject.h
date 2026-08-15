@@ -9,6 +9,7 @@ namespace Helios
 		Model,
 		Light,
 		Camera,
+        ReflectionProbe,
 		Max
 	};
 

@@ -53,6 +53,7 @@ namespace Helios
 
 		/* 设置所属的Scene */
 		void SetOwnerScene(const SharedPtr<Scene>& scene) { m_pOwnerScene = scene; }
+        SharedPtr<Scene> GetOwnerScene() const { return m_pOwnerScene.lock(); }
 
 		/* 优先级 */
 		void SetPriority(int32_t priority) { m_Priority = priority; }
@@ -101,10 +102,14 @@ namespace Helios
 		Camera* m_pOwnerCamera{ nullptr };
 		/* 所属的Scene */
 		WeakPtr<Scene> m_pOwnerScene;
+		/* 优先级 */
+		int32_t m_Priority{ 0 };
+
 		/* 视锥体剔除之后，对当前可见MeshSegment */
 		std::vector<VisibleMeshObject> m_VisibleMeshObjects{};
 		/* 对场景产生影响的光源 */
 		std::vector<SharedPtr<Light>> m_ValidLights{};
+
 		/* 当前View的渲染结果输出到该RenderTarget */
 		FrameGraphResourceHandle m_RenderTargetHandle{};
 		/* FrameGraph */
@@ -118,7 +123,5 @@ namespace Helios
 		bool m_IsHasShadowCast{ false };
 		/* 阴影管理 */
 		SharedPtr<ShadowMapManager> m_pShadowMapManager{ nullptr };
-		/* 优先级 */
-		int32_t m_Priority{ 0 };
 	};
 }

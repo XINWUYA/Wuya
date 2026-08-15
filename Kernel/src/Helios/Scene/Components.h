@@ -6,6 +6,7 @@
 #include "Camera.h"
 #include "Model.h"
 #include "Light.h"
+#include "ReflectionProbe.h"
 
 namespace Helios
 {
@@ -118,6 +119,24 @@ namespace Helios
 			m_Light = Light::Create(type);
 		}
 	};
+
+	/* 反射探针组件 */
+	struct ReflectionProbeComponent : ComponentBase
+	{
+		SharedPtr<ReflectionProbe> m_ReflectionProbe;
+
+		ReflectionProbeComponent()
+		{
+			m_ReflectionProbe = CreateSharedPtr<ReflectionProbe>();
+		}
+		ReflectionProbeComponent(const ReflectionProbeComponent&) = default;
+
+		/* 加入场景时注册到反射探针管理器 */
+		void OnAdded(const Scene& scene, Entity& entity) override;
+		/* 移除出场景时从反射探针管理器注销 */
+		void OnRemoved(const Scene& scene, Entity& entity) override;
+	};
+
 	/* 场景中需要接入on_construct/on_destroy信号分发的全部组件类型 */
 	using SceneComponentList = std::tuple<
 		NameComponent,
@@ -126,5 +145,6 @@ namespace Helios
 		CameraComponent,
 		ModelComponent,
 		LightComponent,
+		ReflectionProbeComponent
 	>;
 }

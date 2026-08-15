@@ -135,6 +135,17 @@ namespace Helios
 		view->Execute();
 	}
 
+	void Renderer::SetViewUniforms(const glm::mat4& view, const glm::mat4& projection, const glm::vec3& view_pos)
+	{
+		PROFILE_FUNCTION();
+
+		s_RenderData.ViewUniformData.ViewMatrix = view;
+		s_RenderData.ViewUniformData.ProjectionMatrix = projection;
+		s_RenderData.ViewUniformData.ViewProjectionMatrix = projection * view;
+		s_RenderData.ViewUniformData.ViewPos = view_pos;
+		s_RenderData.pViewUniformBuffer->SetData(&s_RenderData.ViewUniformData, sizeof(ViewUniformData));
+	}
+
 	void Renderer::Submit(const SharedPtr<Material>& material, const MeshPrimitive& mesh_primitive, uint32_t index_count)
 	{
 		PROFILE_FUNCTION();

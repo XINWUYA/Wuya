@@ -6,7 +6,7 @@ namespace Helios
 {
 	
 	/* ReflectionProbeComponent构造时注册到ReflectionProbeManager */
-	void ReflectionProbeComponent::OnAdded(Scene& scene, Entity& entity)
+	void ReflectionProbeComponent::OnAdded(const Scene& scene, Entity& entity)
 	{
 		if (auto* manager = scene.GetReflectionProbeManager().get())
 			if (m_ReflectionProbe)
@@ -14,7 +14,7 @@ namespace Helios
 	}
 
 	/* ReflectionProbeComponent移出时从ReflectionProbeManager中移除 */
-	void ReflectionProbeComponent::OnRemoved(Scene& scene, Entity& entity)
+	void ReflectionProbeComponent::OnRemoved(const Scene& scene, Entity& entity)
 	{
 		if (auto* manager = scene.GetReflectionProbeManager().get())
 			if (m_ReflectionProbe)

@@ -3,9 +3,9 @@
 #include "FrameGraph/FrameGraph.h"
 #include <Helios/Scene/Scene.h>
 #include <Helios/Scene/Components.h>
-#include <Helios/Scene/Material.h>
 #include <Helios/Scene/ShadowMap.h>
 #include <Helios/Scene/Light.h>
+#include <Helios/Scene/ReflectionProbe.h>
 #include <Helios/Renderer/RenderPasses/ScenePass.h>
 
 namespace Helios
@@ -173,9 +173,19 @@ namespace Helios
 		/* 重置FrameGraph */
 		m_pFrameGraph->Reset();
 
+        auto scene = m_pOwnerScene.lock();
+
 		/* 根据是否有光源开启ShadowCast来注入ShadowPass */
 		if (m_IsHasShadowCast)
-			m_pShadowMapManager->AddShadowPass(*m_pFrameGraph, m_pOwnerScene.lock(), this);
+			m_pShadowMapManager->AddShadowPass(*m_pFrameGraph, scene, this);
+
+		/* 烘焙ReflectionProbe */
+		auto probe_manager = scene->GetReflectionProbeManager();
+		if (probe_manager)
+		{
+			probe_manager->Prepare();
+			probe_manager->AddBakeReflectionProbePass(this);
+		}
 
 		/* ScenePass */
 		Forward::AddScenePass(this, m_IsHasShadowCast);
