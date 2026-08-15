@@ -26,6 +26,10 @@ namespace Helios
 		void SetDebugName(const std::string& name) { m_DebugName = name; }
 		const std::string& GetDebugName() const { return m_DebugName; }
 
+        /* 是否启用 */
+        void SetEnable(bool enable) { m_Enable = enable; }
+        bool GetEnable() const { return m_Enable; }
+
 		/* 位置 */
 		virtual const glm::vec3& GetPosition() const { return m_Position; }
 		virtual void SetPosition(const glm::vec3& position) { m_Position = position; }
@@ -64,6 +68,7 @@ namespace Helios
 
 	protected:
 		std::string m_DebugName{ "Unnamed" };
+        bool m_Enable{ true };
 		ObjectType m_ObjectType{ ObjectType::Invalid };
 		glm::vec3 m_Position{ 0.0f };
 		glm::vec3 m_Rotation{ 0.0f }; /* 欧拉角，弧度 */
